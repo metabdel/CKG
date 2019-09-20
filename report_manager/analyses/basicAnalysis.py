@@ -75,14 +75,14 @@ def get_ranking_with_markers(data, drop_columns, group, columns, list_markers, a
     return long_data
 
 
-def extract_number_missing(df, missing_max, drop_cols=['sample'], group='group'):
+def extract_number_missing(df, min_valid, drop_cols=['sample'], group='group'):
     if group is None:
-        groups = df.loc[:, df.notnull().sum(axis = 1) >= missing_max]
+        groups = df.loc[:, df.notnull().sum(axis = 1) >= min_valid]
     else:
         groups = df.copy()
         groups = groups.drop(drop_cols, axis = 1)
         groups = groups.set_index(group).notnull().groupby(level=0).sum(axis = 1)
-        groups = groups[groups>=missing_max]
+        groups = groups[groups>=min_valid]
 
     groups = groups.dropna(how='all', axis=1)
     return list(groups.columns)
@@ -825,6 +825,7 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
 
         delta = alpha
         data = base.list(x=base.as_matrix(df.values), y=base.unlist(labels), geneid=base.unlist(df.index), logged2=True)
+        
         samr_res = R_function(data=data, res_type=method, s0=s0, nperms=permutations)
         delta_table = samr.samr_compute_delta_table(samr_res)
         siggenes_table = samr.samr_compute_siggenes_table(samr_res, delta, data, delta_table, all_genes=True)
