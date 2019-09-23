@@ -15,7 +15,6 @@ import plotly.io as pio
 from scipy.spatial.distance import pdist, squareform
 # import dash_bio as dashbio
 from scipy.stats import zscore
-from kmapper import plotlyviz
 import networkx as nx
 from pyvis.network import Network as visnet
 from webweb import Web

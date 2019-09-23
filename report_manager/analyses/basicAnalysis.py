@@ -1,5 +1,4 @@
 import pandas as pd
-import dask.dataframe as dd
 import itertools
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
@@ -7,7 +6,6 @@ from sklearn.cluster import AffinityPropagation
 from sklearn.utils import shuffle
 from statsmodels.stats import multitest, anova as aov
 import dabest
-from statsmodels.stats.multicomp import pairwise_tukeyhsd
 import scipy.stats
 from scipy.special import factorial, betainc
 import umap
@@ -26,7 +24,6 @@ import statsmodels.api as sm
 from statsmodels.formula.api import ols
 import time
 from joblib import Parallel, delayed
-from numba import jit
 from rpy2 import robjects as ro
 from rpy2.robjects.packages import importr
 from rpy2.robjects import pandas2ri
@@ -571,7 +568,8 @@ def calculate_ttest(df, condition1, condition2):
 def calculate_THSD(df, group='group', alpha=0.05):
     col = df.name
     df_results = pg.pairwise_tukey(dv=col, between=group, data=pd.DataFrame(df).reset_index(), alpha=alpha, tail='two-sided')
-    df_results.columns = ['group1', 'group2', 'mean(group1)', 'mean(group2)', 'log2FC', 'std_error', 'tail', 't-statistics', 'padj_THSD', 'effsize', 'efftype']
+    df_results.columns = ['group1', 'group2', 'mean(group1)', 'mean(group2)', 'log2FC', 'std_error', 'tail', 't-statistics', 'padj_THSD', 'effsize']
+    df_results['efftype'] = 'hedges'
     df_results['identifier'] = col
     df_results = df_results.set_index('identifier')
     df_results['FC'] = df_results['log2FC'].apply(lambda x: np.power(2,np.abs(x)) * -1 if x < 0 else np.power(2,np.abs(x)))
@@ -580,9 +578,9 @@ def calculate_THSD(df, group='group', alpha=0.05):
     return df_results
 
 def calculate_pairwise_ttest(df, column, subject='subject', group='group', correction='none'):
-    posthoc_columns = ['Contrast', 'group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'Paired', 'Parametric', 'T', 'dof', 'tail', 'padj', 'BF10', 'efsize', 'eftype']
+    posthoc_columns = ['Contrast', 'group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'Paired', 'Parametric', 'T', 'dof', 'tail', 'padj', 'BF10', 'effsize']
     if correction == "none":
-        valid_cols = ['group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'Paired','Parametric', 'T', 'dof', 'BF10', 'efsize', 'eftype']
+        valid_cols = ['group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'Paired','Parametric', 'T', 'dof', 'BF10', 'effsize']
     else:
         valid_cols = posthoc_columns
     posthoc = pg.pairwise_ttests(data=df, dv=column, between=group, subject=subject, effsize='hedges', return_desc=True, padjust=correction)
@@ -590,6 +588,7 @@ def calculate_pairwise_ttest(df, column, subject='subject', group='group', corre
     posthoc = posthoc[valid_cols]
     posthoc = complement_posthoc(posthoc, column)
     posthoc = posthoc.set_index('identifier')
+    posthoc['efftype'] = 'hedges'
 
     return posthoc
 

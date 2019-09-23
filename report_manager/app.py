@@ -23,12 +23,12 @@ auth = dash_auth.BasicAuth(
 
 r = redis.StrictRedis.from_url('redis://localhost:6379')
 
-with open("app_template.html", 'r') as f:
+with open("app_template.html", 'r', encoding='utf8') as f:
     template = f.read()
 
 
 app.index_string = template
-app.scripts.config.serve_locally = True
+app.scripts.config.serve_locally = False
 app.config.suppress_callback_exceptions = True
 # Dash CSS
 external_css = ["https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css",

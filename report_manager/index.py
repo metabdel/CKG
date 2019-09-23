@@ -127,7 +127,7 @@ def number_panel_update(df):
              [Input("project_option", "value")])
 def update_project_url(value):
     if value.startswith('P0'):
-      return 'http://127.0.0.1:5000/apps/project/{}'.format(value)
+      return dcc.Markdown('http://localhost:5000/apps/project/{}'.format(value))
     else:
       return ''
 
