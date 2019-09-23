@@ -137,7 +137,8 @@ def usersImport(import_type='partial'):
     usersPath = config['usersDirectory']
     filename = config['usersFile']
     builder_utils.checkDirectory(usersPath)
-    uh.create_user_from_file(os.path.join(usersPath, filename), expiration=365)    
+    # uh.create_user_from_file(os.path.join(usersPath, filename), expiration=365)
+    uh.extractUsersInfo(os.path.join(usersPath, filename), expiration=365)   
 
 
 def fullImport():

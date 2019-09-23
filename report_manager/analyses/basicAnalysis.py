@@ -198,7 +198,7 @@ def get_coefficient_variation(data, drop_columns, group, columns):
     return cvs_df
 
 
-def get_proteomics_measurements_ready(df, index_cols=['group', 'sample', 'subject'], drop_cols=['sample'], group='group', identifier='identifier', extra_identifier='name', imputation = True, method = 'distribution', missing_method = 'percentage', missing_max = 0.3, min_valid=1, value_col='LFQ_intensity'):
+def get_proteomics_measurements_ready(df, index_cols=['group', 'sample', 'subject'], drop_cols=['sample'], group='group', identifier='identifier', extra_identifier='name', imputation = True, method = 'distribution', missing_method = 'percentage', missing_per_group=True, missing_max = 0.3, min_valid=1, value_col='LFQ_intensity'):
     df = df.set_index(index_cols)
     if extra_identifier is not None and extra_identifier in df.columns:
         df[identifier] = df[extra_identifier].map(str) + "~" + df[identifier].map(str)
@@ -207,7 +207,9 @@ def get_proteomics_measurements_ready(df, index_cols=['group', 'sample', 'subjec
     df[index_cols] = df["index"].apply(pd.Series)
     df = df.drop(["index"], axis=1)
     aux = index_cols
-    if missing_method == 'at_least_x_per_group':
+    if missing_per_group == False:
+        group = None
+    if missing_method == 'at_least_x':
         aux.extend(extract_number_missing(df, min_valid, drop_cols, group=group))
     elif missing_method == 'percentage':
         aux.extend(extract_percentage_missing(df,  missing_max, drop_cols, group=group))
