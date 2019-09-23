@@ -1,9 +1,10 @@
 args:
     imputation: True
     imputation_method: distribution 
-    missing_method: percentage
-    missing_per_group: False
-    missing_max: 0.25
+    missing_method: at_least_x
+    missing_per_group: True
+    missing_max: 0.3
+    min_valid: 5
     value_col: LFQ intensity
     index:
         - group
@@ -149,14 +150,14 @@ data exploration:
         store_analysis: True
         args:
             alpha: 0.05
-            s0: 0
+            s0: 2
             fc: 2.0
             group: 'group'
             subject: subject
             colorscale: 'Blues'
             showscale: False
             marker_size: 10
-            permutations: 0
+            permutations: 250
             x_title: logFC
             y_title: -log(pvalue)
             drop_cols:
