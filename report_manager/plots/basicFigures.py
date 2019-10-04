@@ -59,11 +59,34 @@ def getPlotTraces(data, key='full', type = 'lines', div_factor=float(10^10000), 
     return traces
 
 def get_markdown(text, args={}):
+    """
+    Converts a given text into a Dash Markdown component. It includes a syntax for things like bold text and italics, links, inline code snippets, lists, quotes, and more.
+    For more information visit https://dash.plot.ly/dash-core-components/markdown.
+    
+    Args:
+        text: markdown string (or array of strings) that adhreres to the CommonMark spec.
+        args: dictionary with items from https://dash.plot.ly/dash-core-components/markdown.
+
+    Returns:
+        Dash Markdown component.
+    """
     mkdown = dcc.Markdown(text)
     
     return mkdown
 
 def get_distplot(data, identifier, args):
+    """
+    
+    
+    Args:
+        data:
+        identifier: is the id used to identify the div where the figure will be generated.
+        args: dictionary with the following items:
+            - group: name of the column containing the group 
+
+    Returns:
+        
+    """
     df = data.copy()
     graphs = []
 
@@ -88,9 +111,10 @@ def get_barplot(data, identifier, args):
     This function plots a simple barplot.
     
     Args:
-        data: is a Pandas DataFrame with three columns: "name" of the bars, 'x' values and 'y' values to plot.
+        data: is a Pandas DataFrame with three columns: 'name' of the bars, 'x' values and 'y' values to plot.
         identifier: is the id used to identify the div where the figure will be generated.
-        title: The title of the figure.
+        args: dictionary with the following items:
+            - title: The title of the figure.
     Returns:
         Barplot figure within the <div id="_dash-app-content"> .
     """
@@ -130,6 +154,24 @@ def get_barplot(data, identifier, args):
 
 ##ToDo
 def get_facet_grid_plot(data, identifier, args):
+    """ 
+    This function plots a scatterplot matrix where we can plot one variable against another to form a regular scatter plot, and we can pick a third faceting variable
+    to form panels along the columns to segment the data even further, forming a bunch of vertical panels. For more information visit https://plot.ly/python/facet-trellis/.
+
+    Args:
+        data: pandas dataframe with format: 'group', 'name', 'type', and 'x' and 'y' values to be plotted.
+        identifier: id used to identify the div where the figure will be generated.
+        args: dictionary with the following items:
+            - x: name of the column containing values to plot in the x axis.
+            - y: name of the column containing values to plot in the y axis.
+            - group: name of the column containing the group.
+            - class: name of the column to be used as 'facet' column.
+            - plot_type: decides the type of plot to appear in the facet grid. The options are 'scatter', 'scattergl', 'histogram', 'bar', and 'box'.
+            - title: plot title.
+
+    Returns:
+        Facet grid figure within the <div id="_dash-app-content"> .
+    """
     figure = FF.create_facet_grid(data,
                                 x=args['x'],
                                 y=args['y'],
@@ -148,6 +190,25 @@ def get_facet_grid_plot(data, identifier, args):
     return dcc.Graph(id= identifier, figure = figure)
 
 def get_ranking_plot(data, identifier, args):
+    """ 
+    Creates abundance multiplots (one per sample group).
+
+    Args:
+        data: long-format pandas dataframe with group as index, 'name' (protein identifiers) and 'y' (LFQ intensities) as columns.
+        identifier: id used to identify the div where the figure will be generated.
+        args: dictionary with the following items:
+            - group: name of the column containing the group 
+            - index: boolean. Set to True when multi samples per group. Calculates the mean intensity for each protein in each group.
+            - x_title: title of plot x axis
+            - y_title: title of plot y axis
+            - title: plot title 
+            - width: plot width
+            - height: plot height
+            - annotations: optional. Dictionary where data points names are the keys and descriptions are the values.
+
+    Returns:
+        Multi abundance plot figure within the <div id="_dash-app-content"> .
+    """
     num_cols = 3
     fig = {}
     layouts = []
@@ -210,6 +271,24 @@ def get_ranking_plot(data, identifier, args):
     return dcc.Graph(id=identifier, figure=fig)
 
 def get_scatterplot_matrix(data, identifier, args):
+    """ 
+    This function pltos a multi scatterplot (one for each unique element in args['group']).
+
+    Args:
+        data: pandas dataframe with four columns: 'name' of the data points, 'x' and 'y' values to plot, and 'group' they belong to.
+        identifier: id used to identify the div where the figure will be generated.
+        args: dictionary with the following items:
+            - group: name of the column containing the group 
+            - title: plot title
+            - x_title: plot x axis title
+            - y_title: plot y axis title
+            - height: plot height
+            - width: plot width
+            - annotations: optional. Dictionary where data points names are the keys and descriptions are the values.
+
+    Returns:
+        Multi scatterplot figure within the <div id="_dash-app-content"> .
+    """
     num_cols = 3
     fig = {}
     if 'group' in args:
@@ -301,6 +380,24 @@ def get_scatterplot_matrix_old(data, identifier, args):
     return dcc.Graph(id=identifier, figure=figure)
 
 def get_simple_scatterplot(data, identifier, args):
+    """ 
+    Plots a simple scatterplot with the possibility of including in-plot annotations of data points.
+
+    Args:
+        data: long-format pandas dataframe with columns: 'x' (ranking position), 'group' (original dataframe position),
+                'name' (protein identifier), 'y' (LFQ intensity), 'symbol' (data point shape) and 'size' (data point size).
+        identifier: id used to identify the div where the figure will be generated.
+        args: dictionary with the following items:
+            - annotations: dictionary where data points names are the keys and descriptions are the values.
+            - title: plot title
+            - x_title: plot x axis title
+            - y_title: plot y axis title
+            - height: plot height
+            - width: plot width
+
+    Returns:
+        Annotated scatterplot figure within the <div id="_dash-app-content"> .
+    """
     figure = {}
     m = {'size': 15, 'line': {'width': 0.5, 'color': 'grey'}}
     text = data.name
@@ -356,7 +453,12 @@ def get_scatterplot(data, identifier, args):
     Args:
         data: is a Pandas DataFrame with four columns: "name", x values and y values (provided as variables) to plot.
         identifier: is the id used to identify the div where the figure will be generated.
-        title: The title of the figure.
+        args: dictionary with the following items:
+            - title: title of the figure.
+            - x_title: plot x axis title.
+            - y_title: plot y axis title.
+            - height: plot height.
+            - width: plot width.
     
     Returns:
         Scatterplot figure within the <div id="_dash-app-content"> .
@@ -390,6 +492,26 @@ def get_scatterplot(data, identifier, args):
     return dcc.Graph(id= identifier, figure = figure)
 
 def get_volcanoplot(results, args):
+    """ 
+    This function plots volcano plots for each internal dictionary in a nested dictionary.
+
+    Args:
+        results: nested dictionary with pairwise group comparisons as keys and internal dictionaries containing 'x' (log2FC values),
+                'y' (-log10 p-values), 'text', 'color', 'pvalue' and 'annotations' (number of hits to be highlighted).
+        args: dictionary with the following items:
+            - fc: fold change threshold.
+            - range_x: list with minimum and maximum values for x axis
+            - range_y: list with minimum and maximum values for y axis
+            - x_title: plot x axis title
+            - y_title: plot y axis title
+            - colorscale: string for predefined plotly colorscales or dict containing one or more of the keys listed in https://plot.ly/python/reference/#layout-colorscale.
+            - showscale: boolean. Determines whether or not a colorbar is displayed for a trace.
+            - marker_size: sets the marker size (in px).
+
+
+    Returns:
+        List of volcano plot figures within the <div id="_dash-app-content">.
+    """
     figures = []
     for identifier,title in results:
         result = results[(identifier,title)]
@@ -458,11 +580,31 @@ def get_volcanoplot(results, args):
     return figures
 
 def run_volcano(data, identifier, args={'alpha':0.05, 'fc':2, 'colorscale':'Blues', 'showscale': False, 'marker_size':6, 'x_title':'log2FC', 'y_title':'-log10(pvalue)', 'num_annotations':10}):
-    # Loop through signature
+    """ 
+    This function parsers the regulation data from statistical tests and creates volcano plots for all distinct group comparisons. Significant hits with lowest adjusted p-values are highlighed.
 
+    Args:
+        data: pandas dataframe with format: 'identifier', 'group1', 'group2', 'mean(group1', 'mean(group2)', 'log2FC', 'std_error', 'tail', 't-statistics', 'padj_THSD',
+        'effsize', 'efftype', 'FC', 'rejected', 'F-statistics', 'pvalue', 'padj', 'correction', '-log10 pvalue' and 'Method'.
+        identifier: id used to identify the div where the figure will be generated.
+        args: dictionary with the following items:
+            - alpha: adjusted p-value threshold for significant hits.
+            - fc: fold change threshold.
+            - colorscale: string for predefined plotly colorscales or dict containing one or more of the keys listed in https://plot.ly/python/reference/#layout-colorscale.
+            - showscale: boolean. Determines whether or not a colorbar is displayed for a trace.
+            - marker_size: sets the marker size (in px).
+            - x_title: plot x axis title
+            - y_title: plot y axis title
+            - num_annotations: number of hits to be highlighted (if num_annotations = 10, highlights 10 hits with lowest adjusted p-value).
+
+    Returns:
+        List of volcano plot figures within the <div id="_dash-app-content">.
+    """
+    # Loop through signature
     volcano_plot_results = {}
     grouping = data.groupby(['group1','group2'])
-    for group in grouping.groups:
+
+    for group in grouping.groups: 
         signature = grouping.get_group(group)
         color = []
         text = []
@@ -520,7 +662,7 @@ def run_volcano(data, identifier, args={'alpha':0.05, 'fc':2, 'colorscale':'Blue
             min_pval_sign = pvals[0]
         else:
             min_pval_sign = 0
-        # Return
+
         volcano_plot_results[(gidentifier, title)] = {'x': signature['log2FC'].values, 'y': signature['-log10 pvalue'].values, 'text':text, 'color': color, 'pvalue':min_pval_sign, 'annotations':annotations[0:num_annotations]}
 
     figures = get_volcanoplot(volcano_plot_results, args)
@@ -535,7 +677,12 @@ def get_heatmapplot(data, identifier, args):
         data: is a Pandas DataFrame with the shape of the heatmap where index corresponds to rows
               and column names corresponds to columns, values in the heatmap corresponds to the row values.
         identifier: is the id used to identify the div where the figure will be generated.
-        title: The title of the figure.
+        args: dictionary with the following items:
+            - format: string. Defines the format of the input dataframe.
+            - source: name of the column containing the source.
+            - target: name of the column containing the target.
+            - values: name of the column containing the values to be plotted.
+            - title: The title of the figure.
     
     Returns:
         Heatmap figure within the <div id="_dash-app-content">.
@@ -662,6 +809,18 @@ def get_complex_heatmapplot_old(data, identifier, args):
     return dcc.Graph(id=identifier, figure=figure,)
 
 def get_notebook_network_pyvis(graph, args={}):
+    """ 
+    This function converts a Networkx graph into a PyVis graph supporting Jupyter notebook embedding.
+
+    Args:
+        graph: networkX graph
+        args: dictionary with the following items:
+            - height: network canvas height
+            - width: network canvas width
+
+    Returns:
+        PyVis graph.
+    """
     if 'width' not in args:
         args['width'] = 800
     if 'height' not in args:
@@ -675,18 +834,46 @@ def get_notebook_network_pyvis(graph, args={}):
     return notebook_net
 
 def get_notebook_network_web(graph, args):
+    """ 
+    This function converts a networkX graph into a webweb interactive network in a browser.
+
+    Args:
+        graph: networkX graph
+        
+    Returns:
+        Web network.
+    """
     notebook_net = Web(nx.to_numpy_matrix(graph).tolist())
     notebook_net.display.scaleLinkWidth = True
 
     return notebook_net
 
 def network_to_tables(graph):
+    """ 
+    Creates the graph edge list and node list and returns them as separate Pandas DataFrames.
+
+    Args:
+        graph: networkX graph used to construct the Pandas DataFrame.
+
+    Returns:
+        Two Pandas DataFrames.
+    """
     edges_table = nx.to_pandas_edgelist(graph)
     nodes_table = pd.DataFrame.from_dict(dict(graph.nodes(data=True))).transpose().reset_index()
 
     return nodes_table, edges_table
 
 def generate_configuration_tree(report_pipeline, dataset_type):
+    """ 
+    This function retrieves the analysis pipeline from a dataset .yml file and creates a Cytoscape network, organized hierarchically.
+    
+    Args:
+        report_pipeline: dictionary with dataset type analysis and visualization pipeline (conversion of .yml files to python dictionary).
+        dataset_type: type of dataset ('clinical', 'proteomics', 'DNAseq', 'RNAseq', 'multiomics')
+
+    Returns:
+        New Dash div with title and Cytoscape network, summarizing analysis pipeline.
+    """
     nodes = []
     edges = []
     args = {}
@@ -800,6 +987,29 @@ def generate_configuration_tree(report_pipeline, dataset_type):
     return conf_plot
 
 def get_network(data, identifier, args):
+    """ 
+    This function filters an input dataframe based on a threshold score and builds a cytoscape network.
+    
+    Args:
+        data: long-format pandas dataframe with at least three columns: source node, target node and value (e.g. weight, score).
+        identifier: id used to identify the div where the figure will be generated.
+        args: dictionary with the following items:
+            - source: name of the column containing the source.
+            - target: name of the column containing the target.
+            - cutoff: value threshold for network building.
+            - cutoff_abs: boolean. If True will take both positive and negative sides of the cutoff value.
+            - values: name of the column containing the values to be plotted. 
+            - node_size: method used to determine node radius ('betweenness', 'ev_centrality', 'degree'). For more information visit
+                         https://networkx.github.io/documentation/networkx-1.10/reference/generated/networkx.algorithms.centrality.betweenness_centrality.html and
+                         https://networkx.github.io/documentation/networkx-1.10/reference/generated/networkx.algorithms.centrality.eigenvector_centrality_numpy.html.
+            - title: plot title.
+            - color_weight: boolean. If True, edges in network are colored red if score > 0 and blue if score < 0.
+            - stylesheet: list of dictionaries specifying the style for a group of elements, a class of elements, or a single element (accepts two keys 'selector' and 'style').
+            - layout: dictionary specifying how the nodes should be positioned on the screen. 
+
+    Returns:
+        Dictionary with the network in multiple formats: jupyetr-notebook compatible, web brower compatibles, data table, and json.
+    """
     net = None
     if 'cutoff_abs' not in args:
         args['cutoff_abs'] = False
@@ -870,6 +1080,19 @@ def get_network(data, identifier, args):
     return net
 
 def get_network_style(node_colors, color_edges):
+    # """
+    # This function uses a dictionary of nodes and colors and creates a stylesheet and layout for a network.
+    
+
+    # Args:
+    #     node_colors: dictionary with node names as keys and colors as values.
+    #     color_edges: boolean. If True, add edge coloring to stylesheet (red for positive width, blue for negative).
+
+    # Returns:
+        # Stylesheet (list of dictionaries specifying the style for a group of elements, a class of elements, or a single element) and 
+        # Layout (dictionary specifying how the nodes should be positioned on the canvas).
+    # """
+
     color_selector = "{'selector': '[name = \"KEY\"]', 'style': {'background-color': 'VALUE'}}"
     stylesheet=[{'selector': 'node', 'style': {'label': 'data(name)'}}, 
                 {'selector':'edge','style':{'curve-style': 'bezier'}}]
@@ -892,7 +1115,7 @@ def get_network_style(node_colors, color_edges):
                 'minTemp': 1.0}
 
     if color_edges:
-        stylesheet.extend([{'selector':'[width < 0]', 'style':{'line-color':'#4add1'}},{'selector':'[width > 0]', 'style':{'line-color':'#d6604d'}}])
+        stylesheet.extend([{'selector':'[width < 0]', 'style':{'line-color':'#4dc3d6'}},{'selector':'[width > 0]', 'style':{'line-color':'#d6604d'}}])
 
     for k,v in node_colors.items():
         stylesheet.append(ast.literal_eval(color_selector.replace("KEY", k).replace("VALUE",v)))
@@ -900,6 +1123,23 @@ def get_network_style(node_colors, color_edges):
     return stylesheet, layout
 
 def get_pca_plot(data, identifier, args):
+    """ 
+    This function creates a pca plot with scores and top "args['loadings']" loadings.
+
+    Args:
+        data: tuple with two pandas dataframes: scores and loadings.
+        identifier: id used to identify the div where the figure will be generated.
+        args: dictionary with the following items:
+            - loadings: number of features with highest loading values to be displayed in the pca plot.
+            - title: title of the figure.
+            - x_title: plot x axis title.
+            - y_title: plot y axis title.
+            - height: plot height.
+            - width: plot width.
+
+    Returns:
+        PCA figure within the <div id="_dash-app-content">.
+    """
     pca_data, loadings = data    
     figure = {}
     traces = []
@@ -956,19 +1196,19 @@ def get_sankey_plot(data, identifier, args={'source':'source', 'target':'target'
     
     Args:
         data: Pandas DataFrame with the format: source  target  weight.
-        identifier: id for the web app.
-            args: dictionary with the following items:
-                - source: name of the column containing the source 
-                - target: name of the column containing the target 
-                - weight: name of the column containing the weight 
-                - source_colors: name of the column in data that contains the colors of each source item
-                - target_colors: name of the column in data that contains the colors of each target item
-                - title: Plot title 
-                - orientation: whether to plot horizontal ('h') or vertical ('v')
-                - valueformat: how to show the value ('.0f')
-                - width: plot width
-                - height: plot height
-                - font: font size
+        identifier: id used to identify the div where the figure will be generated.
+        args: dictionary with the following items:
+            - source: name of the column containing the source 
+            - target: name of the column containing the target 
+            - weight: name of the column containing the weight 
+            - source_colors: name of the column in data that contains the colors of each source item
+            - target_colors: name of the column in data that contains the colors of each target item
+            - title: Plot title 
+            - orientation: whether to plot horizontal ('h') or vertical ('v')
+            - valueformat: how to show the value ('.0f')
+            - width: plot width
+            - height: plot height
+            - font: font size
     
     Returns:
         dcc.Graph.
@@ -1025,7 +1265,18 @@ def get_sankey_plot(data, identifier, args={'source':'source', 'target':'target'
     return dcc.Graph(id = identifier, figure = figure)
 
 def get_table(data, identifier, title, colors = ('#C2D4FF','#F5F8FF'), subset = None,  plot_attr = {'width':1500, 'height':2500, 'font':12}, subplot = False):
-    
+    """ 
+    This function converts a pandas dataframe into an interactive table for viewing, editing and exploring large datasets. For more information visit https://dash.plot.ly/datatable.
+
+    Args:
+        data: pandas dataframe.
+        identifier: id used to identify the div where the figure will be generated.
+        title: table title.
+        subset: string, list or None. Selects columns from dataframe to be used. If None, the entire dataframe is used.
+
+    Returns:
+        New Dash div containing title and interactive table.
+    """
     if data is not None and not data.empty:
         if subset is not None:
             data = data[subset]
@@ -1086,6 +1337,19 @@ def get_table(data, identifier, title, colors = ('#C2D4FF','#F5F8FF'), subset = 
     return html.Div(table)
 
 def get_violinplot(data, identifier, args):
+    """ 
+    This function creates a violin plot for all columns in the input dataframe.
+
+    Args:
+        data: pandas dataframe with samples as rows and dependent variables as columns.
+        identifier: id used to identify the div where the figure will be generated.
+        args: dictionary with the following items:
+            - drop_cols: column labels to be dropped from the dataframe.
+            - group: name of the column containing the group.
+
+    Returns:
+       List of violion plots within the <div id="_dash-app-content">.
+    """
     df = data.copy()
     graphs = []
     if 'drop_cols' in args:
@@ -1109,6 +1373,17 @@ def get_violinplot(data, identifier, args):
     return graphs
 
 def create_violinplot(df, variable, group_col='group'):
+    """ 
+    This function creates traces for a simple violin plot.
+
+    Args:
+        df: pandas dataframe with samples as rows and dependent variables as columns.
+        variable: name of the column with the dependent variable.
+        group_col: name of the column containing the group.
+
+    Returns:
+        List of traces to be used as data for plotly figure.
+    """
     traces = []
     for group in np.unique(df[group_col].values):
         violin = {"type": 'violin',
@@ -1127,14 +1402,28 @@ def create_violinplot(df, variable, group_col='group'):
     return traces
 
 
-def get_clustergrammer_plot(df, identifier, args):
+def get_clustergrammer_plot(data, identifier, args):
+    """ 
+    This function takes a pandas dataframe, calculates clustering, and generates the visualization json.
+    For more information visit https://github.com/MaayanLab/clustergrammer-py.
+
+    Args:
+        data: long-format pandas dataframe with columns 'node1' (source), 'node2' (target) and 'weight'.
+        identifier: id used to identify the div where the figure will be generated.
+        args: dictionary with the following items:
+            - format: defines if dataframe needs to be converted from 'edgelist' to matrix.
+            - title: plot title.
+
+    Returns:
+        Dash Div with heatmap plot from Clustergrammer web-based tool.
+    """
     from clustergrammer2 import net as clustergrammer_net
     div = None
-    if not df.empty:
+    if not data.empty:
         if 'format' in args:
             if args['format'] == 'edgelist':
-                df = df[['node1', 'node2', 'weight']].pivot(index='node1', columns='node2') 
-        clustergrammer_net.load_df(df)
+                data = data[['node1', 'node2', 'weight']].pivot(index='node1', columns='node2')
+        clustergrammer_net.load_df(data)
 
         link = utils.get_clustergrammer_link(clustergrammer_net, filename=None)
 
@@ -1144,6 +1433,21 @@ def get_clustergrammer_plot(df, identifier, args):
     return div
 
 def get_parallel_plot(data, identifier, args):
+    """ 
+    This function creates a parallel coordinates plot, with sample groups as the different dimensions.
+
+    Args:
+        data: pandas dataframe with groups as rows and dependent variables as columns.
+        identifier: id used to identify the div where the figure will be generated.
+        args: dictionary with the following items:
+            - group: name of the column containing the groups.
+            - zscore: boolean. If True, calculates the z score of each values in the row, relative to the row mean and standard deviation.
+            - color: line color.
+            - title: plot title.
+
+    Returns:
+        Parallel plot figure within <div id="_dash-app-content"> .
+    """
     if 'group' in args:
         group = args['group']
         if 'zscore' in args:
@@ -1259,6 +1563,18 @@ def get_WGCNAPlots(data, identifier):
 
 
 def getMapperFigure(data, identifier, title, labels):
+    """ 
+    This function uses the KeplerMapper python package to visualize high-dimensional data and generate a FigureWidget that can be shown or editted.
+    This method is suitable for use in Jupyter notebooks. For more information visit https://kepler-mapper.scikit-tda.org/reference/stubs/kmapper.plotlyviz.plotlyviz.html.
+
+    Args:
+        data: dictionary. Simplicial complex output from the KeplerMapper map method.
+        identifier: id used to identify the div where the figure will be generated.
+        title: plot title.
+
+    Returns:
+        Plotly FigureWidget within <div id="_dash-app-content"> .
+    """
     pl_brewer = [[0.0, '#67001f'],
              [0.1, '#b2182b'],
              [0.2, '#d6604d'],
@@ -1286,6 +1602,23 @@ def get_2_venn_diagram(data, identifier, cond1, cond2, args):
     return plot_2_venn_diagram(cond1, cond2, unique1, unique2, intersection, identifier, args)
 
 def plot_2_venn_diagram(cond1, cond2, unique1, unique2, intersection, identifier, args):
+    """ 
+    This function creates a simple non area-weighted two-circle venn diagram.
+
+    Args:
+        cond1: label of the first circle.
+        cond2: label of the second circle.
+        unique1: number of features exclusive to cond1.
+        unique2: number of features exclusive to cond2.
+        intersection: number of features common to cond1 and cond2.
+        identifier: id used to identify the div where the figure will be generated.
+        args: dictionary with the following items:
+            - colors: dictionary with cond1 and cond2 as keys, and color codes as values.
+            - title: plot title.
+
+    Returns:
+        Two-circle venn diagram figure within <div id="_dash-app-content"> .
+    """
     figure = {}
     figure["data"] = []
 
@@ -1360,6 +1693,25 @@ def plot_2_venn_diagram(cond1, cond2, unique1, unique2, intersection, identifier
     return dcc.Graph(id = identifier, figure=figure)
 
 def get_wordcloud(data, identifier, args={'stopwords':[], 'max_words': 400, 'max_font_size': 100, 'width':700, 'height':700, 'margin': 1}):
+    """ 
+    This function generates a Wordcloud based on the natural text in a pandas dataframe column.
+
+    Args:
+        data: pandas dataframe with columns: 'PMID', 'abstract', 'authors', 'date', 'journal', 'keywords', 'title', 'url', 'Proteins', 'Diseases'.
+        identifier: id used to identify the div where the figure will be generated.
+        args: dictionary with the following items:
+            - text_col: name of column containing the natural text used to generate the wordcloud.
+            - stopwords: list of words that will be eliminated.
+            - max_words: maximum number of words.
+            - max_font_size: maximum font size for the largest word.
+            - margin: plot margin size.
+            - width: width of the plot
+            - height: height of the plot
+            - title: plot title
+
+    Returns:
+        Wordcloud figure within <div id="_dash-app-content"> .
+    """
     figure=None
     if data is not None:
         nltk.download('stopwords')
@@ -1447,6 +1799,20 @@ def get_wordcloud(data, identifier, args={'stopwords':[], 'max_words': 400, 'max
 
 
 def get_cytoscape_network(net, identifier, args):
+    """ 
+    This function creates a Cytoscpae network in dash. For more information visit https://dash.plot.ly/cytoscape.
+
+    Args:
+        net: dictionary in which each element (key) is defined by a dictionary with 'id' and 'label' (if it is a node) or 'source', 'target' and 'label' (if it is an edge).
+        identifier: is the id used to identify the div where the figure will be generated.
+        args: dictionary with the following items:
+            - title: title of the figure
+            - stylesheet: list of dictionaries specifying the style for a group of elements, a class of elements, or a single element (accepts two keys 'selector' and 'style').
+            - layout: dictionary specifying how the nodes should be positioned on the screen.
+
+    Returns:
+        Network figure within <div id="_dash-app-content"> .
+    """
     cytonet = html.Div([html.H2(args['title']), cyto.Cytoscape(id=identifier,
                                     stylesheet=args['stylesheet'],
                                     elements=net,
@@ -1462,6 +1828,18 @@ def get_cytoscape_network(net, identifier, args):
     return cytonet
 
 def save_DASH_plot(plot, name, plot_format='svg', directory='.'):
+    """ 
+    This function saves a plotly figure to a specified directory, in a determined format.
+
+    Args:
+        plot: plotly figure (dictionary with data and layout).
+        name: name of the figure
+        plot_format: suffix of the saved file ('svg', 'pdf', 'png', 'jpeg', 'jpg').
+        directory: folder where figure is to be saved.
+
+    Returns:
+        Figure saved in directory.
+    """
     if not os.path.exists(directory):
         os.mkdir(directory)
     if plot_format in ['svg', 'pdf', 'png', 'jpeg', 'jpg']:
