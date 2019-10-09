@@ -77,14 +77,12 @@ def get_markdown(text, args={}):
 def get_distplot(data, identifier, args):
     """
     
+    :param data:
+    :param str identifier: id used to identify the div where the figure will be generated.
+    :param dict args: see below
+    :Arguments:
+        * **group** (str) -- name of the column containing the group
     
-    Args:
-        data:
-        identifier: is the id used to identify the div where the figure will be generated.
-        args: dictionary with the following items:
-            - group: name of the column containing the group 
-
-    Returns:
         
     """
     df = data.copy()
@@ -110,13 +108,12 @@ def get_barplot(data, identifier, args):
     """
     This function plots a simple barplot.
     
-    Args:
-        data: is a Pandas DataFrame with three columns: 'name' of the bars, 'x' values and 'y' values to plot.
-        identifier: is the id used to identify the div where the figure will be generated.
-        args: dictionary with the following items:
-            - title: The title of the figure.
-    Returns:
-        Barplot figure within the <div id="_dash-app-content"> .
+    :param data: pandas DataFrame with three columns: 'name' of the bars, 'x' values and 'y' values to plot
+    :param str identifier: id used to identify the div where the figure will be generated
+    :param dict args: see below
+    :Arguments:
+        * **title** (str) -- plot title
+    :return: Barplot figure within the <div id="_dash-app-content">
     """
     figure = {}
     figure["data"] = []

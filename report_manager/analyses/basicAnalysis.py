@@ -38,17 +38,19 @@ samr = importr('samr')
 
 def transform_into_wide_format(data, index, columns, values, extra=[]):
     """ 
-    Converts a pandas dataframe from long to wide format using pandas pivot_table() function.
+    This function converts a Pandas DataFrame from long to wide format using pandas pivot_table() function.
+    
+    :param data: long-format Pandas DataFrame
+    :param list index: columns that will be converted into the index
+    :param str columns: column name whose unique values will become the new column names
+    :param str values: column to aggregate
+    :param list extra: additional columns to be kept as columns
+    :return: wide-format pandas DataFrame
+    
+    Example::
 
-    Args:
-        data: long-format pandas dataframe
-        index: list of columns that will be converted into the index
-        columns: column name whose unique values will become the new column names
-        values: column to aggregate
-        extra: additional columns to be kept as columns
-        
-    Returns:
-        Wide-format pandas dataframe.
+        result = transform_into_wide_format(df, index='index', columns='x', values='y', extra='group')
+    
     """
     df = data.copy()
     if not df.empty:
@@ -67,16 +69,18 @@ def transform_into_wide_format(data, index, columns, values, extra=[]):
 
 def transform_into_long_format(data, drop_columns, group, columns=['name','y']):
     """ 
-    Converts a pandas dataframe from wide to long format using pd.melt() function.
+    Converts a Pandas DataDrame from wide to long format using pd.melt() function.
+    
+    :param data: wide-format Pandas DataFrame
+    :param list drop_columns: columns to be deleted
+    :param group: column(s) to use as identifier variables
+    :type group: str or list
+    :param list columns: names to use for the 1)variable column, and for the 2)value column
+    :return: long-format Pandas DataFrame.
 
-    Args:
-        data: wide-format pandas dataframe
-        drop_columns: list of columns to be deleted
-        group: column(s) to use as identifier variables
-        columns: list of names to use for the 1)variable column, and for the 2)value column
-        
-    Returns:
-        Long-format pandas dataframe.
+    Example::
+
+        result = transform_into_long_format(df, drop_columns=['sample', 'subject'], group='group', columns=['name','y'])
     """
     data = data.drop(drop_columns, axis=1)
     
@@ -88,24 +92,26 @@ def transform_into_long_format(data, drop_columns, group, columns=['name','y']):
 
 def get_ranking_with_markers(data, drop_columns, group, columns, list_markers, annotation={}):
     """ 
-    Converts a pandas dataframe from wide to long format using pd.melt() function.
-
-    Args:
-        data: wide-format pandas dataframe
-        drop_columns: list of columns to be deleted
-        group: column(s) to use as identifier variables
-        columns: list of names to use for the 1)variable column, and for the 2)value column
-        
-    Returns:
-        Long-format pandas dataframe.
+    
     """
+
+    print('RANKING data')
+    print(data)
+
+    print('markers')
+    print(list_markers)
+
+    print('annotation')
+    print(annotation)
     long_data = transform_into_long_format(data, drop_columns, group, columns)
     if len(set(long_data['name'].values.tolist()).intersection(list_markers)) > 0:
         long_data = long_data.drop_duplicates()
         long_data['symbol'] = [ 17 if p in list_markers else 0 for p in long_data['name'].tolist()]
         long_data['size'] = [25 if p in list_markers else 7 for p in long_data['name'].tolist()]
         long_data['name'] = [p+' marker in '+annotation[p] if p in annotation else p for p in long_data['name'].tolist()]
-        
+    
+    print('result')
+    print(long_data)
     return long_data
 
 
@@ -685,10 +691,6 @@ def apply_pvalue_permutation_fdrcorrection(df, observed_pvalues, group, alpha=0.
 def get_counts_permutation_fdr(value, random, observed, n, alpha):
     """ 
     Calculates local FDR values (q-values) by computing the fraction of accepted hits from the permuted data over accepted hits from the measured data normalized by the total number of permutations.
-
-               #(p-val_perm <= p-val_i)     1
-    q-val_i = ------------------------- x ------
-              #(p-val_obser <= p-val_i)   n_perm
 
     Args:
         value: computed p-value on measured data for a feature.

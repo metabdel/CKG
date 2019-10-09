@@ -211,17 +211,25 @@ def plot_intramodular_correlation(MM, FS, feature_module_df, title, width=1000, 
     """
     This function uses the Feature significance and Module Membership measures, and plots a multi-scatter plot of all modules against all clinical traits.
 
-    Args:
-        MM: module membership pandas dataframe.
-        FS: feature significance pandas dataframe.
-        feature_module_df: pandas dataframe of experimental features and module colors (use mode='dataframe' in get_FeaturesPerModule).
-        title: the title of the figure
-        width: the width of the figure.
-        height: the height of the figure.
+    :param MM: module membership
+    :type MM: pandas DataFrame
+    :param FS: feature significance
+    :type FS: pandas DataFrame
+    :param feature_module_df: pandas DataFrame of experimental features and module colors (use mode='dataframe' in get_FeaturesPerModule)
+    :type feature_module_df: pandas DataFrame
+    :param title: plot title
+    :type title: str
+    :param width: plot width
+    :type width: int
+    :param height: plot height
+    :type height: int
+    :return: Plotly object figure.
+    
+    Example::
 
-    Returns:
-        Plotly object figure.
-    Note: There is a limit in the number of subplots one can make in Plotly. Limiting the number of modules shown to 5.
+        plot = plot_intramodular_correlation(MM, FS, feature_module_df, title='Plot', width=1000, height=800):
+
+    .. note:: There is a limit in the number of subplots one can make in Plotly. This function limits the number of modules shown to 5.
     """
     MM = MM.iloc[:,-6]
     MM['modColor'] = MM.index.map(feature_module_df.set_index('name')['modColor'].get)
