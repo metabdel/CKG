@@ -77,7 +77,15 @@ def display_page(pathname):
             return '404'
 
 
-###Callbacks for CKG homepage
+# ###Calbacks for basicApp
+# @app.callback(Output('docs-link', 'href'),
+#              [Input('docs-link', 'n_clicks')])
+# def generate_report_url(n_clicks):
+#     link = 'http://localhost:8000'
+#     return link
+
+
+##Callbacks for CKG homepage
 @app.callback(Output('db-creation-date', 'children'),
              [Input('db_stats_df', 'data')])
 def update_db_date(df):
