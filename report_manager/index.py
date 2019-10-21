@@ -110,24 +110,56 @@ def update_db_date(df):
               [Input("db_stats_df", "data")])
 def number_panel_update(df):
     projects = pd.read_json(df['projects'], orient='records')
-    meta_stats = pd.read_json(df['meta_stats'], orient='records')
-    store_size = pd.read_json(df['store_size'], orient='records')
-    transactions = pd.read_json(df['transactions'], orient='records')
+    if not projects.empty and 'Projects' in projects:
+        projects = projects['Projects'][0]
 
-    ent = meta_stats['nodeCount'][0]
-    rel = meta_stats['relCount'][0]
-    labels = meta_stats['labelCount'][0]
-    types = meta_stats['relTypeCount'][0]
-    prop = meta_stats['propertyKeyCount'][0]
-    ent_store = store_size['size'][2]
-    rel_store = store_size['size'][4]
-    prop_store = store_size['size'][3]
-    string_store = store_size['size'][5]
-    array_store = store_size['size'][0]
-    log_store = store_size['size'][1]
-    t_open = transactions.loc[transactions['name'] == 'NumberOfOpenedTransactions', 'value'].iloc[0]
-    t_comm = transactions.loc[transactions['name'] == 'NumberOfCommittedTransactions', 'value'].iloc[0]
-    projects = projects['Projects'][0]
+    meta_stats = pd.read_json(df['meta_stats'], orient='records')
+    if not meta_stats.empty:
+      if 'nodeCount' in meta_stats:
+          ent = meta_stats['nodeCount'][0]
+      else:
+          ent = '0'
+      if 'relCount' in meta_stats:
+          rel = meta_stats['relCount'][0]
+      else:
+          rel = '0'
+      if 'labelCount' in meta_stats:
+          labels = meta_stats['labelCount'][0]
+      else:
+          labels = '0'
+      if 'relTypeCount' in  meta_stats:
+          types = meta_stats['relTypeCount'][0]
+      else:
+          types = '0'
+      if 'propertyKeyCount' in meta_stats:
+          prop = meta_stats['propertyKeyCount'][0]
+      else:
+          prop = '0'
+
+    store_size = pd.read_json(df['store_size'], orient='records')
+    if not store_size.empty and 'size' in store_size:
+        ent_store = store_size['size'][2]
+        rel_store = store_size['size'][4]
+        prop_store = store_size['size'][3]
+        string_store = store_size['size'][5]
+        array_store = store_size['size'][0]
+        log_store = store_size['size'][1]
+    else:
+        ent_store = '0 MB'
+        rel_store = '0 MB'
+        prop_store = '0 MB'
+        string_store = '0 MB'
+        array_store = '0 MB'
+        log_store = '0 MB'
+
+    transactions = pd.read_json(df['transactions'], orient='records')
+    if not transactions.empty and 'name' in transactions:
+        t_open = transactions.loc[transactions['name'] == 'NumberOfOpenedTransactions', 'value'].iloc[0]
+        t_comm = transactions.loc[transactions['name'] == 'NumberOfCommittedTransactions', 'value'].iloc[0]
+    else:
+        t_open = '0'
+        t_comm = '0'
+    
     
     return [dcc.Markdown("**{}**".format(i)) for i in [ent,labels,rel,types,prop,ent_store,rel_store,prop_store,string_store,array_store,log_store,t_open,t_comm,projects]]
 
