@@ -23,6 +23,10 @@ cwd = os.path.abspath(os.path.dirname(__file__))
 driver = connector.getGraphDatabaseConnectionConfiguration()
 
 def get_user_creation_queries():
+	"""
+	Reads the YAML file containing the queries relevant to user creation, parses the given stream and \
+	returns a Python object (dict[dict]).
+	"""
 	try:
 		queries_path = 'user_creation_cypher.yml'
 		user_creation_cypher = ckg_utils.get_queries(os.path.join(cwd, queries_path))
@@ -33,6 +37,14 @@ def get_user_creation_queries():
 	return user_creation_cypher
 
 def get_new_user_identifier(driver):
+	"""
+	Queries the database for the last user identifier and returns a new sequential identifier.
+
+	:param driver: py2neo driver, which provides the connection to the neo4j graph database.
+    :type driver: py2neo driver
+    :return: User identifier.
+    :rtype: str
+	"""
 	query_name = 'increment_user_id'
 	try:
 		user_creation_cypher = get_user_creation_queries()
@@ -45,6 +57,17 @@ def get_new_user_identifier(driver):
 	return user_identifier
 
 def check_if_node_exists(driver, node_property, value):
+	"""
+	Queries the graph database and checks if a node with a specific property and property value already exists.
+
+	:param driver: py2neo driver, which provides the connection to the neo4j graph database.
+    :type driver: py2neo driver
+	:param str node_property: property of the node.
+	:param value: property value.
+	:type value: str, int, float or bool
+	:return: Pandas dataframe with user identifier if User with node_property and value already exists, \
+			if User does not exist, returns and empty dataframe.
+	"""
 	query_name = 'find_user'
 	try:
 		user_creation_cypher = get_user_creation_queries()
@@ -61,6 +84,13 @@ def check_if_node_exists(driver, node_property, value):
 	return result
 
 def create_db_user(driver, data):
+	"""
+	Creates and assigns role to new graph database user, if user not in list of local users.
+
+	:param driver: py2neo driver, which provides the connection to the neo4j graph database.
+    :type driver: py2neo driver
+	:param Series data: pandas Series with required user information (see set_arguments()).
+	"""
 	query_name_add = 'create_db_user'
 	query_name_role = 'add_role_to_db_user'
 	query_list_db_users =  'list_db_users'
@@ -79,6 +109,13 @@ def create_db_user(driver, data):
 		logger.error("Reading query {}: {}, file: {},line: {}, error: {}".format(query_name_add, sys.exc_info(), fname, exc_tb.tb_lineno, err))
 
 def create_user_node(driver, data):
+	"""
+	Creates graph database node for new user and adds respective properties to node.
+
+	:param driver: py2neo driver, which provides the connection to the neo4j graph database.
+    :type driver: py2neo driver
+	:param Series data: pandas Series with new user identifier and required user information (see set_arguments()).
+	"""
 	query_name_node = 'create_user_node'
 	try:
 		cypher = get_user_creation_queries()
@@ -94,6 +131,21 @@ def create_user_node(driver, data):
 
 #To use with builder.py
 def extractUsersInfo(filepath, expiration=365):
+	"""
+	Creates new user in the graph database and corresponding node, through the following steps:
+	
+		1. Generates new user identifier
+		2. Checks if a user with given properties already exists in the database. If not:
+		3. Creates new user node
+		4. Creates new local user (access to graph database)
+		5. Saves data to users.tsv
+
+	:param str filepath: filepath and filename containing users information.
+	:param int expiration: number of days a user is given access.
+	:return: Writes relevant .tsv file for the users in the provided file.
+
+	.. warning:: This function must be used within *builder.py*.
+	"""
 	data = pd.read_excel(filepath).applymap(str)
 	driver = connector.getGraphDatabaseConnectionConfiguration()
 	date = datetime.today() + timedelta(days=expiration)
@@ -131,6 +183,18 @@ def extractUsersInfo(filepath, expiration=365):
 
 #To use outside builder.py
 def create_user_from_command_line(args, expiration):
+	"""
+	Creates new user in the graph database and corresponding node, from a terminal window (command line). \
+	Arguments as in set_arguments().
+
+	:param args: object. Contains all the parameters neccessary to create a user ('username', 'name', 'email', \
+				'secondary_email', 'phone_number' and 'affiliation').
+	:type args: any object with __dict__ attribute
+	:param int expiration: number of days users is given access.
+
+	.. note:: This function can be used directly with *python create_user_from_command_line.py -u username \
+				-n user_name -e email -s secondary_email -p phone_number -a affiliation* .
+	"""
 	data = vars(args)
 	data = pd.DataFrame.from_dict(data, orient='index').T
 	result = create_user(data, expiration)
@@ -138,11 +202,33 @@ def create_user_from_command_line(args, expiration):
 
 
 def create_user_from_file(filepath, expiration):
+	"""
+	Creates new user in the graph database and corresponding node, from an excel file. \
+	Rows in the file must be users, and columns must follow set_arguments() fields.
+
+	:param str filepath: filepath and filename containing users information.
+	:param int expiration: number of days users is given access.
+
+	.. note:: This function can be used directly with *python create_user_from_file.py -f path_to_file* .
+	"""
 	data = pd.read_excel(filepath).applymap(str)
 	result = create_user(data, expiration)    
 	return result
 
 def create_user(data, expiration=365):
+	"""
+	Creates new user in the graph database and corresponding node, through the following steps:
+	
+		1. Checks if a user with given properties already exists in the database. If not:
+		2. Generates new user identifier
+		3. Creates new user node
+		4. Creates new local user (access to graph database)
+		5. Saves data to users.tsv
+
+	:param data: pandas dataframe with users as rows and arguments and columns.
+	:param int expiration: number of days users is given access.
+	:return: Writes relevant .tsv file for the users in data.
+	"""
 	driver = connector.getGraphDatabaseConnectionConfiguration()
 	date = datetime.today() + timedelta(days=expiration)
 	df = []
@@ -176,6 +262,13 @@ def create_user(data, expiration=365):
 		GenerateGraphFiles(data)
 
 def GenerateGraphFiles(data):
+	"""
+	Saves pandas dataframe to users.tsv.
+	If file already exists, appends new lines. \
+	Else, creates file and writes dataframe to it.
+	
+	:param data: pandas dataframe to be written to .tsv file.
+	"""
 	importDir = os.path.join(cwd,'../../../data/imports/users')
 	ckg_utils.checkDirectory(importDir)
 	ifile = os.path.join(importDir, 'users.tsv')
@@ -192,6 +285,9 @@ def GenerateGraphFiles(data):
 						line_terminator='\n', escapechar='\\')
 
 def set_arguments():
+	"""
+    This function sets the arguments to be used as input for **create_user.py** in the command line.
+    """
 	parser = argparse.ArgumentParser('Use an excel file (multiple new users) or the function arguments (one new user at a time) to create new users in the database')
 	parser.add_argument('-f', '--file', help='define path to file with users creation information', type=str, required=False)
 	parser.add_argument('-u', '--username', help='define the username to be created', type=str, required=False)
