@@ -16,6 +16,7 @@ from scipy.spatial.distance import pdist, squareform
 # import dash_bio as dashbio
 from scipy.stats import zscore
 import networkx as nx
+from cyjupyter import Cytoscape
 from pyvis.network import Network as visnet
 from webweb import Web
 from networkx.readwrite import json_graph
@@ -416,6 +417,8 @@ def get_simple_scatterplot(data, identifier, args):
     text = data.name
     if 'colors' in data.columns:
         m.update({'color':data['colors'].tolist()})
+    elif 'colors' in args:
+        m.update({'color':args['colors'].tolist()})
     if 'size' in data.columns:
         m.update({'size':data['size'].tolist()})
     if 'symbol' in data.columns:
@@ -1026,7 +1029,7 @@ def get_network(data, identifier, args):
     Example::
 
         result = get_network(data, identifier='network', args={'source':'node1', 'target':'node2', 'cutoff':0.5, 'cutoff_abs':True, 'values':'weight', \
-                            'node_size':'ev_centrality, 'title':'Network Figure', 'color_weight': True})
+                            'node_size':'ev_centrality', 'title':'Network Figure', 'color_weight': True})
     """
     net = None
     if 'cutoff_abs' not in args:
@@ -1039,23 +1042,34 @@ def get_network(data, identifier, args):
                 data = data > args['cutoff']
                 
         data = data.rename(index=str, columns={args['values']: "width"})
+        data['edge_width'] = data['width'].apply(np.abs)
+        min_edge_value = data['edge_width'].min()
+        max_edge_value = data['edge_width'].max()
         graph = nx.from_pandas_edgelist(data, args['source'], args['target'], edge_attr=True)
                   
         degrees = dict(graph.degree())
         nx.set_node_attributes(graph, degrees, 'degree')
         betweenness = None
         ev_centrality = None
-        if data.shape[0] < 100 and data.shape[0] > 10:
+        if data.shape[0] < 100 and data.shape[0] > 5:
             betweenness = nx.betweenness_centrality(graph, weight='width')
             ev_centrality = nx.eigenvector_centrality_numpy(graph)
             nx.set_node_attributes(graph, betweenness, 'betweenness')
             nx.set_node_attributes(graph, ev_centrality, 'eigenvector')
-
+        
+        min_node_size = 0
+        max_node_size = 0
         if args['node_size'] == 'betweenness' and betweenness is not None:
+            min_node_size = min(betweenness.values())
+            max_node_size = max(betweenness.values())
             nx.set_node_attributes(graph, betweenness, 'radius')
         elif args['node_size'] == 'ev_centrality' and ev_centrality is not None:
+            min_node_size = min(ev_centrality.values())
+            max_node_size = max(ev_centrality.values())
             nx.set_node_attributes(graph, ev_centrality, 'radius')
         elif args['node_size'] == 'degree':
+            min_node_size = min(degrees.values())
+            max_node_size = max(degrees.values())
             nx.set_node_attributes(graph, degrees, 'radius')
 
         clusters = analyses.basicAnalysis.get_network_communities(graph, args)
@@ -1088,8 +1102,13 @@ def get_network(data, identifier, args):
         edges_fig_table = get_table(edges_table, identifier=identifier+"_edges_table", title=args['title']+" edges table")
         
         stylesheet, layout = get_network_style(colors, args['color_weight'])
+        stylesheet.append({'selector':'edge','style':{'width':'mapData(edge_width,'+ str(min_edge_value) +','+ str(max_edge_value) +', .5, 8)'}})
+        if min_node_size > 0 and max_node_size >0:
+            mapper = 'mapData(radius,'+ str(min_node_size) +','+ str(max_node_size) +', 15, 50)'
+            stylesheet.append({'selector':'node','style':{'width':mapper, 'height':mapper}})
         args['stylesheet'] = stylesheet
         args['layout'] = layout
+        
         
         cy_elements, mouseover_node = utils.networkx_to_cytoscape(vis_graph)
         #args['mouseover_node'] = mouseover_node
@@ -1110,7 +1129,7 @@ def get_network_style(node_colors, color_edges):
     color_selector = "{'selector': '[name = \"KEY\"]', 'style': {'background-color': 'VALUE'}}"
     stylesheet=[{'selector': 'node', 'style': {'label': 'data(name)'}}, 
                 {'selector':'edge','style':{'curve-style': 'bezier'}}]
-
+    
     layout = {'name': 'cose',
                 'idealEdgeLength': 100,
                 'nodeOverlap': 20,
@@ -1130,11 +1149,36 @@ def get_network_style(node_colors, color_edges):
 
     if color_edges:
         stylesheet.extend([{'selector':'[width < 0]', 'style':{'line-color':'#4dc3d6'}},{'selector':'[width > 0]', 'style':{'line-color':'#d6604d'}}])
+        
 
     for k,v in node_colors.items():
         stylesheet.append(ast.literal_eval(color_selector.replace("KEY", k).replace("VALUE",v)))
 
     return stylesheet, layout
+
+def visualize_notebook_network(network, notebook_type='jupyter', layout={'width':'100%', 'height':'700px'}):
+    """ 
+    This function returns a Cytoscape network visualization for Jupyter notebooks
+
+    :param tuple network: tuple with two dictionaries: network data and stylesheet (see get_network(data, identifier, args)).
+    :param str notebook_type: the type of notebook where the network will be visualized (currently only jupyter notebook is supported) 
+    :param dict layout: specific layout properties (see https://dash.plot.ly/cytoscape/layout)
+    :return: cyjupyter.cytoscape.Cytoscape object
+
+    Example::
+        net = get_network(clincorr.dropna(), identifier='corr', args={'source':'node1', 'target':'node2', 
+                                                            'cutoff':0, 'cutoff_abs':True,
+                                                            'values':'weight','node_size':'degree', 
+                                                            'title':'Network Figure', 'color_weight': True})
+        visualize_notebook_network(network, notebook_type='jupyter', layout={'width':'100%', 'height':'700px'})
+    """
+    net = None
+    if notebook_type == 'jupyter':
+        net = Cytoscape(data={'elements':network[0]}, visual_style=network[1], layout=layout)
+    elif notebook_type == 'jupyterlab':
+        pass
+    
+    return net
 
 def get_pca_plot(data, identifier, args):
     """ 

@@ -182,6 +182,10 @@ def imputation_KNN(data, drop_cols=['group', 'sample', 'subject'], group='group'
         result = imputation_KNN(data, drop_cols=['group', 'sample', 'subject'], group='group', cutoff=0.6, alone = True)
     """
     df = data.copy()
+    cols = df.columns
+    df = df._get_numeric_data()
+    df[group] = data[group]
+    cols = list(set(cols).difference(df.columns))
     value_cols = [c for c in df.columns if c not in drop_cols]
     for g in df[group].unique():
         missDf = df.loc[df[group]==g, value_cols]
@@ -195,6 +199,8 @@ def imputation_KNN(data, drop_cols=['group', 'sample', 'subject'], group='group'
     if alone:
         df = df.dropna(axis=1)
 
+    df = df.join(data[cols])
+    
     return df
 
 def imputation_mixed_norm_KNN(data, index_cols=['group', 'sample', 'subject'], shift = 1.8, nstd = 0.3, group='group', cutoff=0.6):
@@ -782,15 +788,16 @@ def run_correlation(df, alpha=0.05, subject='subject', group='group', method='pe
             pdf = pd.DataFrame(p, index=df.columns, columns=df.columns)
             correlation = convertToEdgeList(rdf, ["node1", "node2", "weight"])
             pvalues = convertToEdgeList(pdf, ["node1", "node2", "pvalue"])
-
+            correlation = pd.merge(correlation,pvalues,on=['node1','node2'])
+            
             if correction[0] == 'fdr':
-                rejected, padj = apply_pvalue_fdrcorrection(pvalues["pvalue"].tolist(), alpha=alpha, method=correction[1])
+                rejected, padj = apply_pvalue_fdrcorrection(correlation["pvalue"].tolist(), alpha=alpha, method=correction[1])
             elif correction[0] == '2fdr':
-                rejected, padj = apply_pvalue_twostage_fdrcorrection(pvalues["pvalue"].tolist(), alpha=alpha, method=correction[1])
-
+                rejected, padj = apply_pvalue_twostage_fdrcorrection(correlation["pvalue"].tolist(), alpha=alpha, method=correction[1])
             correlation["padj"] = padj
             correlation["rejected"] = rejected
             correlation = correlation[correlation.rejected]
+            
     return correlation
 
 def run_multi_correlation(df, alpha=0.05, subject='subject', on=['subject', 'biological_sample'] , group='group', method='pearson', correction=('fdr', 'indep')):
@@ -1030,14 +1037,16 @@ def calculate_THSD(df, group='group', alpha=0.05):
 
         result = calculate_THSD(df, group='group', alpha=0.05)
     """
-    col = df.name
-    df_results = pg.pairwise_tukey(dv=col, between=group, data=pd.DataFrame(df).reset_index(), alpha=alpha, tail='two-sided')
-    df_results.columns = ['group1', 'group2', 'mean(group1)', 'mean(group2)', 'log2FC', 'std_error', 'tail', 't-statistics', 'padj_THSD', 'effsize']
-    df_results['efftype'] = 'hedges'
-    df_results['identifier'] = col
-    df_results = df_results.set_index('identifier')
-    df_results['FC'] = df_results['log2FC'].apply(lambda x: np.power(2,np.abs(x)) * -1 if x < 0 else np.power(2,np.abs(x)))
-    df_results['rejected'] = df_results['padj_THSD'].apply(lambda x: True if x < alpha else False)
+    df_results = None
+    if isinstance(df,pd.Series):
+        col = df.name
+        df_results = pg.pairwise_tukey(dv=col, between=group, data=pd.DataFrame(df).reset_index(), alpha=alpha, tail='two-sided')
+        df_results.columns = ['group1', 'group2', 'mean(group1)', 'mean(group2)', 'log2FC', 'std_error', 'tail', 't-statistics', 'padj_THSD', 'effsize']
+        df_results['efftype'] = 'hedges'
+        df_results['identifier'] = col
+        df_results = df_results.set_index('identifier')
+        df_results['FC'] = df_results['log2FC'].apply(lambda x: np.power(2,np.abs(x)) * -1 if x < 0 else np.power(2,np.abs(x)))
+        df_results['rejected'] = df_results['padj_THSD'].apply(lambda x: True if x < alpha else False)
 
     return df_results
 
@@ -1273,7 +1282,9 @@ def run_anova(df, alpha=0.05, drop_cols=["sample",'subject'], subject='subject',
         for col in df.columns:
             rows = df[col]
             aov_results.append((col,) + calculate_anova(rows, group=group))
-            pairwise_results.append(calculate_THSD(rows, group=group))
+            thsd_result = calculate_THSD(rows, group=group)
+            if thsd_result is not None:
+                pairwise_results.append(thsd_result)
             
         max_perm = get_max_permutations(df, group=group)
         res = format_anova_table(df, aov_results, pairwise_results,  group, permutations, alpha, max_perm)
@@ -1444,7 +1455,8 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
         conditions = set(df.columns)
         d = {v:k+1 for k, v in enumerate(conditions)}
         labels = [d.get(item,item)  for item in df.columns]
-
+        method = 'Multiclass'
+        
         if subject is not None:
             if len(groups) == 1:
                 method = 'One class'
@@ -1497,7 +1509,9 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
             pairwise_results = []
             for col in df.T.columns:
                 rows = df.T[col]
-                pairwise_results.append(calculate_THSD(rows, group=group))
+                thsd_result = calculate_THSD(rows, group=group)
+                if thsd_result is not None:
+                    pairwise_results.append(thsd_result)
             pairwise = pd.concat(pairwise_results)
             
             res = pd.DataFrame([df.index, f_stats, pvalues]).T

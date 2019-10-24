@@ -50,7 +50,7 @@ def get_module_color_annotation(map_list, col_annotation=False, row_annotation=F
             name = gene_colors[i]
             color = colors_dict[name]
             n = number
-            # colors.append([round(n,4), color])
+            colors.append([round(n,4), color])
             vals.append((i, round(n,4)))
             number = n+val
 
