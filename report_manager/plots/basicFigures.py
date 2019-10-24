@@ -657,7 +657,7 @@ def run_volcano(data, identifier, args={'alpha':0.05, 'fc':2, 'colorscale':'Blue
                                     'showarrow': False, 
                                     'ax': 0, 
                                     'ay': -10,
-                                    'font': dict(color = "#2c7bb6", size = 7)})
+                                    'font': dict(color = "#2c7bb6", size = 10)})
                     color.append('#2c7bb6')
                 elif row['FC'] >= args['fc']:
                     annotations.append({'x': row['log2FC'], 
@@ -668,7 +668,7 @@ def run_volcano(data, identifier, args={'alpha':0.05, 'fc':2, 'colorscale':'Blue
                                     'showarrow': False, 
                                     'ax': 0, 
                                     'ay': -10,
-                                    'font': dict(color = "#d7191c", size = 7)})
+                                    'font': dict(color = "#d7191c", size = 10)})
                     color.append('#d7191c')
                 elif row['FC'] < -1.:
                     color.append('#abd9e9')
