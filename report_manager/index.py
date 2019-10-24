@@ -1,6 +1,7 @@
 import io
 import os
 import re
+import sys
 import pandas as pd
 import numpy as np
 import time
@@ -21,7 +22,7 @@ from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 from dash_network import Network
 
-from app import app
+from app import app, server as application
 from apps import initialApp, projectApp, importsApp, projectCreationApp, dataUploadApp, homepageApp
 from apps import projectCreation, dataUpload, homepageStats
 from graphdb_builder import builder_utils
@@ -34,8 +35,6 @@ from worker import create_new_project
 from graphdb_connector import connector
 
 driver = connector.getGraphDatabaseConnectionConfiguration()
-cwd = os.path.abspath(os.path.dirname(__file__))
-templateDir = os.path.join(cwd, 'apps/templates')
 separator = '|'
 
 
@@ -167,10 +166,9 @@ def number_panel_update(df):
              [Input("project_option", "value")])
 def update_project_url(value):
     if value.startswith('P0'):
-      return dcc.Markdown('http://localhost:5000/apps/project/{}'.format(value))
+      return dcc.Markdown('/apps/project/{}'.format(value))
     else:
       return ''
-
 
 ###Callbacks for download project
 @app.callback(Output('download-zip', 'href'),
@@ -180,11 +178,10 @@ def generate_report_url(n_clicks, pathname):
     project_id = pathname.split('/')[-1]
     return '/downloads/{}'.format(project_id)
     
-@app.server.route('/downloads/<value>')
+@application.route('/downloads/<value>')
 def generate_report_url(value):
     uri = os.path.join(os.getcwd(),"../../data/downloads/"+value+'.zip')
     return flask.send_file(uri, attachment_filename = value+'.zip', as_attachment = True)
-
 
 ###Callbacks for project creation app
 def image_formatter(im):
@@ -310,7 +307,7 @@ def update_download_link(n_clicks, pathname):
   project_id = pathname.split()[-1]
   return '/apps/templates?value=ClinicalData_template_{}.xlsx'.format(project_id)
 
-@app.server.route('/apps/templates')
+@application.route('/apps/templates')
 def serve_static():
     file = flask.request.args.get('value')
     filename = '_'.join(file.split('_')[:-1])+'.xlsx'
@@ -440,39 +437,5 @@ def update_table_download_link(n_clicks, data, data_type):
         return csv_string, 'downloaded_DATATYPE_DataUpload.csv'.replace('DATATYPE', data_type)
 
 
-
-
-
-#############
-
-#         localimagefolder = os.path.join(dataDir, 'QRCodes')
-
-
-#         # Generate QR code per row and save as png
-#         images = []
-#         for i, row in clinicalData.iterrows():
-#             subject, biosample, ansample = row['subject id'], row['biological_sample id'], row['analytical_sample id']
-
-#             filename = project_id+"_"+subject+"_"+biosample+"_"+ansample+".png"
-
-#             qr = qrcode.QRCode(version=1,
-#                                error_correction=qrcode.constants.ERROR_CORRECT_L,
-#                                box_size=10,
-#                                border=4)
-#             qr.add_data(project_id+"_"+subject+"_"+biosample+"_"+ansample)
-#             qr.make()
-#             img = qr.make_image()
-#             imagepath = os.path.join(localimagefolder, project_id+"_"+subject+"_"+biosample+"_"+ansample+".png")
-#             img.save(imagepath) # Save image
-#             images.append(imagepath)
-
-#         with open(os.path.join(localimagefolder, "output.pdf"), "wb") as f:
-#             f.write(img2pdf.convert([i for i in images]))
-
-#         # Add png names as new column in dataframe
-#         clinicalData['QR code'] = images
-
-
-
 if __name__ == '__main__':
-    app.run_server(debug=True, port=5000)
+    application.run(debug=True, host='0.0.0.0')
