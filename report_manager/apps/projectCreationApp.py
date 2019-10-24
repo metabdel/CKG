@@ -27,12 +27,19 @@ template_cols = template_cols.columns.tolist()
 
 
 class ProjectCreationApp(basicApp.BasicApp):
+    """
+    Defines what the project creation App is in the report_manager.
+    Includes multiple fill in components to gather project information and metadata.
+    """
     def __init__(self, title, subtitle, description, layout = [], logo = None, footer = None):
         self.pageType = "projectCreationPage"
         basicApp.BasicApp.__init__(self, title, subtitle, description, self.pageType, layout, logo, footer)
         self.buildPage()
 
     def buildPage(self):
+        """
+        Builds page with the basic layout from *basicApp.py* and adds relevant Dash components for project creation.
+        """
         self.add_basic_layout()
         layout = [html.Div([
                     html.Div([html.Div(children=[html.A(children=html.Button('Download Template (.xlsx)', id='download_button', style={'maxWidth':'130px'}), id='download_link', style={'marginLeft': '90%'})]),

@@ -33,6 +33,12 @@ if not df.empty:
     ClinicalVariables = df[[1, 0]].apply(lambda x: ' '.join(x),axis=1).tolist()
 
 class DataUploadApp(basicApp.BasicApp):
+    """
+    Defines what the dataUpload App is in the report_manager.
+    Used to upload experimental and clinical data to correct project folder.
+
+    .. warning:: There is a size limit of 55MB. Files bigger than this will have to be moved manually.
+    """
     def __init__(self, projectId, title, subtitle, description, layout = [], logo = None, footer = None):
         self._project_id = projectId
         self.pageType = "UploadDataPage"
@@ -41,13 +47,24 @@ class DataUploadApp(basicApp.BasicApp):
 
     @property
     def project_id(self):
+        """
+        Retrieves project identifier.
+        """
         return self._project_id
 
     @project_id.setter
     def project_id(self, project_id):
+        """
+        Sets 'project_id' input value as project_id property of the class.
+
+        :param str project_id: project identifier.
+        """
         self._project_id = project_id
 
     def buildPage(self):
+        """
+        Builds page with the basic layout from *basicApp.py* and adds relevant Dash components for project data upload.
+        """
         projectID = self.project_id
         self.add_basic_layout()
         layout = [html.Div([
