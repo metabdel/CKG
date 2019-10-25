@@ -59,14 +59,15 @@ RUN wget -P /var/lib/neo4j/plugins https://github.com/neo4j-contrib/neo4j-apoc-p
 
 RUN ls -lrth /var/lib/neo4j/plugins
 
+
+## Change configuration
+COPY /resources/neo4j_db/neo4j.conf  /etc/neo4j/.
+
 ## Test the service Neo4j
 RUN service neo4j start && \
     sleep 30 && \
     service neo4j stop && \
     cat /var/log/neo4j/neo4j.log
-
-## Change configuration
-COPY /resources/neo4j_db/neo4j.conf  /etc/neo4j/.
 
 ## Load backup with Clinical Knowledge Graph
 COPY /resources/neo4j_db/backups /var/lib/neo4j/data/backups
