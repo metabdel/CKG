@@ -3,11 +3,11 @@ import dash_html_components as html
 from IPython.display import display, HTML
 
 class BasicApp:
-    '''Defines what an App is in the report_manager.
-        Other Apps will inherit basic functionality from this class
-        Attributes: Title, subtitle, description, logo, footer
-    '''
-
+    """
+    Defines what an App is in the report_manager.
+    Other Apps will inherit basic functionality from this class.
+    Attributes: Title, subtitle, description, logo, footer.
+    """
     def __init__(self, title, subtitle, description, page_type, layout = [], logo = None, footer= None):
         self._title = title
         self._subtitle = subtitle
@@ -90,6 +90,10 @@ class BasicApp:
 
     #Functionality
     def add_basic_layout(self):
+        """
+        Calls class functions to setup the layout: title, subtitle, description, \
+        logo and footer.
+        """
         if self.title is not None:
             self.layout.append(self.get_HTML_title())
         if self.subtitle is not None:
@@ -101,12 +105,8 @@ class BasicApp:
         if self.footer is not None:
             self.layout.append(self.footer)
 
-        # button = html.Div([html.A('Documentation',
-        #                         id='docs-link',
-        #                         href="",
-        #                         target="_blank",
-        #                         n_clicks = 0)])
-        # self.add_to_layout(button)
-
     def build_page(self):
+        """
+        Builds page basic layout.
+        """
         self.add_basic_layout()
