@@ -6,6 +6,10 @@ import dash_core_components as dcc
 
 
 class ProjectApp(basicApp.BasicApp):
+    """
+    Defines what a project App is in the report_manager.
+    Includes multiple tabs for different data types.
+    """
     def __init__(self, projectId, title, subtitle, description, layout = [], logo = None, footer = None):
         self._project_id = projectId
         self._page_type = "projectPage"
@@ -14,13 +18,27 @@ class ProjectApp(basicApp.BasicApp):
 
     @property
     def project_id(self):
+        """
+        Retrieves project identifier.
+        """
         return self._project_id
 
     @project_id.setter
     def project_id(self, project_id):
+        """
+        Sets 'project_id' input value as project_id property of the class.
+
+        :param str project_id: project identifier.
+        """
         self._project_id = project_id
 
     def build_page(self):
+        """
+        Builds project and generates the report.
+        For each data type in the report (e.g. 'proteomics', 'clinical'), \
+        creates a designated tab.
+        A button to download the entire project and report is added.
+        """
         p = project.Project(self.project_id, datasets={}, knowledge=None, report={})
         p.build_project()
         p.generate_report()

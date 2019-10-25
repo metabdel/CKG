@@ -163,8 +163,6 @@ def get_dropdown_menu(fig, options_dict, add_button=True, equal_traces=True, num
     :param int number_traces: number of traces created for each 'options_dict' key.
     return: List of nested structures. Each dictionary within *updatemenus[0]['buttons'][0]* corresponds \
             to one dropdown menu options and contains information on which traces are visible, label and method.
-
-    .. note:: Use 'number_traces' when building one single plot (''). When creating subplots, use 'entitied_dict'
     """
     
     list_updatemenus = []
@@ -204,12 +202,13 @@ def get_dropdown_menu(fig, options_dict, add_button=True, equal_traces=True, num
 
 def get_totals_per_date(stats_file, key='full', import_types=False):
     """
-    
+    Summarizes stats file to a Pandas DataFrame with import dates and total number of \
+    imported entities and relationships.
 
-    :param stats_file:
-    :param str key:
-    :param bool import_types:
-    return:
+    :param stats_file: pandas DataFrame with stats data.
+    :param str key: use only full or partial imports ('full', 'partial').
+    :param bool import_types: breakdown importing stats into entities or relationships related.
+    return: Pandas DataFrame with independent import dates as rows and imported numbers as columns.
     """
     if key == 'full':
         stats = stats_file[stats_file['Import_flag'] == 'full']
@@ -242,10 +241,11 @@ def get_totals_per_date(stats_file, key='full', import_types=False):
 
 def get_imports_per_database_date(stats_file):
     """
+    Summarizes stats file to a Pandas DataFrame with import dates, databases and total number of \
+    imported entities and relationships per database.
 
-
-    :param stats_file:
-    return:
+    :param stats_file: pandas DataFrame with stats data.
+    return: Pandas DataFrame with independent import dates and databases as rows and imported numbers as columns.
     """
     cols = ['date', 'dataset', 'entities', 'relationships', 'total']
     stats_sum = []
@@ -266,9 +266,9 @@ def get_imports_per_database_date(stats_file):
 
 def plot_total_number_imported(stats_file, plot_title):
     """
+    Creates plot with overview of imports numbers per date.
 
-
-    :param stats_file:
+    :param stats_file: pandas DataFrame with stats data.
     :param str plot_title: title of the plot.
     return: Line plot figure within the <div id="_dash-app-content">.
     """
@@ -295,9 +295,9 @@ def plot_total_number_imported(stats_file, plot_title):
 
 def plot_total_numbers_per_date(stats_file, plot_title):
     """
+    Plots number of entities and relationships imported per date, with scaled markers reflecting numbers rations.
 
-
-    :param stats_file:
+    :param stats_file: pandas DataFrame with stats data.
     :param str plot_title: title of the plot.
     return: Scatter plot figure within the <div id="_dash-app-content">, with scalled markers.
     """
@@ -328,13 +328,14 @@ def plot_total_numbers_per_date(stats_file, plot_title):
 
 def plot_databases_numbers_per_date(stats_file, plot_title, key='full', dropdown=False, dropdown_options='dates'):
     """
+    Grouped horizontal barplot showing the number of entities and relationships imported from each biomedical database.
 
-
-    :param stats_file:
+    :param stats_file: pandas DataFrame with stats data.
     :param str plot_title: title of the plot.
-    :param str key:
+    :param str key: use only full or partial imports ('full', 'partial').
     :param bool dropdown: add dropdown menu to figure or not.
-    :param str dropdown_options:
+    :param str dropdown_options: name of the variables to be used as options in the dropdown menu ('dates', \
+                        'databases', 'entities' or 'relationships').
     return: Horizontal barplot figure within the <div id="_dash-app-content">.
     """
     if key == 'full':
@@ -375,24 +376,26 @@ def plot_databases_numbers_per_date(stats_file, plot_title, key='full', dropdown
     for name in names:
         fig.for_each_trace(lambda trace: trace.update(marker=dict(color=colors[name])), selector=dict(name=name))
 
-    # remove_legend_duplicates(fig)
+    # remove_legend_duplicates(fig) #Removes legend from individual plots.
 
     return dcc.Graph(id = 'databases imports {}'.format(key), figure = fig)
 
 
-def plot_import_numbers_per_database(stats_file, plot_title, key='full', subplot_titles = ('',''), colors=True, color1='entities', color2='relationships', dropdown=True, dropdown_options='databases'):
+def plot_import_numbers_per_database(stats_file, plot_title, key='full', subplot_titles = ('',''), colors=True, plots_1='entities', plots_2='relationships', dropdown=True, dropdown_options='databases'):
     """
+    Creates plotly multiplot figure with breakdown of imported numbers and size of the respective files, per database and \
+    import type (entities or relationships).
 
-
-    :param stats_file:
+    :param stats_file: pandas DataFrame with stats data.
     :param str plot_title: title of the plot.
-    :param str key:
+    :param str key: use only full or partial imports ('full', 'partial').
     :param tuple subplot_titles: title of the subplots (tuple of strings, one for each subplot).
     :param bool colors: define standard colors for entities and for relationships.
-    :param str color1:
-    :param str color2:
+    :param str plots_1: name of the variable plotted.
+    :param str plots_2: name of the variable plotted.
     :param bool dropdown: add dropdown menu to figure or not.
-    :param str dropdown_options:
+    :param str dropdown_options: name of the variables to be used as options in the dropdown menu ('dates', \
+                        'databases', 'entities' or 'relationships').
     return: Multi-scatterplot figure within the <div id="_dash-app-content">.
     """
     if key == 'full':
@@ -402,8 +405,8 @@ def plot_import_numbers_per_database(stats_file, plot_title, key='full', subplot
     else:
         print('Syntax error')
 
-    ent = get_databases_entities_relationships(stats_file, key=key, options=color1)
-    rel = get_databases_entities_relationships(stats_file, key=key, options=color2)
+    ent = get_databases_entities_relationships(stats_file, key=key, options=plots_1)
+    rel = get_databases_entities_relationships(stats_file, key=key, options=plots_2)
     dropdown_options = get_databases_entities_relationships(stats_file, key=key, options=dropdown_options)
 
     if colors:

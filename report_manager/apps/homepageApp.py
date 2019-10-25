@@ -4,12 +4,19 @@ from apps import homepageStats as hpstats
 
 
 class HomePageApp(basicApp.BasicApp):
+    """
+    Defines what the HomePage App is in the report_manager.
+    Enables the tracking of the number of entitites, relationships, projects, and others, currently in the grapha database.
+    """
     def __init__(self, title, subtitle, description, layout = [], logo = None, footer = None):
         self.pageType = "homePage"
         basicApp.BasicApp.__init__(self, title, subtitle, description, self.pageType, layout, logo, footer)
         self.buildPage()
 
     def buildPage(self):
+        """
+        Builds page with the basic layout from *basicApp.py* and adds all the relevant plots from *homepageStats.py*.
+        """
         self.add_basic_layout()
         layout = hpstats.quick_numbers_panel()
         dfs = hpstats.get_db_stats_data()
