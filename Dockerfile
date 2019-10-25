@@ -61,9 +61,9 @@ RUN ls -lrth /var/lib/neo4j/plugins
 
 ## Test the service Neo4j
 RUN service neo4j start && \
-    cat /var/log/neo4j/neo4j.log && \
     sleep 30 && \
-    service neo4j stop
+    service neo4j stop && \
+    cat /var/log/neo4j/neo4j.log
 
 ## Change configuration
 COPY /resources/neo4j_db/neo4j.conf  /etc/neo4j/.
@@ -92,7 +92,7 @@ RUN apt-get update && \
 		r-recommended=${R_BASE_VERSION}* && \
         echo 'options(repos = c(CRAN = "https://cloud.r-project.org/"), download.file.method = "libcurl")' >> /etc/R/Rprofile.site
 ## Install packages
-ADD ./R_packages.R /R_packages.R
+ADD /resources/R_packages.R /R_packages.R
 RUN Rscript R_packages.R
 
 # Python

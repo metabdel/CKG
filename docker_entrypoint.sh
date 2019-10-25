@@ -1,6 +1,6 @@
 #!/bin/bash
 
-service neo4j start
+sudo service neo4j start
 
 cat /var/log/neo4j/neo4j.log
 
