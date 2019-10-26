@@ -2,7 +2,7 @@ import os
 
 if __name__ == "__main__":
     path = os.path.dirname(os.path.abspath(__file__))
-    structure_directory = '..'
+    structure_directory = '.'
     data_directory_structure = {"data":[
                                     "archive",
                                     "databases",
