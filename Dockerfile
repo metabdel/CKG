@@ -102,7 +102,7 @@ ADD ./requirements.txt /requirements.txt
 RUN pip3 install --ignore-installed -r requirements.txt
 RUN mkdir /CKG
 ADD . /CKG/
-ENV PYTHONPATH "${PYTHONPATH}:/CKG"
+ENV PYTHONPATH "${PYTHONPATH}:/CKG/src"
 
 # JupyterHub
 RUN apt-get -y install npm nodejs && \
