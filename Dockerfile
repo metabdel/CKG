@@ -44,7 +44,7 @@ RUN update-alternatives --install "/usr/bin/java" "java" "/usr/local/oracle-jre8
 
 # NEO4J
 RUN wget -O - http://debian.neo4j.org/neotechnology.gpg.key | apt-key add - && \
-    echo "deb http://debian.neo4j.org/repo stable/" > /etc/apt/sources.list.d/neo4j.list && \
+    echo "deb [trusted=yes] https://debian.neo4j.org/repo stable/" > /etc/apt/sources.list.d/neo4j.list && \
     apt-get update && \
     apt-get install -yq neo4j=1:3.5.8
 

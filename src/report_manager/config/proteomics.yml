@@ -1,7 +1,7 @@
 args:
     imputation: True
     imputation_method: distribution 
-    missing_method: at_least_x
+    missing_method: percentage
     missing_per_group: True
     missing_max: 0.3
     min_valid: 5
@@ -150,7 +150,7 @@ data exploration:
         store_analysis: True
         args:
             alpha: 0.05
-            s0: 2
+            s0: 0
             fc: 2.0
             group: 'group'
             subject: subject

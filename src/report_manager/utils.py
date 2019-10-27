@@ -66,19 +66,20 @@ def generate_html(network):
 def send_message_to_slack_webhook(message, message_to, username='albsantosdel'):
     cwd = os.path.abspath(os.path.dirname(__file__))
     webhook_file = os.path.join(cwd, "../config/wh.txt")
-    with open(webhook_file, 'r') as hf:
-        webhook_url = hf.read()
- 
-    post = {"text": "@{} : {}".format(message_to, message), "username":username, "icon_url": "https://slack.com/img/icons/app-57.png"}
- 
-    try:
-        json_data = json.dumps(post)
-        req = request.Request(webhook_url,
-                              data=json_data.encode('ascii'),
-                              headers={'Content-Type': 'application/json'}) 
-        resp = request.urlopen(req)
-    except Exception as em:
-        print("EXCEPTION: " + str(em))
+    if os.path.exists(webhook_file):
+        with open(webhook_file, 'r') as hf:
+            webhook_url = hf.read()
+    
+        post = {"text": "@{} : {}".format(message_to, message), "username":username, "icon_url": "https://slack.com/img/icons/app-57.png"}
+    
+        try:
+            json_data = json.dumps(post)
+            req = request.Request(webhook_url,
+                                data=json_data.encode('ascii'),
+                                headers={'Content-Type': 'application/json'}) 
+            resp = request.urlopen(req)
+        except Exception as em:
+            print("EXCEPTION: " + str(em))
 
 def send_email(message, subject, message_from, message_to):
     msg = EmailMessage()    
