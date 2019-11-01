@@ -1277,7 +1277,7 @@ def get_sankey_plot(data, identifier, args={'source':'source', 'target':'target'
                                 'target_colors':'target_colors', 'orientation': 'h', 'valueformat': '.0f', 'width':800, 'height':800, 'font':12, 'title':'Sankey plot'})
     """
     figure = {}
-    if not data.empty:
+    if data is not None and not data.empty:
         nodes = list(set(data[args['source']].tolist() + data[args['target']].tolist()))
         if 'source_colors' in args:
             node_colors = dict(zip(data[args['source']],data[args['source_colors']]))

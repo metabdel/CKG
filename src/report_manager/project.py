@@ -38,7 +38,7 @@ class Project:
         self._report = report
         self._name = None
         self._acronym = None
-        self._data_types = None
+        self._data_types = []
         self._responsible = None
         self._description = None
         self._status = None
@@ -233,6 +233,12 @@ class Project:
             self.overlap = pd.DataFrame.from_dict(attributes['overlap'])
 
     def to_dict(self):
+        similarity_dict = {}
+        overlap_dict = {}
+        if self.similar_projects is not None:
+            similarity_dict = self.similar_projects.to_dict(orient='records')
+        if self.overlap is not None:
+            overlap_dict = self.overlap.to_dict(orient='records')
         d = {"identifier" : self.identifier,
              "queries_file":self._queries_file,
             "name" : self.name,
@@ -242,8 +248,8 @@ class Project:
             "responsible": self.responsible,
             "status": self.status,
             "number_subjects": self.num_subjects,
-            "similar_projects":self.similar_projects.to_dict(orient='records'),
-            "overlap":self.overlap.to_dict(orient='records')
+            "similar_projects": similarity_dict,
+            "overlap": overlap_dict
             }
 
         return d
@@ -355,28 +361,32 @@ class Project:
             self.load_project_report()
         if len(self.report) == 0 or len(self.datasets) == 0:
             project_info = self.query_data()
-            self.set_attributes(project_info)
-            self.get_similar_projects(project_info)
-            self.get_projects_overlap(project_info)
-            for data_type in self.data_types:
-                dataset = None
-                if data_type == "proteomics":
-                    dataset = ProteomicsDataset(self.identifier, data={}, analyses={}, analysis_queries={}, report=None)
-                elif data_type == "clinical":
-                    dataset = ClinicalDataset(self.identifier, data={}, analyses={}, analysis_queries={}, report=None)
-                elif data_type == "wes" or data_type == "wgs":
-                    dataset = DNAseqDataset(self.identifier, dataset_type=data_type, data={}, analyses={}, analysis_queries={}, report=None)
-                elif data_type == "longitudinal_proteomics":
-                    dataset = LongitudinalProteomicsDataset(self.identifier, data={}, analyses={}, analysis_queries={}, report=None)
-            
-                if dataset is not None:
-                    dataset.generate_dataset()
-                    self.update_dataset({data_type:dataset})
-            
-            if len(self.datasets) > 1:
-                dataset = MultiOmicsDataset(self.identifier, data=self.datasets, analyses={}, report=None)
-                self.update_dataset({'multiomics':dataset})
-                self.append_data_type('multiomics')
+            if len(project_info) > 0:
+                self.set_attributes(project_info)
+                self.get_similar_projects(project_info)
+                self.get_projects_overlap(project_info)
+                for data_type in self.data_types:
+                    dataset = None
+                    if data_type == "proteomics":
+                        dataset = ProteomicsDataset(self.identifier, data={}, analyses={}, analysis_queries={}, report=None)
+                    elif data_type == "clinical":
+                        dataset = ClinicalDataset(self.identifier, data={}, analyses={}, analysis_queries={}, report=None)
+                    elif data_type == "wes" or data_type == "wgs":
+                        dataset = DNAseqDataset(self.identifier, dataset_type=data_type, data={}, analyses={}, analysis_queries={}, report=None)
+                    elif data_type == "longitudinal_proteomics":
+                        dataset = LongitudinalProteomicsDataset(self.identifier, data={}, analyses={}, analysis_queries={}, report=None)
+                
+                    if dataset is not None:
+                        dataset.generate_dataset()
+                        self.update_dataset({data_type:dataset})
+                
+                if len(self.datasets) > 1:
+                    dataset = MultiOmicsDataset(self.identifier, data=self.datasets, analyses={}, report=None)
+                    self.update_dataset({'multiomics':dataset})
+                    self.append_data_type('multiomics')
+            else:
+                logger.error("Project {} could not be built. Error retrieving information for this project or no information associated to this project".format(self.identifier))
+                print("Project {} could not be built. Error retrieving information for this project or no information associated to this project".format(self.identifier))
 
     def get_projects_overlap(self, project_info):
         if 'overlap' in project_info:
@@ -415,10 +425,11 @@ class Project:
         identifier = "Overlap"
         title = "Protein Identification Overlap"
         plots.append(figure.get_table(self.overlap, identifier+' table', title+' table'))
-        for i, row in self.overlap.iterrows():
-            ntitle = title + ":\n" + row['project1_name'] +" - "+ row['project2_name'] +"(overlap similarity: " + str(row['similarity']) +")"
-            plot = figure.plot_2_venn_diagram(row['from'], row['to'], row['project1_unique'], row['project2_unique'], row['intersection'], identifier=identifier+str(i), args={'title':ntitle})
-            plots.append(plot)
+        if self.overlap is not None:
+            for i, row in self.overlap.iterrows():
+                ntitle = title + ":\n" + row['project1_name'] +" - "+ row['project2_name'] +"(overlap similarity: " + str(row['similarity']) +")"
+                plot = figure.plot_2_venn_diagram(row['from'], row['to'], row['project1_unique'], row['project2_unique'], row['intersection'], identifier=identifier+str(i), args={'title':ntitle})
+                plots.append(plot)
 
         return plots
 
@@ -497,6 +508,7 @@ class Project:
         self.knowledge = knowledge.Knowledge(self.identifier, {'name':self.name}, nodes=nodes, relationships=relationships)
 
     def generate_project_info_report(self):
+        
         report = rp.Report(identifier="project_info")
 
         plots = self.generate_project_attributes_plot()
@@ -526,7 +538,7 @@ class Project:
             self.notify_project_ready()
 
     def notify_project_ready(self, message_type='slack'):
-        message = "Report for project "+str(self.name)+" is ready: check it out at http://localhost:5000/apps/project/"+str(self.identifier)
+        message = "Report for project "+str(self.name)+" is ready: check it out at http://localhost:8050/apps/project/"+str(self.identifier)
         subject = 'Report ready '+self.identifier 
         message_from = "alsantosdel"
         message_to = "albsantosdel" #self.responsible_email
