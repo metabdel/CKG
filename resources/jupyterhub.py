@@ -7,7 +7,7 @@ c.Authenticator.admin_users = {'adminhub'}
 
 ## The public facing port of the proxy.
 c.JupyterHub.port = 8090
-c.Spawner.notebook_dir='/CKG/notebooks'
+c.Spawner.notebook_dir='/CKG/src/notebooks'
 
 #  Supports Linux and BSD variants only.
 c.LocalAuthenticator.create_system_users = True
