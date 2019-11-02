@@ -30,9 +30,10 @@ class Project:
          >>> p.show_report(environment="notebook")
     '''
 
-    def __init__(self, identifier, datasets={}, knowledge=None, report={}):
+    def __init__(self, identifier, configuration_files={}, datasets={}, knowledge=None, report={}):
         self._identifier = identifier
         self._queries_file = 'queries/project_cypher.yml'
+        self.configuration_files = configuration_files
         self._datasets = datasets
         self._knowledge = knowledge
         self._report = report
@@ -53,6 +54,14 @@ class Project:
     @identifier.setter
     def identifier(self, identifier):
         self._identifier = identifier
+    
+    @property
+    def configuration_files(self):
+        return self._configuration_files
+
+    @configuration_files.setter
+    def configuration_files(self, configuration_files):
+        self._configuration_files = configuration_files
 
     @property
     def queries_file(self):
@@ -367,14 +376,25 @@ class Project:
                 self.get_projects_overlap(project_info)
                 for data_type in self.data_types:
                     dataset = None
+                    configuration = None
                     if data_type == "proteomics":
-                        dataset = ProteomicsDataset(self.identifier, data={}, analyses={}, analysis_queries={}, report=None)
+                        if "proteomics" in self.configuration_files:
+                            configuration = ckg_utils.get_configuration(self.configuration_files["proteomics"])
+                        dataset = ProteomicsDataset(self.identifier, data={}, configuration=configuration, analyses={}, analysis_queries={}, report=None)
                     elif data_type == "clinical":
-                        dataset = ClinicalDataset(self.identifier, data={}, analyses={}, analysis_queries={}, report=None)
+                        if "clinical" in self.configuration_files:
+                            configuration = ckg_utils.get_configuration(self.configuration_files["clinical"])
+                        dataset = ClinicalDataset(self.identifier, data={}, configuration=configuration, analyses={}, analysis_queries={}, report=None)
                     elif data_type == "wes" or data_type == "wgs":
-                        dataset = DNAseqDataset(self.identifier, dataset_type=data_type, data={}, analyses={}, analysis_queries={}, report=None)
+                        if "wes" in self.configuration_files:
+                            configuration = ckg_utils.get_configuration(self.configuration_files["wes"])
+                        elif "wgs" in self.configuration_files:
+                            configuration = ckg_utils.get_configuration(self.configuration_files["wgs"])
+                        dataset = DNAseqDataset(self.identifier, dataset_type=data_type, data={}, configuration=configuration, analyses={}, analysis_queries={}, report=None)
                     elif data_type == "longitudinal_proteomics":
-                        dataset = LongitudinalProteomicsDataset(self.identifier, data={}, analyses={}, analysis_queries={}, report=None)
+                        if "longitudinal_proteomics" in self.configuration_files:
+                            configuration = ckg_utils.get_configuration(self.configuration_files["longitudinal_proteomics"])
+                        dataset = LongitudinalProteomicsDataset(self.identifier, data={}, configuration=configuration, analyses={}, analysis_queries={}, report=None)
                 
                     if dataset is not None:
                         dataset.generate_dataset()
