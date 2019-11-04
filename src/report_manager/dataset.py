@@ -4,12 +4,12 @@ import sys
 import json
 import pandas as pd
 import h5py as h5
-from src import ckg_utils
-import src.config.ckg_config as ckg_config
-from src.report_manager import analysisResult as ar, report as rp, utils, knowledge
-from src.report_manager.analyses import basicAnalysis
-from src.report_manager.plots import basicFigures
-from src.graphdb_connector import connector
+import ckg_utils
+import config.ckg_config as ckg_config
+from report_manager import analysisResult as ar, report as rp, utils, knowledge
+from report_manager.analyses import basicAnalysis
+from report_manager.plots import basicFigures
+from graphdb_connector import connector
 import logging
 import logging.config
 

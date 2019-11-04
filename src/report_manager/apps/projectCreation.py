@@ -3,12 +3,12 @@ import sys
 import re
 import pandas as pd
 import numpy as np
-import src.config.ckg_config as ckg_config
-from src import ckg_utils
-from src.graphdb_connector import connector
-from src.graphdb_builder import builder_utils
-from src.graphdb_builder.experiments import experiments_controller as eh
-from src.report_manager.queries import query_utils
+import config.ckg_config as ckg_config
+import ckg_utils
+from graphdb_connector import connector
+from graphdb_builder import builder_utils
+from graphdb_builder.experiments import experiments_controller as eh
+from report_manager.queries import query_utils
 import logging
 import logging.config
 

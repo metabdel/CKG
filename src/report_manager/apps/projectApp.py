@@ -1,6 +1,6 @@
 import os
 from apps import basicApp
-from src.report_manager import project
+from report_manager import project
 import dash_html_components as html
 import dash_core_components as dcc
 

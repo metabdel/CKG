@@ -25,14 +25,14 @@ from dash_network import Network
 from app import app, server as application
 from apps import initialApp, projectApp, importsApp, projectCreationApp, dataUploadApp, homepageApp
 from apps import projectCreation, dataUpload, homepageStats
-from src.graphdb_builder import builder_utils
-from src.graphdb_builder.builder import loader
-from src.graphdb_builder.experiments import experiments_controller as eh
-from src import ckg_utils
-import src.config.ckg_config as ckg_config
+from graphdb_builder import builder_utils
+from graphdb_builder.builder import loader
+from graphdb_builder.experiments import experiments_controller as eh
+import ckg_utils
+import config.ckg_config as ckg_config
 
 from worker import create_new_project
-from src.graphdb_connector import connector
+from graphdb_connector import connector
 
 driver = connector.getGraphDatabaseConnectionConfiguration()
 separator = '|'

@@ -20,15 +20,15 @@ from cyjupyter import Cytoscape
 from pyvis.network import Network as visnet
 from webweb import Web
 from networkx.readwrite import json_graph
-from src.report_manager import utils, analyses
+from report_manager import utils, analyses
 from wordcloud import WordCloud, STOPWORDS
 from nltk.corpus import stopwords
 import nltk
 
 
-from src.report_manager.analyses import wgcnaAnalysis
-from src.report_manager.plots import wgcnaFigures
-from src.report_manager.plots import Dendrogram
+from report_manager.analyses import wgcnaAnalysis
+from report_manager.plots import wgcnaFigures
+from report_manager.plots import Dendrogram
 import dash_cytoscape as cyto
 
 def getPlotTraces(data, key='full', type = 'lines', div_factor=float(10^10000), horizontal=False):

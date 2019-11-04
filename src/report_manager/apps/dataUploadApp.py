@@ -12,10 +12,10 @@ import dash_html_components as html
 import dash_table
 import flask
 
-import src.config.ckg_config as ckg_config
+import config.ckg_config as ckg_config
 from apps import basicApp
 
-from src.graphdb_connector import connector
+from graphdb_connector import connector
 import logging
 import logging.config
 

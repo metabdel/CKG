@@ -9,13 +9,13 @@ from IPython.display import IFrame, display
 import tempfile
 from json import dumps
 import pandas as pd
-from src import ckg_utils
-import src.config.ckg_config as ckg_config
-from src.report_manager.dataset import Dataset, ProteomicsDataset, ClinicalDataset, DNAseqDataset, RNAseqDataset, LongitudinalProteomicsDataset, MultiOmicsDataset
-from src.report_manager.plots import basicFigures as figure
-from src.report_manager import report as rp, utils, knowledge
-from src.report_manager.queries import query_utils
-from src.graphdb_connector import connector
+import ckg_utils
+import config.ckg_config as ckg_config
+from report_manager.dataset import Dataset, ProteomicsDataset, ClinicalDataset, DNAseqDataset, RNAseqDataset, LongitudinalProteomicsDataset, MultiOmicsDataset
+from report_manager.plots import basicFigures as figure
+from report_manager import report as rp, utils, knowledge
+from report_manager.queries import query_utils
+from graphdb_connector import connector
 import logging
 import logging.config
 
