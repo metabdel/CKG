@@ -13,7 +13,7 @@ from rpy2.robjects import pandas2ri
 from rpy2.robjects.packages import importr
 from rpy2.robjects.vectors import StrVector, FloatVector
 import rpy2.robjects.packages as rpacks
-from report_manager import R2Py
+from src.report_manager import R2Py
 pandas2ri.activate()
 # sys.setrecursionlimit(10000)
 

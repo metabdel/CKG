@@ -5,7 +5,7 @@ import scipy as scp
 from scipy.cluster.hierarchy import distance, linkage, dendrogram, fcluster
 from collections import OrderedDict, defaultdict
 from natsort import natsorted, index_natsorted, order_by_index
-from report_manager.plots import color_list
+from src.report_manager.plots import color_list
 import urllib.request
 
 import matplotlib.pyplot as plt
@@ -14,9 +14,9 @@ import matplotlib.colors
 import chart_studio.plotly as py
 import plotly.graph_objs as go
 import plotly.subplots as tools
-from report_manager.plots import Dendrogram
-from report_manager.plots import basicFigures
-from report_manager.analyses import wgcnaAnalysis
+from src.report_manager.plots import Dendrogram
+from src.report_manager.plots import basicFigures
+from src.report_manager.analyses import wgcnaAnalysis
 
 def get_module_color_annotation(map_list, col_annotation=False, row_annotation=False, bygene=False, module_colors=[], dendrogram=[]):
     """

@@ -1,4 +1,4 @@
-import config.ckg_config as ckg_config
+import src.config.ckg_config as ckg_config
 from apps import basicApp
 from apps import homepageStats as hpstats
 

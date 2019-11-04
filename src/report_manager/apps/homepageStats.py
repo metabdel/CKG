@@ -10,14 +10,14 @@ import plotly.express as px
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-import config.ckg_config as ckg_config
-import ckg_utils
+import src.config.ckg_config as ckg_config
+from src import ckg_utils
 import logging
 import logging.config
-from graphdb_connector import connector
-from graphdb_builder import builder_utils
-from report_manager.queries import query_utils
-from report_manager.plots import basicFigures as figure
+from src.graphdb_connector import connector
+from src.graphdb_builder import builder_utils
+from src.report_manager.queries import query_utils
+from src.report_manager.plots import basicFigures as figure
 
 log_config = ckg_config.graphdb_builder_log
 logger = builder_utils.setup_logging(log_config, key="db_stats")

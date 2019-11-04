@@ -1,7 +1,7 @@
 import os
 import sys
-import ckg_utils
-from graphdb_connector import connector
+from src import ckg_utils
+from src.graphdb_connector import connector
 
 def read_queries(queries_file):
     queries = ckg_utils.get_queries(queries_file)

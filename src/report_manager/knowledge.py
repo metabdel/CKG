@@ -4,12 +4,12 @@ import pandas as pd
 import numpy as np
 import ast
 import networkx as nx
-import ckg_utils
-import config.ckg_config as ckg_config
+from src import ckg_utils
+import src.config.ckg_config as ckg_config
 import dash_cytoscape as cyto
-from graphdb_connector import connector
-from report_manager import utils, report as rp
-from report_manager.plots import basicFigures, color_list
+from src.graphdb_connector import connector
+from src.report_manager import utils, report as rp
+from src.report_manager.plots import basicFigures, color_list
 from networkx.readwrite import json_graph
 import logging
 import logging.config

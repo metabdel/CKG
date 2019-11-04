@@ -1,6 +1,6 @@
-from report_manager.analyses import wgcnaAnalysis as wgcna
-import report_manager.analyses.basicAnalysis as analyses
-from report_manager.plots import basicFigures as figure
+from src.report_manager.analyses import wgcnaAnalysis as wgcna
+import src.report_manager.analyses.basicAnalysis as analyses
+from src.report_manager.plots import basicFigures as figure
 import pandas as pd
 import itertools
 import time

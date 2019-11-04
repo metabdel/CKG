@@ -6,7 +6,7 @@ import dash_html_components as html
 
 from apps import basicApp
 
-from graphdb_connector import connector
+from src.graphdb_connector import connector
 
 
 driver = connector.getGraphDatabaseConnectionConfiguration()

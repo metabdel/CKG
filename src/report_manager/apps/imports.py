@@ -1,4 +1,4 @@
-from report_manager.plots import basicFigures as figure
+from src.report_manager.plots import basicFigures as figure
 #Dash
 import dash
 import dash_core_components as dcc

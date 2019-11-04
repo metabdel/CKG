@@ -13,8 +13,8 @@ from cyjupyter import Cytoscape
 import tempfile
 import networkx as nx
 from networkx.readwrite import json_graph
-from report_manager import utils
-from report_manager.plots import basicFigures
+from src.report_manager import utils
+from src.report_manager.plots import basicFigures
 
 class Report:
     def __init__(self, identifier, plots={}):

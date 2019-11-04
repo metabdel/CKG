@@ -2,8 +2,8 @@ import os
 import pandas as pd
 import datetime
 from celery import Celery
-from report_manager.apps import projectCreation
-from graphdb_connector import connector
+from src.report_manager.apps import projectCreation
+from src.graphdb_connector import connector
 
 
 celery_app = Celery('create_new_project')
