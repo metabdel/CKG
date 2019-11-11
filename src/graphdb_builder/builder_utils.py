@@ -169,9 +169,10 @@ def downloadDB(databaseURL, directory=None, file_name=None, user="", password=""
                 ftp.login(user=user, passwd = password)
                 ftp.retrbinary("RETR " + ftp_file ,  open(os.path.join(directory, file_name), mode).write)
         else:
-            wget.download(databaseURL, os.path.join(directory, file_name))
-        
-        print('Finished download')
+            if os.path.exists(os.path.join(directory, file_name)):
+                os.remove(os.path.join(directory, file_name))
+            # wget.download(databaseURL, os.path.join(directory, file_name))
+            os.system("wget -O {0} {1}".format(os.path.join(directory, file_name), databaseURL))
 
     except urllib3.exceptions.InvalidHeader:
         raise urllib3.exceptions.InvalidHeader("Invalid HTTP header provided. {}.\nURL:{}".format(err,databaseURL))
