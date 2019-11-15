@@ -50,31 +50,48 @@ app.layout = dcc.Loading(
     color='#2b8cbe')
 
 @app.callback(Output('page-content', 'children'),
-              [Input('url', 'pathname')])
+              [Input('url', 'href')])
 def display_page(pathname):
     if pathname is not None:
-        if pathname == '/apps/initial':
+        if '/apps/initial' in pathname:
             return initialApp.layout
-        elif pathname.startswith('/apps/projectCreation'):
+        elif '/apps/projectCreation' in pathname:
             projectCreation = projectCreationApp.ProjectCreationApp("Project Creation", "", "", layout = [], logo = None, footer = None)
             return projectCreation.layout
-        elif pathname.startswith('/apps/dataUpload'):
+        elif '/apps/dataUpload' in pathname:
             projectId = pathname.split('/')[-1]
             dataUpload = dataUploadApp.DataUploadApp(projectId, "Data Upload", "", "", layout = [], logo = None, footer = None)
             return dataUpload.layout
-        elif pathname.startswith('/apps/project'):
-            projectId = pathname.split('/')[-1]
-            project = projectApp.ProjectApp(projectId, projectId, "", "", layout = [], logo = None, footer = None)
-            return project.layout
-        elif pathname.startswith('/apps/imports'):
+        elif '/apps/project' in pathname:
+            project_id, force = get_project_params_from_url(pathname)
+            print(project_id)
+            if project_id is None:
+                return initialApp.layout
+            else:
+                project = projectApp.ProjectApp(project_id, project_id, "", "", layout = [], logo = None, footer = None, force=force)
+                return project.layout
+        elif '/apps/imports' in pathname:
             imports = importsApp.ImportsApp("CKG imports monitoring", "Statistics", "", layout = [], logo = None, footer = None)
             return imports.layout
-        elif pathname.startswith('/apps/homepage') or pathname == '/':
+        elif '/apps/homepage' in pathname or pathname.count('/') <= 3:
             stats_db = homepageApp.HomePageApp("CKG homepage", "Database Stats", "", layout = [], logo = None, footer = None)
             return stats_db.layout
         else:
             return '404'
 
+
+def get_project_params_from_url(pathname):
+    force = False
+    project_id = None
+    regex_id = r"project_id=(\w+)"
+    regex_force = r"force=(\d)"
+    match_id = re.search(regex_id, pathname)
+    if match_id:
+        project_id = match_id.group(1)
+    match_force = re.search(regex_force,pathname)
+    if match_force:
+        force = bool(int(match_force.group(1)))
+    return project_id, force
 
 # ###Calbacks for basicApp
 # @app.callback(Output('docs-link', 'href'),
@@ -163,25 +180,37 @@ def number_panel_update(df):
     return [dcc.Markdown("**{}**".format(i)) for i in [ent,labels,rel,types,prop,ent_store,rel_store,prop_store,string_store,array_store,log_store,t_open,t_comm,projects]]
 
 @app.callback(Output("project_url", "children"),
-             [Input("project_option", "value")])
-def update_project_url(value):
+             [Input("project_option", "value")],
+             [State('url', 'href')])
+def update_project_url(value, pathname):
+    basic_path = '/'.join(pathname.split('/')[0:3])
     if value.startswith('P0'):
-      return dcc.Markdown('/apps/project/{}'.format(value))
+        return dcc.Markdown("[Project {}]({}/apps/project?project_id={}&force=0)".format(value,basic_path, value))
     else:
       return ''
 
 ###Callbacks for download project
 @app.callback(Output('download-zip', 'href'),
              [Input('download-zip', 'n_clicks')],
-             [State('url', 'pathname')])
+             [State('url', 'href')])
 def generate_report_url(n_clicks, pathname):
-    project_id = pathname.split('/')[-1]
+    basic_path = '/'.join(pathname.split('/')[0:3]) 
+    project_id, force = get_project_params_from_url(pathname)
     return '/downloads/{}'.format(project_id)
     
 @application.route('/downloads/<value>')
 def generate_report_url(value):
     uri = os.path.join(os.getcwd(),"../../data/downloads/"+value+'.zip')
     return flask.send_file(uri, attachment_filename = value+'.zip', as_attachment = True)
+
+###Callback regenerate project
+@app.callback(Output('regenerate', 'href'),
+             [Input('regenerate', 'n_clicks')],
+             [State('url', 'href')])
+def regenerate_report(n_clicks, pathname):
+    basic_path = '/'.join(pathname.split('/')[0:3]) 
+    project_id, force = get_project_params_from_url(pathname)
+    return basic_path+'/apps/project?project_id={}&force=1'.format(project_id)
 
 ###Callbacks for project creation app
 def image_formatter(im):
