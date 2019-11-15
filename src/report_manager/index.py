@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import time
 from datetime import datetime
+from uuid import uuid4
 import base64
 import qrcode
 import json
@@ -63,12 +64,13 @@ def display_page(pathname):
             dataUpload = dataUploadApp.DataUploadApp(projectId, "Data Upload", "", "", layout = [], logo = None, footer = None)
             return dataUpload.layout
         elif '/apps/project' in pathname:
-            project_id, force = get_project_params_from_url(pathname)
-            print(project_id)
+            project_id, force, session_id = get_project_params_from_url(pathname)
+            if session_id is None:
+                session_id = datetime.now().strftime('%Y%m-%d%H-%M%S-') + str(uuid4())
             if project_id is None:
                 return initialApp.layout
             else:
-                project = projectApp.ProjectApp(project_id, project_id, "", "", layout = [], logo = None, footer = None, force=force)
+                project = projectApp.ProjectApp(session_id, project_id, project_id, "", "", layout = [], logo = None, footer = None, force=force)
                 return project.layout
         elif '/apps/imports' in pathname:
             imports = importsApp.ImportsApp("CKG imports monitoring", "Statistics", "", layout = [], logo = None, footer = None)
@@ -83,15 +85,21 @@ def display_page(pathname):
 def get_project_params_from_url(pathname):
     force = False
     project_id = None
+    session_id = None
     regex_id = r"project_id=(\w+)"
     regex_force = r"force=(\d)"
+    regex_session = r"session=(.+)"
     match_id = re.search(regex_id, pathname)
     if match_id:
         project_id = match_id.group(1)
     match_force = re.search(regex_force,pathname)
     if match_force:
         force = bool(int(match_force.group(1)))
-    return project_id, force
+    match_session = re.search(regex_session,pathname)
+    if match_session:
+        session_id = match_session.group(1)
+    
+    return project_id, force, session_id
 
 # ###Calbacks for basicApp
 # @app.callback(Output('docs-link', 'href'),
@@ -100,7 +108,46 @@ def get_project_params_from_url(pathname):
 #     link = 'http://localhost:8000'
 #     return link
 
-
+#s Callback upload configuration files
+@app.callback([Output('upload-data', 'style'), 
+               Output('output-data-upload','children')],
+              [Input('upload-data', 'contents'),
+               Input('upload-data', 'filename'),
+               Input('my-dropdown','value')])
+def update_output(contents, filename, value):
+    print(value)
+    display = {'display': 'none'}
+    uploaded = None
+    if value is not None:
+        page_id, dataset = value.split('/')      
+        directory = os.path.join('../../data/tmp', page_id)
+        if dataset != "defaults":  
+            display = {'width': '50%',
+                       'height': '60px',
+                       'lineHeight': '60px',
+                       'borderWidth': '2px',
+                       'borderStyle': 'dashed',
+                       'borderRadius': '15px',
+                       'textAlign': 'center',
+                       'margin-bottom': '20px',
+                       'display': 'block'}
+            if not os.path.exists('../../data/tmp'):
+                os.makedirs('../../data/tmp')
+            elif not os.path.exists(directory):
+                os.makedirs(directory)
+            if contents is not None:
+                with open(os.path.join(directory, dataset+'.yml'), 'wb') as out:
+                    content_type, content_string = contents.split(',')
+                    decoded = base64.b64decode(content_string)
+                    out.write(decoded)
+                uploaded = dcc.Markdown("**{} configuration uploaded** &#x2705;".format(dataset.title()))
+        else:
+            display = {'display': 'none'}
+            if os.path.exists(directory):
+                os.rmdir(directory)
+                
+    return display, uploaded
+                
 ##Callbacks for CKG homepage
 @app.callback(Output('db-creation-date', 'children'),
              [Input('db_stats_df', 'data')])
@@ -194,8 +241,7 @@ def update_project_url(value, pathname):
              [Input('download-zip', 'n_clicks')],
              [State('url', 'href')])
 def generate_report_url(n_clicks, pathname):
-    basic_path = '/'.join(pathname.split('/')[0:3]) 
-    project_id, force = get_project_params_from_url(pathname)
+    project_id, force, session_id = get_project_params_from_url(pathname)
     return '/downloads/{}'.format(project_id)
     
 @application.route('/downloads/<value>')
@@ -205,12 +251,13 @@ def generate_report_url(value):
 
 ###Callback regenerate project
 @app.callback(Output('regenerate', 'href'),
-             [Input('regenerate', 'n_clicks')],
+             [Input('regenerate', 'n_clicks'),
+              Input('regenerate', 'title')],
              [State('url', 'href')])
-def regenerate_report(n_clicks, pathname):
+def regenerate_report(n_clicks, title, pathname):
     basic_path = '/'.join(pathname.split('/')[0:3]) 
-    project_id, force = get_project_params_from_url(pathname)
-    return basic_path+'/apps/project?project_id={}&force=1'.format(project_id)
+    project_id, force, session_id = get_project_params_from_url(pathname)
+    return basic_path+'/apps/project?project_id={}&force=1&session={}'.format(project_id, title)
 
 ###Callbacks for project creation app
 def image_formatter(im):
