@@ -1,25 +1,17 @@
 import os
 import flask
+import base64
 import redis
 import dash
 import dash_auth
 import dash_cytoscape as cyto
+
 
 server = flask.Flask('app')
 server.secret_key = os.environ.get('secret_key', 'secret')
 
 app = dash.Dash('app', server=server, meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}])
 
-
-# Keep this out of source code repository - save in a file or a database
-VALID_USERNAME_PASSWORD_PAIRS = [
-    ['hello', 'world']
-]
-
-auth = dash_auth.BasicAuth(
-    app,
-    VALID_USERNAME_PASSWORD_PAIRS
-)
 
 r = redis.StrictRedis.from_url('redis://localhost:6379')
 

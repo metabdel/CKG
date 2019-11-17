@@ -1543,7 +1543,7 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
         res = res.set_index('identifier').join(qvalues.set_index('identifier'))
         res['correction'] = 'permutation FDR ({} perm)'.format(nperms_run)
         res['-log10 pvalue'] = [- np.log10(x) for x in res['pvalue'].values]
-        res['rejected'] = res['padj'] < 0.05
+        res['rejected'] = res['padj'] <= alpha
         res['Method'] = 'SAMR {}'.format(method)
         res = res.reset_index()
     else:

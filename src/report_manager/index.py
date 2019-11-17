@@ -8,24 +8,19 @@ import time
 from datetime import datetime
 from uuid import uuid4
 import base64
-import qrcode
 import json
 #import barcode
 from natsort import natsorted
 import flask
 import urllib.parse
-from urllib.parse import quote as urlquote
-from IPython.display import HTML
-
+import user
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
-from dash_network import Network
 
 from app import app, server as application
-from apps import initialApp, projectApp, importsApp, projectCreationApp, dataUploadApp, homepageApp
-from apps import projectCreation, dataUpload, homepageStats
+from apps import initialApp, projectCreationApp, dataUploadApp, projectApp, importsApp, homepageApp, loginApp
 from graphdb_builder import builder_utils
 from graphdb_builder.builder import loader
 from graphdb_builder.experiments import experiments_controller as eh
@@ -50,37 +45,67 @@ app.layout = dcc.Loading(
     type='circle', 
     color='#2b8cbe')
 
-@app.callback(Output('page-content', 'children'),
+@app.callback([Output('page-content', 'children'), 
+               Output('logout_form', 'style')],
               [Input('url', 'href')])
 def display_page(pathname):
-    if pathname is not None:
+    session_cookie = flask.request.cookies.get('custom-auth-session')
+    logged_in = session_cookie is not None
+    if not logged_in:
+        login_form = loginApp.LoginApp("Login", "", "", layout = [], logo = None, footer = None)
+        return (login_form.layout, {'display': 'none'})
+    elif pathname is not None:
         if '/apps/initial' in pathname:
-            return initialApp.layout
+            return (initialApp.layout, {'display': 'block',
+                                        'position': 'absolute',
+                                        'right': '50px'})
+        elif '/apps/login' in pathname:
+            if logged_in:
+                stats_db = homepageApp.HomePageApp("CKG homepage", "Database Stats", "", layout = [], logo = None, footer = None)
+                return (stats_db.layout, {'display': 'block',
+                                          'position': 'absolute',
+                                          'right': '50px'})
+            else:
+                login_form = loginApp.LoginApp("Login", "", "", layout = [], logo = None, footer = None)
+                return (login_form.layout, {'display': 'none'})
         elif '/apps/projectCreation' in pathname:
             projectCreation = projectCreationApp.ProjectCreationApp("Project Creation", "", "", layout = [], logo = None, footer = None)
-            return projectCreation.layout
+            return (projectCreation.layout, {'display': 'block',
+                                             'position': 'absolute',
+                                             'right': '50px'})
         elif '/apps/dataUpload' in pathname:
             projectId = pathname.split('/')[-1]
             dataUpload = dataUploadApp.DataUploadApp(projectId, "Data Upload", "", "", layout = [], logo = None, footer = None)
-            return dataUpload.layout
+            return (dataUpload.layout, {'display': 'block',
+                                        'position': 'absolute',
+                                        'right': '50px'})
         elif '/apps/project' in pathname:
             project_id, force, session_id = get_project_params_from_url(pathname)
             if session_id is None:
                 session_id = datetime.now().strftime('%Y%m-%d%H-%M%S-') + str(uuid4())
             if project_id is None:
-                return initialApp.layout
+                return (initialApp.layout, {'display': 'block',
+                                            'position': 'absolute',
+                                            'right': '50px'})
             else:
                 project = projectApp.ProjectApp(session_id, project_id, project_id, "", "", layout = [], logo = None, footer = None, force=force)
-                return project.layout
+                return (project.layout, {'display': 'block',
+                                         'position': 'absolute',
+                                         'right': '50px'})
         elif '/apps/imports' in pathname:
             imports = importsApp.ImportsApp("CKG imports monitoring", "Statistics", "", layout = [], logo = None, footer = None)
-            return imports.layout
+            return (imports.layout, {'display': 'block',
+                                     'position': 'absolute',
+                                     'right': '50px'})
         elif '/apps/homepage' in pathname or pathname.count('/') <= 3:
             stats_db = homepageApp.HomePageApp("CKG homepage", "Database Stats", "", layout = [], logo = None, footer = None)
-            return stats_db.layout
+            return (stats_db.layout, {'display': 'block',
+                                      'position': 'absolute',
+                                      'right': '50px'})
         else:
-            return '404'
-
+            return ('404',{'display': 'block',
+                           'position': 'absolute',
+                           'right': '50px'})
 
 def get_project_params_from_url(pathname):
     force = False
@@ -115,7 +140,6 @@ def get_project_params_from_url(pathname):
                Input('upload-data', 'filename'),
                Input('my-dropdown','value')])
 def update_output(contents, filename, value):
-    print(value)
     display = {'display': 'none'}
     uploaded = None
     if value is not None:
@@ -235,6 +259,30 @@ def update_project_url(value, pathname):
         return dcc.Markdown("[Project {}]({}/apps/project?project_id={}&force=0)".format(value,basic_path, value))
     else:
       return ''
+  
+# Create a login route
+@app.server.route('/apps/login', methods=['POST'])
+def route_login():
+    data = flask.request.form
+    username = data.get('username')
+    password = data.get('password')
+
+    if not username or not password:
+        flask.abort(401)
+    elif not user.User(username).verify_password(password):
+        return dcc.Markdown('**Invalid login.** &#x274C;')
+    else:
+        rep = flask.redirect('/')
+        rep.set_cookie('custom-auth-session', username)
+        return rep
+
+@app.server.route('/apps/logout', methods=['POST'])
+def route_logout():
+    # Redirect back to the index and remove the session cookie.
+    rep = flask.redirect('/')
+    rep.set_cookie('custom-auth-session', '', expires=0)
+    
+    return rep
 
 ###Callbacks for download project
 @app.callback(Output('download-zip', 'href'),
@@ -261,7 +309,8 @@ def regenerate_report(n_clicks, title, pathname):
 
 ###Callbacks for project creation app
 def image_formatter(im):
-    return f'<img src="data:image/jpeg;base64,{image_base64(im)}">'
+    data_im = base64.b64encode(im).decode('ascii')
+    return f'<img src="data:image/jpeg;base64,{data_im}">'
 
 def add_internal_identifiers_to_excel(driver, external_id, data):
     subject_ids = projectCreation.get_subjects_in_project(driver, external_id)

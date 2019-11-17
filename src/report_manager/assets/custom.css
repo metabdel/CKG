@@ -1,0 +1,15 @@
+a.button_link:link, a.button_link:visited {
+    background-color: #2f79be;
+    border-radius: 15px;
+    color: white;
+    margin-top: 2px;
+    margin-bottom: 3px;
+    padding: 14px 25px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+  }
+  
+  a.button_link:hover, a.button_link:active {
+    background-color: rgb(32, 92, 204);
+  }
