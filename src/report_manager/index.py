@@ -20,7 +20,7 @@ from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
 from app import app, server as application
-from apps import initialApp, projectCreationApp, dataUploadApp, projectApp, importsApp, homepageApp, loginApp
+from apps import initialApp, projectCreationApp, dataUploadApp, projectApp, importsApp, homepageApp, loginApp, projectCreation
 from graphdb_builder import builder_utils
 from graphdb_builder.builder import loader
 from graphdb_builder.experiments import experiments_controller as eh
