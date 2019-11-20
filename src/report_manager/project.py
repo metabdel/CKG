@@ -365,9 +365,13 @@ class Project:
                     dataset.load_dataset(os.path.join(root,data_type))
                     self.update_dataset({data_type:dataset})
             
-    def build_project(self):
-        if self.check_report_exists():
+    def build_project(self, force=False):
+        if self.check_report_exists() and not force:
             self.load_project_report()
+        elif force:
+            self.report = {}
+            self.datasets = {}
+        
         if len(self.report) == 0 or len(self.datasets) == 0:
             project_info = self.query_data()
             if len(project_info) > 0:
