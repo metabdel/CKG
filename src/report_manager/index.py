@@ -6,10 +6,9 @@ import pandas as pd
 import numpy as np
 import time
 from datetime import datetime
+from uuid import uuid4
 import base64
-import qrcode
 import json
-#import barcode
 from natsort import natsorted
 import flask
 import urllib.parse
@@ -74,14 +73,6 @@ def display_page(pathname):
             return stats_db.layout
         else:
             return '404'
-
-
-# ###Calbacks for basicApp
-# @app.callback(Output('docs-link', 'href'),
-#              [Input('docs-link', 'n_clicks')])
-# def generate_report_url(n_clicks):
-#     link = 'http://localhost:8000'
-#     return link
 
 
 ##Callbacks for CKG homepage
@@ -193,112 +184,59 @@ def add_internal_identifiers_to_excel(driver, external_id, data):
     data.insert(loc=0, column='subject id', value=subject_ids)
     return data
 
-@app.callback(Output('dum-div', 'children'),
-             [Input('responsible', 'value'),
-              Input('participant', 'value'),
-              Input('data-types', 'value'),
-              Input('disease', 'value'),
-              Input('tissue', 'value'),
-              Input('intervention', 'value'),
-              Input('number_subjects', 'value'),
-              Input('number_timepoints', 'value'),
-              Input('upload-data-type', 'value'),
-              Input('update_project_id', 'value')])
-def update_input(responsible, participant, datatype, timepoints, disease, tissue, intervention, upload_dt, project_id):
-    return responsible, participant, datatype, timepoints, disease, tissue, intervention, upload_dt, project_id
-
-@app.callback(Output('responsible', 'value'),
-             [Input('add_responsible', 'n_clicks')],
-             [State('responsible-picker','value')])
-def update_dropdown(n_clicks, value):
-    if n_clicks != None:
-        return separator.join(value)
-
-@app.callback(Output('participant', 'value'),
-             [Input('add_participant', 'n_clicks')],
-             [State('participant-picker','value')])
-def update_dropdown(n_clicks, value):
-    if n_clicks != None:
-        return separator.join(value)
-
-@app.callback(Output('data-types', 'value'),
-             [Input('add_datatype', 'n_clicks')],
-             [State('data-types-picker','value')])
-
-def update_dropdown(n_clicks, value):
-    if n_clicks != None:
-        return separator.join(value)
-
-@app.callback(Output('disease', 'value'),
-             [Input('add_disease', 'n_clicks')],
-             [State('disease-picker','value')])
-
-def update_dropdown(n_clicks, value):
-    if n_clicks != None:
-        return separator.join(value)
-
-@app.callback(Output('tissue', 'value'),
-             [Input('add_tissue', 'n_clicks')],
-             [State('tissue-picker','value')])
-
-def update_dropdown(n_clicks, value):
-    if n_clicks != None:
-        return separator.join(value)
-
-@app.callback(Output('intervention', 'value'),
-             [Input('add_intervention', 'n_clicks')],
-             [State('intervention-picker','value')])
-
-def update_dropdown(n_clicks, value):
-    if n_clicks != None:
-        return separator.join(value)
-
 @app.callback([Output('project-creation', 'children'),
                Output('update_project_id','children'),
                Output('update_project_id','style')],
               [Input('project_button', 'n_clicks')],
               [State('project name', 'value'),
                State('project acronym', 'value'),
-               State('responsible', 'value'),
-               State('participant', 'value'),
-               State('data-types', 'value'),
+               State('responsible-picker', 'value'),
+               State('participant-picker', 'value'),
+               State('data-types-picker', 'value'),
                State('number_timepoints', 'value'),
-               State('disease', 'value'),
-               State('tissue', 'value'),
-               State('intervention', 'value'),
+               State('disease-picker', 'value'),
+               State('tissue-picker', 'value'),
+               State('intervention-picker', 'value'),
                State('number_subjects', 'value'),
                State('project description', 'value'),
                State('date-picker-start', 'date'),
                State('date-picker-end', 'date')])
 def create_project(n_clicks, name, acronym, responsible, participant, datatype, timepoints, disease, tissue, intervention, number_subjects, description, start_date, end_date):
-    if n_clicks != None and any(elem is None for elem in [name, number_subjects, datatype, disease, tissue, responsible]) == True:
-        response = "Insufficient information to create project. Refresh page."
-        return response, None, {'display': 'inline-block'}
-    if n_clicks != None and any(elem is None for elem in [name, number_subjects, datatype, disease, tissue, responsible]) == False:
+    if n_clicks != None:
+        responsible = separator.join(responsible)
+        participant = separator.join(participant)
+        datatype = separator.join(datatype)
+        disease = separator.join(disease)
+        tissue = separator.join(tissue)
+        intervention = separator.join(intervention)
+
+        if any(elem is None for elem in [name, number_subjects, datatype, disease, tissue, responsible]) == True:
+            response = "Insufficient information to create project. Fill in all fields with '*'."
+            return response, None, {'display': 'inline-block'}
+        if any(elem is None for elem in [name, number_subjects, datatype, disease, tissue, responsible]) == False:
         # Get project data from filled-in fields
-        projectData = pd.DataFrame([name, acronym, description, number_subjects, datatype, timepoints, disease, tissue, intervention, responsible, participant, start_date, end_date]).T
-        projectData.columns = ['name', 'acronym', 'description', 'subjects', 'datatypes', 'timepoints', 'disease', 'tissue', 'intervention', 'responsible', 'participant', 'start_date', 'end_date']
-        projectData['status'] = ''
-        # Generate project internal identifier bsed on timestamp
-        # Excel file is saved in folder with internal id name
-        epoch = time.time()
-        internal_id = "%s%d" % ("CP", epoch)
-        projectData.insert(loc=0, column='internal_id', value=internal_id)
-       
-        result = create_new_project.apply_async(args=[internal_id, projectData.to_json(), separator], task_id='project_creation_'+internal_id)
+            projectData = pd.DataFrame([name, acronym, description, number_subjects, datatype, timepoints, disease, tissue, intervention, responsible, participant, start_date, end_date]).T
+            projectData.columns = ['name', 'acronym', 'description', 'subjects', 'datatypes', 'timepoints', 'disease', 'tissue', 'intervention', 'responsible', 'participant', 'start_date', 'end_date']
+            projectData['status'] = ''
 
-        print('REsult project')
-        print(result)
-        result_output = result.get()
-        external_id = list(result_output.keys())[0]
-        print('Result get')
-        print(external_id)
+            # Generate project internal identifier bsed on timestamp
+            # Excel file is saved in folder with internal id name
+            epoch = time.time()
+            internal_id = "%s%d" % ("CP", epoch)
+            projectData.insert(loc=0, column='internal_id', value=internal_id)
+           
+            result = create_new_project.apply_async(args=[internal_id, projectData.to_json(), separator], task_id='project_creation_'+internal_id)
 
-        if result is not None:
-            response = "Project successfully submitted. Download Clinical Data template."
-        else:
-            response = "There was a problem when creating the project."
-        return response, '- '+external_id, {'display': 'inline-block'}
+            result_output = result.get()
+            external_id = list(result_output.keys())[0]
+
+            if result is not None:
+                response = "Project successfully submitted. Download Clinical Data template."
+            else:
+                response = "There was a problem when creating the project."
+            return response, '- '+external_id, {'display': 'inline-block'}
+
+
 
 @app.callback(Output('download_link', 'href'),
              [Input('download_button', 'n_clicks')],
@@ -326,11 +264,11 @@ def serve_static():
                           as_attachment=True,
                           cache_timeout=0)
 
-@app.callback(Output('project_button', 'disabled'),
-             [Input('project_button', 'n_clicks')])
-def disable_submit_button(n_clicks):
-    if n_clicks > 0:
-        return True
+# @app.callback(Output('project_button', 'disabled'),
+#              [Input('project_button', 'n_clicks')])
+# def disable_submit_button(n_clicks):
+#     if n_clicks > 0:
+#         return True
 
 
 ###Callbacks for data upload app
