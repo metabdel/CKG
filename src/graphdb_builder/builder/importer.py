@@ -119,16 +119,15 @@ def usersImport(import_type='partial'):
     """
     Generates User entities from excel file.
 
-    :param str importDirectory: path to the directory where all the import files are generated.
-    :param str experimentDirectory: path to the directory where all the experiments are located.
-    :param str project: identifier of the project to be imported.
+    :param str import_type: type of import ('full' or 'partial').
     :return: Writes the users.tsv file, creates and grants access of new users to the database.
     """
-    usersPath = config['usersDirectory']
-    filename = config['usersFile']
-    builder_utils.checkDirectory(usersPath)
-    # uh.create_user_from_file(os.path.join(usersPath, filename), expiration=365)
-    uh.extractUsersInfo(os.path.join(usersPath, filename), expiration=365)   
+    usersImportDirectory = config['usersImportDirectory']
+    builder_utils.checkDirectory(usersImportDirectory)
+    output_file = os.path.join(usersImportDirectory, 'users.tsv')
+    usersDirectory = config['usersDirectory']
+    ifile = config['usersFile']
+    uh.extractUsersInfo(os.path.join(usersDirectory, ifile), output_file, expiration=365)   
 
 
 def fullImport():
