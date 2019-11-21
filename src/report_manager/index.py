@@ -314,7 +314,8 @@ def add_internal_identifiers_to_excel(driver, external_id, data):
 
 @app.callback([Output('project-creation', 'children'),
                Output('update_project_id','children'),
-               Output('update_project_id','style')],
+               Output('update_project_id','style'),
+               Output('download_link', 'href')],
               [Input('project_button', 'n_clicks')],
               [State('project name', 'value'),
                State('project acronym', 'value'),
@@ -330,7 +331,7 @@ def add_internal_identifiers_to_excel(driver, external_id, data):
                State('date-picker-start', 'date'),
                State('date-picker-end', 'date')])
 def create_project(n_clicks, name, acronym, responsible, participant, datatype, timepoints, disease, tissue, intervention, number_subjects, description, start_date, end_date):
-    if n_clicks != None:
+    if n_clicks > 0:
         responsible = separator.join(responsible)
         participant = separator.join(participant)
         datatype = separator.join(datatype)
@@ -340,7 +341,8 @@ def create_project(n_clicks, name, acronym, responsible, participant, datatype, 
 
         if any(elem is None for elem in [name, number_subjects, datatype, disease, tissue, responsible]) == True:
             response = "Insufficient information to create project. Fill in all fields with '*'."
-            return response, None, {'display': 'inline-block'}
+            return response, None, {'display': 'inline-block'}, None
+        
         if any(elem is None for elem in [name, number_subjects, datatype, disease, tissue, responsible]) == False:
         # Get project data from filled-in fields
             projectData = pd.DataFrame([name, acronym, description, number_subjects, datatype, timepoints, disease, tissue, intervention, responsible, participant, start_date, end_date]).T
@@ -358,20 +360,20 @@ def create_project(n_clicks, name, acronym, responsible, participant, datatype, 
             result_output = result.get()
             external_id = list(result_output.keys())[0]
 
+            #Add subject identifiers to Clinical Data template and download automatically
+            # df = pd.read_excel('apps/templates/ClinicalData_template.xlsx')
+            # df = add_internal_identifiers_to_excel(driver, external_id, df)
+            # csv_string = df.to_csv(index=False,encoding='utf-8')    
+            # csv_string = "data:text/csv;charset=utf-8,%EF%BB%BF" + urllib.parse.quote(csv_string)
+
             if result is not None:
-                response = "Project successfully submitted. Download Clinical Data template."
+                response = "Project successfully submitted. Clinical Data file downloaded."
             else:
                 response = "There was a problem when creating the project."
-            return response, '- '+external_id, {'display': 'inline-block'}
-
-
-
-@app.callback(Output('download_link', 'href'),
-             [Input('download_button', 'n_clicks')],
-             [State('update_project_id', 'children')])
-def update_download_link(n_clicks, pathname):
-  project_id = pathname.split()[-1]
-  return '/apps/templates?value=ClinicalData_template_{}.xlsx'.format(project_id)
+            
+            return response, '- '+external_id, {'display': 'inline-block'}, '/apps/templates?value=ClinicalData_template_{}.xlsx'.format(external_id)
+    else:
+        return '', None, {'display': 'inline-block'}, None
 
 @application.route('/apps/templates')
 def serve_static():
@@ -391,12 +393,6 @@ def serve_static():
                           attachment_filename='ClinicalData_{}.tsv'.format(project_id),
                           as_attachment=True,
                           cache_timeout=0)
-
-# @app.callback(Output('project_button', 'disabled'),
-#              [Input('project_button', 'n_clicks')])
-# def disable_submit_button(n_clicks):
-#     if n_clicks > 0:
-#         return True
 
 
 ###Callbacks for data upload app

@@ -42,8 +42,7 @@ class ProjectCreationApp(basicApp.BasicApp):
         """
         self.add_basic_layout()
         layout = [html.Div([
-                    html.Div([html.Div(children=[html.A(children=html.Button('Download Template (.xlsx)', id='download_button', style={'maxWidth':'130px'}), id='download_link', style={'marginLeft': '90%'})]),
-                              html.H4('Project information', style={'width':'15.5%', 'verticalAlign':'top', 'display':'inline-block'}),
+                    html.Div([html.H4('Project information', style={'width':'15.5%', 'verticalAlign':'top', 'display':'inline-block'}),
                               html.H4('', id='update_project_id', style={'width':'15%', 'verticalAlign':'top', 'display':'none'}),
                               html.Br(),
                               html.Div(children=[html.Label('Project name:*', style={'marginTop':15}),
@@ -103,7 +102,7 @@ class ProjectCreationApp(basicApp.BasicApp):
                               html.Div(children=[html.Label('Ending Date:', style={'marginTop':10}),
                                                  dcc.DatePickerSingle(id='date-picker-end', placeholder='Select date...', clearable=True)],
                                                  style={'width':'30%', 'verticalAlign':'top', 'marginTop':10, 'display':'inline-block'}),
-                              html.Div(children=[html.Button('Create Project', id='project_button')],
+                              html.Div(children=html.A(children=html.Button('Create Project', id='project_button', n_clicks=0), id='download_link', href='', n_clicks=0),
                                                  style={'fontSize':'22px', 'marginLeft':'87.3%'}),
                               html.Div(id='project-creation', style={'fontSize':'20px', 'marginLeft':'70%'}),
                               html.Br()]),
