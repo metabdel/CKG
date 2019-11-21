@@ -147,7 +147,7 @@ def create_new_project(driver, projectId, data, separator='|'):
         pass
     else:
         timepoints = create_new_timepoint(driver, external_identifier, data, separator)
-    if data['intervention'][0] is None:
+    if data['intervention'][0] == separator:
         pass
     else:
         interventions = create_intervention_relationship(driver, external_identifier, data, separator)

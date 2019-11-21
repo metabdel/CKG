@@ -5,6 +5,8 @@ import argparse
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
+from passlib.hash import bcrypt
+from openpyxl import load_workbook
 import ckg_utils
 import config.ckg_config as ckg_config
 from graphdb_connector import connector
@@ -130,17 +132,17 @@ def create_user_node(driver, data):
 
 
 #To use with builder.py
-def extractUsersInfo(filepath, expiration=365):
+def extractUsersInfo(filepath, output_file, expiration=365):
 	"""
 	Creates new user in the graph database and corresponding node, through the following steps:
 	
 		1. Generates new user identifier
 		2. Checks if a user with given properties already exists in the database. If not:
-		3. Creates new user node
-		4. Creates new local user (access to graph database)
-		5. Saves data to users.tsv
+		3. Creates new local user (access to graph database)
+		4. Saves data to users.tsv
 
 	:param str filepath: filepath and filename containing users information.
+	:param str output_file: path to output csv file.
 	:param int expiration: number of days a user is given access.
 	:return: Writes relevant .tsv file for the users in the provided file.
 
@@ -163,13 +165,13 @@ def extractUsersInfo(filepath, expiration=365):
 			if username.empty and name.empty and email.empty:
 				row['ID'] = 'U{}'.format(new_id)
 				row['acronym'] = ''.join([c for c in row['name'] if c.isupper()])
-				row['password'] = row['username']
 				row['rolename'] = 'reader'
 				row['expiration_date'] = date.strftime('%Y-%m-%d')
 				row['image'] = ''
-				df.append(row)
 				create_db_user(driver, row)
-			new_id += 1
+				row['password'] = bcrypt.encrypt(row['password'])
+				df.append(row)
+				new_id += 1
 
 	except Exception as err:
 		exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -177,15 +179,16 @@ def extractUsersInfo(filepath, expiration=365):
 		logger.error("Extracting users info: {}, file: {},line: {}".format(sys.exc_info(), fname, exc_tb.tb_lineno))
 	if len(df) > 0:
 		data = pd.DataFrame(df)
-		data = data[['ID', 'acronym', 'name', 'username', 'email', 'secondary_email', 'phone_number', 'affiliation', 'expiration_date', 'rolename', 'image']]
-		GenerateGraphFiles(data)
+		data['phone_number'] = data['phone_number'].str.split('.').str[0]
+		data = data[['ID', 'acronym', 'name', 'username', 'password', 'email', 'secondary_email', 'phone_number', 'affiliation', 'expiration_date', 'rolename', 'image']]
+		GenerateGraphFiles(data, output_file)
 
 
 #To use outside builder.py
 def create_user_from_command_line(args, expiration):
 	"""
-	Creates new user in the graph database and corresponding node, from a terminal window (command line). \
-	Arguments as in set_arguments().
+	Creates new user in the graph database and corresponding node, from a terminal window (command line), \
+	and adds the new user information to the users excel and import files. Arguments as in set_arguments().
 
 	:param args: object. Contains all the parameters neccessary to create a user ('username', 'name', 'email', \
 				'secondary_email', 'phone_number' and 'affiliation').
@@ -195,37 +198,53 @@ def create_user_from_command_line(args, expiration):
 	.. note:: This function can be used directly with *python create_user_from_command_line.py -u username \
 				-n user_name -e email -s secondary_email -p phone_number -a affiliation* .
 	"""
+	usersImportDirectory = config['usersImportDirectory']
+	builder_utils.checkDirectory(usersImportDirectory)
+	output_file = os.path.join(usersImportDirectory, 'users.tsv')
+	usersDirectory = config['usersDirectory']
+	ifile = config['usersFile']
+
 	data = vars(args)
 	data = pd.DataFrame.from_dict(data, orient='index').T
-	result = create_user(data, expiration)
-	return result
+	wb = load_workbook(os.path.join(usersDirectory, ifile))
+	ws = wb.worksheets[0]
+	l = [data.name[0], data.username[0], data.password[0], data.email[0], data.secondary_email[0], data.phone_number[0], data.affiliation[0], data.image[0]]
+	ws.append(l)
+	wb.save(os.path.join(usersDirectory, ifile))
+	create_user(data, output_file, expiration)
 
 
-def create_user_from_file(filepath, expiration):
+def create_user_from_file(filepath, output_file, expiration):
 	"""
 	Creates new user in the graph database and corresponding node, from an excel file. \
 	Rows in the file must be users, and columns must follow set_arguments() fields.
 
 	:param str filepath: filepath and filename containing users information.
+	:param str output_file: path to output csv file.
 	:param int expiration: number of days users is given access.
 
 	.. note:: This function can be used directly with *python create_user_from_file.py -f path_to_file* .
 	"""
-	data = pd.read_excel(filepath).applymap(str)
-	result = create_user(data, expiration)    
-	return result
+	usersImportDirectory = config['usersImportDirectory']
+	builder_utils.checkDirectory(usersImportDirectory)
+	output_file = os.path.join(usersImportDirectory, 'users.tsv')
 
-def create_user(data, expiration=365):
+	data = pd.read_excel(filepath).applymap(str)
+	create_user(data, output_file, expiration)    
+
+
+def create_user(data, output_file, expiration=365):
 	"""
 	Creates new user in the graph database and corresponding node, through the following steps:
 	
 		1. Checks if a user with given properties already exists in the database. If not:
 		2. Generates new user identifier
-		3. Creates new user node
-		4. Creates new local user (access to graph database)
+		3. Creates new local user (access to graph database)
+		4. Creates new user node
 		5. Saves data to users.tsv
 
 	:param data: pandas dataframe with users as rows and arguments and columns.
+	:param str output_file: path to output csv file.
 	:param int expiration: number of days users is given access.
 	:return: Writes relevant .tsv file for the users in data.
 	"""
@@ -244,13 +263,14 @@ def create_user(data, expiration=365):
 					user_identifier = 'U1'
 				row['ID'] = user_identifier
 				row['acronym'] = ''.join([c for c in row['name'] if c.isupper()])
-				row['password'] = row['username']
 				row['rolename'] = 'reader'
 				row['expiration_date'] = date.strftime('%Y-%m-%d')
 				row['image'] = ''
-				create_user_node(driver, row)
 				create_db_user(driver, row)
+				row['password'] = bcrypt.encrypt(row['password'])
+				create_user_node(driver, row)
 				df.append(row)
+	
 	except Exception as err:
 		exc_type, exc_obj, exc_tb = sys.exc_info()
 		fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
@@ -258,28 +278,27 @@ def create_user(data, expiration=365):
 	
 	if len(df) > 0:
 		data = pd.DataFrame(df)
-		data = data[['ID', 'acronym', 'name', 'username', 'email', 'secondary_email', 'phone_number', 'affiliation', 'expiration_date', 'rolename', 'image']]
-		GenerateGraphFiles(data)
+		data['phone_number'] = data['phone_number'].str.split('.').str[0]
+		data = data[['ID', 'acronym', 'name', 'username', 'password', 'email', 'secondary_email', 'phone_number', 'affiliation', 'expiration_date', 'rolename', 'image']]
+		GenerateGraphFiles(data, output_file)
 
-def GenerateGraphFiles(data):
+def GenerateGraphFiles(data, output_file):
 	"""
 	Saves pandas dataframe to users.tsv.
 	If file already exists, appends new lines. \
 	Else, creates file and writes dataframe to it.
 	
 	:param data: pandas dataframe to be written to .tsv file.
+	:param str output_file: path to output csv file.
 	"""
-	importDir = os.path.join(cwd,'../../../data/imports/users')
-	ckg_utils.checkDirectory(importDir)
-	ifile = os.path.join(importDir, 'users.tsv')
 
-	if os.path.exists(ifile):
-		with open(ifile, 'a') as f:
+	if os.path.exists(output_file):
+		with open(output_file, 'a') as f:
 			data.to_csv(path_or_buf = f, sep='\t',
 						header=False, index=False, quotechar='"',
 						line_terminator='\n', escapechar='\\')
 	else:
-		with open(ifile, 'w') as f:
+		with open(output_file, 'w') as f:
 			data.to_csv(path_or_buf = f, sep='\t',
 						header=True, index=False, quotechar='"',
 						line_terminator='\n', escapechar='\\')
@@ -291,6 +310,7 @@ def set_arguments():
 	parser = argparse.ArgumentParser('Use an excel file (multiple new users) or the function arguments (one new user at a time) to create new users in the database')
 	parser.add_argument('-f', '--file', help='define path to file with users creation information', type=str, required=False)
 	parser.add_argument('-u', '--username', help='define the username to be created', type=str, required=False)
+	parser.add_argument('-d', '--password', help='define the user password', type=str, required=False)
 	parser.add_argument('-n', '--name', help='define the name of the user', type=str, required=False)
 	parser.add_argument('-e', '--email', help='define the email of the user being created', type=str, required=False)
 	parser.add_argument('-s', '--secondary_email', help='define an alternative email for the user', type=str, required=False)
