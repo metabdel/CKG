@@ -315,7 +315,7 @@ def add_internal_identifiers_to_excel(driver, external_id, data):
 @app.callback([Output('project-creation', 'children'),
                Output('update_project_id','children'),
                Output('update_project_id','style'),
-               Output('download_link', 'href')],
+               Output('download_button', 'style')],
               [Input('project_button', 'n_clicks')],
               [State('project name', 'value'),
                State('project acronym', 'value'),
@@ -341,7 +341,7 @@ def create_project(n_clicks, name, acronym, responsible, participant, datatype, 
 
         if any(elem is None for elem in [name, number_subjects, datatype, disease, tissue, responsible]) == True:
             response = "Insufficient information to create project. Fill in all fields with '*'."
-            return response, None, {'display': 'inline-block'}, None
+            return response, None, {'display': 'inline-block'}, {'display': 'none'}
         
         if any(elem is None for elem in [name, number_subjects, datatype, disease, tissue, responsible]) == False:
         # Get project data from filled-in fields
@@ -356,24 +356,26 @@ def create_project(n_clicks, name, acronym, responsible, participant, datatype, 
             projectData.insert(loc=0, column='internal_id', value=internal_id)
            
             result = create_new_project.apply_async(args=[internal_id, projectData.to_json(), separator], task_id='project_creation_'+internal_id)
-
             result_output = result.get()
             external_id = list(result_output.keys())[0]
 
-            #Add subject identifiers to Clinical Data template and download automatically
-            # df = pd.read_excel('apps/templates/ClinicalData_template.xlsx')
-            # df = add_internal_identifiers_to_excel(driver, external_id, df)
-            # csv_string = df.to_csv(index=False,encoding='utf-8')    
-            # csv_string = "data:text/csv;charset=utf-8,%EF%BB%BF" + urllib.parse.quote(csv_string)
-
             if result is not None:
-                response = "Project successfully submitted. Clinical Data file downloaded."
+                response = "Project successfully submitted. Download Clinical Data template."
             else:
                 response = "There was a problem when creating the project."
-            
-            return response, '- '+external_id, {'display': 'inline-block'}, '/apps/templates?value=ClinicalData_template_{}.xlsx'.format(external_id)
+            return response, '- '+external_id, {'display': 'inline-block'}, {'display': 'block'}
     else:
-        return '', None, {'display': 'inline-block'}, None
+        return None, None, {'display': 'inline-block'}, {'display': 'none'}
+
+
+@app.callback(Output('download_link', 'href'),
+              [Input('update_project_id', 'children')])
+def update_download_link(project):
+    if project is not None and project != '':
+        project_id = project.split()[-1]
+        return '/apps/templates?value=ClinicalData_template_{}.xlsx'.format(project_id)
+    else:
+        return ''
 
 @application.route('/apps/templates')
 def serve_static():
