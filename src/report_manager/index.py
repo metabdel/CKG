@@ -126,10 +126,10 @@ def get_project_params_from_url(pathname):
 
 
 #s Callback upload configuration files
-@app.callback([Output('upload-data', 'style'), 
+@app.callback([Output('upload-config', 'style'), 
                Output('output-data-upload','children')],
-              [Input('upload-data', 'contents'),
-               Input('upload-data', 'filename'),
+              [Input('upload-config', 'contents'),
+               Input('upload-config', 'filename'),
                Input('my-dropdown','value')])
 def update_output(contents, filename, value):
     display = {'display': 'none'}
@@ -358,9 +358,6 @@ def create_project(n_clicks, name, acronym, responsible, participant, datatype, 
             result_output = result.get()
             external_id = list(result_output.keys())[0]
 
-            print('RESULT')
-            print(external_id)
-
             if result is not None:
                 if external_id != '':
                     response = "Project successfully submitted. Download Clinical Data template."
@@ -377,7 +374,7 @@ def create_project(n_clicks, name, acronym, responsible, participant, datatype, 
 @app.callback(Output('project-creation', 'style'),
               [Input('project-creation', 'children')])
 def change_style(style):
-    if 'successfully' in style:
+    if style is not None and 'successfully' in style:
         return {'fontSize':'20px', 'marginLeft':'70%', 'color': 'black'}
     else:
         return {'fontSize':'20px', 'marginLeft':'70%', 'color': 'red'}
@@ -418,7 +415,7 @@ def parse_contents(contents, filename):
     decoded = base64.b64decode(content_string)
     file = filename.split('.')[-1]
     
-    if file == 'txt':
+    if file == 'txt' or file == 'tsv':
         df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), sep='\t', low_memory=False)
     elif file == 'csv':
         df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), low_memory=False)
@@ -454,6 +451,9 @@ def store_original_data(contents, filename):
               [State('clinical-variables-picker', 'value'),
                State('upload-data-type-picker', 'value')])
 def update_data(data, n_clicks, variables, dtype):
+    print('Clinical Data')
+    print(data)
+    print('---------------')
     if data is None:
         raise PreventUpdate
 
@@ -468,6 +468,13 @@ def update_data(data, n_clicks, variables, dtype):
             columns.append({'id': var, 'name': var,
                             'renamable': False, 'deletable': True})        
     columns = [d for d in columns if d.get('id') != '']
+
+    print('UPDATED DATA')
+    print(df)
+    print('-------------')
+    print('COLUMNS')
+    print(columns)
+    print('-------------')
     return df, columns
 
 @app.callback(Output('data-upload', 'children'),

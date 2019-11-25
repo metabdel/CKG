@@ -7,7 +7,7 @@ import config.ckg_config as ckg_config
 import ckg_utils
 from graphdb_connector import connector
 from graphdb_builder import builder_utils
-from graphdb_builder.experiments import experiments_controller as eh
+from graphdb_builder.experiments.parsers import clinicalParser as cp
 from report_manager.queries import query_utils
 import logging
 import logging.config
@@ -51,9 +51,6 @@ def check_if_node_exists(driver, node_property, value):
     try:
         cypher = get_project_creation_queries()
         query = cypher[query_name]['query'].replace('PROPERTY', node_property)
-        print('QUERY')
-        print(query)
-        print('--------------')
         for q in query.split(';')[0:-1]:
             if '$' in q:
                 result = connector.getCursorData(driver, q+';', parameters={'value':value})
@@ -256,7 +253,7 @@ def create_new_timepoint(driver, projectId, data, separator='|'):
     :return: Integer for the number of timepoints created.
     """
     query_name = 'create_timepoint'
-    df = eh.extractTimepoints(data, separator=separator)
+    df = cp.extract_timepoints(data, separator=separator)
     try:
         project_creation_cypher = get_project_creation_queries()
         query = project_creation_cypher[query_name]['query']
@@ -289,7 +286,7 @@ def create_intervention_relationship(driver, projectId, data, separator='|'):
     :return: Integer for the number of interventions created.
     """
     query_name = 'create_intervention_relationship'
-    data = eh.extractProjectInterventionRelationships(data, separator=separator)
+    data = cp.extract_project_intervention_rels(data, separator=separator)
     try:
         project_creation_cypher = get_project_creation_queries()
         query = project_creation_cypher[query_name]['query']

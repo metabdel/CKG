@@ -8,7 +8,7 @@ import config.ckg_config as ckg_config
 import ckg_utils
 from graphdb_connector import connector
 from graphdb_builder import builder_utils
-from graphdb_builder.experiments import experiments_controller as eh
+from graphdb_builder.experiments.parsers import clinicalParser as cp, proteomicsParser as pp, wesParser as wp
 from report_manager.queries import query_utils
 from apps import projectCreation as pc
 import logging
@@ -240,31 +240,31 @@ def create_new_experiment_in_db(driver, projectId, data, separator='|'):
 		dataRows = None
 	if dataRows is not None:
 		generateGraphFiles(dataRows,'subjects', projectId, d='clinical')
-	dataRows = eh.extractBiologicalSampleSubjectRelationships(df2)
+	dataRows = cp.extract_biological_sample_subject_rels(df2)
 	if dataRows is not None:
 		generateGraphFiles(dataRows,'subject_biosample', projectId, d='clinical')
-	dataRows = eh.extractBiologicalSamplesInfo(df2)
+	dataRows = cp.extract_biological_samples_info(df2)
 	if dataRows is not None:
 		generateGraphFiles(dataRows,'biological_samples', projectId, d='clinical')
-	dataRows = eh.extractAnalyticalSamplesInfo(df2)
+	dataRows = cp.extract_analytical_samples_info(df2)
 	if dataRows is not None:
 		generateGraphFiles(dataRows,'analytical_samples', projectId, d='clinical')
-	dataRows = eh.extractBiologicalSampleAnalyticalSampleRelationships(df2)
+	dataRows = cp.extract_biological_sample_analytical_sample_rels(df2)
 	if dataRows is not None:
 		generateGraphFiles(dataRows,'biosample_analytical', projectId, d='clinical')
-	dataRows = eh.extractBiologicalSampleTimepointRelationships(df2)
+	dataRows = cp.extract_biological_sample_timepoint_rels(df2)
 	if dataRows is not None:
 		generateGraphFiles(dataRows,'biological_sample_at_timepoint', projectId, d='clinical')
-	dataRows = eh.extractBiologicalSampleTissueRelationships(df2)
+	dataRows = cp.extract_biological_sample_tissue_rels(df2)
 	if dataRows is not None:
 		generateGraphFiles(dataRows,'biosample_tissue', projectId, d='clinical')
-	dataRows = eh.extractSubjectDiseaseRelationships(df2, separator=separator)
+	dataRows = cp.extract_subject_disease_rels(df2, separator=separator)
 	if dataRows is not None:
 		generateGraphFiles(dataRows,'disease', projectId, d='clinical')
-	dataRows = eh.extractBiologicalSampleGroupRelationships(df2)
+	dataRows = cp.extract_biological_sample_group_rels(df2)
 	if dataRows is not None:
 		generateGraphFiles(dataRows,'groups', projectId, d='clinical')
-	dataRows1, dataRows2 = eh.extractBiologicalSampleClinicalVariablesRelationships(df2)
+	dataRows1, dataRows2 = cp.extract_biological_sample_clinical_variables_rels(df2)
 	if dataRows is not None:
 		generateGraphFiles(dataRows1,'clinical_state', projectId, d='clinical')
 		generateGraphFiles(dataRows2,'clinical_quant', projectId, d='clinical')
