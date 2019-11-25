@@ -36,6 +36,35 @@ def get_project_creation_queries():
         logger.error("Reading queries from file {}: {}, file: {},line: {}".format(queries_path, sys.exc_info(), fname, exc_tb.tb_lineno))
     return project_creation_cypher
 
+def check_if_node_exists(driver, node_property, value):
+    """
+    Queries the graph database and checks if a node with a specific property and property value already exists.
+    :param driver: py2neo driver, which provides the connection to the neo4j graph database.
+    :type driver: py2neo driver
+    :param str node_property: property of the node.
+    :param value: property value.
+    :type value: str, int, float or bool
+    :return: Pandas dataframe with user identifier if User with node_property and value already exists, \
+            if User does not exist, returns and empty dataframe.
+    """
+    query_name = 'check_node'
+    try:
+        cypher = get_project_creation_queries()
+        query = cypher[query_name]['query'].replace('PROPERTY', node_property)
+        print('QUERY')
+        print(query)
+        print('--------------')
+        for q in query.split(';')[0:-1]:
+            if '$' in q:
+                result = connector.getCursorData(driver, q+';', parameters={'value':value})
+            else:
+                result = connector.getCursorData(driver, q+';')
+    except Exception as err:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        logger.error("Reading query {}: {}, file: {},line: {}, error: {}".format(query_name, sys.exc_info(), fname, exc_tb.tb_lineno, err))
+    return result
+
 def get_new_project_identifier(driver, projectId):
     """
     Queries the database for the last project external identifier and returns a new sequential identifier.
@@ -125,46 +154,55 @@ def create_new_project(driver, projectId, data, separator='|'):
     external_identifier='No Identifier Assigned'
     disease_ids = []
     tissue_ids = []
+    
     try:
-        external_identifier = get_new_project_identifier(driver, projectId)        
-        data['external_id'] = external_identifier
-        project_creation_cypher = get_project_creation_queries()
-        query = project_creation_cypher[query_name]['query']
-        for q in query.split(';')[0:-1]:
-            if '$' in q:
-                for parameters in data.to_dict(orient='records'):
-                    result = connector.getCursorData(driver, q+';', parameters=parameters)
+        db_project = check_if_node_exists(driver, 'name', data['name'][0])
+        if db_project.empty:
+            external_identifier = get_new_project_identifier(driver, projectId)        
+            data['external_id'] = external_identifier
+            project_creation_cypher = get_project_creation_queries()
+            query = project_creation_cypher[query_name]['query']
+            for q in query.split(';')[0:-1]:
+                if '$' in q:
+                    for parameters in data.to_dict(orient='records'):
+                        result = connector.getCursorData(driver, q+';', parameters=parameters)
+                else:
+                    result = connector.getCursorData(driver, q+';')    
+
+            subjects = create_new_subjects(driver, external_identifier, data['subjects'][0])
+
+            if data['timepoints'][0] is None:
+                pass
             else:
-                result = connector.getCursorData(driver, q+';')    
+                timepoints = create_new_timepoint(driver, external_identifier, data, separator)
+            if data['intervention'][0] == separator:
+                pass
+            else:
+                interventions = create_intervention_relationship(driver, external_identifier, data, separator)
+            
+            for disease in data['disease'][0].split(separator):
+                disease_ids.append(query_utils.map_node_name_to_id(driver, 'Disease', str(disease)))
+            for tissue in data['tissue'][0].split(separator):
+                tissue_ids.append(query_utils.map_node_name_to_id(driver, 'Tissue', str(tissue)))
+
+            store_new_project(external_identifier, data, experimentDir, 'xlsx')
+            store_as_file(external_identifier, data, external_identifier, importDir, 'tsv')
+            store_new_relationships(external_identifier, data['responsible'][0].split(separator), [external_identifier], 'IS_RESPONSIBLE', '_responsibles', importDir, 'tsv')
+            store_new_relationships(external_identifier, data['participant'][0].split(separator), [external_identifier], 'PARTICIPATES_IN', '_participants', importDir, 'tsv')
+            store_new_relationships(external_identifier, [external_identifier], disease_ids, 'STUDIES_DISEASE', '_studies_disease', importDir, 'tsv')
+            store_new_relationships(external_identifier, [external_identifier], tissue_ids, 'STUDIES_TISSUE', '_studies_tissue', importDir, 'tsv')
+        else:
+            result = pd.DataFrame([''])
+            external_identifier = ''
+
     except Exception as err:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         logger.error("Reading query {}: {}, file: {},line: {}".format(query_name, sys.exc_info(), fname, exc_tb.tb_lineno))
-
-    subjects = create_new_subjects(driver, external_identifier, data['subjects'][0])
-
-    if data['timepoints'][0] is None:
-        pass
-    else:
-        timepoints = create_new_timepoint(driver, external_identifier, data, separator)
-    if data['intervention'][0] == separator:
-        pass
-    else:
-        interventions = create_intervention_relationship(driver, external_identifier, data, separator)
     
-    for disease in data['disease'][0].split(separator):
-        disease_ids.append(query_utils.map_node_name_to_id(driver, 'Disease', str(disease)))
-    for tissue in data['tissue'][0].split(separator):
-        tissue_ids.append(query_utils.map_node_name_to_id(driver, 'Tissue', str(tissue)))
+    return result.values[0], external_identifier   
+        
 
-    store_new_project(external_identifier, data, experimentDir, 'xlsx')
-    store_as_file(external_identifier, data, external_identifier, importDir, 'tsv')
-    store_new_relationships(external_identifier, data['responsible'][0].split(separator), [external_identifier], 'IS_RESPONSIBLE', '_responsibles', importDir, 'tsv')
-    store_new_relationships(external_identifier, data['participant'][0].split(separator), [external_identifier], 'PARTICIPATES_IN', '_participants', importDir, 'tsv')
-    store_new_relationships(external_identifier, [external_identifier], disease_ids, 'STUDIES_DISEASE', '_studies_disease', importDir, 'tsv')
-    store_new_relationships(external_identifier, [external_identifier], tissue_ids, 'STUDIES_TISSUE', '_studies_tissue', importDir, 'tsv')
-    
-    return result.values[0], external_identifier
 
 
 def create_new_subjects(driver, projectId, subjects):
