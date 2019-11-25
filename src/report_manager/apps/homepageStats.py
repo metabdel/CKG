@@ -179,6 +179,16 @@ def quick_numbers_panel():
         project_links.append(dcc.Link(project_name.title(),
                      href='/apps/project?project_id={}&force=0'.format(project_id),
                      className="button_link"))
+        
+    project_dropdown = [html.H6('Project finder:'),
+                        dcc.Dropdown(id='project_option', 
+                                     options=[{'label':name, 'value':(name, value)} for name,value in project_ids], 
+                                     value='', 
+                                     multi=False, 
+                                     clearable=True, 
+                                     placeholder='Search...', 
+                                     style={'width':'50%'}),
+                        html.H4('',id='project_url')]
     
     navigation_links = [html.H4('Navigate to:'),
         				dcc.Link("Database Imports", href="/apps/imports", className="nav_link"),
@@ -186,7 +196,7 @@ def quick_numbers_panel():
                         dcc.Link("Upload Data", href="/apps/dataUploadApp", className="nav_link")]
     
     layout = [html.Div(children=navigation_links),
-              html.Div(children=project_links),
+              html.Div(children=project_links[0:5] + project_dropdown),
               dcc.Store(id='db_stats_df', data=get_db_stats_data()),
               html.Div(id='db-creation-date'),
               html.Br(),

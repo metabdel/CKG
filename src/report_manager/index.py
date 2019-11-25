@@ -244,12 +244,12 @@ def number_panel_update(df):
     return [dcc.Markdown("**{}**".format(i)) for i in [ent,labels,rel,types,prop,ent_store,rel_store,prop_store,string_store,array_store,log_store,t_open,t_comm,projects]]
 
 @app.callback(Output("project_url", "children"),
-             [Input("project_option", "value")],
-             [State('url', 'href')])
-def update_project_url(value, pathname):
-    basic_path = '/'.join(pathname.split('/')[0:3])
-    if value.startswith('P0'):
-        return dcc.Markdown("[Project {}]({}/apps/project?project_id={}&force=0)".format(value,basic_path, value))
+             [Input("project_option", "value")])
+def update_project_url(value):
+    if value is not None and len(value) > 1:
+        return dcc.Link(value[0].title(),
+                        href='/apps/project?project_id={}&force=0'.format(value[1]),
+                        className="button_link")
     else:
       return ''
   
