@@ -62,14 +62,18 @@ class AnalysisResult:
             self.result[self.analysis_type] = r
         if self.analysis_type == "pca":
             components = 2
+            drop_cols = []
             if "components" in self.args:
                 components = self.args["components"]
-            self.result, nargs = analyses.run_pca(self.data, components=components)
+            if "drop_cols" in self.args:
+                drop_cols = self.args["drop_cols"]
+            self.result, nargs = analyses.run_pca(self.data, components=components, drop_cols=drop_cols)
             self.args.update(nargs)
         elif self.analysis_type  == "tsne":
             components = 2
             perplexity = 40
             n_iter = 1000
+            drop_cols = []
             init='pca'
             if "components" in self.args:
                 components = self.args["components"]
@@ -79,7 +83,9 @@ class AnalysisResult:
                 n_iter = self.args["n_iter"]
             if "init" in self.args:
                 init = self.args["init"]
-            self.result, nargs = analyses.run_tsne(self.data, components=components, perplexity=perplexity, n_iter=n_iter, init=init)
+            if "drop_cols" in self.args:
+                drop_cols = self.args["drop_cols"]
+            self.result, nargs = analyses.run_tsne(self.data, components=components, drop_cols=drop_cols, perplexity=perplexity, n_iter=n_iter, init=init)
             self.args.update(nargs)
         elif self.analysis_type  == "umap":
             n_neighbors=10
