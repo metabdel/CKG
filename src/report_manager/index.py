@@ -19,10 +19,9 @@ from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
 from app import app, server as application
-from apps import initialApp, projectCreationApp, dataUploadApp, projectApp, importsApp, homepageApp, loginApp, projectCreation
+from apps import initialApp, projectCreationApp, dataUploadApp, dataUpload, projectApp, importsApp, homepageApp, loginApp, projectCreation
 from graphdb_builder import builder_utils
 from graphdb_builder.builder import loader
-from graphdb_builder.experiments import experiments_controller as eh
 import ckg_utils
 import config.ckg_config as ckg_config
 
@@ -68,8 +67,8 @@ def display_page(pathname):
                 login_form = loginApp.LoginApp("Login", "", "", layout = [], logo = None, footer = None)
                 return (login_form.layout, {'display': 'none'})
         elif '/apps/projectCreation' in pathname:
-            projectCreation = projectCreationApp.ProjectCreationApp("Project Creation", "", "", layout = [], logo = None, footer = None)
-            return (projectCreation.layout, {'display': 'block',
+            projectCreation_form = projectCreationApp.ProjectCreationApp("Project Creation", "", "", layout = [], logo = None, footer = None)
+            return (projectCreation_form.layout, {'display': 'block',
                                              'position': 'absolute',
                                              'right': '50px'})
         elif '/apps/dataUpload' in pathname:
