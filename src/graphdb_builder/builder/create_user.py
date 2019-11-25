@@ -60,7 +60,6 @@ def get_new_user_identifier(driver):
 def check_if_node_exists(driver, node_property, value):
 	"""
 	Queries the graph database and checks if a node with a specific property and property value already exists.
-
 	:param driver: py2neo driver, which provides the connection to the neo4j graph database.
     :type driver: py2neo driver
 	:param str node_property: property of the node.
@@ -69,7 +68,7 @@ def check_if_node_exists(driver, node_property, value):
 	:return: Pandas dataframe with user identifier if User with node_property and value already exists, \
 			if User does not exist, returns and empty dataframe.
 	"""
-	query_name = 'find_user'
+	query_name = 'check_node'
 	try:
 		user_creation_cypher = get_user_creation_queries()
 		query = user_creation_cypher[query_name]['query'].replace('PROPERTY', node_property)
