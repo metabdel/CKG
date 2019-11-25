@@ -19,10 +19,9 @@ from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
 from app import app, server as application
-from apps import initialApp, projectCreationApp, dataUploadApp, projectApp, importsApp, homepageApp, loginApp, projectCreation
+from apps import initialApp, projectCreationApp, dataUploadApp, dataUpload, projectApp, importsApp, homepageApp, loginApp, projectCreation
 from graphdb_builder import builder_utils
 from graphdb_builder.builder import loader
-from graphdb_builder.experiments import experiments_controller as eh
 import ckg_utils
 import config.ckg_config as ckg_config
 
@@ -68,8 +67,8 @@ def display_page(pathname):
                 login_form = loginApp.LoginApp("Login", "", "", layout = [], logo = None, footer = None)
                 return (login_form.layout, {'display': 'none'})
         elif '/apps/projectCreation' in pathname:
-            projectCreation = projectCreationApp.ProjectCreationApp("Project Creation", "", "", layout = [], logo = None, footer = None)
-            return (projectCreation.layout, {'display': 'block',
+            projectCreation_form = projectCreationApp.ProjectCreationApp("Project Creation", "", "", layout = [], logo = None, footer = None)
+            return (projectCreation_form.layout, {'display': 'block',
                                              'position': 'absolute',
                                              'right': '50px'})
         elif '/apps/dataUpload' in pathname:
@@ -245,12 +244,12 @@ def number_panel_update(df):
     return [dcc.Markdown("**{}**".format(i)) for i in [ent,labels,rel,types,prop,ent_store,rel_store,prop_store,string_store,array_store,log_store,t_open,t_comm,projects]]
 
 @app.callback(Output("project_url", "children"),
-             [Input("project_option", "value")],
-             [State('url', 'href')])
-def update_project_url(value, pathname):
-    basic_path = '/'.join(pathname.split('/')[0:3])
-    if value.startswith('P0'):
-        return dcc.Markdown("[Project {}]({}/apps/project?project_id={}&force=0)".format(value,basic_path, value))
+             [Input("project_option", "value")])
+def update_project_url(value):
+    if value is not None and len(value) > 1:
+        return dcc.Link(value[0].title(),
+                        href='/apps/project?project_id={}&force=0'.format(value[1]),
+                        className="button_link")
     else:
       return ''
   

@@ -129,9 +129,14 @@ def get_barplot(data, identifier, args):
             if 'colors' in args:
                 if g in args['colors']:
                     color = args['colors'][g]
+            errors = []
+            if 'errors' in args:
+                errors = data.loc[data[args["group"]] == g, args['errors']]
+            #errors = data.groupby(args["group"]).agg({args['y']:'std'})
             trace = go.Bar(
                         x = data.loc[data[args["group"]] == g,args['x']], # assign x as the dataframe column 'x'
                         y = data.loc[data[args["group"]] == g, args['y']],
+                        error_y = dict(type='data',array=errors),
                         name = g,
                         marker = dict(color=color)
                         )

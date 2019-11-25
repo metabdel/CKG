@@ -1,15 +1,35 @@
 a.button_link:link, a.button_link:visited {
-    background-color: #2f79be;
-    border-radius: 15px;
-    color: white;
-    margin-top: 2px;
-    margin-bottom: 3px;
-    padding: 14px 25px;
-    text-align: center;
+  color: rgb(255, 255, 255);
+  background-color: rgb(32, 92, 204);
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: .66rem;
+  white-space: nowrap;
+  border: 3px solid rgb(32, 92, 204);
+  border-radius: 2rem;
+  padding: .3rem .95rem .35rem;
+  text-decoration: none;
+}
+
+a.button_link:hover, a.button_link:active {
+  color: rgb(32, 92, 204);
+  background-color: rgb(255, 255, 255);
+}
+
+a.nav_link:link, a.nav_link:visited {
+    color: rgb(32, 92, 204);
+    background-color: rgb(255, 255, 255);
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: .66rem;
+    white-space: nowrap;
+    border: 3px solid rgb(32, 92, 204);
+    border-radius: 2rem;
+    padding: .3rem .95rem .35rem;
     text-decoration: none;
-    display: inline-block;
-  }
-  
-  a.button_link:hover, a.button_link:active {
-    background-color: rgb(32, 92, 204);
-  }
+}
+
+a.nav_link:hover, a.nav_link:active {
+  color: rgb(255, 255, 255);
+  background-color: rgb(32, 92, 204);
+}

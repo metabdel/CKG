@@ -11,7 +11,7 @@ import os.path
 from datetime import datetime
 import pandas as pd
 from joblib import Parallel, delayed
-import shortuuid
+from uuid import uuid4
 import config.ckg_config as ckg_config
 import ckg_utils
 import create_user as uh
@@ -24,7 +24,7 @@ import logging.config
 
 log_config = ckg_config.graphdb_builder_log
 logger = builder_utils.setup_logging(log_config, key="importer")
-import_id = shortuuid.uuid()
+import_id = uuid4()
 
 try:
     cwd = os.path.abspath(os.path.dirname(__file__))
@@ -90,12 +90,12 @@ def experimentsImport(projects=None, n_jobs=1, import_type="partial"):
     :param str import_type: type of import ('full' or 'partial').
     """
     #Experiments
-    experimentsImportDirectory = econfig["experimentsImportDirectory"]
-    builder_utils.checkDirectory(experimentsImportDirectory)
-    experimentsDirectory = econfig["experimentsDir"]
+    experiments_import_directory = os.path.join(config['importDirectory'],econfig["import_directory"])
+    builder_utils.checkDirectory(experiments_import_directory)
+    experiments_directory = os.path.join(config['dataDirectory'],econfig["experiments_directory"])
     if projects is None:
-        projects = builder_utils.listDirectoryFolders(experimentsDirectory)
-    Parallel(n_jobs=n_jobs)(delayed(experimentImport)(experimentsImportDirectory, experimentsDirectory, project) for project in projects)
+        projects = builder_utils.listDirectoryFolders(experiments_directory)
+    Parallel(n_jobs=n_jobs)(delayed(experimentImport)(experiments_import_directory, experiments_directory, project) for project in projects)
 
 def experimentImport(importDirectory, experimentsDirectory, project):
     """
@@ -113,7 +113,7 @@ def experimentImport(importDirectory, experimentsDirectory, project):
     for dataset in datasets:
         datasetPath = os.path.join(projectPath, dataset)
         builder_utils.checkDirectory(datasetPath)
-        eh.generateDatasetImports(project, dataset)
+        eh.generate_dataset_imports(project, dataset, datasetPath)
 
 def usersImport(import_type='partial'):
     """

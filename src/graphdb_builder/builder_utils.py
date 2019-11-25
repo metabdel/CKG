@@ -16,10 +16,40 @@ import datetime
 import tarfile
 import logging
 import logging.config
-import config.ckg_config as ckg_config
+from config import ckg_config
 import ckg_utils
 import subprocess
 
+
+def readDataset(uri):
+    if uri.endswith('.xlsx'):
+        data = readDataFromExcel(uri)
+    elif uri.endswith(".csv") or uri.endswith(".tsv") or uri.endswith(".txt"):
+        if uri.endswith(".tsv") or uri.endswith(".txt"):
+            data = readDataFromTXT(uri)
+        else:
+            data = readDataFromCSV(uri)
+    data = data.dropna(how='all')
+
+    return data
+
+def readDataFromCSV(uri):
+    #Read the data from csv file
+    data = pd.read_csv(uri, sep = ',', low_memory=False)
+
+    return data
+
+def readDataFromTXT(uri):
+    #Read the data from tsv or txt file
+    data = pd.read_csv(uri, sep = '\t', low_memory=False)
+
+    return data
+
+def readDataFromExcel(uri):
+    #Read the data from Excel file
+    data = pd.read_excel(uri, index_col=None, na_values=['NA'], convert_float = True)
+
+    return data
 
 def write_relationships(relationships, header, outputfile):
     """
