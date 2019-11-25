@@ -6,7 +6,6 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 from passlib.hash import bcrypt
-from openpyxl import load_workbook
 import ckg_utils
 import config.ckg_config as ckg_config
 from graphdb_connector import connector
@@ -205,12 +204,10 @@ def create_user_from_command_line(args, expiration):
 	ifile = config['usersFile']
 
 	data = vars(args)
+	excel = pd.read_excel(os.path.join(usersDirectory, ifile), index=0)
+	excel = excel.append(data, ignore_index=True)
+	excel.to_excel(os.path.join(usersDirectory, ifile), index=False)
 	data = pd.DataFrame.from_dict(data, orient='index').T
-	wb = load_workbook(os.path.join(usersDirectory, ifile))
-	ws = wb.worksheets[0]
-	l = [data.name[0], data.username[0], data.password[0], data.email[0], data.secondary_email[0], data.phone_number[0], data.affiliation[0], data.image[0]]
-	ws.append(l)
-	wb.save(os.path.join(usersDirectory, ifile))
 	create_user(data, output_file, expiration)
 
 
