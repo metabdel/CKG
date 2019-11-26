@@ -451,9 +451,6 @@ def store_original_data(contents, filename):
               [State('clinical-variables-picker', 'value'),
                State('upload-data-type-picker', 'value')])
 def update_data(data, n_clicks, variables, dtype):
-    print('Clinical Data')
-    print(data)
-    print('---------------')
     if data is None:
         raise PreventUpdate
 
@@ -468,13 +465,6 @@ def update_data(data, n_clicks, variables, dtype):
             columns.append({'id': var, 'name': var,
                             'renamable': False, 'deletable': True})        
     columns = [d for d in columns if d.get('id') != '']
-
-    print('UPDATED DATA')
-    print(df)
-    print('-------------')
-    print('COLUMNS')
-    print(columns)
-    print('-------------')
     return df, columns
 
 @app.callback(Output('data-upload', 'children'),
@@ -492,7 +482,7 @@ def run_processing(n_clicks, data, filename, path_name, dtype):
         # Extract all relationahips and nodes and save as csv files
         if dtype == 'clinical':
             df = dataUpload.create_new_experiment_in_db(driver, project_id, df, separator=separator)
-            loader.partialUpdate(imports=['project', 'experiment']) #This will run loader for clinical only. To run for proteomics, etc, move to after 'else: pass'
+            loader.partialUpdate(imports=['project', 'experiment'])
         else:
             pass
         # Path to new local folder
