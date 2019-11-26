@@ -18,8 +18,8 @@ import community
 import math
 from fancyimpute import KNN
 import kmapper as km
-from report_manager import utils
-from report_manager.analyses import wgcnaAnalysis as wgcna
+from analytics_core import utils
+from analytics_core.analytics import wgcnaAnalysis as wgcna
 import statsmodels.api as sm
 from statsmodels.formula.api import ols
 import time

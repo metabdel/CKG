@@ -14,7 +14,7 @@ import tempfile
 import networkx as nx
 from networkx.readwrite import json_graph
 from report_manager import utils
-from report_manager.plots import basicFigures
+from analytics_core.viz import viz
 
 class Report:
     def __init__(self, identifier, plots={}):
@@ -166,7 +166,7 @@ class Report:
             if environment == "notebook":
                 if "notebook" in plot:
                     net = plot['notebook']
-                    report_plots = basicFigures.visualize_notebook_network(net)
+                    report_plots = viz.visualize_notebook_network(net)
                 else:
                     if 'props' in plot:
                         if 'figure' in plot['props']:
@@ -213,13 +213,13 @@ class Report:
                     if 'props' in plot:
                         if 'figure' in plot['props']:
                             try:
-                                basicFigures.save_DASH_plot(plot['props']['figure'], name=figure_name, plot_format='svg', directory=directory)
+                                viz.save_DASH_plot(plot['props']['figure'], name=figure_name, plot_format='svg', directory=directory)
                                 saved.add(figure_name)
                             except:
                                 pass
                     else:
                         try:
-                            basicFigures.save_DASH_plot(plot.figure, name=figure_name, plot_format='svg', directory=directory)
+                            viz.save_DASH_plot(plot.figure, name=figure_name, plot_format='svg', directory=directory)
                             saved.add(figure_name)
                         except:
                             pass

@@ -158,6 +158,7 @@ data exploration:
             showscale: False
             marker_size: 10
             permutations: 250
+            num_annotations: 50
             x_title: logFC
             y_title: -log(pvalue)
             drop_cols:

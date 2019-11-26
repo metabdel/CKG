@@ -1,11 +1,11 @@
-from report_manager.analyses import wgcnaAnalysis as wgcna
-import report_manager.analyses.basicAnalysis as analyses
-from report_manager.plots import basicFigures as figure
+from analytics_core.analytics import wgcnaAnalysis as wgcna
+from analytics_core.analytics import analytics
+from analytics_core.viz import viz
 import pandas as pd
 import itertools
 import time
 
-class AnalysisResult:
+class Analysis:
     def __init__(self, identifier, analysis_type, args, data, result=None):
         self._identifier = identifier
         self._analysis_type = analysis_type
@@ -58,7 +58,7 @@ class AnalysisResult:
 
     def generate_result(self):
         if self.analysis_type == "wide_format":
-            r = analyses.transform_into_wide_format(self.data, self.args['index'], self.args['x'], self.args['y'], extra=[self.args['group']])
+            r = analytics.transform_into_wide_format(self.data, self.args['index'], self.args['x'], self.args['y'], extra=[self.args['group']])
             self.result[self.analysis_type] = r
         if self.analysis_type == "pca":
             components = 2
@@ -67,7 +67,7 @@ class AnalysisResult:
                 components = self.args["components"]
             if "drop_cols" in self.args:
                 drop_cols = self.args["drop_cols"]
-            self.result, nargs = analyses.run_pca(self.data, components=components, drop_cols=drop_cols)
+            self.result, nargs = analytics.run_pca(self.data, components=components, drop_cols=drop_cols)
             self.args.update(nargs)
         elif self.analysis_type  == "tsne":
             components = 2
@@ -85,7 +85,7 @@ class AnalysisResult:
                 init = self.args["init"]
             if "drop_cols" in self.args:
                 drop_cols = self.args["drop_cols"]
-            self.result, nargs = analyses.run_tsne(self.data, components=components, drop_cols=drop_cols, perplexity=perplexity, n_iter=n_iter, init=init)
+            self.result, nargs = analytics.run_tsne(self.data, components=components, drop_cols=drop_cols, perplexity=perplexity, n_iter=n_iter, init=init)
             self.args.update(nargs)
         elif self.analysis_type  == "umap":
             n_neighbors=10
@@ -98,7 +98,7 @@ class AnalysisResult:
             if "metric" in self.args:
                 metric = self.args["metric"]
             if n_neighbors < self.data.shape[0]:
-                self.result, nargs = analyses.run_umap(self.data, n_neighbors=n_neighbors, min_dist=min_dist, metric=metric)
+                self.result, nargs = analytics.run_umap(self.data, n_neighbors=n_neighbors, min_dist=min_dist, metric=metric)
                 self.args.update(nargs)
         elif self.analysis_type  == "mapper":
             n_cubes = 15
@@ -119,7 +119,7 @@ class AnalysisResult:
                 linkage = self.args["linkage"]
             if "affinity" in self.args:
                 affinity = self.args["affinity"]
-            r, nargs = analyses.run_mapper(self.data, n_cubes=n_cubes, overlap=overlap, n_clusters=n_clusters, linkage=linkage, affinity=affinity)
+            r, nargs = analytics.run_mapper(self.data, n_cubes=n_cubes, overlap=overlap, n_clusters=n_clusters, linkage=linkage, affinity=affinity)
             self.args.update(nargs)
             self.result[self.analysis_type] = r
         elif self.analysis_type  == 'ttest':
@@ -127,7 +127,7 @@ class AnalysisResult:
             if "alpha" in self.args:
                 alpha = self.args["alpha"]
             for pair in itertools.combinations(self.data.group.unique(),2):
-                ttest_result = analyses.run_ttest(self.data, pair[0], pair[1], alpha = 0.05)
+                ttest_result = analytics.run_ttest(self.data, pair[0], pair[1], alpha = 0.05)
                 self.result[pair] = ttest_result
         elif self.analysis_type  == 'anova':
             start = time.time()
@@ -146,7 +146,7 @@ class AnalysisResult:
                 group = self.args["group"]
             if "permutations" in self.args:
                 permutations = self.args["permutations"]
-            anova_result = analyses.run_anova(self.data, drop_cols=drop_cols, subject=subject, group=group, alpha=alpha, permutations=permutations)
+            anova_result = analytics.run_anova(self.data, drop_cols=drop_cols, subject=subject, group=group, alpha=alpha, permutations=permutations)
             self.result[self.analysis_type] = anova_result
             print('ANOVA', time.time() - start)
         elif self.analysis_type  == 'samr':
@@ -169,7 +169,7 @@ class AnalysisResult:
                 s0 = self.args["s0"]
             if "permutations" in self.args:
                 permutations = self.args["permutations"]
-            anova_result =analyses.run_samr(self.data, drop_cols=drop_cols, subject=subject, group=group, alpha=alpha, s0=s0, permutations=permutations)
+            anova_result =analytics.run_samr(self.data, drop_cols=drop_cols, subject=subject, group=group, alpha=alpha, s0=s0, permutations=permutations)
             self.result[self.analysis_type] = anova_result
         elif self.analysis_type  == '2-way anova':
             drop_cols = []
@@ -181,7 +181,7 @@ class AnalysisResult:
                 subject = self.args["subject"]
             if "group" in self.args:
                 group = self.args["group"]
-            two_way_anova_result = analyses.run_two_way_anova(self.data, drop_cols=drop_cols, subject=subject, group=group)
+            two_way_anova_result = analytics.run_two_way_anova(self.data, drop_cols=drop_cols, subject=subject, group=group)
             self.result[self.analysis_type] = two_way_anova_result
         elif self.analysis_type == "repeated_measurements_anova":
             start = time.time()
@@ -200,7 +200,7 @@ class AnalysisResult:
                 subject = self.args["subject"]
             if "permutations" in self.args:
                 permutations = self.args["permutations"]
-            anova_result = analyses.run_repeated_measurements_anova(self.data, drop_cols=drop_cols, subject=subject, group=group, alpha=alpha, permutations=permutations)
+            anova_result = analytics.run_repeated_measurements_anova(self.data, drop_cols=drop_cols, subject=subject, group=group, alpha=alpha, permutations=permutations)
             self.result[self.analysis_type] = anova_result
             print('repeated-ANOVA', time.time() - start)
         elif self.analysis_type == "dabest":
@@ -216,7 +216,7 @@ class AnalysisResult:
                 subject = self.args["subject"]
             if "test" in self.args:
                 test = self.args["test"]
-            dabest_result = analyses.run_dabest(self.data, drop_cols=drop_cols, subject=subject, group=group, test=test)
+            dabest_result = analytics.run_dabest(self.data, drop_cols=drop_cols, subject=subject, group=group, test=test)
             self.result[self.analysis_type] = dabest_result
         elif self.analysis_type  == "correlation":
             start = time.time()
@@ -235,7 +235,7 @@ class AnalysisResult:
                 method = self.args["method"]
             if "correction" in self.args:
                 correction = self.args["correction"]
-            self.result[self.analysis_type] = analyses.run_correlation(self.data, alpha=alpha, subject=subject, group=group, method=method, correction=correction)
+            self.result[self.analysis_type] = analytics.run_correlation(self.data, alpha=alpha, subject=subject, group=group, method=method, correction=correction)
             print('Correlation', time.time() - start)
         elif self.analysis_type  == "repeated_measurements_correlation":
             start = time.time()
@@ -254,7 +254,7 @@ class AnalysisResult:
                 correction = self.args["correction"]
             if "cutoff" in self.args:
                 cutoff = self.args['cutoff']
-            self.result[self.analysis_type] = analyses.run_rm_correlation(self.data, alpha=alpha, subject=subject, correction=correction)
+            self.result[self.analysis_type] = analytics.run_rm_correlation(self.data, alpha=alpha, subject=subject, correction=correction)
             print('repeated-Correlation', time.time() - start)
         elif self.analysis_type == "regulation_enrichment":
             start = time.time()
@@ -280,10 +280,10 @@ class AnalysisResult:
             if 'regulation_data' in self.args and 'annotation' in self.args:
                 if self.args['regulation_data'] in self.data and self.args['annotation'] in self.data:
                     self.analysis_type = annotation_type+"_"+self.analysis_type
-                    self.result[self.analysis_type] = analyses.run_regulation_enrichment(self.data[self.args['regulation_data']], self.data[self.args['annotation']], identifier=identifier, groups=groups, annotation_col=annotation_col, reject_col=reject_col, method=method)
+                    self.result[self.analysis_type] = analytics.run_regulation_enrichment(self.data[self.args['regulation_data']], self.data[self.args['annotation']], identifier=identifier, groups=groups, annotation_col=annotation_col, reject_col=reject_col, method=method)
             print('Enrichment', time.time() - start)
         elif self.analysis_type == 'long_format':
-            self.result[self.analysis_type] = analyses.transform_into_long_format(self.data, drop_columns=self.args['drop_columns'], group=self.args['group'], columns=self.args['columns'])
+            self.result[self.analysis_type] = analytics.transform_into_long_format(self.data, drop_columns=self.args['drop_columns'], group=self.args['group'], columns=self.args['columns'])
         elif self.analysis_type == 'ranking_with_markers':
             start = time.time()
             list_markers = []
@@ -304,12 +304,12 @@ class AnalysisResult:
             self.args['annotations'] = annotations
             if 'data' in self.args:
                 if self.args['data'] in self.data:
-                    self.result[self.analysis_type] = analyses.get_ranking_with_markers(self.data[self.args['data']], drop_columns=self.args['drop_columns'], group=self.args['group'], columns=self.args['columns'], list_markers=list_markers, annotation = annotations)
+                    self.result[self.analysis_type] = analytics.get_ranking_with_markers(self.data[self.args['data']], drop_columns=self.args['drop_columns'], group=self.args['group'], columns=self.args['columns'], list_markers=list_markers, annotation = annotations)
             print('Ranking', time.time() - start)
         elif self.analysis_type == 'coefficient_of_variation':
-            self.result[self.analysis_type] = analyses.get_coefficient_variation(self.data, drop_columns=self.args['drop_columns'], group=self.args['group'], columns=self.args['columns'])
+            self.result[self.analysis_type] = analytics.get_coefficient_variation(self.data, drop_columns=self.args['drop_columns'], group=self.args['group'], columns=self.args['columns'])
         elif self.analysis_type == 'publications_abstracts':
-            self.result[self.analysis_type] = analyses.get_publications_abstracts(self.data, publication_col="publication", join_by=['publication','Proteins','Diseases'], index="PMID")
+            self.result[self.analysis_type] = analytics.get_publications_abstracts(self.data, publication_col="publication", join_by=['publication','Proteins','Diseases'], index="PMID")
         elif self.analysis_type == "wgcna":
             start = time.time()
             drop_cols_exp = []
@@ -342,7 +342,7 @@ class AnalysisResult:
                 MEDissThres = self.args["MEDissThres"]
             if "verbose" in self.args:
                 verbose = self.args["verbose"]
-            self.result[self.analysis_type] = analyses.run_WGCNA(self.data, drop_cols_exp, drop_cols_cli, RsquaredCut=RsquaredCut, networkType=networkType, 
+            self.result[self.analysis_type] = analytics.run_WGCNA(self.data, drop_cols_exp, drop_cols_cli, RsquaredCut=RsquaredCut, networkType=networkType, 
                                                             minModuleSize=minModuleSize, deepSplit=deepSplit, pamRespectsDendro=pamRespectsDendro, merge_modules=merge_modules,
                                                             MEDissThres=MEDissThres, verbose=verbose)
             print('WGCNA', time.time() - start)
@@ -366,7 +366,7 @@ class AnalysisResult:
                 method = self.args["method"]
             if "correction" in self.args:
                 correction = self.args["correction"]
-            self.result[self.analysis_type] = analyses.run_multi_correlation(self.data, alpha=alpha, subject=subject, group=group, on=on, method=method, correction=correction)
+            self.result[self.analysis_type] = analytics.run_multi_correlation(self.data, alpha=alpha, subject=subject, group=group, on=on, method=method, correction=correction)
             print('multi-correlation', time.time() - start)
             
 
@@ -390,7 +390,7 @@ class AnalysisResult:
                     if isinstance(id, tuple):
                         identifier = identifier+"_"+id[0]+"_vs_"+id[1]
                         figure_title = self.args["title"] + id[0]+" vs "+id[1]
-                    plot.append(figure.get_table(self.result[id], identifier, figure_title, colors=colors, subset=subset, plot_attr=attr))
+                    plot.append(viz.get_table(self.result[id], identifier, figure_title, colors=colors, subset=subset, plot_attr=attr))
             elif name == "barplot":
                 x_title = "x"
                 y_title = "y"
@@ -405,7 +405,7 @@ class AnalysisResult:
                     else:
                         figure_title = self.args['title']
                     self.args["title"] = figure_title
-                    plot.append(figure.get_barplot(self.result[id], identifier, self.args))
+                    plot.append(viz.get_barplot(self.result[id], identifier, self.args))
             elif name == "facetplot":
                 x_title = "x"
                 y_title = "y"
@@ -423,7 +423,7 @@ class AnalysisResult:
                     else:
                         figure_title = self.args['title']
                     self.args['title'] = figure_title
-                    plot.append(figure.get_facet_grid_plot(self.result[id], identifier, self.args))
+                    plot.append(viz.get_facet_grid_plot(self.result[id], identifier, self.args))
             elif name == "scatterplot":
                 x_title = "x"
                 y_title = "y"
@@ -438,7 +438,7 @@ class AnalysisResult:
                     else:
                         figure_title = self.args['title']
                     self.args['title'] = figure_title
-                    plot.append(figure.get_scatterplot(self.result[id], identifier, self.args))
+                    plot.append(viz.get_scatterplot(self.result[id], identifier, self.args))
             elif name == 'pca':
                 x_title = "x"
                 y_title = "y"
@@ -453,7 +453,7 @@ class AnalysisResult:
                     else:
                         figure_title = self.args['title']
                     self.args['title'] = figure_title
-                    plot.append(figure.get_pca_plot(self.result[id], identifier, self.args))
+                    plot.append(viz.get_pca_plot(self.result[id], identifier, self.args))
             elif name == "volcanoplot":
                 alpha = 0.05
                 lfc = 1.0
@@ -464,7 +464,7 @@ class AnalysisResult:
                 for pair in self.result:
                     signature = self.result[pair]
                     self.args["title"] = self.args['title']+" "+pair[0]+" vs "+pair[1]
-                    p = figure.run_volcano(signature, identifier+"_"+pair[0]+"_vs_"+pair[1], self.args)
+                    p = viz.run_volcano(signature, identifier+"_"+pair[0]+"_vs_"+pair[1], self.args)
                     plot.extend(p)
             elif name == 'network':
                 source = 'source'
@@ -480,7 +480,7 @@ class AnalysisResult:
                     else:
                         figure_title = self.args["title"]
                     self.args["title"] = figure_title
-                    plot.append(figure.get_network(self.result[id], identifier, self.args))
+                    plot.append(viz.get_network(self.result[id], identifier, self.args))
             elif name == "heatmap":
                 for id in self.result:
                     if not self.result[id].empty:
@@ -490,7 +490,7 @@ class AnalysisResult:
                         else:
                             figure_title = self.args["title"]
                         self.args["title"] = figure_title
-                        plot.append(figure.get_complex_heatmapplot(self.result[id], identifier, self.args))
+                        plot.append(viz.get_complex_heatmapplot(self.result[id], identifier, self.args))
             elif name == "mapper":
                 for id in self.result:
                     labels = {}
@@ -501,7 +501,7 @@ class AnalysisResult:
                         figure_title = self.args['title'] + id[0]+" vs "+id[1]
                     else:
                         figure_title = self.args['title']
-                    plot.append(figure.getMapperFigure(self.result[id], identifier, title=figure_title, labels=self.args["labels"]))
+                    plot.append(viz.getMapperFigure(self.result[id], identifier, title=figure_title, labels=self.args["labels"]))
             elif name == "scatterplot_matrix":
                 for id in self.result:
                     if isinstance(id, tuple):
@@ -510,7 +510,7 @@ class AnalysisResult:
                     else:
                         figure_title = self.args['title']
                     self.args["title"] = figure_title
-                    plot.append(figure.get_scatterplot_matrix(self.result[id], identifier, self.args))
+                    plot.append(viz.get_scatterplot_matrix(self.result[id], identifier, self.args))
             elif name == "distplot":
                 for id in self.result:
                     if isinstance(id, tuple):
@@ -519,7 +519,7 @@ class AnalysisResult:
                     else:
                         figure_title = self.args['title']
                     self.args["title"] = figure_title
-                    plot.extend(figure.get_distplot(self.result[id], identifier, self.args))
+                    plot.extend(viz.get_distplot(self.result[id], identifier, self.args))
             elif name == "violinplot":
                 for id in self.result:
                     if isinstance(id, tuple):
@@ -528,7 +528,7 @@ class AnalysisResult:
                     else:
                         figure_title = self.args['title']
                     self.args["title"] = figure_title
-                    plot.extend(figure.get_violinplot(self.result[id], identifier, self.args))
+                    plot.extend(viz.get_violinplot(self.result[id], identifier, self.args))
             elif name == "wgcnaplots":
                 start = time.time()
                 data = {}
@@ -538,19 +538,19 @@ class AnalysisResult:
                 if 'wgcna' in wgcna_data and wgcna_data['wgcna'] is not None and dfs is not None:
                     for dtype in wgcna_data['wgcna']:
                         data = {**dfs, **wgcna_data['wgcna'][dtype]}
-                        plot.extend(figure.get_WGCNAPlots(data, identifier+"-"+dtype))
+                        plot.extend(viz.get_WGCNAPlots(data, identifier+"-"+dtype))
                 print('WGCNA-plot', time.time() - start)
             elif name == 'ranking':
                 for id in self.result:
-                    plot.append(figure.get_ranking_plot(self.result[id], identifier, self.args))
+                    plot.append(viz.get_ranking_plot(self.result[id], identifier, self.args))
             elif name == 'clustergrammer':
                 for id in self.result:
-                    plot.append(figure.get_clustergrammer_plot(self.result[id], identifier, self.args))
+                    plot.append(viz.get_clustergrammer_plot(self.result[id], identifier, self.args))
             elif name == 'cytonet':
                 for id in self.result:
-                    plot.append(figure.get_cytoscape_network(self.result[id], identifier, self.args))
+                    plot.append(viz.get_cytoscape_network(self.result[id], identifier, self.args))
             elif name == 'wordcloud':
                 for id in self.result:
-                    plot.append(figure.get_wordcloud(self.result[id], identifier, self.args))
+                    plot.append(viz.get_wordcloud(self.result[id], identifier, self.args))
 
         return plot

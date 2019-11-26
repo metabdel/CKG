@@ -2,7 +2,7 @@ import os
 import config.ckg_config as ckg_config
 from apps import basicApp
 from apps import imports
-from report_manager.plots import basicFigures
+from analytics_core.viz import viz
 
 
 class ImportsApp(basicApp.BasicApp):
@@ -32,6 +32,6 @@ class ImportsApp(basicApp.BasicApp):
             plots.append(imports.plot_import_numbers_per_database(stats_df, 'Full imports: Breakdown entities/relationships', key='full', subplot_titles = ('Entities imported', 'Relationships imported', 'File size', 'File size'), colors=True, plots_1='entities', plots_2='relationships', dropdown=True, dropdown_options='databases'))
             plots.append(imports.plot_import_numbers_per_database(stats_df, 'Partial imports: Breakdown entities/relationships', key='partial', subplot_titles = ('Entities imported', 'Relationships imported', 'File size', 'File size'), colors=True, plots_1='entities', plots_2='relationships', dropdown=True, dropdown_options='databases'))
         else:
-            plots.append(basicFigures.get_markdown(text="# There are no statistics about recent imports."))
+            plots.append(viz.get_markdown(text="# There are no statistics about recent imports."))
             
         self.extend_layout(plots)

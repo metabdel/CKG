@@ -15,7 +15,7 @@ app = dash.Dash('app', server=server, meta_tags=[{"name": "viewport", "content":
 
 r = redis.StrictRedis.from_url('redis://localhost:6379')
 
-with open("app_template.html", 'r', encoding='utf8') as f:
+with open("assets/app_template.html", 'r', encoding='utf8') as f:
     template = f.read()
 
 

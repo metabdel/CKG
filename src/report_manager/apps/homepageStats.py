@@ -2,32 +2,21 @@ import os
 import sys
 import pandas as pd
 import numpy as np
-import json
-import chart_studio.plotly as py
 import plotly.graph_objs as go
-import plotly.subplots as tools
 import plotly.express as px
-import dash
 import dash_core_components as dcc
 import dash_html_components as html
-import config.ckg_config as ckg_config
 import ckg_utils
-import logging
-import logging.config
 from graphdb_connector import connector
 from graphdb_builder import builder_utils
 from report_manager.queries import query_utils
-from report_manager.plots import basicFigures as figure
-
-log_config = ckg_config.graphdb_builder_log
-logger = builder_utils.setup_logging(log_config, key="db_stats")
 
 try:
     cwd = os.path.abspath(os.path.dirname(__file__))
     config = builder_utils.setup_config('experiments')
     driver = connector.getGraphDatabaseConnectionConfiguration()
 except Exception as err:
-    logger.error("Reading configuration > {}.".format(err))
+    raise Exception("Reading configuration > {}.".format(err))
 
 
 def size_converter(value):
@@ -62,7 +51,7 @@ def get_query():
     except Exception as err:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        logger.error("Reading queries from file {}: {}, file: {},line: {}".format(
+        raise Exception("Reading queries from file {}: {}, file: {},line: {}".format(
             queries_path, sys.exc_info(), fname, exc_tb.tb_lineno))
     return data_upload_cypher
 

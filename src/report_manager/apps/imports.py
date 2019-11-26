@@ -1,4 +1,4 @@
-from report_manager.plots import basicFigures as figure
+from analytics_core.viz import viz
 #Dash
 import dash
 import dash_core_components as dcc
@@ -275,8 +275,8 @@ def plot_total_number_imported(stats_file, plot_title):
     df_full = get_totals_per_date(stats_file, key='full', import_types=False).sort_index()
     df_partial = get_totals_per_date(stats_file, key='partial', import_types=False).sort_index()
 
-    traces_f = figure.getPlotTraces(df_full, key='full', type='lines')
-    traces_p = figure.getPlotTraces(df_partial, key='partial', type='lines')
+    traces_f = viz.getPlotTraces(df_full, key='full', type='lines')
+    traces_p = viz.getPlotTraces(df_partial, key='partial', type='lines')
     traces = traces_f + traces_p
 
     if type(traces[0]) == list:
@@ -304,8 +304,8 @@ def plot_total_numbers_per_date(stats_file, plot_title):
     df_full = get_totals_per_date(stats_file, key='full', import_types=True)
     df_partial = get_totals_per_date(stats_file, key='partial', import_types=True)
 
-    traces_f = figure.getPlotTraces(df_full, key='full', type='scaled markers', div_factor=float(10^1000))
-    traces_p = figure.getPlotTraces(df_partial, key='partial', type='scaled markers', div_factor=float(10^1000))
+    traces_f = viz.getPlotTraces(df_full, key='full', type='scaled markers', div_factor=float(10^1000))
+    traces_p = viz.getPlotTraces(df_partial, key='partial', type='scaled markers', div_factor=float(10^1000))
     traces = traces_f + traces_p
 
     if type(traces[0]) == list:
@@ -351,7 +351,7 @@ def plot_databases_numbers_per_date(stats_file, plot_title, key='full', dropdown
     traces = []
     for i in dropdown_options.keys():
         df = data.iloc[data.index.get_level_values(0).str.contains(i)].droplevel(0)
-        traces.append(figure.getPlotTraces(df, key=key, type = 'bars', horizontal=True))
+        traces.append(viz.getPlotTraces(df, key=key, type = 'bars', horizontal=True))
 
     if type(traces[0]) == list:
         traces = list(chain.from_iterable(traces))
