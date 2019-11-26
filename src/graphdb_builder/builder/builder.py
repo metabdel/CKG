@@ -62,7 +62,7 @@ if __name__ == '__main__':
                     if import_type.lower() == 'experiments' or import_type.lower() == 'experiment':
                         importer.experimentsImport(projects=args.data, n_jobs=1)
                     elif import_type.lower() == 'users' or import_type.lower() == 'user':
-                        importer.usersImport()
+                        importer.usersImport(importDirectory='../../../data/imports')
                     elif import_type.lower() == 'databases' or import_type.lower() == 'database':
                         databases = [d.lower() for d in dbconfig['databases']]
                         valid_entities = [x.lower() for x in args.data if x.lower() in databases]

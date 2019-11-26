@@ -120,6 +120,8 @@ def setup_config(data_type="databases"):
             config = ckg_utils.get_configuration(os.path.join(dirname, ckg_config.experiments_config_file))
         elif data_type == 'builder':
             config = ckg_utils.get_configuration(os.path.join(dirname, ckg_config.builder_config_file))
+        elif data_type == 'users':
+            config = ckg_utils.get_configuration(os.path.join(dirname, ckg_config.users_config_file))
 
     except Exception as err:
         raise Exception("builder_utils - Reading configuration > {}.".format(err))

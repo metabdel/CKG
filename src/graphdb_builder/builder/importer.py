@@ -18,6 +18,7 @@ import create_user as uh
 from graphdb_builder.ontologies import ontologies_controller as oh
 from graphdb_builder.databases import databases_controller as dh
 from graphdb_builder.experiments import experiments_controller as eh
+from graphdb_builder.users import users_controller as uh
 from graphdb_builder import builder_utils
 import logging
 import logging.config
@@ -32,6 +33,7 @@ try:
     oconfig = builder_utils.setup_config('ontologies')
     dbconfig = builder_utils.setup_config('databases')
     econfig = builder_utils.setup_config('experiments')
+    uconfig = builder_utils.setup_config('users')
 except Exception as err:
     print("Error")
     logger.error("importer - Reading configuration > {}.".format(err))
@@ -115,20 +117,17 @@ def experimentImport(importDirectory, experimentsDirectory, project):
         builder_utils.checkDirectory(datasetPath)
         eh.generate_dataset_imports(project, dataset, datasetPath)
 
-def usersImport(import_type='partial'):
+def usersImport(importDirectory, import_type='partial'):
     """
     Generates User entities from excel file.
-
+    
+    :param str importDirectory: path to the directory where all the import files are generated.
     :param str import_type: type of import ('full' or 'partial').
     :return: Writes the users.tsv file, creates and grants access of new users to the database.
     """
-    usersImportDirectory = config['usersImportDirectory']
+    usersImportDirectory = os.path.join(importDirectory, uconfig['usersImportDirectory'])
     builder_utils.checkDirectory(usersImportDirectory)
-    output_file = os.path.join(usersImportDirectory, 'users.tsv')
-    usersDirectory = config['usersDirectory']
-    ifile = config['usersFile']
-    uh.extractUsersInfo(os.path.join(usersDirectory, ifile), output_file, expiration=365)   
-
+    uh.parseUsersFile(usersImportDirectory, expiration=365)
 
 def fullImport():
     """
@@ -150,7 +149,8 @@ def fullImport():
         logger.info("Full import: importing all Experiments")
         experimentsImport(n_jobs=4, import_type='full')
         logger.info("Full import: Experiments import took {}".format(datetime.now() - START_TIME))
-        usersImport(import_type='full')
+        logger.info("Full import: importing all Users")
+        usersImport(importDirectory, import_type='full')
         logger.info("Full import: Users import took {}".format(datetime.now() - START_TIME))
     except FileNotFoundError as err:
         logger.error("Full import > {}.".format(err))
