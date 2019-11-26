@@ -104,6 +104,7 @@ def display_page(pathname):
             return ('404',{'display': 'block',
                            'position': 'absolute',
                            'right': '50px'})
+    return (None, None)
 
 def get_project_params_from_url(pathname):
     force = False

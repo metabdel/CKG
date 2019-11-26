@@ -13,7 +13,7 @@ from rpy2.robjects import pandas2ri
 from rpy2.robjects.packages import importr
 from rpy2.robjects.vectors import StrVector, FloatVector
 import rpy2.robjects.packages as rpacks
-from report_manager import R2Py
+from analytics_core import R_wrapper
 pandas2ri.activate()
 # sys.setrecursionlimit(10000)
 
@@ -25,10 +25,10 @@ R('options(stringsAsFactors = FALSE)')
 
 
 #Call R packages
-base = R2Py.call_Rpackage("package", "base")
-stats = R2Py.call_Rpackage("package", "stats")
-WGCNA = R2Py.call_Rpackage("package", "WGCNA")
-flashClust = R2Py.call_Rpackage('package', 'flashClust')
+base = R_wrapper.call_Rpackage("package", "base")
+stats = R_wrapper.call_Rpackage("package", "stats")
+WGCNA = R_wrapper.call_Rpackage("package", "WGCNA")
+flashClust = R_wrapper.call_Rpackage('package', 'flashClust')
 
 
 def get_data(data, drop_cols_exp=['subject', 'group', 'sample', 'index'], drop_cols_cli=['subject', 'group', 'biological_sample', 'index']):
@@ -309,7 +309,7 @@ def calculate_module_eigengenes(data, modColors, softPower=6, dissimilarity=True
     MEs = WGCNA.orderMEs(MEs0, verbose=0)
     if dissimilarity:
         MEcor = WGCNA.cor(MEs, verbose=0)
-        MEcor = R2Py.R_matrix2Py_matrix(MEcor, MEcor.rownames, MEcor.colnames)
+        MEcor = R_wrapper.R_matrix2Py_matrix(MEcor, MEcor.rownames, MEcor.colnames)
         MEDiss = 1 - MEcor
         return MEs, MEDiss
     else:
@@ -388,8 +388,8 @@ def calculate_ModuleMembership(data, MEs):
     MMPvalue.columns = ['p.MM'+str(col) for col in modLabels]
     MMPvalue.index = data_r.columns
 
-    #FeatureModuleMembership = R2Py.R_matrix2Py_matrix(FeatureModuleMembership, FeatureModuleMembership.index, FeatureModuleMembership.columns)
-    #MMPvalue = R2Py.R_matrix2Py_matrix(MMPvalue, MMPvalue.rownames, MMPvalue.colnames)
+    #FeatureModuleMembership = R_wrapper.R_matrix2Py_matrix(FeatureModuleMembership, FeatureModuleMembership.index, FeatureModuleMembership.columns)
+    #MMPvalue = R_wrapper.R_matrix2Py_matrix(MMPvalue, MMPvalue.rownames, MMPvalue.colnames)
     FeatureModuleMembership.index = data_r.columns.str.replace('dash', '~')
     MMPvalue.index = MMPvalue.index.str.replace('dash', '~')
 
@@ -420,8 +420,8 @@ def calculate_FeatureTraitSignificance(df_exp, df_traits):
     FSPvalue.columns = ['p.GS.'+str(col) for col in df_cli_r.columns]
     FSPvalue.index = df_exp_r.columns
 
-    #FeatureTraitSignificance = R2Py.R_matrix2Py_matrix(FeatureTraitSignificance, FeatureTraitSignificance.rownames, FeatureTraitSignificance.colnames)
-    #FSPvalue = R2Py.R_matrix2Py_matrix(FSPvalue, FSPvalue.rownames, FSPvalue.colnames)
+    #FeatureTraitSignificance = R_wrapper.R_matrix2Py_matrix(FeatureTraitSignificance, FeatureTraitSignificance.rownames, FeatureTraitSignificance.colnames)
+    #FSPvalue = R_wrapper.R_matrix2Py_matrix(FSPvalue, FSPvalue.rownames, FSPvalue.colnames)
 
     FeatureTraitSignificance.columns = FeatureTraitSignificance.columns.str.replace('space', ' ')
     FeatureTraitSignificance.columns = FeatureTraitSignificance.columns.str.replace('parentheses1', '(')

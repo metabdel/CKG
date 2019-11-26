@@ -20,15 +20,15 @@ from cyjupyter import Cytoscape
 from pyvis.network import Network as visnet
 from webweb import Web
 from networkx.readwrite import json_graph
-from report_manager import utils, analyses
+from analytics_core import utils
+from analytics_core.analytics import analytics
 from wordcloud import WordCloud, STOPWORDS
 from nltk.corpus import stopwords
 import nltk
 
 
-from report_manager.analyses import wgcnaAnalysis
-from report_manager.plots import wgcnaFigures
-from report_manager.plots import Dendrogram
+from analytics_core.analytics import wgcnaAnalysis
+from analytics_core.viz import wgcnaFigures, Dendrogram
 import dash_cytoscape as cyto
 
 def getPlotTraces(data, key='full', type = 'lines', div_factor=float(10^10000), horizontal=False):
@@ -1095,7 +1095,7 @@ def get_network(data, identifier, args):
             max_node_size = max(degrees.values())
             nx.set_node_attributes(graph, degrees, 'radius')
 
-        clusters = analyses.basicAnalysis.get_network_communities(graph, args)
+        clusters = analytics.get_network_communities(graph, args)
         col = utils.get_hex_colors(len(set(clusters.values())))
         colors = {n:col[clusters[n]] for n in clusters}
         nx.set_node_attributes(graph, colors, 'color')

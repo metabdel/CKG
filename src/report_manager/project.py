@@ -12,7 +12,8 @@ import pandas as pd
 import ckg_utils
 import config.ckg_config as ckg_config
 from report_manager.dataset import Dataset, ProteomicsDataset, ClinicalDataset, DNAseqDataset, RNAseqDataset, LongitudinalProteomicsDataset, MultiOmicsDataset
-from report_manager.plots import basicFigures as figure
+from analytics_core.viz import viz
+from analytics_core import utils as acore_utils
 from report_manager import report as rp, utils, knowledge
 from report_manager.queries import query_utils
 from graphdb_connector import connector
@@ -431,7 +432,7 @@ class Project:
         project_df = project_df.drop(['similar_projects', 'overlap'], axis=1)
         identifier = "Project info"
         title = "Project: {} information".format(self.name)
-        plot = [figure.get_table(project_df, identifier, title)]
+        plot = [viz.get_table(project_df, identifier, title)]
 
         return plot
 
@@ -439,8 +440,8 @@ class Project:
         plots = []
         identifier = "Similarities"
         title = "Similarities to other Projects"
-        plots.append(figure.get_table(self.similar_projects, identifier+' table', title+' table'))
-        plots.append(figure.get_sankey_plot(self.similar_projects, identifier, args={'source':'current', 'target':'other', 'weight':'similarity_pearson', 'orientation': 'h', 'valueformat': '.0f', 'width':800, 'height':800, 'font':12, 'title':title}))
+        plots.append(viz.get_table(self.similar_projects, identifier+' table', title+' table'))
+        plots.append(viz.get_sankey_plot(self.similar_projects, identifier, args={'source':'current', 'target':'other', 'weight':'similarity_pearson', 'orientation': 'h', 'valueformat': '.0f', 'width':800, 'height':800, 'font':12, 'title':title}))
 
         plots.append(self.get_similarity_network())
         
@@ -450,11 +451,11 @@ class Project:
         plots = []
         identifier = "Overlap"
         title = "Protein Identification Overlap"
-        plots.append(figure.get_table(self.overlap, identifier+' table', title+' table'))
+        plots.append(viz.get_table(self.overlap, identifier+' table', title+' table'))
         if self.overlap is not None:
             for i, row in self.overlap.iterrows():
                 ntitle = title + ":\n" + row['project1_name'] +" - "+ row['project2_name'] +"(overlap similarity: " + str(row['similarity']) +")"
-                plot = figure.plot_2_venn_diagram(row['from'], row['to'], row['project1_unique'], row['project2_unique'], row['intersection'], identifier=identifier+str(i), args={'title':ntitle})
+                plot = viz.plot_2_venn_diagram(row['from'], row['to'], row['project1_unique'], row['project2_unique'], row['intersection'], identifier=identifier+str(i), args={'title':ntitle})
                 plots.append(plot)
 
         return plots
@@ -497,14 +498,14 @@ class Project:
             list_projects = ",".join(['"{}"'.format(i) for i in list_projects])
             query = query.replace("LIST_PROJECTS",list_projects)
             path = connector.sendQuery(driver, query, parameters={}).data()
-            G = utils.neoj_path_to_networkx(path, key='path')
+            G = acore_utils.neoj_path_to_networkx(path, key='path')
             args = {}
             style, layout = self.get_similarity_network_style()
             args['stylesheet'] = style
             args['layout'] = layout
             args['title'] = "Projects subgraph"
-            net, mouseover = utils.networkx_to_cytoscape(G)
-            plot = figure.get_cytoscape_network(net, "projects_subgraph", args)
+            net, mouseover = acore_utils.networkx_to_cytoscape(G)
+            plot = viz.get_cytoscape_network(net, "projects_subgraph", args)
         
         except Exception as err:
             exc_type, exc_obj, exc_tb = sys.exc_info()
