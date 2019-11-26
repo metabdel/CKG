@@ -109,7 +109,7 @@ class ProjectApp(basicApp.BasicApp):
                                 value=self.id+'/defaults',
                                 clearable=False,
                                 style={'width': '50%', 'margin-bottom':'10px'}),
-                            dcc.Upload(id='upload-data',
+                            dcc.Upload(id='upload-config',
                                 children=html.Div(['Drag and Drop or ',
                                     html.A('Select Files')]),
                                 max_size=-1,

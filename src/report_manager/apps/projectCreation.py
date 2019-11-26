@@ -165,9 +165,9 @@ def create_new_project(driver, projectId, data, separator='|'):
                         result = connector.getCursorData(driver, q+';', parameters=parameters)
                 else:
                     result = connector.getCursorData(driver, q+';')    
- 
+
             subjects = create_new_subjects(driver, external_identifier, data['subjects'][0])
- 
+
             if data['timepoints'][0] is None:
                 pass
             else:
@@ -191,17 +191,13 @@ def create_new_project(driver, projectId, data, separator='|'):
         else:
             result = pd.DataFrame([''])
             external_identifier = ''
- 
     except Exception as err:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         logger.error("Reading query {}: {}, file: {},line: {}".format(query_name, sys.exc_info(), fname, exc_tb.tb_lineno))
-     
+    
     return result.values[0], external_identifier   
-         
- 
- 
- 
+        
 def create_new_subjects(driver, projectId, subjects):
     """
     Creates new graph database nodes for subjects participating in a project.

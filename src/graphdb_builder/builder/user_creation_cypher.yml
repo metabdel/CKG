@@ -41,15 +41,15 @@ create_user_node:
         MERGE (u:User {id:$ID})
         ON CREATE SET u.acronym=$acronym,u.name=$name,u.username=$username,u.password=$password,u.email=$email,u.secondary_email=$secondary_email,u.phone_number=$phone_number,u.affiliation=$affiliation,u.expiration_date=$expiration_date,u.rolename=$rolename,u.image=$image
         RETURN COUNT(u) AS User_nodes;
-find_user:
-    name: find user node
-    description: 'Returns node identifier if property with value exists in any User node'
+check_node:
+    name: check node exists
+    description: 'Returns node identifier if property with value exists in any specified node'
     involved_nodes:
         - User
     involved_rels:
     query: >
-        MATCH (u:User) WHERE u.PROPERTY=$value
-        RETURN u.id;
+        MATCH (n:User) WHERE n.PROPERTY=$value
+        RETURN n.id;
 suspend_user:
     name:
     description:

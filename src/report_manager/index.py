@@ -73,8 +73,8 @@ def display_page(pathname):
                                              'right': '50px'})
         elif '/apps/dataUpload' in pathname:
             projectId = pathname.split('/')[-1]
-            dataUpload = dataUploadApp.DataUploadApp(projectId, "Data Upload", "", "", layout = [], logo = None, footer = None)
-            return (dataUpload.layout, {'display': 'block',
+            dataUpload_form = dataUploadApp.DataUploadApp(projectId, "Data Upload", "", "", layout = [], logo = None, footer = None)
+            return (dataUpload_form.layout, {'display': 'block',
                                         'position': 'absolute',
                                         'right': '50px'})
         elif '/apps/project' in pathname:
@@ -126,10 +126,10 @@ def get_project_params_from_url(pathname):
 
 
 #s Callback upload configuration files
-@app.callback([Output('upload-data', 'style'), 
+@app.callback([Output('upload-config', 'style'), 
                Output('output-data-upload','children')],
-              [Input('upload-data', 'contents'),
-               Input('upload-data', 'filename'),
+              [Input('upload-config', 'contents'),
+               Input('upload-config', 'filename'),
                Input('my-dropdown','value')])
 def update_output(contents, filename, value):
     display = {'display': 'none'}
@@ -340,7 +340,7 @@ def create_project(n_clicks, name, acronym, responsible, participant, datatype, 
 
         if any(elem is None for elem in [name, number_subjects, datatype, disease, tissue, responsible]) == True:
             response = "Insufficient information to create project. Fill in all fields with '*'."
-            return response, None, {'display': 'inline-block'}, {'display': 'none'}
+            return response, None, {'display': 'none'}, {'display': 'none'}
         
         if any(elem is None for elem in [name, number_subjects, datatype, disease, tissue, responsible]) == False:
         # Get project data from filled-in fields
@@ -359,12 +359,25 @@ def create_project(n_clicks, name, acronym, responsible, participant, datatype, 
             external_id = list(result_output.keys())[0]
 
             if result is not None:
-                response = "Project successfully submitted. Download Clinical Data template."
+                if external_id != '':
+                    response = "Project successfully submitted. Download Clinical Data template."
+                else:
+                    response = 'A project with the same name already exists in the database.'
             else:
                 response = "There was a problem when creating the project."
+
             return response, '- '+external_id, {'display': 'inline-block'}, {'display': 'block'}
     else:
-        return None, None, {'display': 'inline-block'}, {'display': 'none'}
+        return None, None, {'display': 'none'}, {'display': 'none'}
+
+
+@app.callback(Output('project-creation', 'style'),
+              [Input('project-creation', 'children')])
+def change_style(style):
+    if style is not None and 'successfully' in style:
+        return {'fontSize':'20px', 'marginLeft':'70%', 'color': 'black'}
+    else:
+        return {'fontSize':'20px', 'marginLeft':'70%', 'color': 'red'}
 
 
 @app.callback(Output('download_link', 'href'),
@@ -402,7 +415,7 @@ def parse_contents(contents, filename):
     decoded = base64.b64decode(content_string)
     file = filename.split('.')[-1]
     
-    if file == 'txt':
+    if file == 'txt' or file == 'tsv':
         df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), sep='\t', low_memory=False)
     elif file == 'csv':
         df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), low_memory=False)
@@ -438,6 +451,9 @@ def store_original_data(contents, filename):
               [State('clinical-variables-picker', 'value'),
                State('upload-data-type-picker', 'value')])
 def update_data(data, n_clicks, variables, dtype):
+    print('Clinical Data')
+    print(data)
+    print('---------------')
     if data is None:
         raise PreventUpdate
 
@@ -452,6 +468,13 @@ def update_data(data, n_clicks, variables, dtype):
             columns.append({'id': var, 'name': var,
                             'renamable': False, 'deletable': True})        
     columns = [d for d in columns if d.get('id') != '']
+
+    print('UPDATED DATA')
+    print(df)
+    print('-------------')
+    print('COLUMNS')
+    print(columns)
+    print('-------------')
     return df, columns
 
 @app.callback(Output('data-upload', 'children'),
