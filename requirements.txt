@@ -208,3 +208,6 @@ zipp==0.5.1
 wget==3.2
 passlib==1.7.1
 bcrypt==3.1.7
+et-xmlfile==1.0.1
+jdcal==1.4.1
+openpyxl==3.0.1
