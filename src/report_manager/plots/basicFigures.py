@@ -77,6 +77,30 @@ def get_markdown(text, args={}):
     
     return mkdown
 
+def get_pieplot(data, identifier, args):
+    """
+    This function plots a simple Pie plot.
+
+    :param data: pandas DataFrame with values to plot as columns and labels as index.
+    :param str identifier: id used to identify the div where the figure will be generated.
+    :param dict args: see below.
+    :Arguments:
+        * **valueCol** (str) -- name of the column with the values to be plotted.
+        * **textCol** (str) -- name of the column containing information for the hoverinfo parameter.
+        * **height** (str) -- height of the plot.
+        * **width** (str) -- width of the plot.
+    :return: Pieplot figure within the <div id="_dash-app-content">.
+    """
+    figure = {}
+    figure['data'] = []
+    figure['data'].append(go.Pie(labels=data.index, values=data[args['valueCol']], hovertext=data[args['textCol']], hoverinfo='label+text+percent'))
+    figure["layout"] = go.Layout(height = args['height'],
+                            width = args['width'],
+                            annotations = [dict(xref='paper', yref='paper', showarrow=False, text='')],
+                            template='plotly_white')
+
+    return dcc.Graph(id = identifier, figure = figure)
+
 def get_distplot(data, identifier, args):
     """
     
@@ -115,6 +139,10 @@ def get_barplot(data, identifier, args):
     :param dict args: see below.
     :Arguments:
         * **title** (str) -- plot title.
+        * **x_title** (str) -- plot x axis title.
+        * **y_title** (str) -- plot y axis title.
+        * **height** (str) -- plot height.
+        * **width** (str) -- plot width.
     :return: barplot figure within the <div id="_dash-app-content">.
 
     Example::
