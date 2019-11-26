@@ -3,13 +3,12 @@ import sys
 import pandas as pd
 import numpy as np
 import plotly.graph_objs as go
-import plotly.express as px
 import dash_core_components as dcc
 import dash_html_components as html
 import ckg_utils
 from graphdb_connector import connector
 from graphdb_builder import builder_utils
-from report_manager.queries import query_utils
+from analytics_core.viz import viz
 
 try:
     cwd = os.path.abspath(os.path.dirname(__file__))
@@ -98,7 +97,7 @@ def plot_store_size_components(dfs, title, args):
                   'Relationship store', 'String store', 'Total store size']
     data.columns = ['value', 'size']
     data = data.iloc[:-1]
-    fig = figure.get_pieplot(data, identifier='store_size_pie', args=args)
+    fig = viz.get_pieplot(data, identifier='store_size_pie', args=args)
 
     return html.Div([html.H3(title), fig], style={'margin': '0%', 'padding': '0%'})
 
@@ -124,7 +123,7 @@ def plot_node_rel_per_label(dfs, title, args, focus='nodes'):
             data['relTypesCount'][0], orient='index', columns=['number']).reset_index()
         xaxis_name = 'Types'
 
-    fig = figure.get_barplot(data, identifier='node_rel_per_label_{}'.format(focus), args=args)
+    fig = viz.get_barplot(data, identifier='node_rel_per_label_{}'.format(focus), args=args)
     
     fig.figure['layout'] = go.Layout(barmode='relative',
                                     height=args['height'],
