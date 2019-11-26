@@ -22,6 +22,7 @@ from graphdb_builder import builder_utils
 import logging
 import logging.config
 
+cwd = os.path.abspath(os.path.dirname(__file__))
 log_config = ckg_config.graphdb_builder_log
 logger = builder_utils.setup_logging(log_config, key="loader")
 START_TIME = datetime.now()
@@ -76,7 +77,7 @@ def updateDB(driver, imports=None):
         imports = config["graph"]
 
     try:
-        cypher_queries = ckg_utils.get_queries(config['cypher_queries_file'])
+        cypher_queries = ckg_utils.get_queries(os.path.join(cwd, config['cypher_queries_file']))
     except Exception as err:
         logger.error("Reading queries file > {}.".format(err))
         
@@ -84,11 +85,11 @@ def updateDB(driver, imports=None):
         queries = []
         logger.info("Loading {} into the database".format(i))
         try:
-            import_dir = os.path.join(os.getcwd(),config["databasesDirectory"])
+            import_dir = os.path.join(cwd, config["databasesDirectory"])
             #Ontologies
             if i== "ontologies":
                 entities = config["ontology_entities"]
-                import_dir = os.path.join(os.getcwd(), config["ontologiesDirectory"])
+                import_dir = os.path.join(cwd, config["ontologiesDirectory"])
                 ontologyDataImportCode = cypher_queries['IMPORT_ONTOLOGY_DATA']['query']
                 for entity in entities:
                     queries.extend(ontologyDataImportCode.replace("ENTITY", entity).replace("IMPORTDIR", import_dir).split(';')[0:-1])
@@ -223,14 +224,14 @@ def updateDB(driver, imports=None):
                     queries.extend(code.replace("IMPORTDIR", import_dir).replace("ENTITY", entity).split(';')[0:-1])
             #Users
             elif i == "user":
-                usersDir = os.path.join(os.getcwd(),config["usersImportDirectory"])   
+                usersDir = os.path.join(cwd, config["usersImportDirectory"])   
                 user_cypher = cypher_queries['CREATE_USER_NODE']
                 code = user_cypher['query']
                 queries.extend(code.replace("IMPORTDIR", usersDir).split(';')[0:-1])
 
             #Projects
             elif i == "project":
-                import_dir = os.path.join(os.getcwd(),config["experimentsDirectory"])
+                import_dir = os.path.join(cwd, config["experimentsDirectory"])
                 projects = builder_utils.listDirectoryFolders(import_dir)
                 project_cypher = cypher_queries['IMPORT_PROJECT']
                 for project in projects:
@@ -241,7 +242,7 @@ def updateDB(driver, imports=None):
                         queries.extend(code.replace("IMPORTDIR", projectDir).replace('PROJECTID', project).split(';')[0:-1])
             #Datasets
             elif i == "experiment":
-                import_dir = os.path.join(os.getcwd(),config["experimentsDirectory"])
+                import_dir = os.path.join(cwd, config["experimentsDirectory"])
                 datasets_cypher = cypher_queries['IMPORT_DATASETS']
                 projects = builder_utils.listDirectoryFolders(import_dir)
                 for project in projects:
