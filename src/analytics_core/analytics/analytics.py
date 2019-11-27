@@ -1515,7 +1515,7 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
             pairwise = pd.concat(pairwise_results)
             
             res = pd.DataFrame([df.index, f_stats, pvalues]).T
-            res.columns = ['identifier', 'F-statistics', 'pvalue']
+            res.columns = ['identifier', 'SAMR test statistics', 'pvalue']
             res = pairwise.join(res.set_index('identifier')).reset_index()
 
             contrasts = ['diff_mean_group{}'.format(str(i+1)) for i in np.arange(len(set(labels)))]
@@ -1537,7 +1537,7 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
             res['group1'] = group1
             res['group2'] = group2
             res['FC'] = [np.power(2,np.abs(x)) * -1 if x < 0 else np.power(2,np.abs(x)) for x in res['log2FC'].values]
-            res = res[['identifier', 'group1', 'group2', 'mean(group1)', 'mean(group2)', 'log2FC', 'FC', 't-statistics', 'pvalue']]
+            res = res[['identifier', 'group1', 'group2', 'mean(group1)', 'mean(group2)', 'log2FC', 'FC', 'SAMR test statistics', 'pvalue']]
             df2 = pd.DataFrame()
 
         res = res.set_index('identifier').join(qvalues.set_index('identifier'))
