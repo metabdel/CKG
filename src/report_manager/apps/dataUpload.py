@@ -10,7 +10,6 @@ from graphdb_connector import connector
 from graphdb_builder import builder_utils
 from graphdb_builder.experiments.parsers import clinicalParser as cp, proteomicsParser as pp, wesParser as wp
 from report_manager.queries import query_utils
-from apps import projectCreation as pc
 import logging
 import logging.config
 
@@ -27,8 +26,8 @@ except Exception as err:
 
 def get_data_upload_queries():
 	"""
-    Reads the YAML file containing the queries relevant to parsing of clinical data and \
-    returns a Python object (dict[dict]).
+	Reads the YAML file containing the queries relevant to parsing of clinical data and \
+	returns a Python object (dict[dict]).
 	
 	:return: Nested dictionary.
 	"""
@@ -46,9 +45,9 @@ def get_new_biosample_identifier(driver):
 	Queries the database for the last biological sample internal identifier and returns a new sequential identifier.
 	
 	:param driver: py2neo driver, which provides the connection to the neo4j graph database.
-    :type driver: py2neo driver
+	:type driver: py2neo driver
 	:return: Biological sample identifier.
-    :rtype: str
+	:rtype: str
 	"""
 	query_name = 'increment_biosample_id'
 	try:
@@ -66,7 +65,7 @@ def get_new_analytical_sample_identifier(driver):
 	Queries the database for the last analytical sample internal identifier and returns a new sequential identifier.
 	
 	:param driver: py2neo driver, which provides the connection to the neo4j graph database.
-    :type driver: py2neo driver
+	:type driver: py2neo driver
 	:return: Analytical sample identifier.
 	:rtype: str
 	"""
@@ -86,7 +85,7 @@ def get_subject_number_in_project(driver, projectId):
 	Extracts the number of subjects included in a given project.
 	
 	:param driver: py2neo driver, which provides the connection to the neo4j graph database.
-    :type driver: py2neo driver
+	:type driver: py2neo driver
 	:param str projectId: external project identifier (from the graph database).
 	:return: Integer with the number of subjects.
 	"""
@@ -106,7 +105,7 @@ def create_new_biosamples(driver, projectId, data):
 	Creates new graph database nodes and relationships for biological samples obtained from subjects participating in a project.
 	
 	:param driver: py2neo driver, which provides the connection to the neo4j graph database.
-    :type driver: py2neo driver
+	:type driver: py2neo driver
 	:param str projectId: external project identifier (from the graph database).
 	:param data: pandas Dataframe with clinical data as columns and samples as rows.
 	:return: Pandas DataFrame where new biological sample internal identifiers have been added.
@@ -146,7 +145,7 @@ def create_new_ansamples(driver, projectId, data):
 	Creates new graph database nodes and relationships for analytical samples obtained.
 	
 	:param driver: py2neo driver, which provides the connection to the neo4j graph database.
-    :type driver: py2neo driver
+	:type driver: py2neo driver
 	:param str projectId: external project identifier (from the graph database).
 	:param data: pandas Dataframe with clinical data as columns and samples as rows.
 	:return: Pandas DataFrame where new analytical sample internal identifiers have been added.
@@ -186,7 +185,7 @@ def create_new_ansamples(driver, projectId, data):
 def create_new_experiment_in_db(driver, projectId, data, separator='|'):
 	"""
 	Creates a new project in the graph database, following the steps:
-    
+
 	1. Maps intervention, disease and tissue names to database identifiers and adds data to \
 		pandas DataFrame.
 	2. Creates new biological and analytical samples.
@@ -195,7 +194,7 @@ def create_new_experiment_in_db(driver, projectId, data, separator='|'):
 	4. Saves all the relevant node and relationship dataframes to tab-delimited files.
 
 	:param driver: py2neo driver, which provides the connection to the neo4j graph database.
-    :type driver: py2neo driver
+	:type driver: py2neo driver
 	:param str projectId: external project identifier (from the graph database).
 	:param data: pandas Dataframe with clinical data as columns and samples as rows.
 	:param str separator: character used to separate multiple entries in an attribute.

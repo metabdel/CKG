@@ -1,12 +1,13 @@
 """
-    **import.py**
     Generates all the import files: Ontologies, Databases and Experiments.
     The module is reponsible for generating all the csv files that will
     be loaded into the Graph database and also updates a stats object
     (hdf table) with the number of entities and relationships from each
     dataset imported. A new stats object is created the first time a
     full import is run.
+
 """
+
 import os.path
 from datetime import datetime
 import pandas as pd
@@ -14,7 +15,6 @@ from joblib import Parallel, delayed
 from uuid import uuid4
 import config.ckg_config as ckg_config
 import ckg_utils
-import create_user as uh
 from graphdb_builder.ontologies import ontologies_controller as oh
 from graphdb_builder.databases import databases_controller as dh
 from graphdb_builder.experiments import experiments_controller as eh
@@ -48,11 +48,9 @@ def ontologiesImport(importDirectory, ontologies=None, download=True, import_typ
     
     :param str importDirectory: path of the import directory where files will be created.
     :param list ontologies: a list of ontology names to be imported.
-    :param str import_type: type of import ('full' or 'partial').
-    :return: Writes all the relevant .tsv files for each ontology provided, and records information on /
-    the number of entities and relationships to a stats file.
+    :param bool download: wether database is to be downloaded.
+    :param str import_type: type of import (´full´ or ´partial´).
     """
-    #Ontologies
     ontologiesImportDirectory = os.path.join(importDirectory, oconfig["ontologies_importDir"])
     builder_utils.checkDirectory(ontologiesImportDirectory)
     stats = oh.generate_graphFiles(ontologiesImportDirectory, ontologies, download)
@@ -69,11 +67,8 @@ def databasesImport(importDirectory, databases=None, n_jobs=1, download=True, im
     :param str importDirectory: path of the import directory where files will be created.
     :param list databases: a list of database names to be imported.
     :param int n_jobs: number of jobs to run in parallel. 1 by default when updating one database.
-    :param str import_type: type of import ('full' or 'partial').
-    :return: Writes all the relevant .tsv files for each database provided, and records information on /
-    the number of entities and relationships to a stats file.
+    :param str import_type: type of import (´full´ or ´partial´).
     """
-    #Databases
     databasesImportDirectory = os.path.join(importDirectory, dbconfig["databasesImportDir"])
     builder_utils.checkDirectory(databasesImportDirectory)
     stats = dh.generateGraphFiles(databasesImportDirectory, databases, download, n_jobs)
@@ -89,9 +84,8 @@ def experimentsImport(projects=None, n_jobs=1, import_type="partial"):
     
     :param list projects:  list of project identifiers to be imported.
     :param int n_jobs: number of jobs to run in parallel. 1 by default when updating one project.
-    :param str import_type: type of import ('full' or 'partial').
+    :param str import_type: type of import (´full´ or ´partial´).
     """
-    #Experiments
     experiments_import_directory = os.path.join(config['importDirectory'],econfig["import_directory"])
     builder_utils.checkDirectory(experiments_import_directory)
     experiments_directory = os.path.join(config['dataDirectory'],econfig["experiments_directory"])
@@ -106,7 +100,6 @@ def experimentImport(importDirectory, experimentsDirectory, project):
     :param str importDirectory: path to the directory where all the import files are generated.
     :param str experimentDirectory: path to the directory where all the experiments are located.
     :param str project: identifier of the project to be imported.
-    :return: Writes all the relevant .tsv files for the project.
     """
     projectPath = os.path.join(importDirectory, project)
     builder_utils.checkDirectory(projectPath)
@@ -119,11 +112,12 @@ def experimentImport(importDirectory, experimentsDirectory, project):
 
 def usersImport(importDirectory, import_type='partial'):
     """
-    Generates User entities from excel file.
+    Generates User entities from excel file and grants access of new users to the database.
+    This function also writes the relevant information to a tab-delimited file in the import \
+    directory.
     
     :param str importDirectory: path to the directory where all the import files are generated.
-    :param str import_type: type of import ('full' or 'partial').
-    :return: Writes the users.tsv file, creates and grants access of new users to the database.
+    :param str import_type: type of import (´full´ or ´partial).
     """
     usersImportDirectory = os.path.join(importDirectory, uconfig['usersImportDirectory'])
     builder_utils.checkDirectory(usersImportDirectory)

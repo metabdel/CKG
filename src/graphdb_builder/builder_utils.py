@@ -34,19 +34,28 @@ def readDataset(uri):
     return data
 
 def readDataFromCSV(uri):
-    #Read the data from csv file
+    """
+    Read the data from csv file
+
+    """
     data = pd.read_csv(uri, sep = ',', low_memory=False)
 
     return data
 
 def readDataFromTXT(uri):
-    #Read the data from tsv or txt file
+    """
+    Read the data from tsv or txt file
+
+    """
     data = pd.read_csv(uri, sep = '\t', low_memory=False)
 
     return data
 
 def readDataFromExcel(uri):
-    #Read the data from Excel file
+    """
+    Read the data from Excel file
+
+    """
     data = pd.read_excel(uri, index_col=None, na_values=['NA'], convert_float = True)
 
     return data

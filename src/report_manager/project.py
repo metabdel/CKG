@@ -24,12 +24,15 @@ log_config = ckg_config.report_manager_log
 logger = ckg_utils.setup_logging(log_config, key="project")
 
 class Project:
-    ''' A project class that defines an experimental project.
-        A project can be of different types, contain several datasets and reports.
-        To use:
-         >>> p = Project(identifier="P0000001", datasets=None, report=None)
-         >>> p.show_report(environment="notebook")
-    '''
+    """
+    A project class that defines an experimental project.
+    A project can be of different types, contain several datasets and reports.
+    
+    Example::
+
+        p = Project(identifier="P0000001", datasets=None, report=None)
+        p.show_report(environment="notebook")
+    """
 
     def __init__(self, identifier, configuration_files={}, datasets={}, knowledge=None, report={}):
         self._identifier = identifier
