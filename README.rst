@@ -8,7 +8,7 @@ A Python project that allows you to analyse proteomics and clinical data, and in
 * GitHub: `https://github.com/MannLabs/CKG <https://github.com/MannLabs/CKG>`_
 * Free and open source software: `MIT license <https://github.com/...>`_
 
-.. figure:: ../src/report_manager/assets/banner.jpg
+.. figure:: src/report_manager/assets/banner.jpg
    :alt: ckg logo
 
 
