@@ -58,7 +58,7 @@ def get_module_color_annotation(map_list, col_annotation=False, row_annotation=F
 
         df = pd.DataFrame([labels, y], index=['labels', 'y']).T
         df['vals'] = df['labels'].map(dict(vals))
-    
+
     #Use if map_list is a list of co-expression modules names
     else:
         for i in map_list:
@@ -91,9 +91,9 @@ def get_module_color_annotation(map_list, col_annotation=False, row_annotation=F
     elif col_annotation:
         c_annot = go.Heatmap(z=df.vals, x=df.labels, y=df.y, showscale=False, colorscale=colors, xaxis='x2', yaxis='y2')
         return c_annot
-    
+
     return None
-        
+
 
 
 def get_heatmap(df, colorscale=None , color_missing=True):
@@ -173,7 +173,7 @@ def plot_dendrogram_guidelines(Z_tree, dendrogram):
     :param dict Z_tree: dictionary of data structures computed to render the dendrogram. Keys: 'icoords', 'dcoords', 'ivl' and 'leaves'.
     :param dendrogram: dendrogram represented as a plotly object figure.
     :return: List of dictionaries.
-    """    
+    """
     tickvals = list(dendrogram['layout']['xaxis']['tickvals'])
     maximum = len(tickvals)
     step = int(maximum/8)
@@ -187,7 +187,7 @@ def plot_dendrogram_guidelines(Z_tree, dendrogram):
     values = []
     for i in tickvals[minimum::step]:
         values.append(('line', i, 0.3, i, np.max(Z_tree['dcoord'])))
-    
+
     values = [list(i)+[line] for i in values]
     shapes = []
     for i in values:
@@ -207,7 +207,7 @@ def plot_intramodular_correlation(MM, FS, feature_module_df, title, width=1000, 
     :param int width: plot width
     :param int height: plot height
     :return: Plotly object figure.
-    
+
     Example::
 
         plot = plot_intramodular_correlation(MM, FS, feature_module_df, title='Plot', width=1000, height=800):
@@ -216,14 +216,14 @@ def plot_intramodular_correlation(MM, FS, feature_module_df, title, width=1000, 
     """
     MM = MM.iloc[:,-6]
     MM['modColor'] = MM.index.map(feature_module_df.set_index('name')['modColor'].get)
-    
+
     figure = tools.make_subplots(rows=len(FS.columns), cols=len(MM.columns)-1, shared_xaxes=False, shared_yaxes=False, vertical_spacing = 0.015, horizontal_spacing = 0.1, print_grid=True)
-    
+
     figure.layout.template = 'plotly_white'
     layout = dict(width=width, height=height, showlegend=False, title=title)
     figure.layout.update(layout)
 
-    axis_dict = {} 
+    axis_dict = {}
     for i, j in enumerate(MM.columns[MM.columns.str.startswith('MM')]):
         n_p = len(FS.columns) * (len(MM.columns)-1)-len(MM.columns[MM.columns.str.startswith('MM')])
         axis_dict['xaxis{}'.format(n_p+i+1)] = dict(title = j, titlefont = dict(size=13))
@@ -237,7 +237,7 @@ def plot_intramodular_correlation(MM, FS, feature_module_df, title, width=1000, 
             label = name[0]
         axis_dict['yaxis{}'.format(a+n)] = dict(title = label, titlefont = dict(size=13))
         n += len(MM.columns[MM.columns.str.startswith('MM')])-1
-    
+
 
     annotation = []
     x_axis = 1
@@ -247,21 +247,21 @@ def plot_intramodular_correlation(MM, FS, feature_module_df, title, width=1000, 
             name = MM[MM['modColor'] == j[2:]].index
             x = abs(MM[MM['modColor'] == j[2:]][j].values)
             y = abs(FS[FS.index.isin(name)][b].values)
-        
+
             slope, intercept, r_value, p_value, std_err = scp.stats.linregress(x, y)
             line = slope*x+intercept
 
             figure.append_trace(go.Scattergl(x = x,
                                             y = y,
                                             text = name,
-                                            mode = 'markers',                                    
+                                            mode = 'markers',
                                             opacity=0.7,
                                             marker={'size': 7,
                                                        'color': 'white',
                                                        'line': {'width': 1.5, 'color': j[2:]}}), a+1, i+1)
-        
-            figure.append_trace(go.Scattergl(x = x, y = line, mode = 'lines', marker={'color': 'black'}), a+1, i+1)               
-        
+
+            figure.append_trace(go.Scattergl(x = x, y = line, mode = 'lines', marker={'color': 'black'}), a+1, i+1)
+
             annot = dict(x = 0.7, y = 0.7,
                         xref = 'x{}'.format(x_axis), yref = 'y{}'.format(y_axis),
                         text = 'R={:0.2}, p={:.0e}'.format(r_value, p_value),
@@ -270,7 +270,7 @@ def plot_intramodular_correlation(MM, FS, feature_module_df, title, width=1000, 
             x_axis += 1
             y_axis += 1
 
-    
+
     figure.layout.update(axis_dict)
     figure.layout.update(annotations = annotation)
 
@@ -282,16 +282,16 @@ def plot_complex_dendrogram(dendro_df, subplot_df, title, dendro_labels=[], dist
 
     :param dendro_df: pandas dataframe containing data used to generate dendrogram, columns will result in dendrogram leaves.
     :param subplot_df: pandas dataframe containing data used to generate plot below dendrogram.
-    :param str title: the title of the figure
+    :param str title: the title of the figure.
     :param list dendro_labels: list of strings for dendrogram leaf nodes labels.
-    :param str distfun:distance measure to be used ('euclidean', 'maximum', 'manhattan', 'canberra', 'binary', 'minkowski' or 'jaccard')
-    :param str linkagefun: hierarchical/agglomeration method to be used ('single', 'complete', 'average', 'weighted', 'centroid', 'median' or 'ward')
+    :param str distfun: distance measure to be used (‘euclidean‘, ‘maximum‘, ‘manhattan‘, ‘canberra‘, ‘binary‘, ‘minkowski‘ or ‘jaccard‘).
+    :param str linkagefun: hierarchical/agglomeration method to be used (‘single‘, ‘complete‘, ‘average‘, ‘weighted‘, ‘centroid‘, ‘median‘ or ‘ward‘).
     :param float hang: height at which the dendrogram leaves should be placed.
-    :param str subplot: type of plot to be shown below dendrogram ('module colors' or 'heatmap').
-    :param list[list] subplot_colorscale: colorscale to be used in the subplot.
-    :param bool color_missingvals: if set to True, plots missing values as grey in the heatmap.
-    :param bool row_annotation:if True, adds a color-coded column at the left of the heatmap.
-    :param bool col_annotation: if True, adds a color-coded row at the bottom of the heatmap.
+    :param str subplot: type of plot to be shown below the dendrogram (´module colors´ or ´heatmap´).
+    :param list subplot_colorscale: colorscale to be used in the subplot.
+    :param bool color_missingvals: if set to `True`, plots missing values as grey in the heatmap.
+    :param bool row_annotation: if `True`, adds a color-coded column at the left of the heatmap.
+    :param bool col_annotation: if `True`, adds a color-coded row at the bottom of the heatmap.
     :param int width: the width of the figure.
     :param int height: the height of the figure.
     :return: Plotly object figure.
@@ -309,10 +309,10 @@ def plot_complex_dendrogram(dendro_df, subplot_df, title, dendro_labels=[], dist
 
     if subplot == 'module colors':
         figure = tools.make_subplots(rows=2, cols=1, print_grid=False)
-    
+
         for i in list(dendrogram['data']):
             figure.append_trace(i, 1, 1)
-        
+
         shapes = plot_dendrogram_guidelines(dendro_tree, dendrogram)
         moduleColors = get_module_color_annotation(dendro_labels, col_annotation=col_annotation, bygene=True, module_colors=subplot_df, dendrogram=dendrogram)
         figure.append_trace(moduleColors, 2, 1)
@@ -323,16 +323,16 @@ def plot_complex_dendrogram(dendro_df, subplot_df, title, dendro_labels=[], dist
                               'yaxis':dict(domain=[0.2, 1]),
                               'yaxis2':dict(domain=[0, 0.19], title='Module colors', ticks='', showticklabels=False)})
 
-        
-    elif subplot == 'heatmap':        
+
+    elif subplot == 'heatmap':
         if all(list(subplot_df.columns.map(lambda x: subplot_df[x].between(-1,1, inclusive=True).all()))) != True:
             df = wgcnaAnalysis.get_percentiles_heatmap(subplot_df, dendro_tree, bydendro=True, bycols=False).T
         else:
             df = wgcnaAnalysis.df_sort_by_dendrogram(wgcnaAnalysis.df_sort_by_dendrogram(subplot_df, dendro_tree).T, dendro_tree)
 
         heatmap = get_heatmap(df, colorscale=subplot_colorscale, color_missing=color_missingvals)
-        
-        
+
+
         if row_annotation == True and col_annotation == True:
             figure = tools.make_subplots(rows=3, cols=2, specs=[[{'colspan':2}, None],
                                                               [{}, {}],
@@ -341,11 +341,11 @@ def plot_complex_dendrogram(dendro_df, subplot_df, title, dendro_labels=[], dist
                 figure.append_trace(i, 1, 1)
             for j in list(heatmap['data']):
                 figure.append_trace(j, 2, 2)
-            
+
             r_annot, c_annot = get_module_color_annotation(list(df.index), row_annotation=row_annotation, col_annotation=col_annotation, bygene=False)
             figure.append_trace(r_annot, 2, 1)
             figure.append_trace(c_annot, 3, 1)
-            
+
             figure['layout'] = layout
             figure.layout.template = 'plotly_white'
             figure['layout'].update({'xaxis':dict(ticks='', showticklabels=False, anchor='y'),
@@ -356,30 +356,30 @@ def plot_complex_dendrogram(dendro_df, subplot_df, title, dendro_labels=[], dist
                                      'yaxis2':dict(domain=[0.015, 0.635], autorange='reversed', ticks='', showticklabels=True, automargin=True, anchor='x2'),
                                      'yaxis3':dict(domain=[0.01, 0.635], autorange='reversed', ticks='', showticklabels=False, automargin=True, anchor='x3'),
                                      'yaxis4':dict(domain=[0,0.01], ticks='', showticklabels=False, automargin=True, anchor='x4')})
-                                     
-        
-        
+
+
+
         elif row_annotation == False and col_annotation == False:
             figure = tools.make_subplots(rows=2, cols=1, print_grid=False)
-        
+
             for i in list(dendrogram['data']):
                 figure.append_trace(i, 1, 1)
             for j in list(heatmap['data']):
                 figure.append_trace(j, 2, 1)
-        
+
             figure['layout'] = layout
             figure.layout.template = 'plotly_white'
             figure.layout.update({'xaxis':dict(ticktext=np.array(dendrogram['layout']['xaxis']['ticktext']), tickvals=list(dendrogram['layout']['xaxis']['tickvals'])),
                               'yaxis2':dict(autorange='reversed')})
-        
+
         elif row_annotation == True:
             figure = tools.make_subplots(rows=2, cols=2, specs=[[{'colspan':2}, None],
-                                                              [{}, {}]], print_grid=False)          
+                                                              [{}, {}]], print_grid=False)
             for i in list(dendrogram['data']):
                 figure.append_trace(i, 1, 1)
             for j in list(heatmap['data']):
                 figure.append_trace(j, 2, 2)
-            
+
             r_annot = get_module_color_annotation(list(df.index), row_annotation=row_annotation, col_annotation=col_annotation, bygene=False)
             figure.append_trace(r_annot, 2, 1)
 
@@ -391,18 +391,18 @@ def plot_complex_dendrogram(dendro_df, subplot_df, title, dendro_labels=[], dist
                                      'yaxis':dict(automargin=True, anchor='x'),
                                      'yaxis2':dict(autorange='reversed', ticks='', showticklabels=True, automargin=True, anchor='x2'),
                                      'yaxis3':dict(domain=[0, 0.64], ticks='', showticklabels=False, automargin=True, anchor='x3')})
-        
+
         elif col_annotation == True:
             figure = tools.make_subplots(rows=3, cols=1, specs=[[{}], [{}], [{}]], print_grid=False)
-            
+
             for i in list(dendrogram['data']):
                 figure.append_trace(i, 1, 1)
             for j in list(heatmap['data']):
                 figure.append_trace(j, 3, 1)
-            
+
             c_annot = get_module_color_annotation(list(df.index), row_annotation=row_annotation, col_annotation=col_annotation, bygene=False)
             figure.append_trace(c_annot, 2, 1)
-            
+
             figure['layout'] = layout
             figure.layout.template = 'plotly_white'
             figure['layout'].update({'xaxis':dict(ticktext=np.array(dendrogram['layout']['xaxis']['ticktext']), tickvals=list(dendrogram['layout']['xaxis']['tickvals']), automargin=True, anchor='y'),
@@ -412,7 +412,7 @@ def plot_complex_dendrogram(dendro_df, subplot_df, title, dendro_labels=[], dist
                                      'yaxis2':dict(domain=[0.615, 0.625], ticks='', showticklabels=False, automargin=True, anchor='x2'),
                                      'yaxis3':dict(domain=[0, 0.61], autorange='reversed', ticks='', showticklabels=False, automargin=True, anchor='x3')})
         else: pass
-    
+
     else: pass
-   
+
     return figure

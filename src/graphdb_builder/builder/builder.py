@@ -1,12 +1,15 @@
 """
-    **builder.py**
     Builds the database in two main steps:
+    
     1) Imports all the data from ontologies, databases and experiments
     2) Loads these data into the database
+    
     The module can perform full updates, executing both steps for all the ontologies,
     databases and experiments or a partial update. Partial updates can execute step 1 or
     step 2 for specific data.
+
 """
+
 import os
 import sys
 import argparse
