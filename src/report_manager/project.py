@@ -15,7 +15,7 @@ from report_manager.dataset import Dataset, ProteomicsDataset, ClinicalDataset, 
 from analytics_core.viz import viz
 from analytics_core import utils as acore_utils
 from report_manager import report as rp, utils, knowledge
-from report_manager.queries import query_utils
+from graphdb_connector import query_utils
 from graphdb_connector import connector
 import logging
 import logging.config
@@ -387,11 +387,15 @@ class Project:
                     if data_type == "proteomics":
                         if "proteomics" in self.configuration_files:
                             configuration = ckg_utils.get_configuration(self.configuration_files["proteomics"])
+                        print("Getting proteomics configuration")
                         dataset = ProteomicsDataset(self.identifier, data={}, configuration=configuration, analyses={}, analysis_queries={}, report=None)
+                        print("Proteomics done")
                     elif data_type == "clinical":
                         if "clinical" in self.configuration_files:
                             configuration = ckg_utils.get_configuration(self.configuration_files["clinical"])
+                        print("Getting clinical configuration")
                         dataset = ClinicalDataset(self.identifier, data={}, configuration=configuration, analyses={}, analysis_queries={}, report=None)
+                        print("Clinical done")
                     elif data_type == "wes" or data_type == "wgs":
                         if "wes" in self.configuration_files:
                             configuration = ckg_utils.get_configuration(self.configuration_files["wes"])

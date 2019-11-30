@@ -232,7 +232,6 @@ class Knowledge:
                 query = cypher_queries[query_name]['query']
                 for r,by in replace:
                     query = query.replace(r,by)
-                print(query_name, query)
                 query_data[query_name] = self.send_query(query)
         except Exception as err:
             exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -377,7 +376,7 @@ class ProteomicsKnowledge(Knowledge):
         #self.relationships.update(correlation_knowledge[1])
         
         nodes = self.generate_cypher_nodes_list()
-        queries_results = self.query_data(replace=[('PROTEINIDS',nodes)])
+        queries_results = self.query_data(replace=[('PROTEINIDS',nodes), ('PROJECTID', self.identifier)])
         queries_knowledge = self.generate_knowledge_from_queries(entity='Protein', queries_results=queries_results)
         self.nodes.update(queries_knowledge[0])
         self.relationships.update(queries_knowledge[1])

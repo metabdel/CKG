@@ -9,7 +9,7 @@ import dash_html_components as html
 import ckg_utils
 from graphdb_connector import connector
 from graphdb_builder import builder_utils
-from report_manager.queries import query_utils
+from graphdb_connector import query_utils
 
 try:
     cwd = os.path.abspath(os.path.dirname(__file__))
@@ -165,9 +165,12 @@ def quick_numbers_panel():
     project_ids = [(d['name'], d['id']) for d in driver.nodes.match("Project")]
     project_links = [html.H4('Available Projects:')]
     for project_name, project_id in project_ids:
-        project_links.append(dcc.Link(project_name.title(),
-                     href='/apps/project?project_id={}&force=0'.format(project_id),
-                     className="button_link"))
+        project_links.append(html.A(project_name.title(),
+                                    id='link-internal',
+                                    href='/apps/project?project_id={}&force=0'.format(project_id),
+                                    target='', 
+                                    n_clicks=0,
+                                    className="button_link"))
         
     project_dropdown = [html.H6('Project finder:'),
                         dcc.Dropdown(id='project_option', 
@@ -180,12 +183,13 @@ def quick_numbers_panel():
                         html.H4('',id='project_url')]
     
     navigation_links = [html.H4('Navigate to:'),
-        				dcc.Link("Database Imports", href="/apps/imports", className="nav_link"),
-                        dcc.Link("Project Creation", href="/apps/projectCreationApp", className="nav_link"),
-                        dcc.Link("Upload Data", href="/apps/dataUploadApp", className="nav_link")]
+        				html.A("Database Imports", href="/apps/imports", className="nav_link"),
+                        html.A("Project Creation", href="/apps/projectCreationApp", className="nav_link"),
+                        html.A("Upload Data", href="/apps/dataUploadApp", className="nav_link")]
     
     layout = [html.Div(children=navigation_links),
-              html.Div(children=project_links[0:5] + project_dropdown),
+              html.Div(children=project_links[0:5]),
+              html.Div(children=project_dropdown),
               dcc.Store(id='db_stats_df', data=get_db_stats_data()),
               html.Div(id='db-creation-date'),
               html.Br(),
