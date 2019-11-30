@@ -52,18 +52,20 @@ def transform_into_wide_format(data, index, columns, values, extra=[]):
         result = transform_into_wide_format(df, index='index', columns='x', values='y', extra='group')
     
     """
-    df = data.copy()
-    if not df.empty:
-        cols = [columns, values]
-        cols.extend(index)
-        if len(extra) > 0:
-            extra.extend(index)
-            extra_cols = df[extra].set_index(index)
-        df = df[cols]
-        df = df.pivot_table(index=index, columns=columns, values=values)
-        df = df.join(extra_cols)
-        df = df.drop_duplicates()
-        df = df.reset_index()
+    df = pd.DataFrame()
+    if data is not None:
+        df = data.copy()
+        if not df.empty:
+            cols = [columns, values]
+            cols.extend(index)
+            if len(extra) > 0:
+                extra.extend(index)
+                extra_cols = df[extra].set_index(index)
+            df = df[cols]
+            df = df.pivot_table(index=index, columns=columns, values=values)
+            df = df.join(extra_cols)
+            df = df.drop_duplicates()
+            df = df.reset_index()
 
     return df
 
@@ -82,12 +84,14 @@ def transform_into_long_format(data, drop_columns, group, columns=['name','y']):
 
         result = transform_into_long_format(df, drop_columns=['sample', 'subject'], group='group', columns=['name','y'])
     """
-    data = data.drop(drop_columns, axis=1)
+    long_data = pd.DataFrame()
+    if data is not None:
+        data = data.drop(drop_columns, axis=1)
     
-    long_data = pd.melt(data, id_vars=group, var_name=columns[0], value_name=columns[1])
-    long_data = long_data.set_index(group)
-    long_data.columns = columns
-    
+        long_data = pd.melt(data, id_vars=group, var_name=columns[0], value_name=columns[1])
+        long_data = long_data.set_index(group)
+        long_data.columns = columns
+        
     return long_data
 
 def get_ranking_with_markers(data, drop_columns, group, columns, list_markers, annotation={}):
@@ -106,12 +110,14 @@ def get_ranking_with_markers(data, drop_columns, group, columns, list_markers, a
 
         result = get_ranking_with_markers(data, drop_columns=['sample', 'subject'], group='group', columns=['name', 'y'], list_markers, annotation={})
     """
-    long_data = transform_into_long_format(data, drop_columns, group, columns)
-    if len(set(long_data['name'].values.tolist()).intersection(list_markers)) > 0:
-        long_data = long_data.drop_duplicates()
-        long_data['symbol'] = [ 17 if p in list_markers else 0 for p in long_data['name'].tolist()]
-        long_data['size'] = [25 if p in list_markers else 7 for p in long_data['name'].tolist()]
-        long_data['name'] = [p+' marker in '+annotation[p] if p in annotation else p for p in long_data['name'].tolist()]
+    long_data = pd.DataFrame()
+    if data is not None:
+        long_data = transform_into_long_format(data, drop_columns, group, columns)
+        if len(set(long_data['name'].values.tolist()).intersection(list_markers)) > 0:
+            long_data = long_data.drop_duplicates()
+            long_data['symbol'] = [ 17 if p in list_markers else 0 for p in long_data['name'].tolist()]
+            long_data['size'] = [25 if p in list_markers else 7 for p in long_data['name'].tolist()]
+            long_data['name'] = [p+' marker in '+annotation[p] if p in annotation else p for p in long_data['name'].tolist()]
 
     return long_data
 
@@ -478,6 +484,43 @@ def get_clinical_measurements_ready(df, subject_id='subject', sample_id='biologi
     
     return df
 
+def get_summary_data_matrix(data):
+    """ 
+    Returns some statistics on the data matrix provided.
+    
+    :param data: pandas dataframe.
+    :return: dictionary with the type of statistics as key and the statistic as value in the shape of a pandas data frame
+
+    Example::
+
+        result = get_summary_data_matrix(data)
+    """
+    summary = {}
+    summary["Data Matrix Shape"] = pd.DataFrame(data=[data.shape], columns=["Rows", "Columns"])
+    summary["Stats"] = data.describe().transpose().reset_index()
+    
+    return summary
+
+
+def check_normality(data):
+    """ 
+    Checks whether columns (features) in the provided matrix follow a normal distribution (Requires at least 8 rows). Uses
+    Pigouin test Normality: https://pingouin-stats.org/generated/pingouin.normality.html
+    
+    :param data: pandas dataframe.
+    :return: a pandas data frame with features as rows, test statistic, pvalue, true/false normally distributed. None if
+    number of rows below 8.
+    
+    Example::
+
+        result = check_normality(data)
+    """
+    test_normality = None
+    
+    if data.shape[0] >= 8:
+        test_normality = pg.normality(data, method='normaltest').reset_index()
+        
+    return test_normality
 
 def run_pca(data, drop_cols=['sample', 'subject'], group='group', components=2, dropna=True):
     """ 
@@ -742,7 +785,7 @@ def get_counts_permutation_fdr(value, random, observed, n, alpha):
     """
     a = random[random <= value.values[0]].shape[0] + 0.01 #Offset in case of a = 0.0
     b = (observed <= value.values[0]).sum()
-    qvalue = (a/b * 1/float(n))
+    qvalue = (a/b/float(n))
 
     return (qvalue, qvalue <= alpha)
 
@@ -794,7 +837,8 @@ def run_correlation(df, alpha=0.05, subject='subject', group='group', method='pe
                 rejected, padj = apply_pvalue_fdrcorrection(correlation["pvalue"].tolist(), alpha=alpha, method=correction[1])
             elif correction[0] == '2fdr':
                 rejected, padj = apply_pvalue_twostage_fdrcorrection(correlation["pvalue"].tolist(), alpha=alpha, method=correction[1])
-            correlation["padj"] = padj
+            correlation["pvalue"] = [round(i, 8) for i in correlation['pvalue']] #limit number of decimals to 8 and avoid scientific notation
+            correlation["padj"] = [round(i, 8) for i in padj] #limit number of decimals to 8 and avoid scientific notation
             correlation["rejected"] = rejected
             correlation = correlation[correlation.rejected]
             
@@ -862,6 +906,7 @@ def calculate_rm_correlation(df, x, y, subject):
     # Extract p-value
     pvalue = table.loc[a, 'PR(>F)']
     pvalue *= 0.5
+    pvalue = [round(i, 8) for i in pvalue] #limit number of decimals to 8 and avoid scientific notation
     
     #r, dof, pvalue, ci, power = pg.rm_corr(data=df, x=x, y=y, subject=subject)
 
@@ -1288,7 +1333,7 @@ def run_anova(df, alpha=0.05, drop_cols=["sample",'subject'], subject='subject',
             
         max_perm = get_max_permutations(df, group=group)
         res = format_anova_table(df, aov_results, pairwise_results,  group, permutations, alpha, max_perm)
-        res['method'] = 'One-way anova'
+        res['Method'] = 'One-way anova'
     
     return res
 
@@ -1319,7 +1364,7 @@ def run_repeated_measurements_anova(df, alpha=0.05, drop_cols=['sample'], subjec
         
     max_perm = get_max_permutations(df, group=group)
     res = format_anova_table(df, aov_results, pairwise_results, group, permutations, alpha, max_perm)
-    res['method'] = 'Repeated measurements anova'
+    res['Method'] = 'Repeated measurements anova'
     
     return res
 
@@ -1418,7 +1463,7 @@ def run_ttest(df, condition1, condition2, alpha = 0.05, drop_cols=["sample"], su
     scores['group2'] = condition2
     scores['FC'] = [np.power(2,np.abs(x)) * -1 if x < 0 else np.power(2,np.abs(x)) for x in scores['log2FC'].values]
     scores['-log10 pvalue'] = [- np.log10(x) for x in scores['padj'].values]
-    scores['method'] = method
+    scores['Method'] = method
     scores = scores.reset_index() 
 
     return scores
@@ -1445,7 +1490,6 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
         R_function = R('''result <- function(data, res_type, s0, nperms) {
                                     samr(data=data, resp.type=res_type, s0=s0, nperms=nperms, random.seed = 12345, s0.perc=NULL)
                                     }''')
-
         paired = check_is_paired(df, subject, group)
         groups = df[group].unique()
         samples = len(df[group])
@@ -1477,11 +1521,13 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
 
         delta = alpha
         data = base.list(x=base.as_matrix(df.values), y=base.unlist(labels), geneid=base.unlist(df.index), logged2=True)
-        
+        if s0 is None or s0 == "null":
+            s0 = ro.r("NULL")
         samr_res = R_function(data=data, res_type=method, s0=s0, nperms=permutations)
         delta_table = samr.samr_compute_delta_table(samr_res)
         siggenes_table = samr.samr_compute_siggenes_table(samr_res, delta, data, delta_table, all_genes=True)
         nperms_run = samr_res[8][0]
+        s0_used = samr_res[13][0]
         f_stats = samr_res[9]
         pvalues = samr.samr_pvalues_from_perms(samr_res[9], samr_res[21])
 
@@ -1541,14 +1587,22 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
             df2 = pd.DataFrame()
 
         res = res.set_index('identifier').join(qvalues.set_index('identifier'))
-        res['correction'] = 'permutation FDR ({} perm)'.format(nperms_run)
-        res['-log10 pvalue'] = [- np.log10(x) for x in res['pvalue'].values]
+        if nperms_run < permutations:
+            rejected, padj = apply_pvalue_fdrcorrection(res["pvalue"].tolist(), alpha=alpha, method = 'indep')
+            res['padj'] = padj
+            res['correction'] = 'FDR correction BH'
+            res['Note'] = 'Maximum number of permutations: {}. Corrected instead using FDR correction BH'.format(nperms_run)
+        else:
+            res['correction'] = 'permutation FDR ({} perm)'.format(nperms_run)
         res['rejected'] = res['padj'] <= alpha
+        res['-log10 pvalue'] = [- np.log10(x) for x in res['pvalue'].values]
+        
         res['Method'] = 'SAMR {}'.format(method)
+        res['s0'] = s0_used
         res = res.reset_index()
     else:
         res = run_anova(df, alpha=alpha, drop_cols=drop_cols, subject=subject, group=group, permutations=permutations)
-
+    
     return res#, df2
 
 
@@ -1652,7 +1706,8 @@ def run_enrichment(data, foreground, background, foreground_pop, background_pop,
     if len(pvalues) > 1:
         rejected, padj = apply_pvalue_fdrcorrection(pvalues, alpha=0.05, method='indep')
         result = pd.DataFrame({'terms':terms, 'identifiers':ids, 'foreground':fnum, 'background':bnum, 'pvalue':pvalues, 'padj':padj, 'rejected':rejected})
-        #result = result[result.rejected]
+        result = result.sort_values(by='padj',ascending=True)
+        
     return result
 
 def calculate_fold_change(df, condition1, condition2):

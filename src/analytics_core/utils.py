@@ -83,6 +83,11 @@ def networkx_to_cytoscape(graph):
 
     return cy_elements, mouseover_node
 
+def json_network_to_networkx(graph_json):
+    graph = json_graph.node_link_graph(graph_json)
+
+    return graph
+
 def get_clustergrammer_link(net, filename=None):
     try:
         from StringIO import StringIO

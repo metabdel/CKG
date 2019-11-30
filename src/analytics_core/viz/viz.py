@@ -547,7 +547,7 @@ def get_volcanoplot(results, args):
         else:
             range_x = args["range_x"]
         if "range_y" not in args:
-            range_y = [0,max(abs(result['y']))+0.3]
+            range_y = [0,max(abs(result['y']))+1.]
         else:
             range_y = args["range_y"]
         trace = go.Scatter(x=result['x'],
@@ -555,7 +555,12 @@ def get_volcanoplot(results, args):
                         mode='markers',
                         text=result['text'],
                         hoverinfo='text',
-                        marker={'color': result['color'], 'colorscale': args["colorscale"], 'showscale': args['showscale'], 'size': args['marker_size']}
+                        marker={'color':result['color'], 
+                                'colorscale': args["colorscale"], 
+                                'showscale': args['showscale'], 
+                                'size': args['marker_size'],
+                                'line': {'color':result['color'], 'width':2}
+                                }
                         )
 
         figure["data"].append(trace)
@@ -605,7 +610,7 @@ def get_volcanoplot(results, args):
         figures.append(dcc.Graph(id= identifier, figure = figure))
     return figures
 
-def run_volcano(data, identifier, args={'alpha':0.05, 'fc':2, 'colorscale':'Blues', 'showscale': False, 'marker_size':6, 'x_title':'log2FC', 'y_title':'-log10(pvalue)', 'num_annotations':10}):
+def run_volcano(data, identifier, args={'alpha':0.05, 'fc':2, 'colorscale':'Blues', 'showscale': False, 'marker_size':8, 'x_title':'log2FC', 'y_title':'-log10(pvalue)', 'num_annotations':10}):
     """ 
     This function parsers the regulation data from statistical tests and creates volcano plots for all distinct group comparisons. Significant hits with lowest adjusted p-values are highlighed.
 
@@ -637,6 +642,7 @@ def run_volcano(data, identifier, args={'alpha':0.05, 'fc':2, 'colorscale':'Blue
     for group in grouping.groups: 
         signature = grouping.get_group(group)
         color = []
+        line_colors = []
         text = []
         annotations = []
         num_annotations = args['num_annotations'] if 'num_annotations' in args else 10
@@ -663,7 +669,8 @@ def run_volcano(data, identifier, args={'alpha':0.05, 'fc':2, 'colorscale':'Blue
                                     'ax': 0, 
                                     'ay': -10,
                                     'font': dict(color = "#2c7bb6", size = 10)})
-                    color.append('#2c7bb6')
+                    color.append('rgba(44, 123, 182, 0.2)')
+                    line_colors.append('#2c7bb6')
                 elif row['FC'] >= args['fc']:
                     annotations.append({'x': row['log2FC'], 
                                     'y': row['-log10 pvalue'], 
@@ -674,33 +681,20 @@ def run_volcano(data, identifier, args={'alpha':0.05, 'fc':2, 'colorscale':'Blue
                                     'ax': 0, 
                                     'ay': -10,
                                     'font': dict(color = "#d7191c", size = 10)})
-                    color.append('#d7191c')
+                    color.append('rgba(215, 25, 28, 0.2)')
+                    line_colors.append('#d7191c')
                 elif row['FC'] < -1.:
-                    annotations.append({'x': row['log2FC'], 
-                                    'y': row['-log10 pvalue'], 
-                                    'xref':'x', 
-                                    'yref': 'y', 
-                                    'text': str(row['identifier']), 
-                                    'showarrow': False, 
-                                    'ax': 0, 
-                                    'ay': -10,
-                                    'font': dict(color = "#abd9e9", size = 10)})
-                    color.append('#abd9e9')
+                    color.append('rgba(171, 217, 233, 0.1)')
+                    line_colors.append('#abd9e9')
                 elif row['FC'] > 1.:
-                    annotations.append({'x': row['log2FC'], 
-                                    'y': row['-log10 pvalue'], 
-                                    'xref':'x', 
-                                    'yref': 'y', 
-                                    'text': str(row['identifier']), 
-                                    'showarrow': False, 
-                                    'ax': 0, 
-                                    'ay': -10,
-                                    'font': dict(color = "#fdae61", size = 10)})
-                    color.append('#fdae61')
+                    color.append('rgba(253, 174, 97, 0.1)')
+                    line_colors.append('#fdae61')
                 else:
-                    color.append('lightblue')
+                    color.append('rgba(153, 153, 153, 0.1)')
+                    line_colors.append('#999999')
             else:
-                color.append('silver')
+                color.append('rgba(153, 153, 153, 0.1)')
+                line_colors.append('#999999')
 
         if len(annotations) < num_annotations:
             num_annotations = len(annotations)
@@ -711,7 +705,7 @@ def run_volcano(data, identifier, args={'alpha':0.05, 'fc':2, 'colorscale':'Blue
         else:
             min_pval_sign = 0
 
-        volcano_plot_results[(gidentifier, title)] = {'x': signature['log2FC'].values, 'y': signature['-log10 pvalue'].values, 'text':text, 'color': color, 'pvalue':min_pval_sign, 'annotations':annotations[0:num_annotations]}
+        volcano_plot_results[(gidentifier, title)] = {'x': signature['log2FC'].values, 'y': signature['-log10 pvalue'].values, 'text':text, 'color': color, 'line_color':line_colors, 'pvalue':min_pval_sign, 'annotations':annotations[0:num_annotations]}
 
     figures = get_volcanoplot(volcano_plot_results, args)
 
@@ -1063,7 +1057,14 @@ def get_network(data, identifier, args):
                 data = data[np.abs(data[args['values']]) > args['cutoff']]
             else:
                 data = data > args['cutoff']
-                
+               
+        data[args["source"]] = [str(n).replace("'","") for n in data[args["source"]]]
+        data[args["target"]] = [str(n).replace("'","") for n in data[args["target"]]]
+        
+        if "values" not in args:
+            args["values"] = 'width'
+            data[args["values"]] = 1 
+        
         data = data.rename(index=str, columns={args['values']: "width"})
         data['edge_width'] = data['width'].apply(np.abs)
         min_edge_value = data['edge_width'].min()
@@ -1132,11 +1133,13 @@ def get_network(data, identifier, args):
         args['stylesheet'] = stylesheet
         args['layout'] = layout
         
-        
         cy_elements, mouseover_node = utils.networkx_to_cytoscape(vis_graph)
+        
+        app_net = get_cytoscape_network(cy_elements, identifier, args)
+        
         #args['mouseover_node'] = mouseover_node
 
-        net = {"notebook":[cy_elements, stylesheet,layout], "app":get_cytoscape_network(cy_elements, identifier, args), "net_tables":(nodes_fig_table, edges_fig_table), "net_json":json_graph.node_link_data(graph)}
+        net = {"notebook":[cy_elements, stylesheet,layout], "app": app_net, "net_tables":(nodes_fig_table, edges_fig_table), "net_json":json_graph.node_link_data(graph)}
     return net
 
 def get_network_style(node_colors, color_edges):
@@ -1193,7 +1196,7 @@ def visualize_notebook_network(network, notebook_type='jupyter', layout={'width'
                                                             'cutoff':0, 'cutoff_abs':True,
                                                             'values':'weight','node_size':'degree', 
                                                             'title':'Network Figure', 'color_weight': True})
-        visualize_notebook_network(network, notebook_type='jupyter', layout={'width':'100%', 'height':'700px'})
+        visualize_notebook_network(net['notebook'], notebook_type='jupyter', layout={'width':'100%', 'height':'700px'})
     """
     net = None
     if notebook_type == 'jupyter':
@@ -1365,7 +1368,7 @@ def get_table(data, identifier, title, colors = ('#C2D4FF','#F5F8FF'), subset = 
 
         result = get_table(data, identifier='table', title='Table Figure', subset = None)
     """
-    if data is not None and not data.empty:
+    if data is not None and isinstance(data, pd.DataFrame) and not data.empty:
         if subset is not None:
             data = data[subset]
 
@@ -1381,14 +1384,14 @@ def get_table(data, identifier, title, colors = ('#C2D4FF','#F5F8FF'), subset = 
 
         data_trace = dash_table.DataTable(id='table_'+identifier,
                                             data=data.to_dict("rows"),
-                                            columns=[{"name": i.replace('_', ' ').title(), "id": i} for i in data.columns],
+                                            columns=[{"name": str(i).replace('_', ' ').title(), "id": i} for i in data.columns],
                                             css=[{
                                                 'selector': '.dash-cell div.dash-cell-value',
                                                 'rule': 'display: inline; white-space: inherit; overflow: inherit; text-overflow: inherit;'
                                             }],
-                                            style_data={'whiteSpace': 'normal'},
+                                            style_data={'whiteSpace': 'normal', 'height': 'auto'},
                                             style_cell={
-                                                'minWidth': '50px', 'maxWidth': '500px', 
+                                                'minWidth': '50px', 'maxWidth': '500px',
                                                 'textAlign': 'left', 'padding': '1px', 'vertical-align': 'top'
                                             },
                                             style_table={
@@ -1406,7 +1409,7 @@ def get_table(data, identifier, title, colors = ('#C2D4FF','#F5F8FF'), subset = 
                                             },
                                             style_data_conditional=[{
                                                 "if": 
-                                                    {"column_id": "rejected", "filter_query": 'rejected eq "TRUE"'},
+                                                    {"column_id": "Rejected", "filter_query": 'Rejected eq "True"'},
                                                     "backgroundColor": "#3B8861",
                                                     'color': 'white'
                                                 },
@@ -1423,6 +1426,20 @@ def get_table(data, identifier, title, colors = ('#C2D4FF','#F5F8FF'), subset = 
         table = None
 
     return html.Div(table)
+
+def get_multi_table(data,identifier, title):
+    tables = [html.H2(title)]
+    if data is not None and isinstance(data, dict):
+        for subtitle in data:
+            df = data[subtitle]
+            if len(df.columns) > 10:
+                df = df.transpose()
+            table = get_table(df, identifier=identifier+"_"+subtitle, title=subtitle)
+            if table is not None:
+                tables.append(table)
+    
+    return html.Div(tables)
+            
 
 def get_violinplot(data, identifier, args):
     """ 

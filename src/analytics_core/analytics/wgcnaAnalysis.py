@@ -42,23 +42,24 @@ def get_data(data, drop_cols_exp=['subject', 'group', 'sample', 'index'], drop_c
     """   
     wgcna_data = {}
     for i in data:
-        df = data[i]
-        if i == 'clinical':
-            df.drop_duplicates(keep='first', inplace=True)
-            df = df.reset_index()
-            df['rows'] = df[['subject', 'group']].apply(lambda x: '_'.join(x), axis=1)
-            df.set_index(['rows'], inplace=True)
-            df = df.reindex(index=natsorted(df.index))
-            df = df.drop(drop_cols_cli, axis=1)
+        if data[i] is not None:
+            df = data[i]
+            if i == 'clinical':
+                df.drop_duplicates(keep='first', inplace=True)
+                df = df.reset_index()
+                df['rows'] = df[['subject', 'group']].apply(lambda x: '_'.join(x), axis=1)
+                df.set_index(['rows'], inplace=True)
+                df = df.reindex(index=natsorted(df.index))
+                df = df.drop(drop_cols_cli, axis=1)
 
-        else:
-            df = df.reset_index()
-            df['rows'] = df[['subject', 'group']].apply(lambda x: '_'.join(x), axis=1)
-            df.set_index(['rows'], inplace=True)
-            df = df.reindex(index=natsorted(df.index))
-            df = df.drop(drop_cols_exp, axis=1)
+            else:
+                df = df.reset_index()
+                df['rows'] = df[['subject', 'group']].apply(lambda x: '_'.join(x), axis=1)
+                df.set_index(['rows'], inplace=True)
+                df = df.reindex(index=natsorted(df.index))
+                df = df.drop(drop_cols_exp, axis=1)
 
-        wgcna_data[i] = df
+            wgcna_data[i] = df
 
     return wgcna_data
 
