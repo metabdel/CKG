@@ -34,19 +34,28 @@ def readDataset(uri):
     return data
 
 def readDataFromCSV(uri):
-    #Read the data from csv file
+    """
+    Read the data from csv file
+
+    """
     data = pd.read_csv(uri, sep = ',', low_memory=False)
 
     return data
 
 def readDataFromTXT(uri):
-    #Read the data from tsv or txt file
+    """
+    Read the data from tsv or txt file
+
+    """
     data = pd.read_csv(uri, sep = '\t', low_memory=False)
 
     return data
 
 def readDataFromExcel(uri):
-    #Read the data from Excel file
+    """
+    Read the data from Excel file
+
+    """
     data = pd.read_excel(uri, index_col=None, na_values=['NA'], convert_float = True)
 
     return data
@@ -120,6 +129,8 @@ def setup_config(data_type="databases"):
             config = ckg_utils.get_configuration(os.path.join(dirname, ckg_config.experiments_config_file))
         elif data_type == 'builder':
             config = ckg_utils.get_configuration(os.path.join(dirname, ckg_config.builder_config_file))
+        elif data_type == 'users':
+            config = ckg_utils.get_configuration(os.path.join(dirname, ckg_config.users_config_file))
 
     except Exception as err:
         raise Exception("builder_utils - Reading configuration > {}.".format(err))

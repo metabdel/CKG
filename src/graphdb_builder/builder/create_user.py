@@ -10,104 +10,19 @@ import ckg_utils
 import config.ckg_config as ckg_config
 from graphdb_connector import connector
 from graphdb_builder import builder_utils
+from graphdb_builder.users import users_controller as uh
  
 log_config = ckg_config.graphdb_builder_log
 logger = builder_utils.setup_logging(log_config, key='user_creation')
  
 try:
     config = builder_utils.setup_config('builder')
+    uconfig = builder_utils.setup_config('users')
 except Exception as err:
     logger.error("Reading configuration > {}.".format(err))
  
- 
 cwd = os.path.abspath(os.path.dirname(__file__))
-driver = connector.getGraphDatabaseConnectionConfiguration()
- 
-def get_user_creation_queries():
-    """
-    Reads the YAML file containing the queries relevant to user creation, parses the given stream and \
-    returns a Python object (dict[dict]).
-    """
-    try:
-        queries_path = 'user_creation_cypher.yml'
-        user_creation_cypher = ckg_utils.get_queries(os.path.join(cwd, queries_path))
-    except Exception as err:
-        exc_type, exc_obj, exc_tb = sys.exc_info()
-        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        logger.error("Reading queries from file {}: {}, file: {},line: {}, error: {}".format(queries_path, sys.exc_info(), fname, exc_tb.tb_lineno, err))
-    return user_creation_cypher
- 
-def get_new_user_identifier(driver):
-    """
-    Queries the database for the last user identifier and returns a new sequential identifier.
- 
-    :param driver: py2neo driver, which provides the connection to the neo4j graph database.
-    :type driver: py2neo driver
-    :return: User identifier.
-    :rtype: str
-    """
-    query_name = 'increment_user_id'
-    try:
-        user_creation_cypher = get_user_creation_queries()
-        query = user_creation_cypher[query_name]['query']
-        user_identifier = connector.getCursorData(driver, query).values[0][0]
-    except Exception as err:
-        exc_type, exc_obj, exc_tb = sys.exc_info()
-        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        logger.error("Reading query {}: {}, file: {},line: {}, error: {}".format(query, sys.exc_info(), fname, exc_tb.tb_lineno, err))
-    return user_identifier
- 
-def check_if_node_exists(driver, node_property, value):
-	"""
-	Queries the graph database and checks if a node with a specific property and property value already exists.
-	:param driver: py2neo driver, which provides the connection to the neo4j graph database.
-    :type driver: py2neo driver
-	:param str node_property: property of the node.
-	:param value: property value.
-	:type value: str, int, float or bool
-	:return: Pandas dataframe with user identifier if User with node_property and value already exists, \
-			if User does not exist, returns and empty dataframe.
-	"""
-	query_name = 'check_node'
-	try:
-		user_creation_cypher = get_user_creation_queries()
-		query = user_creation_cypher[query_name]['query'].replace('PROPERTY', node_property)
-		for q in query.split(';')[0:-1]:
-			if '$' in q:
-				result = connector.getCursorData(driver, q+';', parameters={'value':value})
-			else:
-				result = connector.getCursorData(driver, q+';')
-	except Exception as err:
-		exc_type, exc_obj, exc_tb = sys.exc_info()
-		fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-		logger.error("Reading query {}: {}, file: {},line: {}, error: {}".format(query_name, sys.exc_info(), fname, exc_tb.tb_lineno, err))
-	return result
 
-def create_db_user(driver, data):
-    """
-    Creates and assigns role to new graph database user, if user not in list of local users.
- 
-    :param driver: py2neo driver, which provides the connection to the neo4j graph database.
-    :type driver: py2neo driver
-    :param Series data: pandas Series with required user information (see set_arguments()).
-    """
-    query_name_add = 'create_db_user'
-    query_name_role = 'add_role_to_db_user'
-    query_list_db_users =  'list_db_users'
- 
-    try:
-        cypher = get_user_creation_queries()
-        db_query = cypher[query_name_add]['query'] + cypher[query_name_role]['query']
-        db_users = connector.getCursorData(driver, cypher[query_list_db_users]['query'],{})
-        if data['username'] not in db_users['username'].to_list() or db_users.empty:
-            for q in db_query.split(';')[0:-1]:
-                result = connector.getCursorData(driver, q+';', parameters=data.to_dict())
-            logger.info("New user created: {}. Result: {}".format(data['username'], result))
-    except Exception as err:
-        exc_type, exc_obj, exc_tb = sys.exc_info()
-        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        logger.error("Reading query {}: {}, file: {},line: {}, error: {}".format(query_name_add, sys.exc_info(), fname, exc_tb.tb_lineno, err))
- 
 def create_user_node(driver, data):
     """
     Creates graph database node for new user and adds respective properties to node.
@@ -118,7 +33,7 @@ def create_user_node(driver, data):
     """
     query_name_node = 'create_user_node'
     try:
-        cypher = get_user_creation_queries()
+        cypher = uh.get_user_creation_queries()
         query = cypher[query_name_node]['query']
         for q in query.split(';')[0:-1]:
             result = connector.getCursorData(driver, q+';', parameters=data.to_dict())
@@ -126,91 +41,41 @@ def create_user_node(driver, data):
     except Exception as err:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        logger.error("Reading query {}: {}, file: {},line: {}, error: {}".format(query_name_node, sys.exc_info(), fname, exc_tb.tb_lineno, err))
- 
- 
-#To use with builder.py
-def extractUsersInfo(filepath, output_file, expiration=365):
-    """
-    Creates new user in the graph database and corresponding node, through the following steps:
-     
-        1. Generates new user identifier
-        2. Checks if a user with given properties already exists in the database. If not:
-        3. Creates new local user (access to graph database)
-        4. Saves data to users.tsv
- 
-    :param str filepath: filepath and filename containing users information.
-    :param str output_file: path to output csv file.
-    :param int expiration: number of days a user is given access.
-    :return: Writes relevant .tsv file for the users in the provided file.
- 
-    .. warning:: This function must be used within *builder.py*.
-    """
-    data = pd.read_excel(filepath).applymap(str)
-    driver = connector.getGraphDatabaseConnectionConfiguration()
-    date = datetime.today() + timedelta(days=expiration)
-    df = []
-    try:
-        user_identifier = get_new_user_identifier(driver)
-        if user_identifier is None:
-            user_identifier = 'U1'
-        new_id = int(re.search('\d+', user_identifier).group())
- 
-        for index, row in data.iterrows():
-            username = check_if_node_exists(driver, 'username', row['username'])
-            name = check_if_node_exists(driver, 'name', row['name'])
-            email = check_if_node_exists(driver, 'email', row['email'])
-            if username.empty and name.empty and email.empty:
-                row['ID'] = 'U{}'.format(new_id)
-                row['acronym'] = ''.join([c for c in row['name'] if c.isupper()])
-                row['rolename'] = 'reader'
-                row['expiration_date'] = date.strftime('%Y-%m-%d')
-                row['image'] = ''
-                create_db_user(driver, row)
-                row['password'] = bcrypt.encrypt(row['password'])
-                df.append(row)
-                new_id += 1
- 
-    except Exception as err:
-        exc_type, exc_obj, exc_tb = sys.exc_info()
-        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        logger.error("Extracting users info: {}, file: {},line: {}".format(sys.exc_info(), fname, exc_tb.tb_lineno))
-    if len(df) > 0:
-        data = pd.DataFrame(df)
-        data['phone_number'] = data['phone_number'].str.split('.').str[0]
-        data = data[['ID', 'acronym', 'name', 'username', 'password', 'email', 'secondary_email', 'phone_number', 'affiliation', 'expiration_date', 'rolename', 'image']]
-        GenerateGraphFiles(data, output_file)
- 
+        logger.error("Reading query {}: {}, file: {},line: {}, error: {}".format(query_name_node, sys.exc_info(), fname, exc_tb.tb_lineno, err)) 
  
 #To use outside builder.py
 def create_user_from_command_line(args, expiration):
-	"""
-	Creates new user in the graph database and corresponding node, from a terminal window (command line), \
-	and adds the new user information to the users excel and import files. Arguments as in set_arguments().
+    """
+    Creates new user in the graph database and corresponding node, from a terminal window (command line), \
+    and adds the new user information to the users excel and import files. Arguments as in set_arguments().
 
-	:param args: object. Contains all the parameters neccessary to create a user ('username', 'name', 'email', \
-				'secondary_email', 'phone_number' and 'affiliation').
-	:type args: any object with __dict__ attribute
-	:param int expiration: number of days users is given access.
+    :param args: object. Contains all the parameters neccessary to create a user ('username', 'name', 'email', \
+                'secondary_email', 'phone_number' and 'affiliation').
+    :type args: any object with __dict__ attribute
+    :param int expiration: number of days users is given access.
 
-	.. note:: This function can be used directly with *python create_user_from_command_line.py -u username \
-				-n user_name -e email -s secondary_email -p phone_number -a affiliation* .
-	"""
-	usersImportDirectory = config['usersImportDirectory']
-	builder_utils.checkDirectory(usersImportDirectory)
-	output_file = os.path.join(usersImportDirectory, 'users.tsv')
-	usersDirectory = config['usersDirectory']
-	ifile = config['usersFile']
+    .. note:: This function can be used directly with *python create_user_from_command_line.py -u username \
+                -n user_name -e email -s secondary_email -p phone_number -a affiliation* .
+    """
+    usersDirectory = os.path.join(config['dataDirectory'], uconfig['usersImportDirectory'])
+    usersFile = os.path.join(usersDirectory, uconfig['usersFile'])
 
-	data = vars(args)
-	excel = pd.read_excel(os.path.join(usersDirectory, ifile), index=0)
-	excel = excel.append(data, ignore_index=True)
-	excel.to_excel(os.path.join(usersDirectory, ifile), index=False)
-	data = pd.DataFrame.from_dict(data, orient='index').T
-	create_user(data, output_file, expiration)
+    usersImportDirectory = config['usersDirectory']
+    builder_utils.checkDirectory(usersImportDirectory)
+    import_file = os.path.join(usersImportDirectory, uconfig['import_file'])
 
+    data = vars(args)
+    df = pd.DataFrame.from_dict(data, orient='index').T.drop('file', axis=1)
+    create_user(df, import_file, expiration)
 
-def create_user_from_file(filepath, output_file, expiration):
+    if os.path.exists(usersFile):
+        excel = pd.read_excel(usersFile, index=0)
+        excel = excel.append(data, ignore_index=True)
+        excel.to_excel(usersFile, index=False)
+    else:
+        df.to_excel(usersFile, index=False)
+
+def create_user_from_file(filepath, expiration):
     """
     Creates new user in the graph database and corresponding node, from an excel file. \
     Rows in the file must be users, and columns must follow set_arguments() fields.
@@ -221,13 +86,24 @@ def create_user_from_file(filepath, output_file, expiration):
  
     .. note:: This function can be used directly with *python create_user_from_file.py -f path_to_file* .
     """
-    usersImportDirectory = config['usersImportDirectory']
+    usersDirectory = os.path.join(config['dataDirectory'], uconfig['usersImportDirectory'])
+    usersFile = os.path.join(usersDirectory, uconfig['usersFile'])
+
+    usersImportDirectory = config['usersDirectory']
     builder_utils.checkDirectory(usersImportDirectory)
-    output_file = os.path.join(usersImportDirectory, 'users.tsv')
- 
-    data = pd.read_excel(filepath).applymap(str)
-    create_user(data, output_file, expiration)    
- 
+    import_file = os.path.join(usersImportDirectory, uconfig['import_file'])
+
+    data = vars(args)
+    data = pd.read_excel(data['file']).applymap(str)
+    create_user(data, import_file, expiration)
+
+    if os.path.exists(usersFile):
+        excel = pd.read_excel(usersFile, index=0)
+        excel = excel.append(data.drop('file', axis=1), ignore_index=True)
+        excel.to_excel(usersFile, index=False)
+    else:
+        data.to_excel(usersFile, index=False)
+
  
 def create_user(data, output_file, expiration=365):
     """
@@ -250,11 +126,11 @@ def create_user(data, output_file, expiration=365):
  
     try:
         for index, row in data.iterrows():
-            username = check_if_node_exists(driver, 'username', row['username'])
-            name = check_if_node_exists(driver, 'name', row['name'])
-            email = check_if_node_exists(driver, 'email', row['email'])
+            username = uh.check_if_node_exists(driver, 'username', row['username'])
+            name = uh.check_if_node_exists(driver, 'name', row['name'])
+            email = uh.check_if_node_exists(driver, 'email', row['email'])
             if username.empty and name.empty and email.empty:
-                user_identifier = get_new_user_identifier(driver)
+                user_identifier = uh.get_new_user_identifier(driver)
                 if user_identifier is None:
                     user_identifier = 'U1'
                 row['ID'] = user_identifier
@@ -262,7 +138,7 @@ def create_user(data, output_file, expiration=365):
                 row['rolename'] = 'reader'
                 row['expiration_date'] = date.strftime('%Y-%m-%d')
                 row['image'] = ''
-                create_db_user(driver, row)
+                uh.create_db_user(driver, row)
                 row['password'] = bcrypt.encrypt(row['password'])
                 create_user_node(driver, row)
                 df.append(row)
@@ -276,28 +152,7 @@ def create_user(data, output_file, expiration=365):
         data = pd.DataFrame(df)
         data['phone_number'] = data['phone_number'].str.split('.').str[0]
         data = data[['ID', 'acronym', 'name', 'username', 'password', 'email', 'secondary_email', 'phone_number', 'affiliation', 'expiration_date', 'rolename', 'image']]
-        GenerateGraphFiles(data, output_file)
- 
-def GenerateGraphFiles(data, output_file):
-    """
-    Saves pandas dataframe to users.tsv.
-    If file already exists, appends new lines. \
-    Else, creates file and writes dataframe to it.
-     
-    :param data: pandas dataframe to be written to .tsv file.
-    :param str output_file: path to output csv file.
-    """
- 
-    if os.path.exists(output_file):
-        with open(output_file, 'a') as f:
-            data.to_csv(path_or_buf = f, sep='\t',
-                        header=False, index=False, quotechar='"',
-                        line_terminator='\n', escapechar='\\')
-    else:
-        with open(output_file, 'w') as f:
-            data.to_csv(path_or_buf = f, sep='\t',
-                        header=True, index=False, quotechar='"',
-                        line_terminator='\n', escapechar='\\')
+        uh.GenerateGraphFiles(data, output_file)
  
 def set_arguments():
     """

@@ -184,10 +184,10 @@ def create_new_project(driver, projectId, data, separator='|'):
  
             store_new_project(external_identifier, data, experimentDir, 'xlsx')
             store_as_file(external_identifier, data, external_identifier, importDir, 'tsv')
-            store_new_relationships(external_identifier, data['responsible'][0].split(separator), [external_identifier], 'IS_RESPONSIBLE', '_responsibles', importDir, 'tsv')
-            store_new_relationships(external_identifier, data['participant'][0].split(separator), [external_identifier], 'PARTICIPATES_IN', '_participants', importDir, 'tsv')
-            store_new_relationships(external_identifier, [external_identifier], disease_ids, 'STUDIES_DISEASE', '_studies_disease', importDir, 'tsv')
-            store_new_relationships(external_identifier, [external_identifier], tissue_ids, 'STUDIES_TISSUE', '_studies_tissue', importDir, 'tsv')
+            store_new_relationships(external_identifier, data['responsible'][0].split(separator), [external_identifier], 'IS_RESPONSIBLE', 'responsibles', importDir, 'tsv')
+            store_new_relationships(external_identifier, data['participant'][0].split(separator), [external_identifier], 'PARTICIPATES_IN', 'participants', importDir, 'tsv')
+            store_new_relationships(external_identifier, [external_identifier], disease_ids, 'STUDIES_DISEASE', 'studies_disease', importDir, 'tsv')
+            store_new_relationships(external_identifier, [external_identifier], tissue_ids, 'STUDIES_TISSUE', 'studies_tissue', importDir, 'tsv')
         else:
             result = pd.DataFrame([''])
             external_identifier = ''

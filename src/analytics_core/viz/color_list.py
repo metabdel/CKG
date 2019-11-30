@@ -82,13 +82,13 @@ def read_colors():
     The format of RGB strings is '#RRGGBB'.
 
     color_dict: map from color name to RGB string
-    rgbs: list of (rgb, names) pairs, where rgb is an RGB code and
-          names is a sorted list of color names
+    rgbs: list of (rgb, names) pairs, where rgb is an RGB code and \
+            names is a sorted list of color names
     """
     color_dict = make_color_dict()
     rgbs = invert_dict(color_dict).items()
     rgbs.sort()
-    
+
     return color_dict, rgbs
 
 

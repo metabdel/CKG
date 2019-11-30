@@ -3,13 +3,12 @@ import sys
 import pandas as pd
 import numpy as np
 import plotly.graph_objs as go
-import plotly.express as px
 import dash_core_components as dcc
 import dash_html_components as html
 import ckg_utils
 from graphdb_connector import connector
 from graphdb_builder import builder_utils
-from graphdb_connector import query_utils
+from analytics_core.viz import viz
 
 try:
     cwd = os.path.abspath(os.path.dirname(__file__))
@@ -79,28 +78,31 @@ def get_db_stats_data():
     return dfs
 
 
-def plot_store_size_components(dfs, title):
+def plot_store_size_components(dfs, title, args):
     """
     Plots the store size of different components of the graph database, as a Pie Chart.
 
     :param dict dfs: dictionary of json objects.
     :param str title: title of the Dash div where plot is located.
+    :param dict args: see below.
+    :Arguments:
+        * **valueCol** (str) -- name of the column with the values to be plotted.
+        * **textCol** (str) -- name of the column containing information for the hoverinfo parameter.
+        * **height** (str) -- height of the plot.
+        * **width** (str) -- width of the plot.
     :return: New Dash div containing title and pie chart.
     """
     data = pd.read_json(dfs['store_size'], orient='records')
     data.index = ['Array store', 'Logical Log', 'Node store', 'Property store',
                   'Relationship store', 'String store', 'Total store size']
     data.columns = ['value', 'size']
+    data = data.iloc[:-1]
+    fig = viz.get_pieplot(data, identifier='store_size_pie', args=args)
 
-    fig = go.Figure(data=[go.Pie(labels=data.index[:-1], values=data['value']
-                                 [:-1], hovertext=data['size'][:-1], hoverinfo='label+text+percent')])
-    fig['layout']['template'] = 'plotly_white'
-
-    return html.Div([html.H3(title), dcc.Graph(id='store_size_pie', figure=fig)], style={'margin': '0%',
-                                                                                         'padding': '0%'})
+    return html.Div([html.H3(title), fig], style={'margin': '0%', 'padding': '0%'})
 
 
-def plot_node_rel_per_label(dfs, title, focus='nodes'):
+def plot_node_rel_per_label(dfs, title, args, focus='nodes'):
     """
     Plots the number of nodes or relationships (depending on 'focus') per label, contained in the \
     grapha database.
@@ -121,15 +123,15 @@ def plot_node_rel_per_label(dfs, title, focus='nodes'):
             data['relTypesCount'][0], orient='index', columns=['number']).reset_index()
         xaxis_name = 'Types'
 
-    # traces = figure.getPlotTraces(df, key='', type='bars')
-    # fig = go.Figure(data=traces, layout=layout)
-    fig = px.bar(data, x='index', y='number')
-    fig.update_layout(xaxis_tickangle=-60, xaxis_title=xaxis_name,
-                      yaxis_title='', yaxis_type='log')
-    fig['layout']['template'] = 'plotly_white'
-
-    return html.Div([html.H3(title), dcc.Graph(id='node_rel_per_label_{}'.format(focus), figure=fig)], style={'margin': '0%',
-                                                                                                              'padding': '0%'})
+    fig = viz.get_barplot(data, identifier='node_rel_per_label_{}'.format(focus), args=args)
+    
+    fig.figure['layout'] = go.Layout(barmode='relative',
+                                    height=args['height'],
+                                    xaxis={'title':xaxis_name, 'tickangle':-60},
+                                    yaxis={'type':'log'},
+                                    template='plotly_white')
+    
+    return html.Div([html.H3(title), fig], style={'margin': '0%', 'padding': '0%'})
 
 
 def indicator(color, text, id_value):
