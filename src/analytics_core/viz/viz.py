@@ -1074,7 +1074,7 @@ def get_network(data, identifier, args):
     Example::
 
         result = get_network(data, identifier='network', args={'source':'node1', 'target':'node2', 'cutoff':0.5, 'cutoff_abs':True, 'values':'weight', \
-                            'node_size':'ev_centrality', 'title':'Network Figure', 'color_weight': True})
+                            'node_size':'degree', 'title':'Network Figure', 'color_weight': True})
     """
     net = None
     if 'cutoff_abs' not in args:
