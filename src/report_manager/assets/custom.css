@@ -33,3 +33,7 @@ a.nav_link:hover, a.nav_link:active {
   color: rgb(255, 255, 255);
   background-color: rgb(32, 92, 204);
 }
+
+div {
+  margin-bottom: 10px;
+}

@@ -98,20 +98,19 @@ class Report:
                         figure_id = str(i) + '_figure' 
                     i += 1
                     fig_set = grp.create_dataset(figure_id, (1,), dtype=dt, compression="gzip")
-                    fig_set[:] = str(figure_json)
-                    fig_set.attrs['identifier'] = figure_id
+                    try:
+                        fig_set[:] = str(figure_json)
+                        fig_set.attrs['identifier'] = figure_id
+                    except ValueError as err:
+                        print(figure_json, err)
                 order += 1
 
-    #ToDo load Network data
     def read_report(self, directory):
         report_plots = defaultdict(list)
         if os.path.exists(os.path.join(directory, "report.h5")):
             with h5.File(os.path.join(directory, "report.h5"), 'r') as f:
                 for name in f:
                     plot_id = name.split('~')
-                    if len(plot_id) >1:
-                        analysis = plot_id[0]
-                        plot_type = plot_id[1]
                     for figure_id in f[name]:
                         figure_json = f[name+"/"+figure_id][0]
                         identifier = f[name+"/"+figure_id].attrs["identifier"]
@@ -148,15 +147,16 @@ class Report:
                                 except:
                                     pass
                     else:
+                        app_plot = plot
                         if isinstance(plot, dict):
                             if "app" in plot:
-                                plot = plot["app"]
+                                app_plot = plot["app"]
                             if 'net_tables' in plot:
                                 tables = plot['net_tables']
                                 report_plots.append(tables[0])
                                 report_plots.append(tables[1])
 
-                        report_plots.append(html.Div(plot, style={'overflowY': 'scroll', 'overflowX': 'scroll'}))
+                        report_plots.append(html.Div(app_plot, style={'overflowY': 'scroll', 'overflowX': 'scroll'}))
 
         return report_plots
 

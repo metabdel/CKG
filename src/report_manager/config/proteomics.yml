@@ -11,6 +11,15 @@ args:
         - sample
         - subject
 overview: #section
+    overview statistics:
+        data: processed
+        analyses:
+            - summary
+        plots:
+            - multiTable
+        store_analysis: True
+        args:
+            title: Summary Statistics
     peptides:
         data: number of peptides
         analyses: []
@@ -271,7 +280,7 @@ enrichment:
             - regulation_enrichment
         plots:
             - basicTable
-        store_analysis: False
+        store_analysis: True
         args:
             regulation_data: regulation table
             annotation: go annotation
@@ -292,7 +301,7 @@ enrichment:
             - regulation_enrichment
         plots:
             - basicTable
-        store_analysis: False
+        store_analysis: True
         args:
             regulation_data: regulation table
             annotation: pathway annotation

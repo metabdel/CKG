@@ -60,6 +60,10 @@ class Analysis:
         if self.analysis_type == "wide_format":
             r = analytics.transform_into_wide_format(self.data, self.args['index'], self.args['x'], self.args['y'], extra=[self.args['group']])
             self.result[self.analysis_type] = r
+        if self.analysis_type == "summary":
+            value_cols = None
+            r = analytics.get_summary_data_matrix(self.data)
+            self.result[self.analysis_type] = r
         if self.analysis_type == "pca":
             components = 2
             drop_cols = []
@@ -148,11 +152,10 @@ class Analysis:
                 permutations = self.args["permutations"]
             anova_result = analytics.run_anova(self.data, drop_cols=drop_cols, subject=subject, group=group, alpha=alpha, permutations=permutations)
             self.result[self.analysis_type] = anova_result
-            print('ANOVA', time.time() - start)
         elif self.analysis_type  == 'samr':
             start = time.time()
             alpha = 0.05
-            s0 = 0
+            s0 = None
             drop_cols = []
             group = 'group'
             subject = 'subject'
@@ -236,7 +239,6 @@ class Analysis:
             if "correction" in self.args:
                 correction = self.args["correction"]
             self.result[self.analysis_type] = analytics.run_correlation(self.data, alpha=alpha, subject=subject, group=group, method=method, correction=correction)
-            print('Correlation', time.time() - start)
         elif self.analysis_type  == "repeated_measurements_correlation":
             start = time.time()
             alpha = 0.05
@@ -255,7 +257,6 @@ class Analysis:
             if "cutoff" in self.args:
                 cutoff = self.args['cutoff']
             self.result[self.analysis_type] = analytics.run_rm_correlation(self.data, alpha=alpha, subject=subject, correction=correction)
-            print('repeated-Correlation', time.time() - start)
         elif self.analysis_type == "regulation_enrichment":
             start = time.time()
             identifier='identifier'
@@ -305,7 +306,6 @@ class Analysis:
             if 'data' in self.args:
                 if self.args['data'] in self.data:
                     self.result[self.analysis_type] = analytics.get_ranking_with_markers(self.data[self.args['data']], drop_columns=self.args['drop_columns'], group=self.args['group'], columns=self.args['columns'], list_markers=list_markers, annotation = annotations)
-            print('Ranking', time.time() - start)
         elif self.analysis_type == 'coefficient_of_variation':
             self.result[self.analysis_type] = analytics.get_coefficient_variation(self.data, drop_columns=self.args['drop_columns'], group=self.args['group'], columns=self.args['columns'])
         elif self.analysis_type == 'publications_abstracts':
@@ -345,7 +345,6 @@ class Analysis:
             self.result[self.analysis_type] = analytics.run_WGCNA(self.data, drop_cols_exp, drop_cols_cli, RsquaredCut=RsquaredCut, networkType=networkType, 
                                                             minModuleSize=minModuleSize, deepSplit=deepSplit, pamRespectsDendro=pamRespectsDendro, merge_modules=merge_modules,
                                                             MEDissThres=MEDissThres, verbose=verbose)
-            print('WGCNA', time.time() - start)
         elif self.analysis_type == 'multi_correlation':
             start = time.time()
             alpha = 0.05
@@ -366,9 +365,7 @@ class Analysis:
                 method = self.args["method"]
             if "correction" in self.args:
                 correction = self.args["correction"]
-            self.result[self.analysis_type] = analytics.run_multi_correlation(self.data, alpha=alpha, subject=subject, group=group, on=on, method=method, correction=correction)
-            print('multi-correlation', time.time() - start)
-            
+            self.result[self.analysis_type] = analytics.run_multi_correlation(self.data, alpha=alpha, subject=subject, group=group, on=on, method=method, correction=correction)         
 
     def get_plot(self, name, identifier):
         plot = []
@@ -391,6 +388,9 @@ class Analysis:
                         identifier = identifier+"_"+id[0]+"_vs_"+id[1]
                         figure_title = self.args["title"] + id[0]+" vs "+id[1]
                     plot.append(viz.get_table(self.result[id], identifier, figure_title, colors=colors, subset=subset, plot_attr=attr))
+            if name == "multiTable":
+                for id in self.result:
+                    plot.append(viz.get_multi_table(self.result[id], identifier, self.args["title"]))
             elif name == "barplot":
                 x_title = "x"
                 y_title = "y"

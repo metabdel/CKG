@@ -15,7 +15,7 @@ from report_manager.dataset import Dataset, ProteomicsDataset, ClinicalDataset, 
 from analytics_core.viz import viz
 from analytics_core import utils as acore_utils
 from report_manager import report as rp, utils, knowledge
-from report_manager.queries import query_utils
+from graphdb_connector import query_utils
 from graphdb_connector import connector
 import logging
 import logging.config
@@ -390,11 +390,15 @@ class Project:
                     if data_type == "proteomics":
                         if "proteomics" in self.configuration_files:
                             configuration = ckg_utils.get_configuration(self.configuration_files["proteomics"])
+                        print("Getting proteomics configuration")
                         dataset = ProteomicsDataset(self.identifier, data={}, configuration=configuration, analyses={}, analysis_queries={}, report=None)
+                        print("Proteomics done")
                     elif data_type == "clinical":
                         if "clinical" in self.configuration_files:
                             configuration = ckg_utils.get_configuration(self.configuration_files["clinical"])
+                        print("Getting clinical configuration")
                         dataset = ClinicalDataset(self.identifier, data={}, configuration=configuration, analyses={}, analysis_queries={}, report=None)
+                        print("Clinical done")
                     elif data_type == "wes" or data_type == "wgs":
                         if "wes" in self.configuration_files:
                             configuration = ckg_utils.get_configuration(self.configuration_files["wes"])
@@ -465,7 +469,7 @@ class Project:
 
     def get_similarity_network_style(self):
         #color_selector = "{'selector': '[name = \"KEY\"]', 'style': {'background-color': 'VALUE'}}"
-        stylesheet=[{'selector': 'node', 'style': {'label': 'data(name)'}},{'selector':'edge','style':{'label':'data(name)', 'curve-style': 'bezier'}}]
+        stylesheet=[{'selector': 'node', 'style': {'label': 'data(name)'}},{'selector':'edge','style':{'label':'data(label)', 'curve-style': 'bezier'}}]
         layout = {'name': 'cose',
                 'idealEdgeLength': 100,
                 'nodeOverlap': 20,
@@ -501,7 +505,7 @@ class Project:
             list_projects = ",".join(['"{}"'.format(i) for i in list_projects])
             query = query.replace("LIST_PROJECTS",list_projects)
             path = connector.sendQuery(driver, query, parameters={}).data()
-            G = acore_utils.neoj_path_to_networkx(path, key='path')
+            G = acore_utils.neo4j_path_to_networkx(path, key='path')
             args = {}
             style, layout = self.get_similarity_network_style()
             args['stylesheet'] = style

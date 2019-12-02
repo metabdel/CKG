@@ -8,7 +8,7 @@ import ckg_utils
 from graphdb_connector import connector
 from graphdb_builder import builder_utils
 from graphdb_builder.experiments.parsers import clinicalParser as cp
-from report_manager.queries import query_utils
+from graphdb_connector import query_utils
 import logging
 import logging.config
  
