@@ -1,5 +1,6 @@
 import io
 import os
+import shutil
 import re
 import sys
 import pandas as pd
@@ -31,13 +32,12 @@ from graphdb_connector import connector
 driver = connector.getGraphDatabaseConnectionConfiguration()
 separator = '|'
 
-
 app.layout = dcc.Loading(
     children=[html.Div([
     dcc.Location(id='url', refresh=False),
-    html.Div(id='page-content', style={'padding-top':10}),
+    html.Div(id='page-content', style={'padding-top':10}, className='container-fluid'),
 ])], style={'text-align':'center',
-            'margin-top':'180px',
+            'margin-top':'70px',
             'margin-bottom':'-60px','position':'absolute',
             'top':'50%','left':'50%', 'height':'200px'},
     type='circle', 
@@ -45,7 +45,7 @@ app.layout = dcc.Loading(
 
 @app.callback([Output('page-content', 'children'), 
                Output('logout_form', 'style')],
-              [Input('url', 'href')])
+              [Input('url','href')])
 def display_page(pathname):
     session_cookie = flask.request.cookies.get('custom-auth-session')
     logged_in = session_cookie is not None
@@ -66,18 +66,18 @@ def display_page(pathname):
             else:
                 login_form = loginApp.LoginApp("Login", "", "", layout = [], logo = None, footer = None)
                 return (login_form.layout, {'display': 'none'})
-        elif '/apps/projectCreation' in pathname:
+        elif '/apps/projectCreationApp' in pathname:
             projectCreation_form = projectCreationApp.ProjectCreationApp("Project Creation", "", "", layout = [], logo = None, footer = None)
             return (projectCreation_form.layout, {'display': 'block',
                                              'position': 'absolute',
                                              'right': '50px'})
-        elif '/apps/dataUpload' in pathname:
+        elif '/apps/dataUploadApp' in pathname:
             projectId = pathname.split('/')[-1]
             dataUpload_form = dataUploadApp.DataUploadApp(projectId, "Data Upload", "", "", layout = [], logo = None, footer = None)
             return (dataUpload_form.layout, {'display': 'block',
                                         'position': 'absolute',
                                         'right': '50px'})
-        elif '/apps/project' in pathname:
+        elif '/apps/project?' in pathname:
             project_id, force, session_id = get_project_params_from_url(pathname)
             if session_id is None:
                 session_id = datetime.now().strftime('%Y%m-%d%H-%M%S-') + str(uuid4())
@@ -86,6 +86,7 @@ def display_page(pathname):
                                             'position': 'absolute',
                                             'right': '50px'})
             else:
+                print("I am in")
                 project = projectApp.ProjectApp(session_id, project_id, project_id, "", "", layout = [], logo = None, footer = None, force=force)
                 return (project.layout, {'display': 'block',
                                          'position': 'absolute',
@@ -96,6 +97,7 @@ def display_page(pathname):
                                      'position': 'absolute',
                                      'right': '50px'})
         elif '/apps/homepage' in pathname or pathname.count('/') <= 3:
+            print("Stats")
             stats_db = homepageApp.HomePageApp("CKG homepage", "Database Stats", "", layout = [], logo = None, footer = None)
             return (stats_db.layout, {'display': 'block',
                                       'position': 'absolute',
@@ -105,6 +107,8 @@ def display_page(pathname):
                            'position': 'absolute',
                            'right': '50px'})
     return (None, None)
+
+
 
 def get_project_params_from_url(pathname):
     force = False
@@ -126,7 +130,13 @@ def get_project_params_from_url(pathname):
     return project_id, force, session_id
 
 
-#s Callback upload configuration files
+# Documentation files
+@app.server.route("/docs/<value>")
+def return_docs(value):
+    docs_url = ckg_config.docs_url
+    return flask.render_template(docs_url+"{}".format(value))
+ 
+# Callback upload configuration files
 @app.callback([Output('upload-config', 'style'), 
                Output('output-data-upload','children')],
               [Input('upload-config', 'contents'),
@@ -157,11 +167,14 @@ def update_output(contents, filename, value):
                     content_type, content_string = contents.split(',')
                     decoded = base64.b64decode(content_string)
                     out.write(decoded)
-                uploaded = dcc.Markdown("**{} configuration uploaded** &#x2705;".format(dataset.title()))
+                uploaded = dcc.Markdown("**{} configuration uploaded: {}** &#x2705;".format(dataset.title(),filename))
+                contents = None
+            else:
+                uploaded = None
         else:
             display = {'display': 'none'}
             if os.path.exists(directory):
-                os.rmdir(directory)
+                shutil.rmtree(directory)
                 
     return display, uploaded
                 
@@ -248,8 +261,10 @@ def number_panel_update(df):
              [Input("project_option", "value")])
 def update_project_url(value):
     if value is not None and len(value) > 1:
-        return dcc.Link(value[0].title(),
+        return html.A(value[0].title(),
                         href='/apps/project?project_id={}&force=0'.format(value[1]),
+                        target='', 
+                        n_clicks=0,
                         className="button_link")
     else:
       return ''
@@ -287,7 +302,7 @@ def generate_report_url(n_clicks, pathname):
     return '/downloads/{}'.format(project_id)
     
 @application.route('/downloads/<value>')
-def generate_report_url(value):
+def route_report_url(value):
     uri = os.path.join(os.getcwd(),"../../data/downloads/"+value+'.zip')
     return flask.send_file(uri, attachment_filename = value+'.zip', as_attachment = True)
 
@@ -515,4 +530,5 @@ def update_table_download_link(n_clicks, data, data_type):
 
 
 if __name__ == '__main__':
+    print("IN MAIN")
     application.run(debug=True, host='0.0.0.0')

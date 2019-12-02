@@ -9,7 +9,8 @@ import ckg_utils
 from graphdb_connector import connector
 from graphdb_builder import builder_utils
 from graphdb_builder.experiments.parsers import clinicalParser as cp, proteomicsParser as pp, wesParser as wp
-from report_manager.queries import query_utils
+from graphdb_connector import query_utils
+from apps import projectCreation as pc
 import logging
 import logging.config
 

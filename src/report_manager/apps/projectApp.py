@@ -154,3 +154,5 @@ class ProjectApp(basicApp.BasicApp):
                 tabs.append(tab)
         lc = dcc.Tabs(tabs)
         self.add_to_layout(lc)
+        
+        p = None

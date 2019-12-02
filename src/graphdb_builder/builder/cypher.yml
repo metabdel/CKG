@@ -654,6 +654,13 @@ IMPORT_DATASETS:
         'name': 'import clinical data'
         'description': 'Loads into the database all the clinical variables measured in a project'
         'query': >
+            USING PERIODIC COMMIT 10000
+            LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/PROJECTID_subject_had_intervention.tsv" AS line
+            FIELDTERMINATOR '\t'
+            MATCH (subject:Subject {id:line.START_ID})
+            MATCH (intervention:Clinical_variable {id:line.END_ID})
+            MERGE (subject)-[r:HAD_INTERVENTION{type:line.type, in_combination:line.in_combination, response:line.response}]->(intervention)
+            RETURN COUNT(r) AS interventions;
             USING PERIODIC COMMIT 10000 
             LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/PROJECTID_clinical_state.tsv" AS line 
             FIELDTERMINATOR '\t'
@@ -782,7 +789,7 @@ CREATE_PROJECT: &create_project
     'query': >
         CREATE CONSTRAINT ON (p:Project) ASSERT p.id IS UNIQUE;
         CREATE CONSTRAINT ON (p:Project) ASSERT p.name IS UNIQUE; 
-        LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/PROJECTID.tsv" AS line
+        LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/PROJECTID_info.tsv" AS line
         FIELDTERMINATOR '\t'
         MERGE (p:Project {id:line.external_id})
         ON CREATE SET p.internal_id=line.internal_id,p.name=line.name,p.acronym=line.acronym,p.description=line.description,p.type=line.datatypes,p.timepoint=line.timepoints,p.disease=line.disease,p.tissue=line.tissue,p.intervention=line.intervention,p.responsible=line.responsible,p.participant=line.participant,p.start_date=line.start_date,p.end_date=line.end_date,p.status=line.status

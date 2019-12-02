@@ -8,8 +8,6 @@ import dash_cytoscape as cyto
 
 
 server = flask.Flask('app')
-server.secret_key = os.environ.get('secret_key', 'secret')
-
 app = dash.Dash('app', server=server, meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}])
 
 
@@ -22,14 +20,6 @@ with open("assets/app_template.html", 'r', encoding='utf8') as f:
 app.index_string = template
 app.scripts.config.serve_locally = False
 app.config.suppress_callback_exceptions = True
-
-# Dash CSS
-external_css = ["https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css",
-                "https://codepen.io/chriddyp/pen/bWLwgP.css",
-                "https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"]
-
-for css in external_css:
-    app.css.append_css({"external_url": css})
 
 external_js = ["http://code.jquery.com/jquery-3.4.1.min.js"]
 
