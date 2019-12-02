@@ -469,7 +469,7 @@ class Project:
 
     def get_similarity_network_style(self):
         #color_selector = "{'selector': '[name = \"KEY\"]', 'style': {'background-color': 'VALUE'}}"
-        stylesheet=[{'selector': 'node', 'style': {'label': 'data(name)'}},{'selector':'edge','style':{'label':'data(name)', 'curve-style': 'bezier'}}]
+        stylesheet=[{'selector': 'node', 'style': {'label': 'data(name)'}},{'selector':'edge','style':{'label':'data(label)', 'curve-style': 'bezier'}}]
         layout = {'name': 'cose',
                 'idealEdgeLength': 100,
                 'nodeOverlap': 20,
@@ -505,7 +505,7 @@ class Project:
             list_projects = ",".join(['"{}"'.format(i) for i in list_projects])
             query = query.replace("LIST_PROJECTS",list_projects)
             path = connector.sendQuery(driver, query, parameters={}).data()
-            G = acore_utils.neoj_path_to_networkx(path, key='path')
+            G = acore_utils.neo4j_path_to_networkx(path, key='path')
             args = {}
             style, layout = self.get_similarity_network_style()
             args['stylesheet'] = style

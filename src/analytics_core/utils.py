@@ -45,12 +45,13 @@ def generate_html(network):
                                     conf=network.conf,
                                     tooltip_link=use_link_template)
 
-def neoj_path_to_networkx(paths, key='path'):
+def neo4j_path_to_networkx(paths, key='path'):
     regex = r"\(?(.+)\)\<?\-\>?\[\:(.+)\s\{.*\}\]\<?\-\>?\((.+)\)?"
     nodes = set()
     rels = set()
     for r in paths:
-        path = str(r[key])
+        if key is not None:
+            path = str(r[key])
         matches = re.search(regex, path)
         if matches:
             source = matches.group(1)
@@ -72,6 +73,38 @@ def neoj_path_to_networkx(paths, key='path'):
         G.add_edge(s,t,label=label)
 
     return G
+
+def neo4j_schema_to_networkx(schema):
+    regex = r"\(?(.+)\)\<?\-\>?\[\:(.+)\s\{.*\}\]\<?\-\>?\((.+)\)"
+    nodes = set()
+    rels = set()
+    if 'relationships' in schema[0]:
+        relationships = schema[0]['relationships']
+        for relationship in relationships:
+            matches = re.search(regex, str(relationship))
+            if matches:
+                source = matches.group(1)
+                source_match = re.search(regex, source)
+                if source_match:
+                    source = source_match.group(1)
+                    relationship = source_match.group(2)
+                    target = source_match.group(3)
+                    nodes.update([source, target])
+                    rels.add((source, target, relationship))
+                    source = target
+                relationship = matches.group(2)
+                target = matches.group(3)
+                nodes.update([source, target])
+                rels.add((source, target, relationship))
+    G = nx.Graph()
+    G.add_nodes_from(nodes)
+    colors = dict(zip(nodes, get_hex_colors(len(nodes))))
+    nx.set_node_attributes(G, colors, 'color')
+    for s,t,label in rels:
+        G.add_edge(s,t,label=label)
+        
+    return G
+            
 
 def networkx_to_cytoscape(graph):
     cy_graph = json_graph.cytoscape_data(graph)

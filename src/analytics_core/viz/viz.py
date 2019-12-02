@@ -1970,6 +1970,12 @@ def get_cytoscape_network(net, identifier, args):
         * **layout** (dict) -- specifies how the nodes should be positioned on the screen.
     :return: network figure within <div id="_dash-app-content">.
     """
+    height = '700px'    
+    width = '100%'
+    if 'height' in args:
+        height = args['height']
+    if 'width' in args:
+        width = args['width']
     cytonet = html.Div([html.H2(args['title']), cyto.Cytoscape(id=identifier,
                                     stylesheet=args['stylesheet'],
                                     elements=net,
@@ -1977,7 +1983,7 @@ def get_cytoscape_network(net, identifier, args):
                                     minZoom = 0.2,
                                     maxZoom = 1.5,
                                     #mouseoverNodeData=args['mouseover_node'],
-                                    style={'width': '100%', 'height': '700px'}
+                                    style={'width': width, 'height': height}
                                     )
                     ])
 
