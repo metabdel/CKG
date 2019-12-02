@@ -47,7 +47,9 @@ This will print some warnings, which should be okay
 
 Project creation
 ----------------
+
 **Browser**
+
 Navigate to project creation from the front page by pressing the button "PROJECT CREATION"
 or go to ``http://localhost:5000/apps/projectCreation``
 
