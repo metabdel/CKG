@@ -152,9 +152,12 @@ def create_new_project(driver, projectId, data, separator='|'):
     """
     query_name = 'create_project'
     external_identifier='No Identifier Assigned'
+    done = None
      
     try:
         db_project = check_if_node_exists(driver, 'name', data['name'][0])
+        print(db_project)
+        print('%%%%%%%%%%%%')
         if db_project.empty:
             external_identifier = get_new_project_identifier(driver, projectId)
             if external_identifier is None:
@@ -184,9 +187,13 @@ def create_new_project(driver, projectId, data, separator='|'):
                 generateGraphFiles(dataRows,'timepoint', external_identifier, d='clinical')
 
             loader.partialUpdate(imports=['project'])
-
             subjects = create_new_subjects(driver, external_identifier, data['subjects'][0])
             done = 1
+
+            projectDir = os.path.join(experimentDir, os.path.join(external_identifier,'clinical'))
+            ckg_utils.checkDirectory(projectDir)
+            data.to_excel(os.path.join(projectDir, 'ProjectData_{}.xlsx'.format(external_identifier)), index=False, encoding='utf-8')
+            
         else:
             done = 0
             external_identifier = ''
@@ -195,6 +202,8 @@ def create_new_project(driver, projectId, data, separator='|'):
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         logger.error("Reading query {}: {}, file: {},line: {}".format(query_name, sys.exc_info(), fname, exc_tb.tb_lineno))
     
+    print(done)
+    print('------------')
     return done, external_identifier   
         
 def create_new_subjects(driver, projectId, subjects):
