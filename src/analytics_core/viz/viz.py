@@ -1183,15 +1183,22 @@ def get_network_style(node_colors, color_edges):
     '''
 
     color_selector = "{'selector': '[name = \"KEY\"]', 'style': {'background-color': 'VALUE'}}"
-    stylesheet=[{'selector': 'node', 'style': {'label': 'data(name)'}},
-                {'selector':'edge','style':{'curve-style': 'bezier'}}]
+    stylesheet=[{'selector': 'node', 'style': {'label': 'data(name)', 
+                                               'text-valign': 'center', 
+                                               'text-halign': 'center', 
+                                               'border-color':'gray', 
+                                               'border-width': '1px',
+                                               'font-size': '12',
+                                               'opacity':0.75}},
+                {'selector':'edge','style':{'label':'data(label)',
+                                            'curve-style': 'bezier',
+                                            'opacity':0.7,
+                                            'font-size': '4'}}]
 
     layout = {'name': 'cose',
                 'idealEdgeLength': 100,
                 'nodeOverlap': 20,
                 'refresh': 20,
-                #'fit': True,
-                #'padding': 30,
                 'randomize': False,
                 'componentSpacing': 100,
                 'nodeRepulsion': 400000,
