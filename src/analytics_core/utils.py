@@ -105,7 +105,6 @@ def neo4j_schema_to_networkx(schema):
         
     return G
             
-
 def networkx_to_cytoscape(graph):
     cy_graph = json_graph.cytoscape_data(graph)
     cy_nodes = cy_graph['elements']['nodes']
@@ -115,6 +114,13 @@ def networkx_to_cytoscape(graph):
     mouseover_node = dict(graph.nodes(data=True))
 
     return cy_elements, mouseover_node
+
+def networkx_to_gml(graph, path):
+    nx.write_gml(graph, path)
+
+def json_network_to_gml(graph_json, path):
+    graph = json_network_to_networkx(graph_json)
+    nx.write_gml(graph, path)
 
 def json_network_to_networkx(graph_json):
     graph = json_graph.node_link_graph(graph_json)
