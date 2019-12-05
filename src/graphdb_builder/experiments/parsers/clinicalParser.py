@@ -13,7 +13,7 @@ def parser(projectId):
     if 'directory' in config:
         directory = config['directory']
     directory = directory.replace('PROJECTID', projectId)
-    driver = connector.getGraphDatabaseConnectionConfiguration()
+    # driver = connector.getGraphDatabaseConnectionConfiguration()
     
     project_data = parse_dataset(projectId, config, directory, key='project')
     clinical_data = parse_dataset(projectId, config, directory, key='clinical')
@@ -21,8 +21,8 @@ def parser(projectId):
         data[('info', 'w')] = extract_project_info(project_data)
         data[('responsibles', 'w')] = extract_responsible_rels(project_data, separator=separator)
         data[('participants', 'w')] = extract_participant_rels(project_data, separator=separator)
-        data[('studies_tissue', 'w')] = extract_project_tissue_rels(driver, project_data, separator=separator)
-        data[('studies_disease', 'w')] = extract_project_disease_rels(driver, project_data, separator=separator)
+        data[('studies_tissue', 'w')] = extract_project_tissue_rels(project_data, separator=separator)
+        data[('studies_disease', 'w')] = extract_project_disease_rels(project_data, separator=separator)
         data[('studies_intervention', 'w')] = extract_project_intervention_rels(project_data, separator=separator)
         data[('timepoint', 'w')] = extract_timepoints(project_data, separator=separator)
         data[('project', 'w')] = extract_project_subject_rels(project_data, clinical_data)
@@ -34,6 +34,7 @@ def parser(projectId):
         data[('biological_sample_at_timepoint', 'w')] = extract_biological_sample_timepoint_rels(clinical_data)
         data[('biosample_tissue', 'w')] = extract_biological_sample_tissue_rels(clinical_data)
         data[('disease', 'w')] = extract_subject_disease_rels(clinical_data, separator=separator)
+        data[('subject_had_intervention', 'w')] = extract_subject_intervention_rels(clinical_data, separator=separator)
         data[('groups', 'w')] = extract_biological_sample_group_rels(clinical_data)
         clinical_state, clinical_quant = extract_biological_sample_clinical_variables_rels(clinical_data)
         data[('clinical_state', 'w')] = clinical_state
@@ -82,7 +83,7 @@ def extract_participant_rels(project_data, separator='|'):
         df['TYPE'] = 'PARTICIPATES_IN'
         return df
     
-def extract_project_tissue_rels(driver, project_data, separator='|'):
+def extract_project_tissue_rels(project_data, separator='|'):
     data = project_data.copy()
     
     if pd.isna(data['tissue'][0]):
@@ -94,7 +95,7 @@ def extract_project_tissue_rels(driver, project_data, separator='|'):
         df['TYPE'] = 'STUDIES_TISSUE'
         return df
     
-def extract_project_disease_rels(driver, project_data, separator='|'):
+def extract_project_disease_rels(project_data, separator='|'):
     data = project_data.copy()
     
     if pd.isna(data['disease'][0]):
@@ -108,7 +109,7 @@ def extract_project_disease_rels(driver, project_data, separator='|'):
 
 def extract_project_intervention_rels(project_data, separator='|'):
     data = project_data.copy()
-    if pd.isna(data['intervention'][0]):
+    if data['intervention'][0] == separator:
         return pd.DataFrame(columns=['START_ID', 'END_ID', 'TYPE'])
     else:
         interventions = data['intervention'][0].split(separator)
@@ -226,6 +227,23 @@ def extract_subject_disease_rels(clinical_data, separator='|'):
         df = df.reset_index([0, 'subject id']).replace('nan', np.nan).dropna().drop_duplicates(keep='first')
         df.columns = ['START_ID', 'END_ID']
         df['TYPE'] = 'HAS_DISEASE'
+        return df
+
+def extract_subject_intervention_rels(clinical_data, separator='|'):
+    data = clinical_data.set_index('subject id').copy()
+    if pd.isna(data['had_intervention']).all():
+        return None
+    else:
+        interventions = data['had_intervention'].str.split(separator, expand=True).stack().str.strip().reset_index(level=1, drop=True)
+        
+        ##Uncomment line if clinical variable name is also included
+        # interventions = interventions.str.split().str[-1].str.extract(r'.*\((.*)\).*')[0]
+        types = data['had_intervention_type'].str.split(separator, expand=True).stack().str.strip().reset_index(level=1, drop=True)
+        combi = data['had_intervention_in_combination'].str.split(separator, expand=True).stack().str.strip().reset_index(level=1, drop=True)
+        response = data['had_intervention_response'].str.split(separator, expand=True).stack().str.strip().reset_index(level=1, drop=True)
+        df = pd.concat([interventions, types, combi, reponse], axis=1).reset_index()
+        df.columns = ['START_ID', 'END_ID', 'type', 'in_combination', 'response']
+        df.insert(loc=2, column='TYPE', value='HAD_INTERVENTION')
         return df
 
 def extract_biological_sample_group_rels(clinical_data):

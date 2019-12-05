@@ -56,6 +56,7 @@ def get_new_biosample_identifier(driver):
 		query = cypher[query_name]['query']
 		identifier = connector.getCursorData(driver, query).values[0][0]
 	except Exception as err:
+		identifier = None
 		exc_type, exc_obj, exc_tb = sys.exc_info()
 		fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
 		logger.error("Reading query {}: {}, file: {},line: {}".format(query_name, sys.exc_info(), fname, exc_tb.tb_lineno))
@@ -76,6 +77,7 @@ def get_new_analytical_sample_identifier(driver):
 		query = cypher[query_name]['query']
 		identifier = connector.getCursorData(driver, query).values[0][0]
 	except Exception as err:
+		identifier = None
 		exc_type, exc_obj, exc_tb = sys.exc_info()
 		fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
 		logger.error("Reading query {}: {}, file: {},line: {}".format(query_name, sys.exc_info(), fname, exc_tb.tb_lineno))
@@ -119,10 +121,12 @@ def create_new_biosamples(driver, projectId, data):
 		df.columns=[col.replace('biological_sample ', '').replace(' ','_') for col in df.columns]
 		cypher = get_data_upload_queries()
 		query = cypher[query_name]['query']
+
 		for bio_external_id in data['biological_sample external_id'].unique():
 			biosample_id = get_new_biosample_identifier(driver)
+			if biosample_id is None:
+				biosample_id = 'BS1'
 			biosample_dict[bio_external_id] = biosample_id
-
 			mask = df[df['external_id'] == bio_external_id]
 			parameters = mask.to_dict(orient='records')[0]
 			parameters['biosample_id'] = str(biosample_id)
@@ -132,6 +136,7 @@ def create_new_biosamples(driver, projectId, data):
 					result = connector.getCursorData(driver, q+';', parameters=parameters)
 				else:
 					result = connector.getCursorData(driver, q+';')
+
 			done += 1
 	except Exception as err:
 		exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -164,6 +169,8 @@ def create_new_ansamples(driver, projectId, data):
 		query = cypher[query_name]['query']
 		for an_external_id in data['analytical_sample external_id'].unique():
 			ansample_id = get_new_analytical_sample_identifier(driver)
+			if ansample_id is None:
+				ansample_id = 'AS1'
 			ansample_dict[an_external_id] = ansample_id
 			
 			mask = df[df['external_id'] == an_external_id]
@@ -220,22 +227,44 @@ def create_new_experiment_in_db(driver, projectId, data, separator='|'):
 		tissue_id = query_utils.map_node_name_to_id(driver, 'Tissue', str(tissue))
 		tissue_dict[tissue] = tissue_id
 
-	for interventions in data['intervention'].dropna().unique():
+	for interventions in data['studies_intervention'].dropna().unique():
 		for intervention in interventions.split('|'):
 			intervention_dict[intervention] = re.search('\(([^)]+)', intervention.split()[-1]).group(1)
 
-	data.insert(1, 'intervention id', data['intervention'].map(intervention_dict))
+	print('Diseases')
+	print(disease_dict)
+	print('---------------')
+	print('Tissues')
+	print(tissue_dict)
+	print('---------------')
+	print('Interventions')
+	print(intervention_dict)
+	print('---------------')
+
+	data.insert(1, 'intervention id', data['studies_intervention'].map(intervention_dict))
 	data.insert(1, 'disease id', data['disease'].map(disease_dict))
 	data.insert(1, 'tissue id', data['tissue'].map(tissue_dict))
+
+	print('COMPLETE DF CREATED')
+	print(data)
+	print('---------------')
 
 	df = create_new_biosamples(driver, projectId, data)
 
 	df2 = create_new_ansamples(driver, projectId, df)
 
+	print('ANL SAMPLES CREATED')
+	print(df2)
+	print('---------------')
+
 	project_subjects = get_subject_number_in_project(driver, projectId)
+
 	dataRows = df2[['subject id', 'subject external_id']].dropna(axis=0)
 	dataRows = dataRows.drop_duplicates(keep='first').reset_index(drop=True)
 	dataRows.columns = ['ID', 'external_id']
+	print('DATAROWS')
+	print(dataRows)
+	print('--------------')
 	if int(project_subjects) != len(dataRows['ID'].unique()):
 		dataRows = None
 	if dataRows is not None:
@@ -260,7 +289,10 @@ def create_new_experiment_in_db(driver, projectId, data, separator='|'):
 		generateGraphFiles(dataRows,'biosample_tissue', projectId, d='clinical')
 	dataRows = cp.extract_subject_disease_rels(df2, separator=separator)
 	if dataRows is not None:
-		generateGraphFiles(dataRows,'disease', projectId, d='clinical')
+		generateGraphFiles(dataRows,'disease', projectId, d='clinical') 
+	dataRows = cp.extract_subject_intervention_rels(df2, separator=separator)
+	if dataRows is not None:
+		generateGraphFiles(dataRows, 'subject_had_intervention', projectId, d='clinical')
 	dataRows = cp.extract_biological_sample_group_rels(df2)
 	if dataRows is not None:
 		generateGraphFiles(dataRows,'groups', projectId, d='clinical')
@@ -268,6 +300,8 @@ def create_new_experiment_in_db(driver, projectId, data, separator='|'):
 	if dataRows is not None:
 		generateGraphFiles(dataRows1,'clinical_state', projectId, d='clinical')
 		generateGraphFiles(dataRows2,'clinical_quant', projectId, d='clinical')
+
+	print('FILES GENERATED')
 	return df2
 
 

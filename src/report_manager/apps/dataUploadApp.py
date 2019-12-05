@@ -69,7 +69,6 @@ class DataUploadApp(basicApp.BasicApp):
         self.add_basic_layout()
         layout = [html.Div([
                             html.Div([dcc.Store(id='memory-original-data', storage_type='memory'),
-                                      # dcc.Store(id='memory-table-data', storage_type='memory'),
                                       html.H4('Upload Experiment file', style={'marginTop':30, 'marginBottom':20}),
                                       dcc.Upload(id='upload-data', children=html.Div(['Drag and Drop or ', html.A('Select Files')]),
                                                  style={'width': '100%',
@@ -87,12 +86,10 @@ class DataUploadApp(basicApp.BasicApp):
                             html.Div(id='dumm-div'),
                             html.Div(children=[dcc.Dropdown(id='upload-data-type-picker', options=[{'label':i, 'value':i} for i in DataTypes], value='', multi=False, style={'width':'100%'})],
                                                style={'width':'20%', 'marginLeft': '0%', 'verticalAlign':'top', 'display':'inline-block'}),
-                            # html.Div(children=[html.Button('Add', id='add_upload_datatype', style={'height':'35px'})],
-                            #                    style={'width':'10%', 'marginLeft': '0.4%', 'verticalAlign':'top', 'display':'inline-block'}),
-                            # html.Div(children=[dcc.Input(id='upload-data-type', value='', type='text', style={'width':'100%', 'height':'35px', 'marginTop':5})],
-                            #                      style={'width':'49%', 'marginLeft':'0%', 'verticalAlign':'top'}),
-                            # html.Div(id='error_msg', style={'fontSize':'15px', 'marginLeft':'0%'}),
-                			html.Div([
+                            html.Div(children=[dcc.RadioItems(id='proteomics-tool', options=[{'label':i, 'value':i} for i in ['MaxQuant', 'Spectronaut']], value='', labelStyle={'display': 'inline-block', 'margin-right': 20},
+                                                              inputStyle={"margin-right": "5px"}, style={'display':'block', 'fontSize':'16px'})]),
+                			
+                      html.Div([
                     				  html.Div(children=[html.A(children=html.Button('Export Table', id='data_download_button', style={'height':36, 'maxWidth':'200px'}), id='data_download_link', download='downloaded_ClinicalData.csv')],
                                       					 style={'marginTop':'0%', 'marginLeft': '91.4%', 'horizontalAlign':'right', 'verticalAlign':'top', 'display':'inline-block'}),
                     				  html.Div(children=[dcc.Dropdown(id='clinical-variables-picker', placeholder='Select clinical variables...', options=[{'label':i, 'value':i} for i in ClinicalVariables], value=['', ''], multi=True, style={})],

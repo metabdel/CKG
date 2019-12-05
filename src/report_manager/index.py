@@ -29,6 +29,8 @@ import config.ckg_config as ckg_config
 from worker import create_new_project
 from graphdb_connector import connector
 
+cwd = os.path.abspath(os.path.dirname(__file__))
+experimentDir = os.path.join(cwd, '../../data/experiments')
 driver = connector.getGraphDatabaseConnectionConfiguration()
 separator = '|'
 
@@ -462,6 +464,15 @@ def store_original_data(contents, filename):
     else:
         raise PreventUpdate
 
+@app.callback(Output('proteomics-tool', 'style'),
+              [Input('upload-data-type-picker', 'value')])
+def show_proteomics_options(datatype):
+    if datatype == 'proteomics' or datatype == 'longitudinal_proteomics':
+        return {'display': 'block'}
+    else:
+        return {'display': 'none'}
+
+
 @app.callback([Output('clinical-table', 'data'),
                Output('clinical-table', 'columns')],
               [Input('memory-original-data', 'data'),
@@ -490,26 +501,37 @@ def update_data(data, n_clicks, variables, dtype):
              [State('memory-original-data', 'data'),
               State('upload-data', 'filename'),
               State('url', 'pathname'),
-              State('upload-data-type-picker', 'value')])
-def run_processing(n_clicks, data, filename, path_name, dtype):
+              State('upload-data-type-picker', 'value'),
+              State('proteomics-tool', 'value')])
+def run_processing(n_clicks, data, filename, path_name, dtype, prot_tool):
     if n_clicks is not None:
         # Get Clinical data from Uploaded and updated table
         df = pd.DataFrame(data, columns=data[0].keys())
         df.fillna(value=pd.np.nan, inplace=True)
         project_id = path_name.split('/')[-1]
+        # Path to new local folder
+        dataDir = os.path.join(experimentDir, os.path.join(project_id, dtype))
         # Extract all relationahips and nodes and save as csv files
         if dtype == 'clinical':
             df = dataUpload.create_new_experiment_in_db(driver, project_id, df, separator=separator)
             loader.partialUpdate(imports=['project', 'experiment'])
         else:
             pass
-        # Path to new local folder
-        dataDir = '../../data/experiments/PROJECTID/DATATYPE/'.replace('PROJECTID', project_id).replace('DATATYPE', dtype)
+        
+        if dtype == 'proteomics' or dtype == 'longitudinal_proteomics':
+            if prot_tool != '':
+                dataDir = dataDir+prot_tool+'/'
+
+        print('DATA DIR')
+        print(dataDir)
+        print('---------------')
+
         # Check/create folders based on local
         ckg_utils.checkDirectory(dataDir)
         csv_string = export_contents(df, dataDir, filename)
         message = 'FILE successfully uploaded.'.replace('FILE', '"'+filename+'"')
         return message
+
 
 @app.callback(Output('memory-original-data', 'clear_data'),
               [Input('submit_button', 'n_clicks')])
