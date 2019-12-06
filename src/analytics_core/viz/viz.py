@@ -1655,7 +1655,7 @@ def get_WGCNAPlots(data, identifier):
     :param str identifier: is the id used to identify the div where the figure will be generated.
     :return: list of dcc.Graph.
     """
-    graphs = []
+    graphs = [html.H2("Weighted Gene Co-expression Network Analysis")]
     data = tuple(data[k] for k in data)
 
     if data is not None:
