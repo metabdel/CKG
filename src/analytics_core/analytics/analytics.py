@@ -542,8 +542,9 @@ def run_pca(data, drop_cols=['sample', 'subject'], group='group', components=2, 
     result = {}
     args = {}
     df = data.copy()
-    if set(drop_cols).intersection(df.columns) == len(drop_cols):
+    if len(set(drop_cols).intersection(df.columns)) == len(drop_cols):
         df = df.drop(drop_cols, axis=1)
+        
     df = df.set_index(group)
     df = df.select_dtypes(['number'])
     if dropna:
@@ -597,7 +598,7 @@ def run_tsne(data, drop_cols=['sample', 'subject'], group='group', components=2,
     result = {}
     args = {}
     df = data.copy()
-    if set(drop_cols).intersection(df.columns) == len(drop_cols):
+    if len(set(drop_cols).intersection(df.columns)) == len(drop_cols):
         df = df.drop(drop_cols, axis=1)
     df = df.set_index(group)
     if dropna:
@@ -644,7 +645,7 @@ def run_umap(data, drop_cols=['sample', 'subject'], group='group', n_neighbors=1
     result = {}
     args = {}
     df = data.copy()
-    if set(drop_cols).intersection(df.columns) == len(drop_cols):
+    if len(set(drop_cols).intersection(df.columns)) == len(drop_cols):
         df = df.drop(drop_cols, axis=1)
     df = df.set_index(group)
     if dropna:
