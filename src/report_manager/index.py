@@ -22,7 +22,7 @@ from dash.exceptions import PreventUpdate
 from app import app, server as application
 from apps import initialApp, projectCreationApp, dataUploadApp, dataUpload, projectApp, importsApp, homepageApp, loginApp, projectCreation
 from graphdb_builder import builder_utils
-from graphdb_builder.builder import loader
+from graphdb_builder.builder import loader, importer
 import ckg_utils
 import config.ckg_config as ckg_config
 
@@ -30,6 +30,7 @@ from worker import create_new_project
 from graphdb_connector import connector
 
 cwd = os.path.abspath(os.path.dirname(__file__))
+importDir = os.path.join(cwd, '../../data/imports/experiments')
 experimentDir = os.path.join(cwd, '../../data/experiments')
 driver = connector.getGraphDatabaseConnectionConfiguration()
 separator = '|'
@@ -505,33 +506,48 @@ def update_data(data, n_clicks, variables, dtype):
               State('proteomics-tool', 'value')])
 def run_processing(n_clicks, data, filename, path_name, dtype, prot_tool):
     if n_clicks is not None:
+        if dtype == '':
+            message = 'Error: Please refresh the page and select the type of data to be uploaded.'
+            return message
+
+        if dtype == 'proteomics' or dtype == 'longitudinal_proteomics' and prot_tool == '':
+            message = 'Error: Please refresh the page and select tool: MaxQuant or Spectronaut.'
+            return message     
+
         # Get Clinical data from Uploaded and updated table
         df = pd.DataFrame(data, columns=data[0].keys())
         df.fillna(value=pd.np.nan, inplace=True)
         project_id = path_name.split('/')[-1]
         # Path to new local folder
-        dataDir = os.path.join(experimentDir, os.path.join(project_id, dtype))
-        # Extract all relationahips and nodes and save as csv files
-        if dtype == 'clinical':
+        dataDir = os.path.join(experimentDir, os.path.join(project_id, dtype.split('_')[-1]))
+        
+        # Extract all relationahips and nodes and save as tsv files
+        if dtype == 'clinical' or dtype == 'longitudinal_clinical':
             df = dataUpload.create_new_experiment_in_db(driver, project_id, df, separator=separator)
-            loader.partialUpdate(imports=['project', 'experiment'])
-        else:
-            pass
+            ckg_utils.checkDirectory(dataDir)
+            csv_string = export_contents(df, dataDir, filename)
         
         if dtype == 'proteomics' or dtype == 'longitudinal_proteomics':
-            if prot_tool != '':
-                dataDir = dataDir+prot_tool+'/'
+            dataDir = os.path.join(dataDir, prot_tool.lower())
+            ckg_utils.checkDirectory(dataDir)
+            csv_string = export_contents(df, dataDir, filename)
+            
+            datasetPath = os.path.join(os.path.join(importDir, project_id), 'proteomics')
+            builder_utils.checkDirectory(datasetPath)
+            eh.generate_dataset_imports(project_id, 'proteomics', datasetPath)
 
-        print('DATA DIR')
-        print(dataDir)
-        print('---------------')
-
-        # Check/create folders based on local
-        ckg_utils.checkDirectory(dataDir)
-        csv_string = export_contents(df, dataDir, filename)
+        loader.partialUpdate(imports=['project', 'experiment'])
+        
         message = 'FILE successfully uploaded.'.replace('FILE', '"'+filename+'"')
         return message
 
+@app.callback(Output('data-upload', 'style'),
+              [Input('data-upload', 'children')])
+def change_style(message):
+    if 'Error' in message:
+        return {'fontSize':'20px', 'marginLeft':'70%', 'color': 'red'}
+    else:
+        return {'fontSize':'20px', 'marginLeft':'70%', 'color': 'black'}
 
 @app.callback(Output('memory-original-data', 'clear_data'),
               [Input('submit_button', 'n_clicks')])
