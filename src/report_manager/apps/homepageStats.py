@@ -77,7 +77,7 @@ def get_db_schema():
                      'curve-style': 'bezier', 
                      'opacity':0.7,
                      'width':0.4,
-                     'font-size': '7'}}]
+                     'font-size': '5'}}]
     layout = {'name': 'cose',
               'idealEdgeLength': 100,
               'nodeOverlap': 20,
