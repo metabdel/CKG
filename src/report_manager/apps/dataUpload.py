@@ -114,30 +114,19 @@ def create_new_biosamples(driver, projectId, data):
 	:return: Pandas DataFrame where new biological sample internal identifiers have been added.
 	"""
 	query_name = 'create_biosample'
-	biosample_dict = {}
-	done = 0
 	try:
 		df = data[[i for i in data.columns if str(i).startswith('biological_sample') or str(i).startswith('subject')]]
 		df.columns=[col.replace('biological_sample ', '').replace(' ','_') for col in df.columns]
+		external_ids = data['biological_sample external_id'].unique()
 		cypher = get_data_upload_queries()
 		query = cypher[query_name]['query']
 
-		for bio_external_id in data['biological_sample external_id'].unique():
-			biosample_id = get_new_biosample_identifier(driver)
-			if biosample_id is None:
-				biosample_id = 'BS1'
-			biosample_dict[bio_external_id] = biosample_id
-			mask = df[df['external_id'] == bio_external_id]
-			parameters = mask.to_dict(orient='records')[0]
-			parameters['biosample_id'] = str(biosample_id)
+		biosample_id = get_new_biosample_identifier(driver)
+		if biosample_id is None:
+			biosample_id = '1'
 
-			for q in query.split(';')[0:-1]:
-				if '$' in q:
-					result = connector.getCursorData(driver, q+';', parameters=parameters)
-				else:
-					result = connector.getCursorData(driver, q+';')
-
-			done += 1
+		biosample_ids = ['BS'+str(i) for i in np.arange(int(biosample_id), int(biosample_id)+len(external_ids))]
+		biosample_dict = dict(zip(external_ids, biosample_ids))
 	except Exception as err:
 		exc_type, exc_obj, exc_tb = sys.exc_info()
 		fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
@@ -157,31 +146,19 @@ def create_new_ansamples(driver, projectId, data):
 	:return: Pandas DataFrame where new analytical sample internal identifiers have been added.
 	"""
 	query_name = 'create_analytical_sample'
-	ansample_dict = {}
-	done = 0
 	try:
 		df = data[[i for i in data.columns if str(i).startswith('analytical_sample')]]
 		df.columns=[col.replace('analytical_sample ', '').replace(' ','_') for col in df.columns]
-		df['biosample_id'] = data['biological_sample id']
-		df['group'] = data['grouping1']
-		df['secondary_group'] = data['grouping2']
+		external_ids = data['analytical_sample external_id'].unique()
 		cypher = get_data_upload_queries()
 		query = cypher[query_name]['query']
-		for an_external_id in data['analytical_sample external_id'].unique():
-			ansample_id = get_new_analytical_sample_identifier(driver)
-			if ansample_id is None:
-				ansample_id = 'AS1'
-			ansample_dict[an_external_id] = ansample_id
-			
-			mask = df[df['external_id'] == an_external_id]
-			parameters = mask.to_dict(orient='records')[0]
-			parameters['ansample_id'] = str(ansample_id)
-			for q in query.split(';')[0:-1]:
-				if '$' in q:
-					result = connector.getCursorData(driver, q+';', parameters=parameters)
-				else:
-					result = connector.getCursorData(driver, q+';')
-			done += 1
+
+		ansample_id = get_new_analytical_sample_identifier(driver)
+		if ansample_id is None:
+			ansample_id = '1'
+
+		ansample_ids = ['AS'+str(i) for i in np.arange(int(ansample_id), int(ansample_id)+len(external_ids))]
+		ansample_dict = dict(zip(external_ids, ansample_ids))
 	except Exception as err:
 		exc_type, exc_obj, exc_tb = sys.exc_info()
 		fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
@@ -231,40 +208,19 @@ def create_new_experiment_in_db(driver, projectId, data, separator='|'):
 		for intervention in interventions.split('|'):
 			intervention_dict[intervention] = re.search('\(([^)]+)', intervention.split()[-1]).group(1)
 
-	print('Diseases')
-	print(disease_dict)
-	print('---------------')
-	print('Tissues')
-	print(tissue_dict)
-	print('---------------')
-	print('Interventions')
-	print(intervention_dict)
-	print('---------------')
-
 	data.insert(1, 'intervention id', data['studies_intervention'].map(intervention_dict))
 	data.insert(1, 'disease id', data['disease'].map(disease_dict))
 	data.insert(1, 'tissue id', data['tissue'].map(tissue_dict))
 
-	print('COMPLETE DF CREATED')
-	print(data)
-	print('---------------')
-
 	df = create_new_biosamples(driver, projectId, data)
-
 	df2 = create_new_ansamples(driver, projectId, df)
-
-	print('ANL SAMPLES CREATED')
-	print(df2)
-	print('---------------')
 
 	project_subjects = get_subject_number_in_project(driver, projectId)
 
 	dataRows = df2[['subject id', 'subject external_id']].dropna(axis=0)
 	dataRows = dataRows.drop_duplicates(keep='first').reset_index(drop=True)
 	dataRows.columns = ['ID', 'external_id']
-	print('DATAROWS')
-	print(dataRows)
-	print('--------------')
+
 	if int(project_subjects) != len(dataRows['ID'].unique()):
 		dataRows = None
 	if dataRows is not None:
@@ -301,7 +257,6 @@ def create_new_experiment_in_db(driver, projectId, data, separator='|'):
 		generateGraphFiles(dataRows1,'clinical_state', projectId, d='clinical')
 		generateGraphFiles(dataRows2,'clinical_quant', projectId, d='clinical')
 
-	print('FILES GENERATED')
 	return df2
 
 

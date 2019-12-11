@@ -151,6 +151,7 @@ def get_barplot(data, identifier, args):
     """
     figure = {}
     figure["data"] = []
+
     if "group" in args:
         for g in data[args["group"]].unique():
             color = None
@@ -161,21 +162,40 @@ def get_barplot(data, identifier, args):
             if 'errors' in args:
                 errors = data.loc[data[args["group"]] == g, args['errors']]
             #errors = data.groupby(args["group"]).agg({args['y']:'std'})
-            trace = go.Bar(
-                        x = data.loc[data[args["group"]] == g,args['x']], # assign x as the dataframe column 'x'
-                        y = data.loc[data[args["group"]] == g, args['y']],
-                        error_y = dict(type='data',array=errors),
-                        name = g,
-                        marker = dict(color=color)
-                        )
+            if 'orientation' in args:
+                trace = go.Bar(
+                            x = data.loc[data[args["group"]] == g,args['x']], 
+                            y = data.loc[data[args["group"]] == g, args['y']],
+                            error_y = dict(type='data',array=errors),
+                            name = g,
+                            marker = dict(color=color),
+                            orientation = args['orientation']
+                            )
+            else:
+                trace = go.Bar(
+                            x = data.loc[data[args["group"]] == g,args['x']], # assign x as the dataframe column 'x'
+                            y = data.loc[data[args["group"]] == g, args['y']],
+                            error_y = dict(type='data',array=errors),
+                            name = g,
+                            marker = dict(color=color),
+                            )
             figure["data"].append(trace)
     else:
-        figure["data"].append(
-                      go.Bar(
-                            x=data[args['x']], # assign x as the dataframe column 'x'
-                            y=data[args['y']]
+        if 'orientation' in args:
+            figure["data"].append(
+                          go.Bar(
+                                x = data[args['x']],
+                                y = data[args['y']],
+                                orientation = args['orientation']
+                            )
                         )
-                    )
+        else:
+            figure["data"].append(
+                          go.Bar(
+                                x = data[args['x']], # assign x as the dataframe column 'x'
+                                y = data[args['y']],
+                            )
+                        )
     figure["layout"] = go.Layout(
                             title = args['title'],
                             xaxis={"title":args["x_title"]},
