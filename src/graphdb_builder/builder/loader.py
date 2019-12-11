@@ -96,6 +96,10 @@ def updateDB(driver, imports=None):
                 ontologyDataImportCode = cypher_queries['IMPORT_ONTOLOGY_DATA']['query']
                 for entity in entities:
                     queries.extend(ontologyDataImportCode.replace("ENTITY", entity).replace("IMPORTDIR", import_dir).split(';')[0:-1])
+            elif i == "biomarkers":
+                code = cypher_queries['IMPORT_BIOMARKERS']['query']
+                import_dir = os.path.join(cwd, config["curatedDirectory"])
+                queries = code.replace("IMPORTDIR", import_dir).split(';')[0:-1]
             #Databases
             #Chromosomes
             elif i == "chromosomes":
@@ -159,9 +163,6 @@ def updateDB(driver, imports=None):
                 code = cypher_queries['IMPORT_DISEASE_DATA']['query']
                 for entity, resource in config["disease_resources"]:
                     queries.extend(code.replace("IMPORTDIR", import_dir).replace("ENTITY", entity).replace("RESOURCE", resource.lower()).split(';')[0:-1])
-            elif i == "biomarkers":
-                code = cypher_queries['IMPORT_BIOMARKERS']['query']
-                queries = code.replace("IMPORTDIR", import_dir).split(';')[0:-1]
             #Drugs  
             elif i == "drugs":
                 code = cypher_queries['IMPORT_DRUG_DATA']['query']

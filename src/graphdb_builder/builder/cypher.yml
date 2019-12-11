@@ -444,7 +444,7 @@ IMPORT_DRUG_SIDE_EFFECTS:
         FIELDTERMINATOR '\t'
         MATCH (d:Drug {id:line.START_ID})
         MATCH (p:Phenotype {id:line.END_ID})
-        MERGE (d)-[r:HAS_SIDE_EFFECT{source:line.source,original_side_effect_code:line.original_side_effect}]->(p)
+        MERGE (d)-[r:HAS_SIDE_EFFECT{source:line.source,original_side_effect_code:line.original_side_effect,evidence_from:line.evidence_from,frequency:line.frequency,lower_bound:line.lower_bound,upper_bound:line.upper_bound}]->(p)
         RETURN COUNT(r) AS drug_has_side_effect_phenotype;
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/RESOURCE_is_indicated_for.tsv" AS line
@@ -556,7 +556,7 @@ IMPORT_BIOMARKERS:
     'description': 'Creates relationships is_biomarker_of (Disease, ...)'
     'query': >
         USING PERIODIC COMMIT 10000
-        LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/curated/protein_is_biomarker_of_disease.tsv" AS line
+        LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/protein_is_biomarker_of_disease.tsv" AS line
         FIELDTERMINATOR '\t'
         MATCH (p:Protein{id:line.START_ID})
         MATCH (d:Disease{id:line.END_ID}) 

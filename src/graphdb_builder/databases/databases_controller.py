@@ -26,8 +26,8 @@ def parseDatabase(importDirectory, database, download=True):
     stats = set()
     try:
         logger.info("Parsing database {}".format(database))
-        if database.lower() == "internal":
-            result = internalDBsParser.parser(dbconfig["databasesDir"], download)
+        if database.lower() == "jensenlab":
+            result = jensenlabParser.parser(dbconfig["databasesDir"], download)
             for qtype in result:
                 relationships, header, outputfileName = result[qtype]
                 outputfile = os.path.join(importDirectory, outputfileName)
@@ -35,11 +35,9 @@ def parseDatabase(importDirectory, database, download=True):
                 logger.info("Database {} - Number of {} relationships: {}".format(database, qtype, len(relationships)))
                 stats.add(builder_utils.buildStats(len(relationships), "relationships", qtype, database, outputfile))
         elif database.lower() == "mentions":
-            entities, header, outputfileName = internalDBsParser.parserMentions(dbconfig["databasesDir"], importDirectory, download)
-            outputfile = os.path.join(importDirectory, outputfileName)
-            builder_utils.write_entities(entities, header, outputfile)
-            logger.info("Database {} - Number of {} entities: {}".format(database, "Publication", len(entities)))
-            stats.add(builder_utils.buildStats(len(entities), "entity", "Publication", database, outputfile))
+            num_entities, outputfile = textminingParser.parser(dbconfig["databasesDir"], importDirectory, download)
+            logger.info("Database {} - Number of {} entities: {}".format(database, "Publication", num_entities))
+            stats.add(builder_utils.buildStats(num_entities, "entity", "Publication", database, outputfile))
         elif database.lower() == "hgnc":
             #HGNC
             entities, header = hgncParser.parser(dbconfig["databasesDir"], download)

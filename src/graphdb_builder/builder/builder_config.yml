@@ -12,6 +12,8 @@ experimentsDirectory: '../../../data/imports/experiments'
 databasesDirectory: '../../../data/imports/databases'
 #ontologies import diretory
 ontologiesDirectory: '../../../data/imports/ontologies'
+#curated import directory
+curatedDirectory: '../../../data/imports/curated'
 #users directory
 usersDirectory: '../../../data/users'
 usersImportDirectory: '../../../data/imports/users'
@@ -51,7 +53,7 @@ graph:
     - clinical variants
     - pathology_expression
     - mentions
-    - internal
+    - jensenlab
     - functional_regions
     - side effects
     - metabolite
