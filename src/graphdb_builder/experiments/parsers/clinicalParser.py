@@ -109,7 +109,7 @@ def extract_project_disease_rels(project_data, separator='|'):
 
 def extract_project_intervention_rels(project_data, separator='|'):
     data = project_data.copy()
-    if data['intervention'][0] == separator:
+    if pd.isna(data['intervention'][0]):
         return pd.DataFrame(columns=['START_ID', 'END_ID', 'TYPE'])
     else:
         interventions = data['intervention'][0].split(separator)
@@ -232,7 +232,7 @@ def extract_subject_disease_rels(clinical_data, separator='|'):
 def extract_subject_intervention_rels(clinical_data, separator='|'):
     data = clinical_data.set_index('subject id').copy()
     if pd.isna(data['had_intervention']).all():
-        return None
+        return pd.DataFrame(columns=['START_ID', 'END_ID', 'TYPE', 'in_combination', 'response'])
     else:
         interventions = data['had_intervention'].str.split(separator, expand=True).stack().str.strip().reset_index(level=1, drop=True)
         
@@ -248,7 +248,7 @@ def extract_subject_intervention_rels(clinical_data, separator='|'):
 
 def extract_biological_sample_group_rels(clinical_data):
     data = clinical_data.copy()
-    if pd.isna(data['grouping1']).any():
+    if pd.isna(data['grouping1']).all():
         return None
     else:
         df = data[['biological_sample id', 'grouping1', 'grouping2']]

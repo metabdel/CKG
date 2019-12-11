@@ -23,6 +23,7 @@ from app import app, server as application
 from apps import initialApp, projectCreationApp, dataUploadApp, dataUpload, projectApp, importsApp, homepageApp, loginApp, projectCreation
 from graphdb_builder import builder_utils
 from graphdb_builder.builder import loader, importer
+from graphdb_builder.experiments import experiments_controller as eh
 import ckg_utils
 import config.ckg_config as ckg_config
 
@@ -358,16 +359,20 @@ def create_project(n_clicks, name, acronym, responsible, participant, datatype, 
         disease = separator.join(disease)
         tissue = separator.join(tissue)
         intervention = separator.join(intervention)
+        arguments = [name, number_subjects, datatype, disease, tissue, responsible]
 
-        if any(elem is None for elem in [name, number_subjects, datatype, disease, tissue, responsible]) == True:
+        if any(not arguments[n] for n, i in enumerate(arguments)) == True:
             response = "Insufficient information to create project. Fill in all fields with '*'."
             return response, None, {'display': 'none'}, {'display': 'none'}
         
-        if any(elem is None for elem in [name, number_subjects, datatype, disease, tissue, responsible]) == False:
+        if any(not arguments[n] for n, i in enumerate(arguments)) == False:
         # Get project data from filled-in fields
             projectData = pd.DataFrame([name, acronym, description, number_subjects, datatype, timepoints, disease, tissue, intervention, responsible, participant, start_date, end_date]).T
             projectData.columns = ['name', 'acronym', 'description', 'subjects', 'datatypes', 'timepoints', 'disease', 'tissue', 'intervention', 'responsible', 'participant', 'start_date', 'end_date']
             projectData['status'] = ''
+
+            projectData.fillna(value=pd.np.nan, inplace=True)
+            projectData.replace('', np.nan, inplace=True)
 
             # Generate project internal identifier bsed on timestamp
             # Excel file is saved in folder with internal id name
@@ -516,20 +521,11 @@ def update_proteomics_tool(n_clicks, value):
               State('proteomics-tool', 'value')])
 def run_processing(n_clicks, data, filename, project_id, dtype, prot_tool):
     if n_clicks > 0:
-        print('ARGUMENTS')
-        print(filename)
-        print('--------')
-        print(project_id)
-        print('--------')
-        print(dtype)
-        print('--------')
-        print(prot_tool)
-        print('--------')
         if dtype == '':
             message = 'Error: Please refresh the page and select the type of data to be uploaded.'
             return message, {'display':'none'}
 
-        if dtype == 'proteomics' or dtype == 'longitudinal_proteomics' and prot_tool == '':
+        if prot_tool == '' and dtype == 'proteomics' or dtype == 'longitudinal_proteomics':
             message = 'Error: Please refresh the page and select tool: MaxQuant or Spectronaut.'
             return message, {'display':'none'}
 
@@ -554,7 +550,10 @@ def run_processing(n_clicks, data, filename, project_id, dtype, prot_tool):
             
             datasetPath = os.path.join(os.path.join(importDir, project_id), 'proteomics')
             builder_utils.checkDirectory(datasetPath)
+            print('CREATED DIR')
+            print(datasetPath)
             eh.generate_dataset_imports(project_id, 'proteomics', datasetPath)
+            print('FINISHED IMPORTER')
 
         loader.partialUpdate(imports=['project', 'experiment'])
         message = 'FILE successfully uploaded.'.replace('FILE', '"'+filename+'"')

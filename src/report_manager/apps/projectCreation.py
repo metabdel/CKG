@@ -156,8 +156,6 @@ def create_new_project(driver, projectId, data, separator='|'):
      
     try:
         db_project = check_if_node_exists(driver, 'name', data['name'][0])
-        print(db_project)
-        print('%%%%%%%%%%%%')
         if db_project.empty:
             external_identifier = get_new_project_identifier(driver, projectId)
             if external_identifier is None:
@@ -201,9 +199,6 @@ def create_new_project(driver, projectId, data, separator='|'):
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         logger.error("Reading query {}: {}, file: {},line: {}".format(query_name, sys.exc_info(), fname, exc_tb.tb_lineno))
-    
-    print(done)
-    print('------------')
     return done, external_identifier   
         
 def create_new_subjects(driver, projectId, subjects):
