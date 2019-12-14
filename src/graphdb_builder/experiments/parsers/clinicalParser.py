@@ -7,11 +7,12 @@ from graphdb_connector import connector
 
 def parser(projectId):
     data = {}
+    cwd = os.path.abspath(os.path.dirname(__file__))
     config = builder_utils.get_config(config_name="clinical.yml", data_type='experiments')
-    directory = '../../../data/experiments/PROJECTID/clinical/'
+    directory = os.path.join(cwd, '../../../../data/experiments/PROJECTID/clinical/')
     separator = config["separator"]
     if 'directory' in config:
-        directory = config['directory']
+        directory = os.path.join(cwd, config['directory'])
     directory = directory.replace('PROJECTID', projectId)
     # driver = connector.getGraphDatabaseConnectionConfiguration()
     
