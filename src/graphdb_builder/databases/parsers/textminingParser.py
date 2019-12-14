@@ -29,7 +29,6 @@ def parser(databases_directory, importDirectory, download=True):
     entities = None
     
     for qtype in config['db_mentions_types']:
-        print(qtype)
         parse_mentions(config, directory, qtype, importDirectory, download)
 
     return (num_entities, outputfile)
@@ -71,13 +70,11 @@ def parse_PMC_list(config, directory, download=True, valid_pubs=None):
 
 def parse_mentions(config, directory, qtype, importDirectory, download=True):
     url = config['db_url']
-    string_url = config['string_url']
-    stitch_url = config['stitch_url']
     ifile = config['db_mentions_files'][qtype]
     if qtype == "9606":
-        mapping = mp.getSTRINGMapping(string_url, download=download)
+        mapping = mp.getSTRINGMapping(download=download)
     elif qtype == "-1":
-        mapping = mp.getSTRINGMapping(stitch_url, source = config['db_sources']["Drug"], download = download, db = "STITCH")
+        mapping = mp.getSTRINGMapping(source = config['db_sources']["Drug"], download = download, db = "STITCH")
     
     filters = []
     if qtype in config['db_mentions_filters']:

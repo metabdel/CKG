@@ -14,7 +14,7 @@ def parser(databases_directory, drug_source, download=True):
 
     output_file = 'sider_has_side_effect.tsv'
 
-    drugmapping = mp.getSTRINGMapping(config['SIDER_mapping'], source = drug_source, download = False, db = "STITCH")
+    drugmapping = mp.getSTRINGMapping(source = drug_source, download = download, db = "STITCH")
     phenotypemapping = mp.getMappingFromOntology(ontology="Phenotype", source = config['SIDER_source'])
     
     relationships = set()
@@ -28,7 +28,7 @@ def parser(databases_directory, drug_source, download=True):
         data = line.decode('utf-8').rstrip("\r\n").split("\t")
         drug = re.sub(r'CID\d', 'CIDm', data[0])
         se = data[2]
-        evidence_from = data[3]
+        evidence_from = str(data[3])
         freq = data[4]
         lower_bound = data[5]
         upper_bound = data[6]

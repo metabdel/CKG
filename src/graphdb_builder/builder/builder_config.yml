@@ -34,6 +34,7 @@ statsCols:
     - 'Imported_number'
     - 'Import_type'
     - 'name'
+    - 'updated_on'
 
 #Full Graph
 graph: 
@@ -81,6 +82,7 @@ ontology_entities:
 #Modified proteins
 modified_proteins_resources:
     - 'psp'
+    - 'signor'
 #Protein complexes
 complexes_resources:
     - 'CORUM'
@@ -128,7 +130,7 @@ food_resources:
     - 'FooDB'
 
 #Internal Databases entities
-internalEntities:
+jensenlabEntities:
     - ['Protein','Disease']
     - ['Protein', 'Tissue']
     - ['Protein','Cellular_component']
@@ -139,5 +141,7 @@ mentionEntities:
     - 'Tissue'
     - 'Protein'
     - 'Drug'
+    - 'Cellular_component'
+    - 'Modified_protein'
 publicationEntities:
     - 'GWAS_study'

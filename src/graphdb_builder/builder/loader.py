@@ -209,10 +209,10 @@ def updateDB(driver, imports=None):
                 code = cypher_queries['IMPORT_CLINICALLY_RELEVANT_VARIANT_DATA']['query']
                 for resource in config["clinical_variant_resources"]:
                     queries.extend(code.replace("IMPORTDIR", import_dir).replace("RESOURCE", resource.lower()).split(';')[0:-1])
-            #Internal
-            elif i == "internal":
-                code = cypher_queries['IMPORT_INTERNAL_DATA']['query']
-                for (entity1, entity2) in config["internalEntities"]:
+            #Jensenlab.org
+            elif i == "jensenlab":
+                code = cypher_queries['IMPORT_JENSENLAB_DATA']['query']
+                for (entity1, entity2) in config["jensenlabEntities"]:
                     queries.extend(code.replace("IMPORTDIR", import_dir).replace("ENTITY1", entity1).replace("ENTITY2", entity2).split(';')[0:-1])
             #Mentions
             elif i == "mentions":
@@ -258,7 +258,7 @@ def updateDB(driver, imports=None):
                         code = dataset['query']
                         queries.extend(code.replace("IMPORTDIR", datasetDir).replace('PROJECTID', project).split(';')[0:-1])
             else:
-                logger.error("Non-existing dataset. The dataset you are trying to import does not exist: {}.".format(i))
+                logger.error("Non-existing dataset. The dataset you are trying to load does not exist: {}.".format(i))
             load_into_database(driver, queries, i)
         except Exception as err:
             exc_type, exc_obj, exc_tb = sys.exc_info()

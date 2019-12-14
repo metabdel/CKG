@@ -431,7 +431,7 @@ def file_size(file_path):
         file_info = os.stat(file_path)
         return str(file_info.st_size)
 
-def buildStats(count, otype, name, dataset, filename):
+def buildStats(count, otype, name, dataset, filename, updated_on):
     """
     Returns a tuple with all the information needed to build a stats file.
 
@@ -447,7 +447,7 @@ def buildStats(count, otype, name, dataset, filename):
     size = file_size(filename)
     filename = filename.split('/')[-1]
     
-    return(y, t, dataset, filename, size, count, otype, name)
+    return(str(y), str(t), dataset, filename, size, count, otype, name, updated_on)
 
 def compress_directory(folder_to_backup, dest_folder, file_name):
     """

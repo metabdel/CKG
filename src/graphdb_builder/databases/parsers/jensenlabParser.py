@@ -10,8 +10,7 @@ from graphdb_builder import mapping as mp, builder_utils
 def parser(databases_directory, download=True):
     result = {}
     config = builder_utils.get_config(config_name="jensenlabConfig.yml", data_type='databases')
-    string_url = config['string_url']
-    string_mapping = mp.getSTRINGMapping(string_url, download=download)
+    string_mapping = mp.getSTRINGMapping(download=download)
 
     for qtype in config['db_types']:
         relationships = parsePairs(config, databases_directory, qtype, string_mapping)
