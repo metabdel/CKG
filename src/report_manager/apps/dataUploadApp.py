@@ -28,6 +28,7 @@ Diseases = [(d['name']) for d in driver.nodes.match("Disease")]
 
 query = 'MATCH (n:Clinical_variable) RETURN n.name,n.id LIMIT 20'
 df = pd.DataFrame(connector.getCursorData(driver, query).values)
+ClinicalVariables = pd.DataFrame()
 if not df.empty:
     df[0] = ['({0})'.format(i) for i in df[0].tolist()]
     ClinicalVariables = df[[1, 0]].apply(lambda x: ' '.join(x),axis=1).tolist()
