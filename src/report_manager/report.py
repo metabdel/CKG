@@ -204,7 +204,7 @@ class Report:
                         with open(os.path.join(directory, name+'.json'), 'w') as out:
                             out.write(json.dumps(plot["net_json"]))
                         try:
-                            acore_utils.json_network_to_gml(plot["net_json"], name+".gml")
+                            acore_utils.json_network_to_gml(plot["net_json"], os.path.join(directory, name+".gml"))
                         except: 
                             pass
                         if "app" in plot:

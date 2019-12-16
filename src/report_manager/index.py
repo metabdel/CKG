@@ -464,6 +464,7 @@ def export_contents(data, dataDir, filename):
               [Input('upload-data', 'contents'),
                Input('upload-data', 'filename')])
 def store_original_data(contents, filename):
+    print("IN")
     if contents is not None:
         df = parse_contents(contents, filename)
         return df.to_dict('records')

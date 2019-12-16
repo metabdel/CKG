@@ -15,6 +15,9 @@ import pingouin as pg
 import numpy as np
 import networkx as nx
 import community
+import snf
+from sklearn.cluster import spectral_clustering
+from sklearn.metrics import v_measure_score
 import math
 from fancyimpute import KNN
 import kmapper as km
@@ -145,7 +148,7 @@ def extract_number_missing(data, min_valid, drop_cols=['sample'], group='group')
         groups = groups[groups>=min_valid]
 
     groups = groups.dropna(how='all', axis=1)
-    return list(groups.columns)
+    return groups.columns.unique().tolist()
 
 def extract_percentage_missing(data, missing_max, drop_cols=['sample'], group='group'):
     """ 
@@ -168,9 +171,9 @@ def extract_percentage_missing(data, missing_max, drop_cols=['sample'], group='g
         groups = groups.set_index(group)
         groups = groups.isnull().groupby(level=0).mean()
         groups = groups[groups<=missing_max]
-        groups = groups.dropna(how='all', axis=1).columns
+        groups = groups.dropna(how='all', axis=1).columns.unique().tolist()
 
-    return list(groups)
+    return groups
 
 def imputation_KNN(data, drop_cols=['group', 'sample', 'subject'], group='group', cutoff=0.6, alone = True):
     """ 
@@ -2076,3 +2079,13 @@ def run_two_way_anova(df, drop_cols=['sample'], subject='subject', group=['group
     anova_df = anova_df.dropna(how="all")
     
     return anova_df, residuals
+
+def run_snf(df_dict, clusters, distance_metric, K_affinity, mu_affinity):
+    """
+        
+    :param df_dict: 
+    :param clusters: 
+    
+    
+    """
+    pass
