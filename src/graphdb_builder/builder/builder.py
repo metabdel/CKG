@@ -58,17 +58,20 @@ if __name__ == '__main__':
     elif args.build_type == 'import':
         logger.info("The user chose to perform a partial build")
         if args.import_types is not None:
-            if len(args.data) > 0:
+            if args.data is None or len(args.data) > 0:
                 logger.info("The build will import data from {}".format("".join(args.import_types)))
                 for import_type in args.import_types:
-                    logger.info("Importing {}: {}".format(import_type, "".join(args.data)))
+                    logger.info("Importing {}: {}".format(import_type, args.data))
                     if import_type.lower() == 'experiments' or import_type.lower() == 'experiment':
                         importer.experimentsImport(projects=args.data, n_jobs=1)
                     elif import_type.lower() == 'users' or import_type.lower() == 'user':
                         importer.usersImport(importDirectory='../../../data/imports')
                     elif import_type.lower() == 'databases' or import_type.lower() == 'database':
                         databases = [d.lower() for d in dbconfig['databases']]
-                        valid_entities = [x.lower() for x in args.data if x.lower() in databases]
+                        if args.data is not None:
+                            valid_entities = [x.lower() for x in args.data if x.lower() in databases]
+                        else:
+                            valid_entities = databases
                         if len(valid_entities) > 0:
                             logger.info("These entities will be imported: {}".format(", ".join(valid_entities)))
                             print("These entities will be imported: {}".format(", ".join(valid_entities)))
@@ -78,7 +81,10 @@ if __name__ == '__main__':
                             print("The indicated entities (--data) cannot be imported: {}".format(args.data))
                     elif import_type.lower() == 'ontologies' or import_type.lower() == 'ontology':
                         ontologies = [d.lower   () for d in oconfig['ontologies']]
-                        valid_entities = [x.capitalize() for x in args.data if x.lower() in ontologies]
+                        if args.data is not None:
+                            valid_entities = [x.capitalize() for x in args.data if x.lower() in ontologies]
+                        else:
+                            valid_entities = ontologies
                         if len(valid_entities) > 0:
                             logger.info("These entities will be imported: {}".format(", ".join(valid_entities)))
                             print("These entities will be loaded into the database: {}".format(", ".join(valid_entities)))

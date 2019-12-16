@@ -81,7 +81,7 @@ def parseKinaseSubstrates(fhandler, modifications):
         substrate = data[6]
         modified_protein_id = substrate+'_'+data[9]+'-p'
         if organism == "human":
-            relationships.add((modified_protein_id,kinase,"IS_SUBSTRATE_OF", "","CURATED", 5, "PhosphoSitePlus"))
+            relationships.add((modified_protein_id,kinase,"IS_SUBSTRATE_OF", "NA","CURATED", 5, "PhosphoSitePlus"))
     return relationships
     
 def parseRegulationAnnotations(fhandler, modifications, mapping):

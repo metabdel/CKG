@@ -431,7 +431,7 @@ def file_size(file_path):
         file_info = os.stat(file_path)
         return str(file_info.st_size)
 
-def buildStats(count, otype, name, dataset, filename, updated_on):
+def buildStats(count, otype, name, dataset, filename, updated_on=None):
     """
     Returns a tuple with all the information needed to build a stats file.
 

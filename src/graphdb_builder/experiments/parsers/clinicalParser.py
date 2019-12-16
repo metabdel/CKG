@@ -65,7 +65,7 @@ def extract_project_info(project_data):
     return df
 
 def extract_responsible_rels(project_data, separator='|'):
-    df = None
+    df = pd.DataFrame(columns=['START_ID', 'END_ID', 'TYPE'])
     if 'responsible' in project_data:
         if not pd.isna(project_data['responsible'][0]):
             df = pd.DataFrame(project_data.responsible.str.split(separator).tolist()).T.rename(columns={0:'START_ID'})
@@ -75,7 +75,7 @@ def extract_responsible_rels(project_data, separator='|'):
     return df
 
 def extract_participant_rels(project_data, separator='|'):
-    df = None
+    df = pd.DataFrame(columns=['START_ID', 'END_ID', 'TYPE'])
     if 'participant' in project_data:
         if not pd.isna(project_data['participant'][0]):
             df = pd.DataFrame(project_data.participant.str.split(separator).tolist()).T.rename(columns={0:'START_ID'})
@@ -85,8 +85,7 @@ def extract_participant_rels(project_data, separator='|'):
     return df
     
 def extract_project_tissue_rels(project_data, separator='|'):
-    df = None
-    
+    df = pd.DataFrame(columns=['START_ID', 'END_ID', 'TYPE'])
     if 'tissue' in project_data:
         if not pd.isna(project_data['tissue'][0]):
             tissues = project_data['tissue'][0].split(separator)
@@ -97,7 +96,7 @@ def extract_project_tissue_rels(project_data, separator='|'):
     return df
     
 def extract_project_disease_rels(project_data, separator='|'):
-    df = None
+    df = pd.DataFrame(columns=['START_ID', 'END_ID', 'TYPE'])
     if 'disease' in project_data:
         if not pd.isna(project_data['disease'][0]):
             diseases = project_data['disease'][0].split(separator)
@@ -108,7 +107,7 @@ def extract_project_disease_rels(project_data, separator='|'):
     return df
 
 def extract_project_intervention_rels(project_data, separator='|'):
-    df = None
+    df = pd.DataFrame(columns=['START_ID', 'END_ID', 'TYPE'])
     if 'intervention' in project_data:
         if not pd.isna(project_data['intervention'][0]):
             interventions = project_data['intervention'][0].split(separator)
@@ -131,29 +130,29 @@ def extract_timepoints(project_data, separator='|'):
     return df
 
 def extract_project_subject_rels(project_data, clinical_data):
-    df = None
-    if 'subject id' in project_data:
-        if not pd.isna(project_data['subject id']).any():
-            df = pd.DataFrame(project_data['subject id'].dropna().unique(), columns=['END_ID'])
+    df = pd.DataFrame(columns=['START_ID', 'END_ID', 'TYPE'])
+    if 'subject id' in clinical_data:
+        if not pd.isna(clinical_data['subject id']).any():
+            df = pd.DataFrame(clinical_data['subject id'].dropna().unique(), columns=['END_ID'])
             df.insert(loc=0, column='START_ID', value=project_data['external_id'][0])
             df['TYPE'] = 'HAS_ENROLLED'
     
     return df
 
 def extract_subject_identifiers(project_data, clinical_data):
-    df = None
+    df = pd.DataFrame(columns=['ID', 'external_id'])
     data = clinical_data.set_index('subject id').copy()
-    if 'subject external_id' in clinical_data and 'subjects' in project_data:
-        if not pd.isna(data['subject external_id']).any():
-            df = clinical_data.set_index('subject id')[['subject external_id']].dropna(axis=0).reset_index()
-            df = df.drop_duplicates(keep='first').reset_index(drop=True)
-            df.columns = ['ID', 'external_id']
-            if int(project_data['subjects'][0]) != len(df['ID']):
-                df = None
+    if not pd.isna(data['subject external_id']).any():
+        df = data[['subject external_id']].dropna(axis=0).reset_index()
+        df = df.drop_duplicates(keep='first').reset_index(drop=True)
+        df.columns = ['ID', 'external_id']
+        if int(project_data['subjects'][0]) != len(df['ID']):
+            df = pd.DataFrame(columns=['ID', 'external_id'])
+            
     return df
 
 def extract_biological_sample_subject_rels(clinical_data):
-    df = None
+    df = pd.DataFrame(columns=['START_ID', 'END_ID', 'TYPE'])
     if 'biological_sample id' in clinical_data:
         if not pd.isna(clinical_data['biological_sample id']).any():
             df = clinical_data[['biological_sample id', 'subject id']].drop_duplicates(keep='first').reset_index(drop=True)
@@ -163,7 +162,7 @@ def extract_biological_sample_subject_rels(clinical_data):
     return df
 
 def extract_biological_samples_info(clinical_data):
-    df = None
+    df = pd.DataFrame(columns=['ID'])
     if 'biological_sample id' in clinical_data:
         if not pd.isna(clinical_data['biological_sample id']).any():
             cols = [i for i in clinical_data.columns if str(i).startswith('biological_sample')]
@@ -175,7 +174,7 @@ def extract_biological_samples_info(clinical_data):
     return df
 
 def extract_analytical_samples_info(clinical_data):
-    df = None
+    df = pd.DataFrame(columns=['ID', 'group', 'secondary_group'])
     if 'analytical_sample id' in clinical_data:
         if not pd.isna(clinical_data['analytical_sample id']).any():
             cols = [i for i in clinical_data.columns if str(i).startswith('analytical_sample')]
@@ -187,7 +186,7 @@ def extract_analytical_samples_info(clinical_data):
     return df
 
 def extract_biological_sample_analytical_sample_rels(clinical_data):
-    df = None
+    df = pd.DataFrame(columns=['START_ID', 'END_ID', 'quantity', 'quantity_units'])
     if 'analytical_sample id' in clinical_data:
         if not pd.isna(clinical_data['analytical_sample id']).any():
             df = clinical_data[['biological_sample id', 'analytical_sample id', 'analytical_sample quantity', 'analytical_sample quantity_units']].drop_duplicates(keep='first').reset_index(drop=True)
@@ -208,7 +207,7 @@ def extract_biological_sample_timepoint_rels(clinical_data):
     return df
 
 def extract_biological_sample_tissue_rels(clinical_data):
-    df = None
+    df = pd.DataFrame(columns=['START_ID', 'END_ID', 'TYPE'])
     if 'tissue id' in clinical_data:
         if not pd.isna(clinical_data['tissue id']).all():
             df = clinical_data[['biological_sample id', 'tissue id']].drop_duplicates(keep='first').reset_index(drop=True)
@@ -218,7 +217,7 @@ def extract_biological_sample_tissue_rels(clinical_data):
     return df
 
 def extract_subject_disease_rels(clinical_data, separator='|'):
-    df = None
+    df = pd.DataFrame(columns=['START_ID', 'END_ID', 'TYPE'])
     if 'disease id' in clinical_data:
         if not pd.isna(clinical_data['disease id']).all():
             clinical_data['disease id'] = clinical_data['disease id'].astype(str)
@@ -247,7 +246,7 @@ def extract_subject_intervention_rels(clinical_data, separator='|'):
     return df
 
 def extract_biological_sample_group_rels(clinical_data):
-    df = None
+    df = pd.DataFrame(columns=['START_ID', 'END_ID', 'primary', 'TYPE'])
     if 'grouping1' in clinical_data:
         if not pd.isna(clinical_data['grouping1']).all():
             df = clinical_data[['biological_sample id', 'grouping1', 'grouping2']]

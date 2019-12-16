@@ -37,7 +37,8 @@ IMPORT_PROTEIN_DATA:
     'name': "import protein data"
     'description': "Creates Protein and Peptide nodes, their relationship and relationships to Gene and Transcript nodes"
     'query': >
-        CREATE INDEX ON :Protein(accession); 
+        CREATE INDEX ON :Protein(accession);
+        CREATE INDEX ON :Protein(name); 
         CREATE CONSTRAINT ON (a:Protein) ASSERT a.id IS UNIQUE; 
         CREATE CONSTRAINT ON (a:Protein) ASSERT a.accesion IS UNIQUE; 
         USING PERIODIC COMMIT 10000
@@ -107,7 +108,7 @@ IMPORT_MODIFIED_PROTEINS:
     'query': >
         CREATE CONSTRAINT ON (m:Modified_protein) ASSERT m.id IS UNIQUE;
         USING PERIODIC COMMIT 10000
-        LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Modified_protein.tsv" AS line
+        LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/RESOURCE_Modified_protein.tsv" AS line
         FIELDTERMINATOR '\t'
         MERGE (m:Modified_protein {id:line.ID})
         ON CREATE SET m.protein=line.protein,m.position=line.position,m.residue=line.residue,m.sequence_window=line.sequence_window,m.source=line.source
