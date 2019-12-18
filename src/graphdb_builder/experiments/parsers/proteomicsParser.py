@@ -9,7 +9,8 @@ def parser(projectId):
     data = {}
     cwd = os.path.abspath(os.path.dirname(__file__))
     directory = os.path.join(cwd, '../../../../data/experiments/PROJECTID/proteomics/')
-    config = get_dataset_configuration()
+    #config = get_dataset_configuration()
+    config = builder_utils.get_config(config_name="proteomics.yml", data_type='experiments')
     if 'directory' in config:
         directory = os.path.join(cwd, config['directory'])
     directory = directory.replace('PROJECTID', projectId)
@@ -67,7 +68,7 @@ def parse_dataset(projectId, configuration, dataDir):
     return dataset
 
 def check_minimum_configuration(configuration):
-    minimum_req = ['columns', 'indexCol', 
+    minimum_req = ['columns', 'indexCol',
                    'proteinCol', 'log',
                    'file', 'valueCol', 'attributes']
 
@@ -86,10 +87,10 @@ def load_dataset(uri, configuration):
     columns = set(columns).difference(regexCols)
 
     #Read the filters defined in config, i.e. reverse, contaminant, etc.
-    
+
     if 'filters' in configuration:
         filters = configuration["filters"]
-    
+
     indexCol = configuration["indexCol"]
 
     #Read the data from file
@@ -128,7 +129,7 @@ def expand_groups(data, configuration):
     elif configuration['groupCol'] not in data.columns:
         data.index.name = configuration['groupCol']
         data = data.reset_index()
-        
+
     s = data[configuration["proteinCol"]].str.split(';').apply(pd.Series, 1).stack().reset_index(level=1, drop=True)
     del data[configuration["proteinCol"]]
     pdf = s.to_frame(configuration["proteinCol"])
@@ -433,18 +434,18 @@ def get_dataset_configuration(processing_format, data_type):
                 dataset_config = config[processing_format][data_type]
         else:
             dataset_config = config[processing_format]
-    
+
     return dataset_config
 
 def map_experimental_data(data, mapping):
     mapping_cols = {}
-    
+
     if not data.empty:
         for column in data.columns:
             for external_id in mapping:
                 if external_id in column:
                     mapping_cols[column] = column.replace(external_id, mapping[external_id])
         data = data.rename(columns=mapping_cols)
-        
-        
+
+
     return data
