@@ -9,7 +9,7 @@ def parser(projectId):
     data = {}
     cwd = os.path.abspath(os.path.dirname(__file__))
     directory = os.path.join(cwd, '../../../../data/experiments/PROJECTID/proteomics/')
-    config = builder_utils.get_config(config_name="proteomics.yml", data_type='experiments')
+    config = get_dataset_configuration()
     if 'directory' in config:
         directory = os.path.join(cwd, config['directory'])
     directory = directory.replace('PROJECTID', projectId)
@@ -422,4 +422,29 @@ def calculate_median_replicates(data, log = "log2"):
 def update_groups(data, groups):
     data = data.join(groups.to_frame(), on='START_ID')
 
+    return data
+
+def get_dataset_configuration(processing_format, data_type):
+    config = builder_utils.get_config(config_name="proteomics.yml", data_type='experiments')
+    dataset_config = {}
+    if processing_format in config:
+        if data_type is not None:
+            if data_type in config[processing_format]:
+                dataset_config = config[processing_format][data_type]
+        else:
+            dataset_config = config[processing_format]
+    
+    return dataset_config
+
+def map_experimental_data(data, mapping):
+    mapping_cols = {}
+    
+    if not data.empty:
+        for column in data.columns:
+            for external_id in mapping:
+                if external_id in column:
+                    mapping_cols[column] = column.replace(external_id, mapping[external_id])
+        data = data.rename(columns=mapping_cols)
+        
+        
     return data

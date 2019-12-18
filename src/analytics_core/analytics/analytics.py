@@ -27,17 +27,23 @@ import statsmodels.api as sm
 from statsmodels.formula.api import ols
 import time
 from joblib import Parallel, delayed
-from rpy2 import robjects as ro
-from rpy2.robjects.packages import importr
-from rpy2.robjects import pandas2ri
-import rpy2.robjects.numpy2ri
 
-pandas2ri.activate()
+try:
+    from rpy2 import robjects as ro
+    from rpy2.robjects.packages import importr
+    from rpy2.robjects import pandas2ri
+    import rpy2.robjects.numpy2ri
 
-R = ro.r
-base = importr('base')
-stats_r = importr('stats')
-samr = importr('samr')
+    pandas2ri.activate()
+    R = ro.r
+    base = importr('base')
+    stats_r = importr('stats')
+    samr = importr('samr')
+    r_installation = True
+except ImportError:
+    r_installation = False
+    print("R functions will not work. Module Rpy2 not installed.")
+
 
 def transform_into_wide_format(data, index, columns, values, extra=[]):
     """ 
@@ -423,6 +429,7 @@ def get_proteomics_measurements_ready(df, index_cols=['group', 'sample', 'subjec
 
         result = get_proteomics_measurements_ready(df, index_cols=['group', 'sample', 'subject'], drop_cols=['sample'], group='group', identifier='identifier', extra_identifier='name', imputation = True, method = 'mixed', missing_method = 'at_least_x', missing_per_group=False, min_valid=5, value_col='LFQ_intensity')
     """
+    print(df.head())
     df = df.set_index(index_cols)
     if extra_identifier is not None and extra_identifier in df.columns:
         df[identifier] = df[extra_identifier].map(str) + "~" + df[identifier].map(str)
@@ -1022,6 +1029,10 @@ def calculate_ttest_samr(df, labels, n=2, s0=0, paired=False):
 
         result = calculate_ttest_samr(df, labels, n=2, s0=0.1, paired=False)
     """
+    if not r_installation:
+        raise Exception("No valid installation of R") 
+    
+    result = pd.DataFrame(columns=['identifier', 'group1', 'group2', 'mean(group1)', 'mean(group2)', 'log2FC', 'FC', 't-statistics', 'pvalue'])
     conditions = df.columns.unique()
     mean1 = df[conditions[0]].mean(axis=1)
     mean2 = df[conditions[1]].mean(axis=1)
@@ -1191,7 +1202,10 @@ def calculate_anova_samr(df, labels, s0=0):
 
         result = calculate_anova_samr(df, labels, s0=0.1)
     """
-    aov_res = samr.multiclass_func(df.values, base.unlist(labels), s0=s0)
+    if not r_installation:
+        raise Exception("No valid installation of R")
+    
+    aov_res = wgcna.multiclass_func(df.values, base.unlist(labels), s0=s0)
     
     result = pd.DataFrame([df.index, aov_res[0]]).T
     result.columns = ['identifier', 'F-statistics']    
@@ -1489,6 +1503,9 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
 
         result = run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample'], alpha=0.05, s0=1, permutations=250)
     """ 
+    if not r_installation:
+        raise Exception("No valid installation of R")
+    
     if permutations > 0:
         R_function = R('''result <- function(data, res_type, s0, nperms) {
                                     samr(data=data, resp.type=res_type, s0=s0, nperms=nperms, random.seed = 12345, s0.perc=NULL)
@@ -1892,6 +1909,9 @@ def run_WGCNA(data, drop_cols_exp, drop_cols_cli, RsquaredCut=0.8, networkType='
 
         result = run_WGCNA(data, drop_cols_exp=['subject', 'sample', 'group', 'index'], drop_cols_cli=['subject', 'biological_sample', 'group', 'index'], RsquaredCut=0.8, networkType='unsigned', minModuleSize=30, deepSplit=2, pamRespectsDendro=False, merge_modules=True, MEDissThres=0.25, verbose=0)
     """
+    if not r_installation:
+        raise Exception("No valid installation of R")
+    
     result = {}
     dfs = wgcna.get_data(data, drop_cols_exp=drop_cols_exp, drop_cols_cli=drop_cols_cli)
     if 'clinical' in dfs:
