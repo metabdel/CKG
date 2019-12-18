@@ -67,10 +67,9 @@ def parse_dataset(projectId, configuration, dataDir):
     return dataset
 
 def check_minimum_configuration(configuration):
-    minimum_req = ['columns', 'filters',
-                   'indexCol', 'proteinCol', 'log',
-                   'file', 'valueCol',
-                   'attributes']
+    minimum_req = ['columns', 'indexCol', 
+                   'proteinCol', 'log',
+                   'file', 'valueCol', 'attributes']
 
     return set(minimum_req).difference(set(configuration.keys()))
 
@@ -81,12 +80,16 @@ def load_dataset(uri, configuration):
     #Get the columns from config and divide them into simple or regex columns
     data = None
     regexCols = None
+    filters = None
     columns = configuration["columns"]
     regexCols = [c.replace("\\\\","\\") for c in columns if '+' in c]
     columns = set(columns).difference(regexCols)
 
     #Read the filters defined in config, i.e. reverse, contaminant, etc.
-    filters = configuration["filters"]
+    
+    if 'filters' in configuration:
+        filters = configuration["filters"]
+    
     indexCol = configuration["indexCol"]
 
     #Read the data from file
@@ -117,9 +120,15 @@ def remove_contaminant_tag(column, tag='CON__'):
     return new_column
 
 def expand_groups(data, configuration):
+    default_group_col = 'id'
     if "groupCol" not in configuration or configuration["groupCol"] is None:
+        data.index.name = default_group_col
         data = data.reset_index()
-        configuration['groupCol'] = 'index'
+        configuration['groupCol'] = default_group_col
+    elif configuration['groupCol'] not in data.columns:
+        data.index.name = configuration['groupCol']
+        data = data.reset_index()
+        
     s = data[configuration["proteinCol"]].str.split(';').apply(pd.Series, 1).stack().reset_index(level=1, drop=True)
     del data[configuration["proteinCol"]]
     pdf = s.to_frame(configuration["proteinCol"])
@@ -179,6 +188,7 @@ def extract_protein_modification_subject_rels(data, configuration):
     columns.append("TYPE")
     data.columns = columns
     data = data[['START_ID', 'END_ID', 'TYPE', "value"] + regexCols + cCols]
+    data.columns = [c.replace('PG.','') for c in data.columns]
     data = data.drop_duplicates()
 
     return data
@@ -289,6 +299,7 @@ def extract_peptide_subject_rels(data, configuration):
     columns.append("TYPE")
     aux.columns = columns
     aux = aux[['START_ID', 'END_ID', 'TYPE', "value"] + regexCols + cCols]
+    aux.columns = [c.replace('PG.','') for c in aux.columns]
     aux = aux.drop_duplicates()
 
     return aux
@@ -326,6 +337,7 @@ def extract_protein_subject_rels(data, configuration):
     columns.append("TYPE")
     aux.columns = columns
     aux = aux[['START_ID', 'END_ID', 'TYPE', "value"] + regexCols + cCols]
+    aux.columns = [c.replace('PG.','') for c in aux.columns]
 
     return aux
 
