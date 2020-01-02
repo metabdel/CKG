@@ -29,7 +29,7 @@ def get_data_upload_queries():
 	"""
 	Reads the YAML file containing the queries relevant to parsing of clinical data and \
 	returns a Python object (dict[dict]).
-	
+
 	:return: Nested dictionary.
 	"""
 	try:
@@ -44,7 +44,7 @@ def get_data_upload_queries():
 def get_new_biosample_identifier(driver):
 	"""
 	Queries the database for the last biological sample internal identifier and returns a new sequential identifier.
-	
+
 	:param driver: py2neo driver, which provides the connection to the neo4j graph database.
 	:type driver: py2neo driver
 	:return: Biological sample identifier.
@@ -65,7 +65,7 @@ def get_new_biosample_identifier(driver):
 def get_new_analytical_sample_identifier(driver):
 	"""
 	Queries the database for the last analytical sample internal identifier and returns a new sequential identifier.
-	
+
 	:param driver: py2neo driver, which provides the connection to the neo4j graph database.
 	:type driver: py2neo driver
 	:return: Analytical sample identifier.
@@ -86,7 +86,7 @@ def get_new_analytical_sample_identifier(driver):
 def get_subject_number_in_project(driver, projectId):
 	"""
 	Extracts the number of subjects included in a given project.
-	
+
 	:param driver: py2neo driver, which provides the connection to the neo4j graph database.
 	:type driver: py2neo driver
 	:param str projectId: external project identifier (from the graph database).
@@ -106,7 +106,7 @@ def get_subject_number_in_project(driver, projectId):
 def create_new_biosamples(driver, projectId, data):
 	"""
 	Creates new graph database nodes and relationships for biological samples obtained from subjects participating in a project.
-	
+
 	:param driver: py2neo driver, which provides the connection to the neo4j graph database.
 	:type driver: py2neo driver
 	:param str projectId: external project identifier (from the graph database).
@@ -138,7 +138,7 @@ def create_new_biosamples(driver, projectId, data):
 def create_new_ansamples(driver, projectId, data):
 	"""
 	Creates new graph database nodes and relationships for analytical samples obtained.
-	
+
 	:param driver: py2neo driver, which provides the connection to the neo4j graph database.
 	:type driver: py2neo driver
 	:param str projectId: external project identifier (from the graph database).
@@ -165,19 +165,17 @@ def create_new_ansamples(driver, projectId, data):
 		logger.error("Reading query {}: {}, file: {},line: {}".format(query_name, sys.exc_info(), fname, exc_tb.tb_lineno))
 
 	data.insert(2, 'analytical_sample id', data['analytical_sample external_id'].map(ansample_dict))
-	return data	
+	return data
 
 def create_new_experiment_in_db(driver, projectId, data, separator='|'):
 	"""
 	Creates a new project in the graph database, following the steps:
-
 	1. Maps intervention, disease and tissue names to database identifiers and adds data to \
 		pandas DataFrame.
 	2. Creates new biological and analytical samples.
 	3. Checks if the number of subjects created in the graph database matches the number of \
 		subjects in the input dataframe.
 	4. Saves all the relevant node and relationship dataframes to tab-delimited files.
-
 	:param driver: py2neo driver, which provides the connection to the neo4j graph database.
 	:type driver: py2neo driver
 	:param str projectId: external project identifier (from the graph database).
@@ -193,15 +191,15 @@ def create_new_experiment_in_db(driver, projectId, data, separator='|'):
 		if len(disease.split(separator)) > 1:
 			ids = []
 			for i in disease.split(separator):
-				disease_id = query_utils.map_node_name_to_id(driver, 'Disease', str(i))
+				disease_id = query_utils.map_node_name_to_id(driver, 'Disease', str(i.strip()))
 				ids.append(disease_id)
 			disease_dict[disease] = '|'.join(ids)
 		else:
-			disease_id = query_utils.map_node_name_to_id(driver, 'Disease', str(disease))
+			disease_id = query_utils.map_node_name_to_id(driver, 'Disease', str(disease.strip()))
 			disease_dict[disease] = disease_id
 
 	for tissue in data['tissue'].dropna().unique():
-		tissue_id = query_utils.map_node_name_to_id(driver, 'Tissue', str(tissue))
+		tissue_id = query_utils.map_node_name_to_id(driver, 'Tissue', str(tissue.strip()))
 		tissue_dict[tissue] = tissue_id
 
 	for interventions in data['studies_intervention'].dropna().unique():
@@ -245,7 +243,7 @@ def create_new_experiment_in_db(driver, projectId, data, separator='|'):
 		generateGraphFiles(dataRows,'biosample_tissue', projectId, d='clinical')
 	dataRows = cp.extract_subject_disease_rels(df2, separator=separator)
 	if dataRows is not None:
-		generateGraphFiles(dataRows,'disease', projectId, d='clinical') 
+		generateGraphFiles(dataRows,'disease', projectId, d='clinical')
 	dataRows = cp.extract_subject_intervention_rels(df2, separator=separator)
 	if dataRows is not None:
 		generateGraphFiles(dataRows, 'subject_had_intervention', projectId, d='clinical')
@@ -263,7 +261,7 @@ def create_new_experiment_in_db(driver, projectId, data, separator='|'):
 def generateGraphFiles(data, dataType, projectId, ot = 'w', d = 'proteomics'):
 	"""
 	Saves data provided as a Pandas DataFrame to a tab-delimited file.
-	
+
 	:param data: pandas DataFrame.
 	:param str dataType: type of data in 'data'.
 	:param str projectId: external project identifier (from the graph database).
@@ -278,5 +276,3 @@ def generateGraphFiles(data, dataType, projectId, ot = 'w', d = 'proteomics'):
 					header=True, index=False, quotechar='"',
 					line_terminator='\n', escapechar='\\')
 	logger.info("Experiment {} - Number of {} relationships: {}".format(projectId, dataType, data.shape[0]))
-
-
