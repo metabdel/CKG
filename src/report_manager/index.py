@@ -24,6 +24,7 @@ from apps import initialApp, projectCreationApp, dataUploadApp, dataUpload, proj
 from graphdb_builder import builder_utils
 from graphdb_builder.builder import loader, importer
 from graphdb_builder.experiments import experiments_controller as eh
+from report_manager import utils
 import ckg_utils
 import config.ckg_config as ckg_config
 
@@ -77,7 +78,8 @@ def display_page(pathname):
                                              'right': '50px'})
         elif '/apps/dataUploadApp' in pathname:
             projectId = pathname.split('/')[-1]
-            dataUpload_form = dataUploadApp.DataUploadApp(projectId, "Data Upload", "", "", layout = [], logo = None, footer = None)
+            session_id = datetime.now().strftime('%Y%m-%d%H-%M%S-') + str(uuid4())
+            dataUpload_form = dataUploadApp.DataUploadApp(session_id, projectId, "Data Upload", "", "", layout = [], logo = None, footer = None)
             return (dataUpload_form.layout, {'display': 'block',
                                         'position': 'absolute',
                                         'right': '50px'})
@@ -180,8 +182,7 @@ def update_output(contents, value, fname):
         elif dataset == 'reset':
             display = {'display': 'none'}
             if os.path.exists(directory):
-                shutil.rmtree(directory)
-                
+                shutil.rmtree(directory)                
     return display, uploaded, fname
                 
 
@@ -299,6 +300,9 @@ def route_logout():
     
     return rep
 
+
+
+
 ###Callbacks for download project
 @app.callback(Output('download-zip', 'href'),
              [Input('download-zip', 'n_clicks')],
@@ -321,6 +325,11 @@ def regenerate_report(n_clicks, title, pathname):
     basic_path = '/'.join(pathname.split('/')[0:3]) 
     project_id, force, session_id = get_project_params_from_url(pathname)
     return basic_path+'/apps/project?project_id={}&force=1&session={}'.format(project_id, title)
+
+
+
+
+
 
 ###Callbacks for project creation app
 def image_formatter(im):
@@ -436,17 +445,14 @@ def serve_static():
 
 
 ###Callbacks for data upload app
-def parse_contents(contents, filename):
-    content_type, content_string = contents.split(',')
-    decoded = base64.b64decode(content_string)
-    file = filename.split('.')[-1]
-    
-    if file == 'txt' or file == 'tsv':
-        df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), sep='\t', low_memory=False)
-    elif file == 'csv':
-        df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), low_memory=False)
-    elif file == 'xlsx' or file == 'xls':
-        df = pd.read_excel(io.BytesIO(decoded))        
+def parse_contents(file):
+    ftype = file.split('.')[-1]
+    if ftype == 'txt' or ftype == 'tsv':
+        df = pd.read_csv(file, sep='\t', low_memory=False)
+    elif ftype == 'csv':
+        df = pd.read_csv(file, low_memory=False)
+    elif ftype == 'xlsx' or ftype == 'xls':
+        df = pd.read_excel(file)        
     return df
 
 def export_contents(data, dataDir, filename):
@@ -460,146 +466,147 @@ def export_contents(data, dataDir, filename):
         csv_string = data.to_excel(os.path.join(dataDir, filename), index=False, encoding='utf-8')   
     return csv_string
 
-@app.callback(Output('memory-original-data', 'data'),
-              [Input('upload-data', 'contents'),
-               Input('upload-data', 'filename')])
-def store_original_data(contents, filename):
-    print("IN")
-    if contents is not None:
-        df = parse_contents(contents, filename)
-        return df.to_dict('records')
-    else:
-        raise PreventUpdate
 
 @app.callback(Output('proteomics-tool', 'style'),
               [Input('upload-data-type-picker', 'value')])
 def show_proteomics_options(datatype):
-    if datatype == 'proteomics' or datatype == 'longitudinal_proteomics':
+    if 'proteomics' in datatype or 'longitudinal_proteomics' in datatype:
         return {'display': 'block'}
     else:
         return {'display': 'none'}
 
 
-@app.callback([Output('clinical-table', 'data'),
-               Output('clinical-table', 'columns')],
-              [Input('memory-original-data', 'data'),
-               Input('editing-columns-button', 'n_clicks')],
-              [State('clinical-variables-picker', 'value'),
-               State('upload-data-type-picker', 'value')])
-def update_data(data, n_clicks, variables, dtype):
-    if data is None:
-        raise PreventUpdate
+@app.callback(Output('uploaded-files', 'children'),
+             [Input('upload-data-type-picker', 'value'),
+              Input('prot-tool', 'value'),
+              Input('upload-data', 'filename'),
+              Input('upload-data', 'contents')])
+def save_files_in_tmp(datatype, prot_tool, filenames, contents):
+    if datatype != '':
+        page_id, dataset = datatype.split('/')
+        tmpDirectory = os.path.join('../../data/tmp', page_id)
+        if not os.path.exists('../../data/tmp'):
+            os.makedirs('../../data/tmp')
+        elif not os.path.exists(tmpDirectory):
+            os.makedirs(tmpDirectory)
+        
+        if 'proteomics' in datatype or 'longitudinal_proteomics' in datatype:
+            prot_dir = os.path.join(tmpDirectory, dataset)
+            directory = os.path.join(prot_dir, prot_tool.lower())
+            if not os.path.exists(os.path.join(tmpDirectory, dataset)):
+                os.makedirs(os.path.join(tmpDirectory, dataset))
+            else:
+                for f in os.listdir(prot_dir):
+                    if os.path.isfile(os.path.join(prot_dir, f)):
+                        os.remove(os.path.join(prot_dir, f))
+        else:
+            directory = os.path.join(tmpDirectory, dataset)
+        
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        else:
+            for f in os.listdir(directory):
+                if os.path.isfile(os.path.join(directory, f)):
+                    os.remove(os.path.join(directory, f))
 
-    columns= []
-    df = pd.DataFrame(data, columns=data[0].keys())
-    for i in df.columns:
-        columns.append({'id': i, 'name': i,
-                        'renamable': False, 'deletable': True})
-    df = df.to_dict('rows')
-    if n_clicks is not None:
-        for var in variables:
-            columns.append({'id': var, 'name': var,
-                            'renamable': False, 'deletable': True})        
-    columns = [d for d in columns if d.get('id') != '']
-    return df, columns
-
-@app.callback(Output('prot_tool_div', 'children'),
-              [Input('submit_button', 'n_clicks')],
-              [State('proteomics-tool', 'value')])
-def update_proteomics_tool(n_clicks, value):
-    if n_clicks > 0:
-        return str(value)
+        if contents is not None:
+            for file in zip(filenames, contents):
+                with open(os.path.join(directory, file[0]), 'wb') as out:
+                    content_type, content_string = file[1].split(',')
+                    decoded = base64.b64decode(content_string)
+                    out.write(decoded)
+            directory = None
+            prot_tool = ''
+            #Two or more spaces before '\n' will create a new line in Markdown
+            return '   \n'.join(filenames)
+        else:
+            raise PreventUpdate
     else:
-        return ''
+        return None
+
 
 @app.callback([Output('data-upload', 'children'),
-              Output('data_download_link', 'style')],
-             [Input('submit_button', 'n_clicks')],
-             [State('memory-original-data', 'data'),
-              State('upload-data', 'filename'),
-              State('project_id', 'value'),
-              State('upload-data-type-picker', 'value'),
-              State('proteomics-tool', 'value')])
-def run_processing(n_clicks, data, filename, project_id, dtype, prot_tool):
+               Output('data_download_link', 'style')],
+              [Input('submit_button', 'n_clicks')],
+              [State('project_id', 'value'),
+               State('upload-data-type-picker', 'value')])
+def run_processing(n_clicks, project_id, dtype):
     if n_clicks > 0:
-        if dtype == '':
-            message = 'Error: Please refresh the page and select the type of data to be uploaded.'
-            return message, {'display':'none'}
-
-        if prot_tool == '' and dtype == 'proteomics' or dtype == 'longitudinal_proteomics':
-            message = 'Error: Please refresh the page and select tool: MaxQuant or Spectronaut.'
-            return message, {'display':'none'}
-
-        # Get Clinical data from Uploaded and updated table
-        df = pd.DataFrame(data, columns=data[0].keys())
-        df.fillna(value=pd.np.nan, inplace=True)
-        # Path to new local folder
-        dataDir = os.path.join(experimentDir, os.path.join(project_id, dtype.split('_')[-1]))
+        page_id, dataset = dtype.split('/')
+        destDir = os.path.join(experimentDir, project_id)
+        tmpDirectory = os.path.join('../../data/tmp', page_id)
+        datasets = builder_utils.listDirectoryFolders(tmpDirectory)
         
-        # Extract all relationahips and nodes and save as tsv files
-        if dtype == 'clinical' or dtype == 'longitudinal_clinical':
-            style = {'display':'block'}
-            df = dataUpload.create_new_experiment_in_db(driver, project_id, df, separator=separator)
-            ckg_utils.checkDirectory(dataDir)
-            export_contents(df, dataDir, filename)
-        
-        if dtype == 'proteomics' or dtype == 'longitudinal_proteomics':
-            style = {'display':'none'}
-            dataDir = os.path.join(dataDir, prot_tool.lower())
-            ckg_utils.checkDirectory(dataDir)
-            export_contents(df, dataDir, filename)
-            
-            datasetPath = os.path.join(os.path.join(importDir, project_id), 'proteomics')
-            builder_utils.checkDirectory(datasetPath)
-            print('CREATED DIR')
-            print(datasetPath)
-            eh.generate_dataset_imports(project_id, 'proteomics', datasetPath)
-            print('FINISHED IMPORTER')
+        for dataset in datasets:
+            directory = os.path.join(tmpDirectory, dataset)
+            dir_tree = os.listdir(directory)
+            if 'clinical' in dataset:
+                data = parse_contents(os.path.join(directory, dir_tree[0]))
+                data.fillna(value=pd.np.nan, inplace=True)
+                df = dataUpload.create_new_experiment_in_db(driver, project_id, data, separator=separator)
+                export_contents(df, directory, dir_tree[0])
+            #Copy files from 'tmp' to 'experiments'
+            for branch in dir_tree:
+                source = os.path.join(tmpDirectory, os.path.join(dataset, branch))
+                destination = os.path.join(destDir, dataset)
+                if os.path.isdir(source):
+                    destination = os.path.join(destination, os.path.basename(source))
+                    shutil.copytree(source, destination)
+                else:
+                    shutil.copy(source, destination)
+
+            # # Uncomment when proteomics headers changing (to internal identifiers) has been implemented        
+            # if 'proteomics' in dataset:
+            #     datasetPath = os.path.join(os.path.join(importDir, project_id), 'proteomics')
+            #     builder_utils.checkDirectory(datasetPath)
+            #     eh.generate_dataset_imports(project_id, 'proteomics', datasetPath)
+            #     print('FINISHED IMPORTER')
 
         loader.partialUpdate(imports=['project', 'experiment'])
-        message = 'FILE successfully uploaded.'.replace('FILE', '"'+filename+'"')
+        style = {'display':'block'}
+        message = 'Files successfully uploaded.'
+          
         return message, style
     else:
         return '', {'display':'none'}
 
-@app.callback(Output('dummy-div', 'children'),
-             [Input('submit_button', 'n_clicks')],
-             [State('project_id', 'value')])
-def update_project_id(n_clicks, project):
-    if n_clicks > 0:
-        return str(project)
-    else:
-        return ''
 
 @app.callback(Output('data_download_link', 'href'),
-             [Input('dummy-div', 'children')])
-def generate_upload_url(project_id):
-    return '/clinical?value={}'.format('ClinicalData_'+project_id+'.xlsx')
-    
-@application.route('/clinical/')
-def route_upload_url():
-    value = flask.request.args.get('value')
-    project = value.split('_')[-1].split('.')[0]
-    url = os.path.join(os.getcwd(),"../../data/experiments/"+project+'/clinical/'+value)
-    return flask.send_file(url, attachment_filename = value, as_attachment = True)
-
-@app.callback(Output('data-upload', 'style'),
-              [Input('data-upload', 'children')])
-def change_style(message):
-    if message is None:
-        return {'fontSize':'20px', 'marginLeft':'70%', 'color': 'black'}
+             [Input('data_download_link', 'n_clicks')],
+             [State('project_id', 'value'),
+              State('upload-data-type-picker', 'value')])
+def generate_upload_zip(n_clicks, project_id, dtype):
+    if dtype != '':
+        page_id, dataset = dtype.split('/')
+        return '/tmp/{}_{}'.format(page_id, project_id)
     else:
-        if 'Error' in message:
-            return {'fontSize':'20px', 'marginLeft':'70%', 'color': 'red'}
-        else:
-            return {'fontSize':'20px', 'marginLeft':'70%', 'color': 'black'}
+        return None
 
-@app.callback(Output('memory-original-data', 'clear_data'),
-              [Input('submit_button', 'n_clicks')])
-def clear_click(n_click_clear):
-    if n_click_clear is not None and n_click_clear > 0:
-        return True
-    return False
+@application.route('/tmp/<value>')
+def route_upload_url(value):
+    page_id, project_id = value.split('_')
+    directory = os.path.join(cwd,'../../data/tmp/'+page_id)
+    filename = 'Uploaded_files_'+project_id
+    utils.compress_directory(filename, directory, compression_format='zip')
+    # url = os.path.join(cwd, os.path.join(directory, filename+'.zip'))
+    url = os.path.join(cwd, filename+'.zip')
+    return flask.send_file(url, attachment_filename = filename+'.zip', as_attachment = True)
+
+
+
+
+# @app.callback(Output('data-upload', 'style'),
+#               [Input('data-upload', 'children')])
+# def change_style(message):
+#     if message is None:
+#         return {'fontSize':'20px', 'marginLeft':'70%', 'color': 'black'}
+#     else:
+#         if 'Error' in message:
+#             return {'fontSize':'20px', 'marginLeft':'70%', 'color': 'red'}
+#         else:
+#             return {'fontSize':'20px', 'marginLeft':'70%', 'color': 'black'}
+
+
 
 
 if __name__ == '__main__':
