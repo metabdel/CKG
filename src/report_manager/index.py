@@ -576,7 +576,7 @@ def run_processing(n_clicks, project_id, dtype):
              [State('project_id', 'value'),
               State('upload-data-type-picker', 'value')])
 def generate_upload_zip(n_clicks, project_id, dtype):
-    if dtype != '':
+    if dtype is not None and dtype != '':
         page_id, dataset = dtype.split('/')
         return '/tmp/{}_{}'.format(page_id, project_id)
     else:
@@ -585,12 +585,11 @@ def generate_upload_zip(n_clicks, project_id, dtype):
 @application.route('/tmp/<value>')
 def route_upload_url(value):
     page_id, project_id = value.split('_')
-    directory = os.path.join(cwd,'../../data/tmp/'+page_id)
-    filename = 'Uploaded_files_'+project_id
-    utils.compress_directory(filename, directory, compression_format='zip')
-    # url = os.path.join(cwd, os.path.join(directory, filename+'.zip'))
-    url = os.path.join(cwd, filename+'.zip')
-    return flask.send_file(url, attachment_filename = filename+'.zip', as_attachment = True)
+    directory = os.path.join(cwd,'../../data/tmp/')
+    filename = os.path.join(directory, 'Uploaded_files_'+project_id)
+    utils.compress_directory(filename, os.path.join(directory, page_id), compression_format='zip')
+    url = filename+'.zip'
+    return flask.send_file(url, attachment_filename = filename.split('/')[-1]+'.zip', as_attachment = True)
 
 
 
