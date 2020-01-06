@@ -536,7 +536,7 @@ def run_processing(n_clicks, project_id, dtype):
         destDir = os.path.join(experimentDir, project_id)
         tmpDirectory = os.path.join('../../data/tmp', page_id)
         datasets = builder_utils.listDirectoryFolders(tmpDirectory)
-        
+        mapping = {}
         for dataset in datasets:
             directory = os.path.join(tmpDirectory, dataset)
             dir_tree = os.listdir(directory)
@@ -555,13 +555,18 @@ def run_processing(n_clicks, project_id, dtype):
                 else:
                     shutil.copy(source, destination)
 
-            # # Uncomment when proteomics headers changing (to internal identifiers) has been implemented        
-            # if 'proteomics' in dataset:
-            #     datasetPath = os.path.join(os.path.join(importDir, project_id), 'proteomics')
-            #     builder_utils.checkDirectory(datasetPath)
-            #     eh.generate_dataset_imports(project_id, 'proteomics', datasetPath)
-            #     print('FINISHED IMPORTER')
-
+            if 'proteomics' in dataset:
+                datasetPath = os.path.join(os.path.join(importDir, project_id), 'proteomics')
+                builder_utils.checkDirectory(datasetPath)
+                mapping = eh.get_mapping_analytical_samples(project_id, driver)
+                if len(mapping) > 0:
+                    eh.map_experiment_files(project_id, datasetPath, mapping)
+                else:
+                    message = "Clinical data needs to be uploaded first."
+                    style = {'display':'none', 'color':'red'}
+                    
+                    return message, style
+            
         loader.partialUpdate(imports=['project', 'experiment'])
         style = {'display':'block'}
         message = 'Files successfully uploaded.'

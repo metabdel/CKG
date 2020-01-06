@@ -50,6 +50,39 @@ def generate_graph_files(data, dataType, projectId, stats, ot = 'w', dataset_imp
     
     logger.info("Experiment {} - Number of {} relationships: {}".format(projectId, dataType, data.shape[0]))
     stats.add(builder_utils.buildStats(data.shape[0], "relationships", dataType, "Experiment", outputfile))
+    
+def map_experiment_files(project_id, datasetPath, mapping):
+    files = builder_utils.listDirectoryFiles(datasetPath)
+    
+    for f in files:
+        data = builder_utils.readDataset(f)
+        data = map_experimental_data(data, mapping)
+        data.to_csv(path_or_buf = f, sep='\t',
+					header=True, index=False, quotechar='"',
+					line_terminator='\n', escapechar='\\')
+
+def map_experimental_data(data, mapping):
+    mapping_cols = {}
+
+    if not data.empty:
+        for column in data.columns:
+            for external_id in mapping:
+                if external_id in column:
+                    mapping_cols[column] = column.replace(external_id, mapping[external_id])
+        data = data.rename(columns=mapping_cols)
+
+
+    return data
+
+def get_mapping_analytical_samples(project_id, driver):
+    mapping = {}
+    query = "MATCH (p:Project)-[:HAS_ENROLLED]-(:Subject)-[:BELONGS_TO_SUBJECT]-()-[:SPLITTED_INTO]-(a:Analytical_sample) WHERE p.id='{}' RETURN a.external_id, a.id".format(project_id)
+    mapping = connector.getCursorData(driver,query)
+    if not mapping.empty:
+        mapping = mapping.set_index("a.external_id").to_dict(orient='dict')["a.id"]
+    
+    return mapping
+
 
 if __name__ == "__main__":
     pass
