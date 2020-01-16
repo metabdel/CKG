@@ -3,3 +3,4 @@ separator: '|'
 
 file_clinical: 'ClinicalData_PROJECTID.xlsx'
 file_project: 'ProjectData_PROJECTID.xlsx'
+file_design: 'ExperimentalDesign_PROJECTID.xlsx'
