@@ -436,16 +436,3 @@ def get_dataset_configuration(processing_format, data_type):
             dataset_config = config[processing_format]
 
     return dataset_config
-
-def map_experimental_data(data, mapping):
-    mapping_cols = {}
-
-    if not data.empty:
-        for column in data.columns:
-            for external_id in mapping:
-                if external_id in column:
-                    mapping_cols[column] = column.replace(external_id, mapping[external_id])
-        data = data.rename(columns=mapping_cols)
-
-
-    return data
