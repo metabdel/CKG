@@ -511,10 +511,6 @@ def save_files_in_tmp(n_clicks, datatype, prot_tool, filenames, contents):
     else:
             raise PreventUpdate
 
-
-
-
-
 @app.callback([Output('data-upload', 'children'),
                Output('data_download_link', 'style')],
               [Input('submit_button', 'n_clicks')],
@@ -655,8 +651,6 @@ def run_processing(n_clicks, project_id, dtype):
                         print('Done!')
                         result_output = result.get()
                         done = list(result_output.keys())[0]
-
-
                 
                 print('Copy files to "experiments".')
                 #Copy files from 'tmp' to 'experiments'
@@ -716,6 +710,11 @@ def change_style(message):
         else:
             return {'fontSize':'20px', 'marginLeft':'70%', 'color': 'black'}
 
+@app.callback(Output('submit_button', 'disabled'),
+             [Input('submit_button', 'n_clicks')])
+def deactivate_button(n_clicks):
+    if n_clicks > 0:
+        return True
 
 
 
