@@ -4,34 +4,20 @@ import os
 import pandas as pd
 import json
 import py2neo
-
 import dash
 from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_table
 import flask
-
 import config.ckg_config as ckg_config
 from apps import basicApp
-
 from graphdb_connector import connector
 import logging
 import logging.config
 
-
 driver = connector.getGraphDatabaseConnectionConfiguration()
-
-DataTypes = ['proteomics', 'clinical', 'wes', 'longitudinal_proteomics', 'longitudinal_clinical']
-Tissues = [(t['name']) for t in driver.nodes.match("Tissue")]
-Diseases = [(d['name']) for d in driver.nodes.match("Disease")]
-
-query = 'MATCH (n:Clinical_variable) RETURN n.name,n.id LIMIT 20'
-df = pd.DataFrame(connector.getCursorData(driver, query).values)
-ClinicalVariables = pd.DataFrame()
-if not df.empty:
-    df[0] = ['({0})'.format(i) for i in df[0].tolist()]
-    ClinicalVariables = df[[1, 0]].apply(lambda x: ' '.join(x),axis=1).tolist()
+DataTypes = ['experimental_design', 'clinical', 'proteomics', 'wes', 'longitudinal_proteomics', 'longitudinal_clinical']
 
 class DataUploadApp(basicApp.BasicApp):
     """
@@ -108,7 +94,10 @@ class DataUploadApp(basicApp.BasicApp):
                                                  multiple=True)]),
                             html.Br(),
                             html.Div(children=[dcc.Markdown('**Uploaded Files:**', id='markdown-title'), dcc.Markdown(id='uploaded-files')]),
-                					  html.Div(children=html.Button('Upload Data', id='submit_button', n_clicks = 0, className="button_link", style={'fontSize':'25px'}),
+                			html.Div(children=html.Button('Upload Data', id='upload_button', n_clicks = 0, className="button_link", style={'fontSize':'18px'}),
+                                                         style={'width':'100%', 'padding-left':'87%', 'padding-right':'0%'}),
+                            html.Div(children=html.Button(id='reset_button', n_clicks = 0), style={'display':'none'}),
+                            html.Div(children=html.Button('Add to CKG', id='submit_button', n_clicks = 0, className="button_link", style={'fontSize':'25px'}),
                              							 style={'width':'100%', 'padding-left':'87%', 'padding-right':'0%'}),
                             html.Div(children=html.A('Download Uploaded Files(.zip)', id='data_download_link', href='', n_clicks=0, style={'display':'none'}), style={'width':'100%', 'padding-left':'87%', 'padding-right':'0%'}),
                             html.Div(id='data-upload', style={'fontSize':'20px', 'marginLeft':'70%'}),

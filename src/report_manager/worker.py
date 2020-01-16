@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import datetime
 from celery import Celery
-from report_manager.apps import projectCreation
+from report_manager.apps import projectCreation, dataUpload
 from graphdb_connector import connector
 
 
@@ -17,3 +17,9 @@ def create_new_project(identifier, data, separator='|'):
     driver = connector.getGraphDatabaseConnectionConfiguration()
     project_result, projectId = projectCreation.create_new_project(driver, identifier, pd.read_json(data), separator=separator)
     return {str(projectId): str(project_result)}
+
+@celery_app.task
+def create_new_identifiers(project_id, data, directory, filename):
+	driver = connector.getGraphDatabaseConnectionConfiguration()
+	upload_result, projectId = dataUpload.create_experiment_internal_identifiers(driver, project_id, pd.read_json(data), directory, filename)
+	return {str(projectId):str(upload_result)}
