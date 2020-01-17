@@ -61,6 +61,20 @@ def readDataFromExcel(uri):
 
     return data
 
+def export_contents(data, dataDir, filename):
+    """
+    Export Pandas DataFrame to file, with UTF-8 endocing.
+
+    """
+    file = filename.split('.')[-1]
+    if file == 'txt' or file == 'tsv':
+        csv_string = data.to_csv(os.path.join(dataDir, filename), sep='\t', index=False, encoding='utf-8')
+    elif file == 'csv':
+        csv_string = data.to_csv(os.path.join(dataDir, filename), sep=',', index=False, encoding='utf-8')
+    elif file == 'xlsx' or file == 'xls':
+        csv_string = data.to_excel(os.path.join(dataDir, filename), index=False, encoding='utf-8')   
+    return csv_string
+
 def write_relationships(relationships, header, outputfile):
     """
     Reads a set of relationships and saves them to a file.
@@ -350,6 +364,18 @@ def listDirectoryFolders(directory):
     from os import listdir
     from os.path import isdir, join
     dircontent = [f for f in listdir(directory) if isdir(join(directory, f)) and not f.startswith('.')]
+    return dircontent
+
+def listDirectoryFoldersNotEmpty(directory):
+    """
+    Lists all directories in a specified directory.
+
+    :param str directory: path to folder.
+    :return: List of folder names.
+    """
+    from os import listdir
+    from os.path import isdir, join
+    dircontent = [f for f in listdir(directory) if listdir(join(directory, f)) and isdir(join(directory, f)) and not f.startswith('.')]
     return dircontent
 
 def checkDirectory(directory):
