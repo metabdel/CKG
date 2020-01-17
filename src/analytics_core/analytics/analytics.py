@@ -429,7 +429,6 @@ def get_proteomics_measurements_ready(df, index_cols=['group', 'sample', 'subjec
 
         result = get_proteomics_measurements_ready(df, index_cols=['group', 'sample', 'subject'], drop_cols=['sample'], group='group', identifier='identifier', extra_identifier='name', imputation = True, method = 'mixed', missing_method = 'at_least_x', missing_per_group=False, min_valid=5, value_col='LFQ_intensity')
     """
-    print(df.head())
     df = df.set_index(index_cols)
     if extra_identifier is not None and extra_identifier in df.columns:
         df[identifier] = df[extra_identifier].map(str) + "~" + df[identifier].map(str)
