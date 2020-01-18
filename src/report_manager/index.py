@@ -451,66 +451,62 @@ def serve_static(value):
 
 
 ###Callbacks for data upload app
-@app.callback(Output('proteomics-tool', 'style'),
-              [Input('upload-data-type-picker', 'value')])
-def show_proteomics_options(datatype):
+@app.callback([Output('proteomics-tool', 'style'),
+               Output('upload-data','disabled')],
+              [Input('upload-data-type-picker', 'value'),
+               Input('prot-tool', 'value')])
+def show_proteomics_options(datatype, prot_tool):
+    display = ({'display': 'none'}, False)
     if 'proteomics' in datatype or 'longitudinal_proteomics' in datatype:
-        return {'display': 'block'}
-    else:
-        return {'display': 'none'}
-
-@app.callback(Output('upload_button', 'n_clicks'),
-              [Input('reset_button', 'n_clicks')])
-def reset_upload_button(n_clicks):
-    return 0
+        if prot_tool == '':
+            display = ({'display': 'block'}, True)
+        else:
+            display = ({'display': 'block'}, False)
+    
+    return display
 
 @app.callback([Output('uploaded-files', 'children'),
-               Output('reset_button', 'n_clicks')],
-              [Input('upload_button', 'n_clicks'),
-               Input('upload-data-type-picker', 'value'),
+               Output('upload-data', 'filename')],
+              [Input('upload-data-type-picker', 'value'),
                Input('prot-tool', 'value'),
-               Input('upload-data', 'filename'),
-               Input('upload-data', 'contents')])
-def save_files_in_tmp(n_clicks, datatype, prot_tool, filenames, contents):
-    if n_clicks > 0:
+               Input('upload-data', 'contents')],
+              [State('upload-data', 'filename')])
+def save_files_in_tmp(datatype, prot_tool, contents, filenames):
+    if len(datatype.split('/')) > 1:
         page_id, dataset = datatype.split('/')
         temporaryDirectory = os.path.join(tmpDirectory, page_id)
         if not os.path.exists(tmpDirectory):
             os.makedirs(tmpDirectory)
         elif not os.path.exists(temporaryDirectory):
             os.makedirs(temporaryDirectory)
-        if 'proteomics' in datatype:
-            prot_dir = os.path.join(temporaryDirectory, dataset)
-            directory = os.path.join(prot_dir, prot_tool.lower())
-            if not os.path.exists(prot_dir):
-                os.makedirs(prot_dir)
-            else:
-                for f in os.listdir(prot_dir):
-                    if os.path.isfile(os.path.join(prot_dir, f)):
-                        os.remove(os.path.join(prot_dir, f))
-        else:
-            directory = os.path.join(temporaryDirectory, dataset)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-        else:
-            for f in os.listdir(directory):
-                if os.path.isfile(os.path.join(directory, f)):
-                    os.remove(os.path.join(directory, f))
+            
+        directory = os.path.join(temporaryDirectory, dataset)
+        if os.path.exists(directory) and filenames is not None:
+            shutil.rmtree(directory)
+        
+        builder_utils.checkDirectory(directory)
+        if 'proteomics' in datatype and prot_tool !='':
+            directory = os.path.join(directory, prot_tool.lower())
+            builder_utils.checkDirectory(directory)
+        
+        if filenames is None:
+            contents = None
         if contents is not None:
             for file in zip(filenames, contents):
                 with open(os.path.join(directory, file[0]), 'wb') as out:
                     content_type, content_string = file[1].split(',')
                     decoded = base64.b64decode(content_string)
                     out.write(decoded)
-            directory = None
-            prot_tool = ''
+            
+            uploaded = '   \n'.join(filenames)
+            filenames = None
             #Two or more spaces before '\n' will create a new line in Markdown
-            return '   \n'.join(filenames), 0
+            return uploaded, filenames
         else:
             raise PreventUpdate
-    else:
-            raise PreventUpdate
-
+    
+    return '',None
+    
 @app.callback([Output('data-upload', 'children'),
                Output('data_download_link', 'style')],
               [Input('submit_button', 'n_clicks')],
