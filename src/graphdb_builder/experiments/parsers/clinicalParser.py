@@ -8,17 +8,26 @@ from graphdb_connector import connector
 def parser(projectId):
     cwd = os.path.abspath(os.path.dirname(__file__))
     config = builder_utils.get_config(config_name="clinical.yml", data_type='experiments')
-    directory = os.path.join(cwd, '../../../../data/experiments/PROJECTID/clinical/')
+    clinical_directory = os.path.join(cwd, '../../../../data/experiments/PROJECTID/clinical/')
+    design_directory = os.path.join(cwd, '../../../../data/experiments/PROJECTID/experimental_design/')
     separator = config["separator"]
-    if 'directory' in config:
-        directory = os.path.join(cwd, config['directory'])
-    directory = directory.replace('PROJECTID', projectId)
-    project_dfs = project_parser(projectId, config, directory, separator)
-    design_dfs = experimental_desgin_parser(projectId, config, directory)
-    clinical_dfs = clinical_parser(projectId, config, directory, separator)
-    data = project_dfs.copy()
+    if 'clinical_directory' in config:
+        clinical_directory = os.path.join(cwd, config['clinical_directory'])
+    
+    clinical_directory = clinical_directory.replace('PROJECTID', projectId)
+    
+    if 'design_directory' in config:
+        design_directory = os.path.join(cwd, config['design_directory'])
+
+    design_directory = design_directory.replace('PROJECTID', projectId)
+    project_dfs = project_parser(projectId, config, clinical_directory, separator)
+    design_dfs = experimental_desgin_parser(projectId, config, design_directory)
+    clinical_dfs = clinical_parser(projectId, config, clinical_directory, separator)
+    
+    data = project_dfs
     data.update(design_dfs)
     data.update(clinical_dfs)
+    
     return data
 
 def project_parser(projectId, config, directory, separator):
@@ -32,15 +41,15 @@ def project_parser(projectId, config, directory, separator):
         data[('studies_disease', 'w')] = extract_project_disease_rels(project_data, separator=separator)
         data[('studies_intervention', 'w')] = extract_project_intervention_rels(project_data, separator=separator)
         data[('timepoint', 'w')] = extract_timepoints(project_data, separator=separator)
+    
     return data
 
 def experimental_desgin_parser(projectId, config, directory):
     data = {}
-    project_data = parse_dataset(projectId, config, directory, key='project')
     design_data = parse_dataset(projectId, config, directory, key='design')
-    if project_data is not None and design_data is not None:
-        data[('project', 'w')] = extract_project_subject_rels(project_data, design_data)
-        data[('subjects', 'w')] = extract_subject_identifiers(project_data, design_data)
+    if design_data is not None:
+        data[('project', 'w')] = extract_project_subject_rels(projectId, design_data)
+        data[('subjects', 'w')] = extract_subject_identifiers(design_data)
         data[('biological_samples', 'w')] = extract_biosample_identifiers(design_data)
         data[('analytical_samples', 'w')] = extract_analytical_sample_identifiers(design_data)
         data[('subject_biosample', 'w')] = extract_biological_sample_subject_rels(design_data)
@@ -63,6 +72,7 @@ def clinical_parser(projectId, config, directory, separator):
         clinical_state, clinical_quant = extract_biological_sample_clinical_variables_rels(clinical_data)
         data[('clinical_state', 'w')] = clinical_state
         data[('clinical_quant', 'w')] = clinical_quant
+        
     return data
 
 def parse_dataset(projectId, configuration, dataDir, key='project'):
@@ -152,25 +162,23 @@ def extract_timepoints(project_data, separator='|'):
 
 ########################
 
-def extract_project_subject_rels(project_data, design_data):
+def extract_project_subject_rels(projectId, design_data):
     df = pd.DataFrame(columns=['START_ID', 'END_ID', 'TYPE'])
     if 'subject external_id' in design_data:
         if not pd.isna(design_data['subject id']).any():
             df = pd.DataFrame(design_data['subject id'].dropna().unique(), columns=['END_ID'])
-            df.insert(loc=0, column='START_ID', value=project_data['external_id'][0])
+            df.insert(loc=0, column='START_ID', value=projectId)
             df['TYPE'] = 'HAS_ENROLLED'
     
     return df
 
-def extract_subject_identifiers(project_data, design_data):
+def extract_subject_identifiers(design_data):
     df = pd.DataFrame(columns=['ID', 'external_id'])
     data = design_data.set_index('subject id').copy()
     if not pd.isna(data['subject external_id']).any():
         df = data[['subject external_id']].dropna(axis=0).reset_index()
         df = df.drop_duplicates(keep='first').reset_index(drop=True)
         df.columns = ['ID', 'external_id']
-        if int(project_data['subjects'][0]) != len(df['ID']):
-            df = pd.DataFrame(columns=['ID', 'external_id'])
             
     return df
 ########################

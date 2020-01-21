@@ -139,23 +139,19 @@ def check_samples_in_project(driver, projectId):
 
 	"""
 	query_name = 'extract_samples_numbers'
+	res = pd.DataFrame()
 	try:
 		result = []
 		data_upload_cypher = get_data_upload_queries()
 		query = data_upload_cypher[query_name]['query']
-		for q in query.split(';'):
-			if '$' in q:
-				res = connector.getCursorData(driver, q+';', parameters={'external_id': str(projectId)})
-			else:
-				res = connector.getCursorData(driver, q+';')
-			result.append((res.columns[0], res.iloc[:,0].values[0]))
+		res = connector.getCursorData(driver, query, parameters={'external_id': str(projectId)})
 	except Exception as err:
 		exc_type, exc_obj, exc_tb = sys.exc_info()
 		fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
 		logger.error("Reading query {}: {}, file: {},line: {}".format(query_name, sys.exc_info(), fname, exc_tb.tb_lineno))
-	return result
+	return res
 
-def check_external_ids_in_db(driver, projectId, subject_ids, biological_sample_ids, analytical_sample_ids):
+def check_external_ids_in_db(driver, projectId, external_ids):
 	"""
 	
 	
@@ -163,24 +159,20 @@ def check_external_ids_in_db(driver, projectId, subject_ids, biological_sample_i
 	query_name = 'check_external_ids'
 	parameters = dict()
 	parameters['external_id'] = projectId
-	parameters['subject_ids'] = subject_ids
-	parameters['biological_sample_ids'] = biological_sample_ids
-	parameters['analytical_sample_ids'] = analytical_sample_ids
+	parameters['subject_ids'] = external_ids['subjects']
+	parameters['biological_sample_ids'] = external_ids['biological_samples']
+	parameters['analytical_sample_ids'] = external_ids['analytical_samples']
+	res = pd.DataFrame()
 	try:
-		result = []
 		data_upload_cypher = get_data_upload_queries()
 		query = data_upload_cypher[query_name]['query']
-		for q in query.split(';'):
-			if '$' in q:
-				res = connector.getCursorData(driver, q+';', parameters=parameters)
-			else:
-				res = connector.getCursorData(driver, q+';')
-			result.append(res)
+		res = connector.getCursorData(driver, query, parameters=parameters)
 	except Exception as err:
 		exc_type, exc_obj, exc_tb = sys.exc_info()
 		fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
 		logger.error("Reading query {}: {}, file: {},line: {}".format(query_name, sys.exc_info(), fname, exc_tb.tb_lineno))
-	return result
+
+	return res
 
 def remove_samples_nodes_db(driver, projectId):
 	"""
@@ -200,9 +192,9 @@ def remove_samples_nodes_db(driver, projectId):
 		logger.error("Reading query {}: {}, file: {},line: {}".format(query_name, sys.exc_info(), fname, exc_tb.tb_lineno))
 	return result
 
-def create_new_subjects(driver, data):
+def create_new_subjects(driver, data, projectId):
 	"""
-	
+
 
 	:param driver: py2neo driver, which provides the connection to the neo4j graph database.
 	:type driver: py2neo driver
@@ -215,7 +207,22 @@ def create_new_subjects(driver, data):
 		subject_id = '1'
 	subject_ids = ['S'+str(i) for i in np.arange(int(subject_id), int(subject_id)+len(external_ids))]
 	subject_dict = dict(zip(external_ids, subject_ids))
-	data.insert(1, 'subject id', data['subject external_id'].map(subject_dict))
+	
+	query_name = 'create_project_subject'
+	for external_id, subject_id in subject_dict.items():
+		parameters = {'external_id': str(external_id), 'project_id':projectId, 'subject_id':subject_id}
+		try:
+			data_upload_cypher = get_data_upload_queries()
+			queries = data_upload_cypher[query_name]['query'].split(';')[:-1]
+			for q in queries:
+				res = connector.getCursorData(driver, q+';', parameters=parameters)
+		except Exception as err:
+			exc_type, exc_obj, exc_tb = sys.exc_info()
+			fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+			logger.error("Reading query {}: {}, file: {},line: {}".format(query_name, sys.exc_info(), fname, exc_tb.tb_lineno))
+
+	data['subject id'] = data['subject external_id'].map(subject_dict)
+
 	return data
 
 def create_new_biosamples(driver, data):
@@ -228,12 +235,30 @@ def create_new_biosamples(driver, data):
 	:return: Pandas DataFrame where new biological sample internal identifiers have been added.
 	"""
 	external_ids = data['biological_sample external_id'].unique()
+	subject_ids = data['subject id']
 	biosample_id = get_new_biosample_identifier(driver)
 	if biosample_id is None:
 		biosample_id = '1'
 	biosample_ids = ['BS'+str(i) for i in np.arange(int(biosample_id), int(biosample_id)+len(external_ids))]
 	biosample_dict = dict(zip(external_ids, biosample_ids))
-	data.insert(3, 'biological_sample id', data['biological_sample external_id'].map(biosample_dict))
+	biosample_subject_dict = dict(zip(external_ids, subject_ids))
+	print(biosample_subject_dict)
+	query_name = 'create_subject_biosamples'
+	for external_id, biosample_id in biosample_dict.items():
+		subject_id = biosample_subject_dict[external_id]
+		parameters = {'external_id': str(external_id), 'biosample_id':biosample_id, 'subject_id':subject_id}
+		try:
+			data_upload_cypher = get_data_upload_queries()
+			queries = data_upload_cypher[query_name]['query'].split(';')[:-1]
+			for q in queries:
+				res = connector.getCursorData(driver, q+';', parameters=parameters)
+		except Exception as err:
+			exc_type, exc_obj, exc_tb = sys.exc_info()
+			fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+			logger.error("Reading query {}: {}, file: {},line: {}".format(query_name, sys.exc_info(), fname, exc_tb.tb_lineno))
+
+	data['biological_sample id'] = data['biological_sample external_id'].map(biosample_dict)
+
 	return data
 
 def create_new_ansamples(driver, data):
@@ -246,18 +271,35 @@ def create_new_ansamples(driver, data):
 	:return: Pandas DataFrame where new analytical sample internal identifiers have been added.
 	"""
 	external_ids = data['analytical_sample external_id'].unique()
+	biosample_ids = data['biological_sample id']
 	ansample_id = get_new_analytical_sample_identifier(driver)
 	if ansample_id is None:
 		ansample_id = '1'
 	ansample_ids = ['AS'+str(i) for i in np.arange(int(ansample_id), int(ansample_id)+len(external_ids))]
 	ansample_dict = dict(zip(external_ids, ansample_ids))
-	data.insert(5, 'analytical_sample id', data['analytical_sample external_id'].map(ansample_dict))
-	return data
+	asample_biosample_dict = dict(zip(external_ids, biosample_ids))
 
+	query_name = 'create_asamples_biosamples'
+	for external_id, asample_id in ansample_dict.items():
+		biosample_id = asample_biosample_dict[external_id]
+		parameters = {'external_id': str(external_id), 'biosample_id':biosample_id, 'asample_id':asample_id}
+		try:
+			data_upload_cypher = get_data_upload_queries()
+			queries = data_upload_cypher[query_name]['query'].split(';')[:-1]
+			for q in queries:
+				res = connector.getCursorData(driver, q+';', parameters=parameters)
+		except Exception as err:
+			exc_type, exc_obj, exc_tb = sys.exc_info()
+			fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+			logger.error("Reading query {}: {}, file: {},line: {}".format(query_name, sys.exc_info(), fname, exc_tb.tb_lineno))
+ 
+	data['analytical_sample id'] = data['analytical_sample external_id'].map(ansample_dict)
+ 
+	return data
 
 def create_experiment_internal_identifiers(driver, projectId, data, directory, filename):
 	done = 0
-	df = create_new_subjects(driver, data)
+	df = create_new_subjects(driver, data, projectId)
 	df1 = create_new_biosamples(driver, df)
 	df2 = create_new_ansamples(driver, df1)
 	builder_utils.export_contents(df2, directory, filename)
@@ -266,17 +308,15 @@ def create_experiment_internal_identifiers(driver, projectId, data, directory, f
 
 def create_mapping_cols_clinical(driver, data, directory, filename, separator='|'):
 	"""
-	
-	:param driver: py2neo driver, which provides the connection to the neo4j graph database.
-	:type driver: py2neo driver
-	:param data: pandas Dataframe with clinical data as columns and samples as rows.
-	:param str separator: character used to separate multiple entries in an attribute.
-	:return: Pandas Dataframe with all clinical data and graph database internal identifiers.
-	"""
+		:param driver: py2neo driver, which provides the connection to the neo4j graph database.
+		:type driver: py2neo driver
+		:param data: pandas Dataframe with clinical data as columns and samples as rows.
+		:param str separator: character used to separate multiple entries in an attribute.
+		:return: Pandas Dataframe with all clinical data and graph database internal identifiers.	
+  	"""
 	tissue_dict = {}
 	disease_dict = {}
 	intervention_dict = {}
-
 	for disease in data['disease'].dropna().unique():
 		if len(disease.split(separator)) > 1:
 			ids = []
@@ -296,11 +336,11 @@ def create_mapping_cols_clinical(driver, data, directory, filename, separator='|
 		for intervention in interventions.split('|'):
 			intervention_dict[intervention] = re.search('\(([^)]+)', intervention.split()[-1]).group(1)
 
-	data.insert(1, 'intervention id', data['studies_intervention'].map(intervention_dict))
-	data.insert(1, 'disease id', data['disease'].map(disease_dict))
-	data.insert(1, 'tissue id', data['tissue'].map(tissue_dict))
+	data['intervention id'] = data['studies_intervention'].map(intervention_dict)
+	data['disease id'] = data['disease'].map(disease_dict)
+	data['tissue id'] = data['tissue'].map(tissue_dict)
+	
 	builder_utils.export_contents(data, directory, filename)
-
 
 def create_new_experiment_in_db(driver, projectId, data, separator='|'):
 	"""

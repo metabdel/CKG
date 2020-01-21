@@ -17,10 +17,12 @@ logger = builder_utils.setup_logging(log_config, key="experiments_controller")
 
 def generate_dataset_imports(projectId, dataType, dataset_import_dir):
     stats = set()
+    builder_utils.checkDirectory(dataset_import_dir)
     try:
         if dataType == 'clinical':
             data = clinicalParser.parser(projectId)
             for dtype, ot in data:
+                print(dtype, ot)
                 generate_graph_files(data[(dtype, ot)],dtype, projectId, stats, ot, dataset_import_dir)
         elif dataType == "proteomics":
             data = proteomicsParser.parser(projectId)
@@ -43,6 +45,8 @@ def generate_graph_files(data, dataType, projectId, stats, ot = 'w', dataset_imp
         outputfile = os.path.join(dataset_import_dir, projectId+".tsv")
     else:
         outputfile = os.path.join(dataset_import_dir, projectId+"_"+dataType.lower()+".tsv")
+    print(data)
+    print(outputfile)
     with open(outputfile, ot) as f:
         data.to_csv(path_or_buf = f, sep='\t',
             header=True, index=False, quotechar='"',
