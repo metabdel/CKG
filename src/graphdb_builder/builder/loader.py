@@ -32,6 +32,7 @@ START_TIME = datetime.now()
 
 try:    
     config = builder_utils.setup_config('builder')
+    directories = builder_utils.get_full_path_directories()
 except Exception as err:
     logger.error("Reading configuration > {}.".format(err))
 
@@ -88,17 +89,17 @@ def updateDB(driver, imports=None):
         queries = []
         logger.info("Loading {} into the database".format(i))
         try:
-            import_dir = os.path.join(cwd, config["databasesDirectory"])
+            import_dir = os.path.join(cwd, directories["databasesDirectory"])
             #Ontologies
             if i== "ontologies":
                 entities = config["ontology_entities"]
-                import_dir = os.path.join(cwd, config["ontologiesDirectory"])
+                import_dir = os.path.join(cwd, directories["ontologiesDirectory"])
                 ontologyDataImportCode = cypher_queries['IMPORT_ONTOLOGY_DATA']['query']
                 for entity in entities:
                     queries.extend(ontologyDataImportCode.replace("ENTITY", entity).replace("IMPORTDIR", import_dir).split(';')[0:-1])
             elif i == "biomarkers":
                 code = cypher_queries['IMPORT_BIOMARKERS']['query']
-                import_dir = os.path.join(cwd, config["curatedDirectory"])
+                import_dir = os.path.join(cwd, directories["curatedDirectory"])
                 queries = code.replace("IMPORTDIR", import_dir).split(';')[0:-1]
             #Databases
             #Chromosomes
@@ -228,14 +229,14 @@ def updateDB(driver, imports=None):
                     queries.extend(code.replace("IMPORTDIR", import_dir).replace("ENTITY", entity).split(';')[0:-1])
             #Users
             elif i == "user":
-                usersDir = os.path.join(cwd, config["usersDirectory"])   
+                usersDir = os.path.join(cwd, directories["usersDirectory"])   
                 user_cypher = cypher_queries['CREATE_USER_NODE']
                 code = user_cypher['query']
                 queries.extend(code.replace("IMPORTDIR", usersDir).split(';')[0:-1])
 
             #Projects
             elif i == "project":
-                import_dir = os.path.join(cwd, config["experimentsDirectory"])
+                import_dir = os.path.join(cwd, directories["experimentsDirectory"])
                 projects = builder_utils.listDirectoryFolders(import_dir)
                 project_cypher = cypher_queries['IMPORT_PROJECT']
                 for project in projects:
@@ -246,7 +247,7 @@ def updateDB(driver, imports=None):
                         queries.extend(code.replace("IMPORTDIR", projectDir).replace('PROJECTID', project).split(';')[0:-1])
             #Datasets
             elif i == "experiment":
-                import_dir = os.path.join(cwd, config["experimentsDirectory"])
+                import_dir = os.path.join(cwd, directories["experimentsDirectory"])
                 datasets_cypher = cypher_queries['IMPORT_DATASETS']
                 projects = builder_utils.listDirectoryFolders(import_dir)
                 for project in projects:
@@ -309,9 +310,9 @@ def archiveImportDirectory(archive_type="full"):
 
     :param str archive_type: whether it is a full update or a partial update.
     """
-    dest_folder = config["archiveDirectory"]
+    dest_folder = directories["archiveDirectory"]
     builder_utils.checkDirectory(dest_folder)
-    folder_to_backup = config["importDirectory"]
+    folder_to_backup = directories["importDirectory"]
     date, time = builder_utils.getCurrentTime()
     file_name = "{}_{}_{}".format(archive_type, date.replace('-', ''), time.replace(':', ''))
     logger.info("Archiving {} to file: {}".format(folder_to_backup, file_name))

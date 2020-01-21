@@ -25,6 +25,7 @@ logger = builder_utils.setup_logging(log_config, key="builder")
 
 try:
     config = builder_utils.setup_config('builder')
+    directories = builder_utils.get_full_path_directories()
     dbconfig = builder_utils.setup_config('databases')
     oconfig = builder_utils.setup_config('ontologies')
 except Exception as err:
@@ -65,7 +66,7 @@ if __name__ == '__main__':
                     if import_type.lower() == 'experiments' or import_type.lower() == 'experiment':
                         importer.experimentsImport(projects=args.data, n_jobs=1)
                     elif import_type.lower() == 'users' or import_type.lower() == 'user':
-                        importer.usersImport(importDirectory='../../../data/imports')
+                        importer.usersImport(importDirectory=directories['importDirectory'])
                     elif import_type.lower() == 'databases' or import_type.lower() == 'database':
                         databases = [d.lower() for d in dbconfig['databases']]
                         if args.data is not None:
@@ -75,7 +76,7 @@ if __name__ == '__main__':
                         if len(valid_entities) > 0:
                             logger.info("These entities will be imported: {}".format(", ".join(valid_entities)))
                             print("These entities will be imported: {}".format(", ".join(valid_entities)))
-                            importer.databasesImport(importDirectory='../../../data/imports', databases=valid_entities, n_jobs=args.n_jobs, download=download)
+                            importer.databasesImport(importDirectory=directories['importDirectory'], databases=valid_entities, n_jobs=args.n_jobs, download=download)
                         else:
                             logger.error("The indicated entities (--data) cannot be imported: {}".format(args.data))
                             print("The indicated entities (--data) cannot be imported: {}".format(args.data))
@@ -88,7 +89,7 @@ if __name__ == '__main__':
                         if len(valid_entities) > 0:
                             logger.info("These entities will be imported: {}".format(", ".join(valid_entities)))
                             print("These entities will be loaded into the database: {}".format(", ".join(valid_entities)))
-                            importer.ontologiesImport(importDirectory='../../../data/imports', ontologies=valid_entities, download=download)
+                            importer.ontologiesImport(importDirectory=directories['importDirectory'], ontologies=valid_entities, download=download)
                         else:
                             logger.error("The indicated entities (--data) cannot be imported: {}".format(args.data))
                             print("The indicated entities (--data) cannot be imported: {}".format(args.data))

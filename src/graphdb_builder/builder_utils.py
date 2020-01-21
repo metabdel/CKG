@@ -7,6 +7,7 @@ import wget
 import requests
 import ftplib
 import json
+import shutil
 from Bio import Entrez
 from Bio import Medline
 import os.path
@@ -151,6 +152,24 @@ def setup_config(data_type="databases"):
         raise Exception("builder_utils - Reading configuration > {}.".format(err))
 
     return config
+
+def get_full_path_directories():
+    """
+    Reads Builder YAML configuration file and returns the full path of all directories.
+    :return: Dictionary.
+    """
+    directories = {}
+    try:
+        dirname = os.path.abspath(os.path.dirname(__file__))
+        config = ckg_utils.get_configuration(os.path.join(dirname, ckg_config.builder_config_file))
+        if 'directories' in config:
+            for directory in config['directories']:
+                directories[directory] = os.path.join(dirname,config['directories'][directory])
+        
+    except Exception as err:
+        raise Exception("Error {}: builder_utils - Reading directories from configuration > {}.".format(err, ckg_config.builder_config_file))
+
+    return directories
 
 def list_ftp_directory(ftp_url, user='', password=''):
     """
@@ -444,6 +463,19 @@ def convert_bytes(num):
             return "%3.1f %s" % (num, x)
         num /= 1024.0
 
+def copytree(src, dst, symlinks=False, ignore=None):
+    print("COPYING!")
+    for item in os.listdir(src):
+        print(item)
+        s = os.path.join(src, item)
+        print(s)
+        checkDirectory(dst)
+        d = os.path.join(dst, item)
+        print(d)
+        if os.path.isdir(s):
+            shutil.copytree(s, d, symlinks, ignore)
+        else:
+            shutil.copy2(s, d)
 
 def file_size(file_path):
     """
