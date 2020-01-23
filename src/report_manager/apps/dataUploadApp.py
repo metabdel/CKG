@@ -104,7 +104,8 @@ class DataUploadApp(basicApp.BasicApp):
                                              target='',
                                              n_clicks=0,
                                              className="button_link")],
-                                      style={'width':'100%', 'padding-left':'87%', 'padding-right':'0%'}),
+                                      style={'width':'100%', 'padding-left':'87%', 'padding-right':'0%'}),]),
+                                
                                 html.Div(children=html.A('Download Uploaded Files(.zip)',
                                             id='data_download_link',
                                             href='',
@@ -113,6 +114,6 @@ class DataUploadApp(basicApp.BasicApp):
                                             className="button_link"),
                                          style={'width':'100%', 'padding-left':'87%', 'padding-right':'0%'}),
                                 html.Div(id='data-upload', style={'fontSize':'20px', 'marginLeft':'70%'}),
-                                html.Hr()])])]
+                                html.Hr()])]
 
         self.extend_layout(layout)
