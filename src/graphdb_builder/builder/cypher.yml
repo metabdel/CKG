@@ -147,13 +147,6 @@ IMPORT_PROTEIN_ANNOTATIONS:
         MERGE (p)-[r:ASSOCIATED_WITH{score:toFloat(line.score),source:line.source,evidence_type:line.evidence_type}]->(c)
         RETURN COUNT(r) AS protein_associated_with_cellular_component;
         USING PERIODIC COMMIT 10000
-        LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Protein_Cellular_component_associated_with_integrated.tsv" AS line
-        FIELDTERMINATOR '\t'
-        MATCH (p:Protein {id:line.START_ID})
-        MATCH (c:Cellular_component {id:line.END_ID})
-        MERGE (p)-[r:ASSOCIATED_WITH_INTEGRATED{score:toFloat(line.score),source:line.source,evidence_type:line.evidence_type}]->(c)
-        RETURN COUNT(r) AS protein_associated_with_integrated_cellular_component;
-        USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Molecular_function_associated_with.tsv" AS line
         FIELDTERMINATOR '\t'
         MATCH (p:Protein {id:line.START_ID})
