@@ -603,6 +603,7 @@ def run_processing(n_clicks, project_id, dtype):
                 else:
                     message = 'ERROR: Format of the Clinical Data file is not correct. Check template in the documentation.'
                     return message, {'display':'none'}
+        
         for dataset in datasets:
             source = os.path.join(temporaryDirectory, dataset)
             destination = os.path.join(destDir, dataset)
@@ -610,39 +611,24 @@ def run_processing(n_clicks, project_id, dtype):
             datasetPath = os.path.join(os.path.join(experimentsImportDir, project_id), dataset)
             if dataset != "experimental_design":
                 eh.generate_dataset_imports(project_id, dataset, datasetPath)
+
+        print('DONE IMPORTING')
         
         loader.partialUpdate(imports=['project', 'experiment'])
+        print('DONE LOADING')
+
         style = {'display':'block'}
         message = 'Files successfully uploaded.'
         return message, style
     else:
         return '', {'display':'none'}
 
-
-@app.callback(Output('data_download_link', 'href'),
-             [Input('data_download_link', 'n_clicks')],
-             [State('project_id', 'value'),
-              State('upload-data-type-picker', 'value')])
-def generate_upload_zip(n_clicks, project_id, dtype):
-    if dtype is not None and dtype != '':
-        page_id, dataset = dtype.split('/')
-        return '/tmp/{}_{}'.format(page_id, project_id)
-    else:
-        return None
-
-@application.route('/tmp/<value>')
-def route_upload_url(value):
-    page_id, project_id = value.split('_')
-    directory = os.path.join(cwd,'../../data/tmp/')
-    filename = os.path.join(directory, 'Uploaded_files_'+project_id)
-    utils.compress_directory(filename, os.path.join(directory, page_id), compression_format='zip')
-    url = filename+'.zip'
-    return flask.send_file(url, attachment_filename = filename.split('/')[-1]+'.zip', as_attachment = True)
-
-
 @app.callback(Output('data-upload', 'style'),
               [Input('data-upload', 'children')])
 def change_style_data_upload(message):
+    print('message')
+    print(message)
+    print('-------------')
     if message is None:
         return {'fontSize':'20px', 'marginLeft':'70%', 'color': 'black'}
     else:
@@ -659,6 +645,28 @@ def deactivate_button(n_clicks):
     if n_clicks > 0:
         return True
 
+@app.callback(Output('data_download_link', 'href'),
+             [Input('data_download_link', 'n_clicks')],
+             [State('project_id', 'value'),
+              State('upload-data-type-picker', 'value')])
+def generate_upload_zip(n_clicks, project_id, dtype):
+    print(project_id)
+    print(dtype)
+    print('------------')
+    if dtype is not None and dtype != '':
+        page_id, dataset = dtype.split('/')
+        return '/tmp/{}_{}'.format(page_id, project_id)
+    else:
+        return None
+
+@application.route('/tmp/<value>')
+def route_upload_url(value):
+    page_id, project_id = value.split('_')
+    directory = os.path.join(cwd,'../../data/tmp/')
+    filename = os.path.join(directory, 'Uploaded_files_'+project_id)
+    utils.compress_directory(filename, os.path.join(directory, page_id), compression_format='zip')
+    url = filename+'.zip'
+    return flask.send_file(url, attachment_filename = filename.split('/')[-1]+'.zip', as_attachment = True)
 
 
 if __name__ == '__main__':

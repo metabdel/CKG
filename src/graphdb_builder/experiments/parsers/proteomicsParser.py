@@ -3,7 +3,7 @@ import re
 import pandas as pd
 import numpy as np
 from collections import defaultdict
-from graphdb_builder import builder_utils
+from graphdb_builder import builder_utils, mapping
 
 def parser(projectId):
     data = {}
@@ -18,6 +18,9 @@ def parser(projectId):
     for results_path in processing_results:
         processing_tool = results_path.split('/')[-1]
         if processing_tool in config:
+            sample_mapping = mapping.get_mapping_analytical_samples(projectId)
+            if len(sample_mapping) > 0:
+                mapping.map_experiment_files(projectId, os.path.join(directory, processing_tool), sample_mapping)
             tool_configuration = config[processing_tool]
             for dtype in tool_configuration:
                 dataset_configuration = tool_configuration[dtype]

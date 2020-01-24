@@ -78,15 +78,6 @@ def get_new_biosample_identifier(driver):
 		logger.error("Reading query {}: {}, file: {},line: {}".format(query_name, sys.exc_info(), fname, exc_tb.tb_lineno))
 	return identifier
 
-def get_mapping_analytical_samples(project_id, driver):
-    mapping = {}
-    query = "MATCH (p:Project)-[:HAS_ENROLLED]-(:Subject)-[:BELONGS_TO_SUBJECT]-()-[:SPLITTED_INTO]-(a:Analytical_sample) WHERE p.id='{}' RETURN a.external_id, a.id".format(project_id)
-    mapping = connector.getCursorData(driver,query)
-    if not mapping.empty:
-        mapping = mapping.set_index("a.external_id").to_dict(orient='dict')["a.id"]
-    
-    return mapping
-
 def get_new_analytical_sample_identifier(driver):
 	"""
 	Queries the database for the last analytical sample internal identifier and returns a new sequential identifier.
