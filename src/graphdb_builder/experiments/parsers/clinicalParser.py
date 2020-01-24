@@ -13,17 +13,13 @@ def parser(projectId):
     separator = config["separator"]
     if 'clinical_directory' in config:
         clinical_directory = os.path.join(cwd, config['clinical_directory'])
-    
     clinical_directory = clinical_directory.replace('PROJECTID', projectId)
-    
     if 'design_directory' in config:
         design_directory = os.path.join(cwd, config['design_directory'])
-
     design_directory = design_directory.replace('PROJECTID', projectId)
     project_dfs = project_parser(projectId, config, clinical_directory, separator)
     design_dfs = experimental_desgin_parser(projectId, config, design_directory)
     clinical_dfs = clinical_parser(projectId, config, clinical_directory, separator)
-    
     data = project_dfs
     data.update(design_dfs)
     data.update(clinical_dfs)

@@ -65,7 +65,7 @@ def load_into_database(driver, queries, requester):
     
     return result
 
-def updateDB(driver, imports=None):
+def updateDB(driver, imports=None, specific=[]):
     """
     Populates the graph database with information for each Database, Ontology or Experiment \
     specified in imports. If imports is not defined, the function populates the entire graph \
@@ -93,6 +93,8 @@ def updateDB(driver, imports=None):
             #Ontologies
             if i== "ontologies":
                 entities = config["ontology_entities"]
+                if len(specific) > 0:
+                    entities = list(set(entities).intersection(specific))
                 import_dir = os.path.join(cwd, directories["ontologiesDirectory"])
                 ontologyDataImportCode = cypher_queries['IMPORT_ONTOLOGY_DATA']['query']
                 for entity in entities:
@@ -238,6 +240,8 @@ def updateDB(driver, imports=None):
             elif i == "project":
                 import_dir = os.path.join(cwd, directories["experimentsDirectory"])
                 projects = builder_utils.listDirectoryFolders(import_dir)
+                if len(specific) > 0:
+                    projects = list(set(projects).intersection(specific))
                 project_cypher = cypher_queries['IMPORT_PROJECT']
                 for project in projects:
                     projectDir = os.path.join(import_dir, project)
@@ -250,6 +254,8 @@ def updateDB(driver, imports=None):
                 import_dir = os.path.join(cwd, directories["experimentsDirectory"])
                 datasets_cypher = cypher_queries['IMPORT_DATASETS']
                 projects = builder_utils.listDirectoryFolders(import_dir)
+                if len(specific) > 0:
+                    projects = list(set(projects).intersection(specific))
                 for project in projects:
                     projectDir = os.path.join(import_dir, project)
                     datasetTypes = builder_utils.listDirectoryFolders(projectDir)
@@ -283,7 +289,7 @@ def fullUpdate():
     archiveImportDirectory(archive_type="full")
     logger.info("Full update of the database - Archiving took: {}".format(datetime.now() - START_TIME))
 
-def partialUpdate(imports):
+def partialUpdate(imports, specific=[]):
     """
     Method that controls the update of the graph database with the specified entities and \
     relationships. Firstly, it gets a connection to the database (driver) and then initiates \
@@ -295,7 +301,7 @@ def partialUpdate(imports):
     """
     driver = connector.getGraphDatabaseConnectionConfiguration()
     logger.info("Partial update of the database - Updating: {}".format(",".join(imports)))
-    updateDB(driver, imports)
+    updateDB(driver, imports, specific)
     logger.info("Partial update of the database - Update took: {}".format(datetime.now() - START_TIME))
     logger.info("Partial update of the database - Archiving imports folder")
     #archiveImportDirectory(archive_type="partial")

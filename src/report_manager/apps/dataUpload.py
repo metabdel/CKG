@@ -132,7 +132,6 @@ def check_samples_in_project(driver, projectId):
 	query_name = 'extract_samples_numbers'
 	res = pd.DataFrame()
 	try:
-		result = []
 		data_upload_cypher = get_data_upload_queries()
 		query = data_upload_cypher[query_name]['query']
 		res = connector.getCursorData(driver, query, parameters={'external_id': str(projectId)})
@@ -289,13 +288,14 @@ def create_new_ansamples(driver, data):
 	return data
 
 def create_experiment_internal_identifiers(driver, projectId, data, directory, filename):
+	print("Creating")
 	done = 0
 	df = create_new_subjects(driver, data, projectId)
 	df1 = create_new_biosamples(driver, df)
 	df2 = create_new_ansamples(driver, df1)
 	builder_utils.export_contents(df2, directory, filename)
 	done += 1
-	return done, projectId
+	return done
 
 def create_mapping_cols_clinical(driver, data, directory, filename, separator='|'):
 	"""

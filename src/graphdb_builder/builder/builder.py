@@ -40,6 +40,7 @@ def set_arguments():
     parser.add_argument("-i", "--import_types", help="If only import, define which data types (ontologies, experiments, databases, users) you want to import (partial import)", nargs='+', default=None, choices=['experiments', 'databases', 'ontologies', 'users'])
     parser.add_argument("-l", "--load_entities",  help="If only load, define which entities you want to load into the database (partial load)",  nargs='+', default=config["graph"])
     parser.add_argument("-d", "--data", help="If only import, define which ontology/ies, experiment/s or database/s you want to import",  nargs='+', default=None)
+    parser.add_argument("-s", "--specific", help="If only loading, define which ontology/ies, projects you want to load",  nargs='+', default=[])
     parser.add_argument("-n", "--n_jobs", help="define number of cores used when importing data", type=int, default=4)
     parser.add_argument("-w", "--download", help="define whether or not to download imported data", type=str, default="True")
     parser.add_argument("-u", "--user", help="Specify a user name to keep track of who is building the database", type=str, required=True)
@@ -99,15 +100,15 @@ if __name__ == '__main__':
     elif args.build_type == 'load':
         logger.info("The build will load data into the database: {}".format("".join(args.load_entities)))
         valid_entities = []
+        specific = args.specific
         if len(args.load_entities) > 0:
             valid_entities = [x.lower() for x in args.load_entities if x.lower() in config['graph']]
         else:
             valid_entities = config['graph']
-            
         if len(valid_entities) > 0:
             logger.info("These entities will be loaded into the database: {}".format(", ".join(valid_entities)))
             print("These entities will be loaded into the database: {}".format(", ".join(valid_entities)))
-            loader.partialUpdate(imports=valid_entities)
+            loader.partialUpdate(imports=valid_entities, specific=specific)
         else:
             logger.error("The indicated entities (--load_entities) cannot be loaded: {}".format(args.load_entities))
             print("The indicated entities (--load_entities) cannot be loaded into the database: {}".format(args.load_entities))

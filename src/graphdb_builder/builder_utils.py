@@ -464,14 +464,10 @@ def convert_bytes(num):
         num /= 1024.0
 
 def copytree(src, dst, symlinks=False, ignore=None):
-    print("COPYING!")
     for item in os.listdir(src):
-        print(item)
         s = os.path.join(src, item)
-        print(s)
         checkDirectory(dst)
         d = os.path.join(dst, item)
-        print(d)
         if os.path.isdir(s):
             shutil.copytree(s, d, symlinks, ignore)
         else:

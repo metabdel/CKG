@@ -12,6 +12,7 @@ import base64
 import json
 from natsort import natsorted
 import flask
+from flask import flash
 import urllib.parse
 import user
 import dash_core_components as dcc
@@ -87,9 +88,8 @@ def display_page(pathname):
                                              'position': 'absolute',
                                              'right': '50px'})
         elif '/apps/dataUploadApp' in pathname:
-            projectId = pathname.split('/')[-1]
             session_id = datetime.now().strftime('%Y%m-%d%H-%M%S-') + str(uuid4())
-            dataUpload_form = dataUploadApp.DataUploadApp(session_id, projectId, "Data Upload", "", "", layout = [], logo = None, footer = None)
+            dataUpload_form = dataUploadApp.DataUploadApp(session_id, "Data Upload", "", "", layout = [], logo = None, footer = None)
             return (dataUpload_form.layout, {'display': 'block',
                                         'position': 'absolute',
                                         'right': '50px'})
@@ -346,11 +346,6 @@ def image_formatter(im):
     data_im = base64.b64encode(im).decode('ascii')
     return f'<img src="data:image/jpeg;base64,{data_im}">'
 
-# def add_internal_identifiers_to_excel(driver, external_id, data):
-#     subject_ids = projectCreation.get_subjects_in_project(driver, external_id)
-#     subject_ids = natsorted([item for sublist in subject_ids for item in sublist], reverse=False)
-#     data.insert(loc=0, column='subject id', value=subject_ids)
-#     return data
 
 @app.callback([Output('project-creation', 'children'),
                Output('update_project_id','children'),
@@ -460,22 +455,25 @@ def serve_static(value):
                Output('upload-form','style')],
               [Input('project_id', 'value')])
 def activate_upload_form(projectid):
-    message = ''
+    print("IN upload")
+    m = ''
     style = {'pointer-events': 'none', 'opacity': 0.5}
+    print("Project in upload",projectid)
     if len(projectid) > 7:
         db_projects = [(t['id']) for t in driver.nodes.match("Project")]
         if projectid not in db_projects:
-            message = 'ERROR: Project "{}" does not exist in the database.'.format(projectid)
+            m = 'ERROR: Project "{}" does not exist in the database.'.format(projectid)
         else:
             style = {}
     
-    return message, style
+    return m, style
 
 @app.callback([Output('proteomics-tool', 'style'),
                Output('upload-data','disabled')],
               [Input('upload-data-type-picker', 'value'),
                Input('prot-tool', 'value')])
 def show_proteomics_options(datatype, prot_tool):
+    print("In proteomics options")
     display = ({'display': 'none'}, False)
     if 'proteomics' in datatype or 'longitudinal_proteomics' in datatype:
         if prot_tool == '':
@@ -489,9 +487,9 @@ def show_proteomics_options(datatype, prot_tool):
                Output('upload-data', 'filename')],
               [Input('upload-data-type-picker', 'value'),
                Input('prot-tool', 'value'),
-               Input('upload-data', 'contents')],
-              [State('project_id', 'value'), 
-               State('upload-data', 'filename')])
+               Input('upload-data', 'contents'),
+               Input('project_id', 'value')],
+               [State('upload-data', 'filename')])
 def save_files_in_tmp(datatype, prot_tool, contents, projectid, uploaded_files):
     if len(datatype.split('/')) > 1:
         page_id, dataset = datatype.split('/')
@@ -541,14 +539,14 @@ def save_files_in_tmp(datatype, prot_tool, contents, projectid, uploaded_files):
     
     return '', []
     
-@app.callback([Output('data-upload', 'children'),
+@app.callback([Output('upload-result', 'children'),
                Output('data_download_link', 'style')],
-              [Input('submit_button', 'n_clicks')],
-              [State('project_id', 'value'),
-               State('upload-data-type-picker', 'value')])
-def run_processing(n_clicks, project_id, dtype):
+              [Input('submit_button', 'n_clicks'),
+              Input('upload-data-type-picker', 'value'),
+              Input('project_id', 'value')])
+def run_processing(n_clicks, dtype, project_id):
     if n_clicks > 0 and len(dtype.split('/')) > 1:
-        page_id, dataset = dtype.split('/')
+        page_id, _ = dtype.split('/')
         destDir = os.path.join(experimentDir, project_id)
         builder_utils.checkDirectory(destDir)
         temporaryDirectory = os.path.join(tmpDirectory, page_id)
@@ -560,12 +558,13 @@ def run_processing(n_clicks, project_id, dtype):
             experimental_files = os.listdir(directory)
             if (res_n > 0).any().values.sum() > 0:
                 res = dataUpload.remove_samples_nodes_db(driver, project_id)
-            
+                
             if config['file_design'].replace('PROJECTID', project_id) in experimental_files:
                 experimental_filename = config['file_design'].replace('PROJECTID', project_id)
                 designData = builder_utils.readDataset(os.path.join(directory, experimental_filename))
                 result = create_new_identifiers.apply_async(args=[project_id, designData.to_json(), directory, experimental_filename], task_id='data_upload_'+page_id)
                 result_output = result.get()
+                #result_output = result.wait(timeout=None, interval=0.2)
                 res_n = dataUpload.check_samples_in_project(driver, project_id)
         if 'clinical' in datasets:
             dataset = 'clinical'
@@ -613,51 +612,43 @@ def run_processing(n_clicks, project_id, dtype):
                 eh.generate_dataset_imports(project_id, dataset, datasetPath)
 
         print('DONE IMPORTING')
-        
-        loader.partialUpdate(imports=['project', 'experiment'])
+        loader.partialUpdate(imports=['project', 'experiment'], specific=[project_id])
         print('DONE LOADING')
 
         style = {'display':'block'}
         message = 'Files successfully uploaded.'
-        return message, style
+        print(message)
     else:
-        return '', {'display':'none'}
+        message = 'WHAT THE FUCK'
+        style = {'display':'none'}
+        
+    return message, style
 
-@app.callback(Output('data-upload', 'style'),
-              [Input('data-upload', 'children')])
-def change_style_data_upload(message):
-    print('message')
-    print(message)
-    print('-------------')
-    if message is None:
+@app.callback(Output('upload-result', 'style'),
+              [Input('upload-result', 'children')])
+def change_style_data_upload(upload_result):
+    if upload_result is None:
         return {'fontSize':'20px', 'marginLeft':'70%', 'color': 'black'}
     else:
-        if 'ERROR' in message:
+        if 'ERROR' in upload_result:
             return {'fontSize':'20px', 'marginLeft':'70%', 'color': 'red'}
-        if 'WARNING' in message:
+        if 'WARNING' in upload_result:
             return {'fontSize':'20px', 'marginLeft':'70%', 'color': 'orange'}
         else:
             return {'fontSize':'20px', 'marginLeft':'70%', 'color': 'black'}
 
-@app.callback(Output('submit_button', 'disabled'),
-             [Input('submit_button', 'n_clicks')])
-def deactivate_button(n_clicks):
-    if n_clicks > 0:
-        return True
-
 @app.callback(Output('data_download_link', 'href'),
-             [Input('data_download_link', 'n_clicks')],
-             [State('project_id', 'value'),
-              State('upload-data-type-picker', 'value')])
-def generate_upload_zip(n_clicks, project_id, dtype):
-    print(project_id)
-    print(dtype)
-    print('------------')
-    if dtype is not None and dtype != '':
+             [Input('data_download_link', 'n_clicks'),
+              Input('project_id', 'value'),
+              Input('upload-data-type-picker', 'value')],
+             [State('data_download_link', 'href')])
+def generate_upload_zip(n_clicks, project_id, dtype, href):
+    if len(dtype.split('/')) > 1:
         page_id, dataset = dtype.split('/')
         return '/tmp/{}_{}'.format(page_id, project_id)
     else:
-        return None
+        raise PreventUpdate
+    return None
 
 @application.route('/tmp/<value>')
 def route_upload_url(value):
@@ -666,6 +657,7 @@ def route_upload_url(value):
     filename = os.path.join(directory, 'Uploaded_files_'+project_id)
     utils.compress_directory(filename, os.path.join(directory, page_id), compression_format='zip')
     url = filename+'.zip'
+    
     return flask.send_file(url, attachment_filename = filename.split('/')[-1]+'.zip', as_attachment = True)
 
 

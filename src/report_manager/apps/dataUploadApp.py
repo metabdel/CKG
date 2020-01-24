@@ -26,9 +26,8 @@ class DataUploadApp(basicApp.BasicApp):
 
     .. warning:: There is a size limit of 55MB. Files bigger than this will have to be moved manually.
     """
-    def __init__(self, id, projectId, title, subtitle, description, layout = [], logo = None, footer = None):
+    def __init__(self, id, title, subtitle, description, layout = [], logo = None, footer = None):
         self._id = id
-        self._project_id = projectId
         self.pageType = "UploadDataPage"
         basicApp.BasicApp.__init__(self, title, subtitle, description, self.pageType, layout, logo, footer)
         self.buildPage()
@@ -49,27 +48,11 @@ class DataUploadApp(basicApp.BasicApp):
         """
         self._id = id
 
-    @property
-    def project_id(self):
-        """
-        Retrieves project identifier.
-        """
-        return self._project_id
-
-    @project_id.setter
-    def project_id(self, project_id):
-        """
-        Sets 'project_id' input value as project_id property of the class.
-
-        :param str project_id: project identifier.
-        """
-        self._project_id = project_id
-
+    
     def buildPage(self):
         """
         Builds page with the basic layout from *basicApp.py* and adds relevant Dash components for project data upload.
         """
-        projectID = self.project_id
         self.add_basic_layout()
         layout = [html.Div([
                             html.Div([html.H4('Project identifier:', style={'marginTop':30, 'marginBottom':20}),
@@ -104,7 +87,7 @@ class DataUploadApp(basicApp.BasicApp):
                                              target='',
                                              n_clicks=0,
                                              className="button_link")],
-                                      style={'width':'100%', 'padding-left':'87%', 'padding-right':'0%'}),]),
+                                      style={'width':'100%', 'padding-left':'87%', 'padding-right':'0%'})]),
                                 
                                 html.Div(children=html.A('Download Uploaded Files(.zip)',
                                             id='data_download_link',
@@ -113,7 +96,7 @@ class DataUploadApp(basicApp.BasicApp):
                                             style={'display':'none'},
                                             className="button_link"),
                                          style={'width':'100%', 'padding-left':'87%', 'padding-right':'0%'}),
-                                html.Div(id='data-upload', style={'fontSize':'20px', 'marginLeft':'70%'}),
+                                html.Div(id='data-upload-result', children=[dcc.Markdown(id='upload-result')], style={'fontSize':'20px', 'marginLeft':'70%'}),
                                 html.Hr()])]
 
         self.extend_layout(layout)

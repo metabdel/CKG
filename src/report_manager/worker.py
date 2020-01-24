@@ -21,5 +21,5 @@ def create_new_project(identifier, data, separator='|'):
 @celery_app.task
 def create_new_identifiers(project_id, data, directory, filename):
 	driver = connector.getGraphDatabaseConnectionConfiguration()
-	upload_result, projectId = dataUpload.create_experiment_internal_identifiers(driver, project_id, pd.read_json(data), directory, filename)
-	return {str(projectId):str(upload_result)}
+	upload_result = dataUpload.create_experiment_internal_identifiers(driver, project_id, pd.read_json(data), directory, filename)
+	return {str(project_id):str(upload_result)}
