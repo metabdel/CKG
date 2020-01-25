@@ -88,8 +88,7 @@ def display_page(pathname):
                                              'position': 'absolute',
                                              'right': '50px'})
         elif '/apps/dataUploadApp' in pathname:
-            session_id = datetime.now().strftime('%Y%m-%d%H-%M%S-') + str(uuid4())
-            dataUpload_form = dataUploadApp.DataUploadApp(session_id, "Data Upload", "", "", layout = [], logo = None, footer = None)
+            dataUpload_form = dataUploadApp.DataUploadApp("Data Upload", "", "", layout = [], logo = None, footer = None)
             return (dataUpload_form.layout, {'display': 'block',
                                         'position': 'absolute',
                                         'right': '50px'})
@@ -299,7 +298,7 @@ def route_login():
         return dcc.Markdown('**Invalid login.** &#x274C;')
     else:
         rep = flask.redirect('/')
-        rep.set_cookie('custom-auth-session', username)
+        rep.set_cookie('custom-auth-session', username+datetime.now().strftime('%Y%m-%d%H-%M%S-') + str(uuid4()))
         return rep
 
 @app.server.route('/apps/logout', methods=['POST'])
@@ -335,10 +334,6 @@ def regenerate_report(n_clicks, title, pathname):
     basic_path = '/'.join(pathname.split('/')[0:3]) 
     project_id, force, session_id = get_project_params_from_url(pathname)
     return basic_path+'/apps/project?project_id={}&force=1&session={}'.format(project_id, title)
-
-
-
-
 
 
 ###Callbacks for project creation app
@@ -453,12 +448,10 @@ def serve_static(value):
 ###Callbacks for data upload app
 @app.callback([Output('existing-project', 'children'),
                Output('upload-form','style')],
-              [Input('project_id', 'value')])
+               [Input('project_id', 'value')])
 def activate_upload_form(projectid):
-    print("IN upload")
     m = ''
     style = {'pointer-events': 'none', 'opacity': 0.5}
-    print("Project in upload",projectid)
     if len(projectid) > 7:
         db_projects = [(t['id']) for t in driver.nodes.match("Project")]
         if projectid not in db_projects:
@@ -473,9 +466,8 @@ def activate_upload_form(projectid):
               [Input('upload-data-type-picker', 'value'),
                Input('prot-tool', 'value')])
 def show_proteomics_options(datatype, prot_tool):
-    print("In proteomics options")
     display = ({'display': 'none'}, False)
-    if 'proteomics' in datatype or 'longitudinal_proteomics' in datatype:
+    if datatype in ['proteomics', 'longitudinal_proteomics']:
         if prot_tool == '':
             display = ({'display': 'block'}, True)
         else:
@@ -485,15 +477,15 @@ def show_proteomics_options(datatype, prot_tool):
 
 @app.callback([Output('uploaded-files', 'children'),
                Output('upload-data', 'filename')],
-              [Input('upload-data-type-picker', 'value'),
-               Input('prot-tool', 'value'),
-               Input('upload-data', 'contents'),
-               Input('project_id', 'value')],
-               [State('upload-data', 'filename')])
-def save_files_in_tmp(datatype, prot_tool, contents, projectid, uploaded_files):
-    if len(datatype.split('/')) > 1:
-        page_id, dataset = datatype.split('/')
-        temporaryDirectory = os.path.join(tmpDirectory, page_id)
+              [Input('upload-data', 'contents')],
+               [State('upload-data-type-picker', 'value'),
+                State('prot-tool', 'value'),
+                State('project_id', 'value'),
+               State('upload-data', 'filename')])
+def save_files_in_tmp(contents, dataset, prot_tool, projectid, uploaded_files):
+    if dataset is not None:
+        session_cookie = flask.request.cookies.get('custom-auth-session')
+        temporaryDirectory = os.path.join(tmpDirectory, session_cookie+"upload")
         if not os.path.exists(tmpDirectory):
             os.makedirs(tmpDirectory)
         elif not os.path.exists(temporaryDirectory):
@@ -541,15 +533,14 @@ def save_files_in_tmp(datatype, prot_tool, contents, projectid, uploaded_files):
     
 @app.callback([Output('upload-result', 'children'),
                Output('data_download_link', 'style')],
-              [Input('submit_button', 'n_clicks'),
-              Input('upload-data-type-picker', 'value'),
-              Input('project_id', 'value')])
-def run_processing(n_clicks, dtype, project_id):
-    if n_clicks > 0 and len(dtype.split('/')) > 1:
-        page_id, _ = dtype.split('/')
+              [Input('submit_button', 'n_clicks')],
+              [State('project_id', 'value')])
+def run_processing(n_clicks, project_id):
+    if n_clicks > 0:
+        session_cookie = flask.request.cookies.get('custom-auth-session')
         destDir = os.path.join(experimentDir, project_id)
         builder_utils.checkDirectory(destDir)
-        temporaryDirectory = os.path.join(tmpDirectory, page_id)
+        temporaryDirectory = os.path.join(tmpDirectory, session_cookie+"upload")
         datasets = builder_utils.listDirectoryFoldersNotEmpty(temporaryDirectory)        
         res_n = dataUpload.check_samples_in_project(driver, project_id)
         if 'experimental_design' in datasets:
@@ -619,7 +610,7 @@ def run_processing(n_clicks, dtype, project_id):
         message = 'Files successfully uploaded.'
         print(message)
     else:
-        message = 'WHAT THE FUCK'
+        message = ''
         style = {'display':'none'}
         
     return message, style
@@ -638,14 +629,12 @@ def change_style_data_upload(upload_result):
             return {'fontSize':'20px', 'marginLeft':'70%', 'color': 'black'}
 
 @app.callback(Output('data_download_link', 'href'),
-             [Input('data_download_link', 'n_clicks'),
-              Input('project_id', 'value'),
-              Input('upload-data-type-picker', 'value')],
-             [State('data_download_link', 'href')])
-def generate_upload_zip(n_clicks, project_id, dtype, href):
-    if len(dtype.split('/')) > 1:
-        page_id, dataset = dtype.split('/')
-        return '/tmp/{}_{}'.format(page_id, project_id)
+             [Input('data_download_link', 'n_clicks')],
+              [State('project_id', 'value')])
+def generate_upload_zip(n_clicks, project_id):
+    if n_clicks > 0:
+        session_cookie = flask.request.cookies.get('custom-auth-session')
+        return '/tmp/{}_{}'.format(session_cookie+"upload", project_id)
     else:
         raise PreventUpdate
     return None

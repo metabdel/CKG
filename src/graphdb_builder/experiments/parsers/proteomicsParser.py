@@ -67,7 +67,7 @@ def parse_dataset(projectId, configuration, dataDir):
                 dataset=dataset.dropna(how='all')
     else:
         raise Exception("Error when importing proteomics experiment in project {}.\n Missing configuration: {}".format(projectId,",".join(missing)))
-
+    
     return dataset
 
 def check_minimum_configuration(configuration):

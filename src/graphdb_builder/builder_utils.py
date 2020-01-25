@@ -394,7 +394,7 @@ def listDirectoryFoldersNotEmpty(directory):
     """
     from os import listdir
     from os.path import isdir, join
-    dircontent = [f for f in listdir(directory) if listdir(join(directory, f)) and isdir(join(directory, f)) and not f.startswith('.')]
+    dircontent = [f for f in listdir(directory) if not f.startswith('.') and listdir(join(directory, f)) and isdir(join(directory, f))]
     return dircontent
 
 def checkDirectory(directory):
@@ -469,7 +469,7 @@ def copytree(src, dst, symlinks=False, ignore=None):
         checkDirectory(dst)
         d = os.path.join(dst, item)
         if os.path.isdir(s):
-            shutil.copytree(s, d, symlinks, ignore)
+            copytree(s, d, symlinks, ignore)
         else:
             shutil.copy2(s, d)
 

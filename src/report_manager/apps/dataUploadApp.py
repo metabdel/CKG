@@ -26,29 +26,11 @@ class DataUploadApp(basicApp.BasicApp):
 
     .. warning:: There is a size limit of 55MB. Files bigger than this will have to be moved manually.
     """
-    def __init__(self, id, title, subtitle, description, layout = [], logo = None, footer = None):
-        self._id = id
+    def __init__(self, title, subtitle, description, layout = [], logo = None, footer = None):
         self.pageType = "UploadDataPage"
         basicApp.BasicApp.__init__(self, title, subtitle, description, self.pageType, layout, logo, footer)
         self.buildPage()
 
-    @property
-    def id(self):
-        """
-        Retrieves page identifier.
-        """
-        return self._id
-
-    @id.setter
-    def id(self, id):
-        """
-        Sets 'id' input value as id property of the class.
-
-        :param str id: page identifier.
-        """
-        self._id = id
-
-    
     def buildPage(self):
         """
         Builds page with the basic layout from *basicApp.py* and adds relevant Dash components for project data upload.
@@ -63,7 +45,7 @@ class DataUploadApp(basicApp.BasicApp):
                             html.Div(id='upload-form',children=[
                                 html.Div(children=[html.Label('Select upload data type:', style={'marginTop':10})],
                                                style={'width':'49%', 'marginLeft':'0%', 'verticalAlign':'top', 'fontSize':'18px'}),
-                                html.Div(children=[dcc.RadioItems(id='upload-data-type-picker', options=[{'label':i, 'value':self.id+'/'+i} for i in DataTypes], value='', labelStyle={'display': 'inline-block', 'margin-right': 20},
+                                html.Div(children=[dcc.RadioItems(id='upload-data-type-picker', options=[{'label':i, 'value':i} for i in DataTypes], value=None, labelStyle={'display': 'inline-block', 'margin-right': 20},
                                                               inputStyle={"margin-right": "5px"}, style={'display':'block', 'fontSize':'16px'})]),
                                 html.Div(children=[html.H5('Proteomics tool:'), dcc.RadioItems(id='prot-tool', options=[{'label':i, 'value':i} for i in ['MaxQuant', 'Spectronaut']], value='', labelStyle={'display': 'inline-block', 'margin-right': 20},
                                                               inputStyle={"margin-right": "5px"}, style={'display':'block', 'fontSize':'16px'})], id='proteomics-tool', style={'padding-top':20}),
