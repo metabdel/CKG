@@ -394,7 +394,10 @@ def listDirectoryFoldersNotEmpty(directory):
     """
     from os import listdir
     from os.path import isdir, join
-    dircontent = [f for f in listdir(directory) if not f.startswith('.') and listdir(join(directory, f)) and isdir(join(directory, f))]
+    dircontent = []
+    if isdir(directory):
+        dircontent = [f for f in listdir(directory) if not f.startswith('.') and isdir(join(directory, f)) and listdir(join(directory, f))]
+    
     return dircontent
 
 def checkDirectory(directory):

@@ -22,4 +22,6 @@ def create_new_project(identifier, data, separator='|'):
 def create_new_identifiers(project_id, data, directory, filename):
 	driver = connector.getGraphDatabaseConnectionConfiguration()
 	upload_result = dataUpload.create_experiment_internal_identifiers(driver, project_id, pd.read_json(data), directory, filename)
-	return {str(project_id):str(upload_result)}
+	res_n = dataUpload.check_samples_in_project(driver, project_id)
+	
+	return {str(project_id):str(upload_result), 'res_n':res_n.to_dict()}

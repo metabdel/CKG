@@ -12,7 +12,6 @@ import base64
 import json
 from natsort import natsorted
 import flask
-from flask import flash
 import urllib.parse
 import user
 import dash_core_components as dcc
@@ -533,9 +532,11 @@ def save_files_in_tmp(contents, dataset, prot_tool, projectid, uploaded_files):
     
 @app.callback([Output('upload-result', 'children'),
                Output('data_download_link', 'style')],
-              [Input('submit_button', 'n_clicks')],
-              [State('project_id', 'value')])
+              [Input('submit_button', 'n_clicks'),
+               Input('project_id', 'value')])
 def run_processing(n_clicks, project_id):
+    message = None
+    style = {'display':'none'}
     if n_clicks > 0:
         session_cookie = flask.request.cookies.get('custom-auth-session')
         destDir = os.path.join(experimentDir, project_id)
@@ -546,17 +547,21 @@ def run_processing(n_clicks, project_id):
         if 'experimental_design' in datasets:
             dataset = 'experimental_design'
             directory = os.path.join(temporaryDirectory, dataset)
-            experimental_files = os.listdir(directory)
-            if (res_n > 0).any().values.sum() > 0:
-                res = dataUpload.remove_samples_nodes_db(driver, project_id)
-                
+            experimental_files = os.listdir(directory)                
             if config['file_design'].replace('PROJECTID', project_id) in experimental_files:
                 experimental_filename = config['file_design'].replace('PROJECTID', project_id)
                 designData = builder_utils.readDataset(os.path.join(directory, experimental_filename))
-                result = create_new_identifiers.apply_async(args=[project_id, designData.to_json(), directory, experimental_filename], task_id='data_upload_'+page_id)
-                result_output = result.get()
-                #result_output = result.wait(timeout=None, interval=0.2)
-                res_n = dataUpload.check_samples_in_project(driver, project_id)
+                if 'subject external_id' in designData.columns and 'biological_sample external_id' in designData.columns and 'biological_sample external_id' in designData.columns:
+                    if (res_n > 0).any().values.sum() > 0:
+                        res = dataUpload.remove_samples_nodes_db(driver, project_id)
+                    result = create_new_identifiers.apply_async(args=[project_id, designData.to_json(), directory, experimental_filename], task_id='data_upload_'+session_cookie)
+                    result_output = result.wait(timeout=None, propagate=True, interval=0.2)
+                    res_n = pd.DataFrame.from_dict(result_output['res_n'])
+                else:
+                    message = 'ERROR: The Experimental design file provided ({}) is missing some of the required fields: {}'.format(experimental_filename, ','.join(['subject external_id','biological_sample external_id','analytical_sample external_id']))
+                    
+                    return message, style
+
         if 'clinical' in datasets:
             dataset = 'clinical'
             directory = os.path.join(temporaryDirectory, dataset)
@@ -573,7 +578,8 @@ def run_processing(n_clicks, project_id):
                     if 0 in res_n.values:
                         samples = ', '.join([k for (k,v) in res_n if v == 0])
                         message = 'ERROR: No {} for project {} in the database. Please upload first the experimental design (ExperimentalDesign_{}.xlsx)'.format(samples, project_id, project_id)
-                        return message, {'display':'none'}
+                        
+                        return message, style
                     else:
                         db_ids = dataUpload.check_external_ids_in_db(driver, project_id, external_ids).to_dict()
                         message = ''
@@ -592,7 +598,8 @@ def run_processing(n_clicks, project_id):
                             message += 'WARNING: Some {} identifiers were not matched:\n Matching: {}\n No information provided: {} \n Non-existing in the database: {}\n'.format(col, len(intersections[col]), ','.join(differences_in[col]), ','.join(differences_out[col]))
                 else:
                     message = 'ERROR: Format of the Clinical Data file is not correct. Check template in the documentation.'
-                    return message, {'display':'none'}
+                    
+                    return message, style
         
         for dataset in datasets:
             source = os.path.join(temporaryDirectory, dataset)
@@ -602,16 +609,10 @@ def run_processing(n_clicks, project_id):
             if dataset != "experimental_design":
                 eh.generate_dataset_imports(project_id, dataset, datasetPath)
 
-        print('DONE IMPORTING')
         loader.partialUpdate(imports=['project', 'experiment'], specific=[project_id])
-        print('DONE LOADING')
-
+        
         style = {'display':'block'}
         message = 'Files successfully uploaded.'
-        print(message)
-    else:
-        message = ''
-        style = {'display':'none'}
         
     return message, style
 
@@ -629,16 +630,12 @@ def change_style_data_upload(upload_result):
             return {'fontSize':'20px', 'marginLeft':'70%', 'color': 'black'}
 
 @app.callback(Output('data_download_link', 'href'),
-             [Input('data_download_link', 'n_clicks')],
-              [State('project_id', 'value')])
+             [Input('data_download_link', 'n_clicks'),
+              Input('project_id', 'value')])
 def generate_upload_zip(n_clicks, project_id):
-    if n_clicks > 0:
-        session_cookie = flask.request.cookies.get('custom-auth-session')
-        return '/tmp/{}_{}'.format(session_cookie+"upload", project_id)
-    else:
-        raise PreventUpdate
-    return None
-
+    session_cookie = flask.request.cookies.get('custom-auth-session')
+    return '/tmp/{}_{}'.format(session_cookie+"upload", project_id)
+    
 @application.route('/tmp/<value>')
 def route_upload_url(value):
     page_id, project_id = value.split('_')

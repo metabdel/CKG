@@ -232,7 +232,6 @@ def create_new_biosamples(driver, data):
 	biosample_ids = ['BS'+str(i) for i in np.arange(int(biosample_id), int(biosample_id)+len(external_ids))]
 	biosample_dict = dict(zip(external_ids, biosample_ids))
 	biosample_subject_dict = dict(zip(external_ids, subject_ids))
-	print(biosample_subject_dict)
 	query_name = 'create_subject_biosamples'
 	for external_id, biosample_id in biosample_dict.items():
 		subject_id = biosample_subject_dict[external_id]
@@ -288,7 +287,6 @@ def create_new_ansamples(driver, data):
 	return data
 
 def create_experiment_internal_identifiers(driver, projectId, data, directory, filename):
-	print("Creating")
 	done = 0
 	df = create_new_subjects(driver, data, projectId)
 	df1 = create_new_biosamples(driver, df)

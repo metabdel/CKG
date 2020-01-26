@@ -62,23 +62,20 @@ class DataUploadApp(basicApp.BasicApp):
                                                  multiple=True)]),
                                 html.Br(),
                                 html.Div(children=[dcc.Markdown('**Uploaded Files:**', id='markdown-title'), dcc.Markdown(id='uploaded-files')]),
-                                html.Div([html.A("Upload Data to CKG",
+                                html.Div([html.Button("Upload Data to CKG",
                                              id='submit_button',
-                                             title="Upload Data to CKG",
-                                             href='',
-                                             target='',
                                              n_clicks=0,
                                              className="button_link")],
                                       style={'width':'100%', 'padding-left':'87%', 'padding-right':'0%'})]),
                                 
-                                html.Div(children=html.A('Download Uploaded Files(.zip)',
+                                html.Div(children=html.A('Download Files(.zip)',
                                             id='data_download_link',
                                             href='',
                                             n_clicks=0, 
                                             style={'display':'none'},
                                             className="button_link"),
                                          style={'width':'100%', 'padding-left':'87%', 'padding-right':'0%'}),
-                                html.Div(id='data-upload-result', children=[dcc.Markdown(id='upload-result')], style={'fontSize':'20px', 'marginLeft':'70%'}),
+                                html.Div(id='data-upload-result', children=[dcc.Markdown(id='upload-result')]),
                                 html.Hr()])]
 
         self.extend_layout(layout)

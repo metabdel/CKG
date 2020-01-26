@@ -43,6 +43,7 @@ def generate_graph_files(data, dataType, projectId, stats, ot = 'w', dataset_imp
         outputfile = os.path.join(dataset_import_dir, projectId+".tsv")
     else:
         outputfile = os.path.join(dataset_import_dir, projectId+"_"+dataType.lower()+".tsv")
+    
     with open(outputfile, ot) as f:
         data.to_csv(path_or_buf = f, sep='\t',
             header=True, index=False, quotechar='"',
