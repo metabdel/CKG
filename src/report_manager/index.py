@@ -559,6 +559,7 @@ def run_processing(n_clicks, project_id):
                     res_n = pd.DataFrame.from_dict(result_output['res_n'])
                 else:
                     message = 'ERROR: The Experimental design file provided ({}) is missing some of the required fields: {}'.format(experimental_filename, ','.join(['subject external_id','biological_sample external_id','analytical_sample external_id']))
+                    builder_utils.remove_directory(directory)
                     
                     return message, style
 
@@ -578,6 +579,7 @@ def run_processing(n_clicks, project_id):
                     if 0 in res_n.values:
                         samples = ', '.join([k for (k,v) in res_n if v == 0])
                         message = 'ERROR: No {} for project {} in the database. Please upload first the experimental design (ExperimentalDesign_{}.xlsx)'.format(samples, project_id, project_id)
+                        builder_utils.remove_directory(directory)
                         
                         return message, style
                     else:
@@ -598,6 +600,7 @@ def run_processing(n_clicks, project_id):
                             message += 'WARNING: Some {} identifiers were not matched:\n Matching: {}\n No information provided: {} \n Non-existing in the database: {}\n'.format(col, len(intersections[col]), ','.join(differences_in[col]), ','.join(differences_out[col]))
                 else:
                     message = 'ERROR: Format of the Clinical Data file is not correct. Check template in the documentation.'
+                    builder_utils.remove_directory(directory)
                     
                     return message, style
         

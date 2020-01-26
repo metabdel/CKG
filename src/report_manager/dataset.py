@@ -392,34 +392,36 @@ class ProteomicsDataset(Dataset):
     def processing(self):
         processed_data = None
         data = self.get_dataframe("original")
+        
         if data is not None:
-            imputation = True
-            method = "mixed"
-            missing_method = 'percentage'
-            missing_per_group = True
-            missing_max = 0.3
-            min_valid = 1
-            value_col = 'LFQ intensity'
-            index=['group', 'sample', 'subject']
-            args = {}
-            if "args" in self.configuration:
-                args = self.configuration["args"]
-                if "imputation" in args:
-                    imputation = args["imputation"]
-                if "imputation_method" in args:
-                    method = args["imputation_method"]
-                if "missing_method" in args:
-                    missing_method = args["missing_method"]
-                if "missing_per_group" in args:
-                    missing_per_group = args["missing_per_group"]
-                if "missing_max" in args:
-                    missing_max = args["missing_max"]
-                if "min_valid" in args:
-                    min_valid = args['min_valid']
-                if "value_col" in args:
-                    value_col = args["value_col"]
+            if not data.empty:
+                imputation = True
+                method = "mixed"
+                missing_method = 'percentage'
+                missing_per_group = True
+                missing_max = 0.3
+                min_valid = 1
+                value_col = 'LFQ intensity'
+                index=['group', 'sample', 'subject']
+                args = {}
+                if "args" in self.configuration:
+                    args = self.configuration["args"]
+                    if "imputation" in args:
+                        imputation = args["imputation"]
+                    if "imputation_method" in args:
+                        method = args["imputation_method"]
+                    if "missing_method" in args:
+                        missing_method = args["missing_method"]
+                    if "missing_per_group" in args:
+                        missing_per_group = args["missing_per_group"]
+                    if "missing_max" in args:
+                        missing_max = args["missing_max"]
+                    if "min_valid" in args:
+                        min_valid = args['min_valid']
+                    if "value_col" in args:
+                        value_col = args["value_col"]
 
-            processed_data = analytics.get_proteomics_measurements_ready(data, index_cols=index, imputation = imputation, method = method, missing_method = missing_method, missing_per_group=missing_per_group, missing_max = missing_max, min_valid=min_valid)
+                processed_data = analytics.get_proteomics_measurements_ready(data, index_cols=index, imputation = imputation, method = method, missing_method = missing_method, missing_per_group=missing_per_group, missing_max = missing_max, min_valid=min_valid)
         return processed_data
     
     def generate_knowledge(self):
@@ -455,34 +457,35 @@ class ClinicalDataset(Dataset):
         processed_data = None
         data = self.get_dataframe("original")
         if data is not None:
-            subject_id = 'subject'
-            sample_id = 'biological_sample'
-            group_id = 'group'
-            columns = 'clinical_variable'
-            values = 'values'
-            extra = []
-            imputation  = True
-            imputation_method = 'KNN'
-            args = {}
-            if "args" in self.configuration:
-                args = self.configuration["args"]
-                if "subject_id" in args:
-                    subject_id = args["subject_id"]
-                if "sample_id" in args:
-                    sample_id = args["sample_id"]
-                if "columns" in args:
-                    columns = args["columns"]
-                if "values" in args:
-                    values = args["values"]
-                if "extra" in args:
-                    extra = args["extra"]
-                if 'imputation_method' in args:
-                    imputation = True
-                    imputation_method = args['imputation_method']
-                if 'group_id' in args:
-                    group_id = args['group_id']
+            if not data.empty:
+                subject_id = 'subject'
+                sample_id = 'biological_sample'
+                group_id = 'group'
+                columns = 'clinical_variable'
+                values = 'values'
+                extra = []
+                imputation  = True
+                imputation_method = 'KNN'
+                args = {}
+                if "args" in self.configuration:
+                    args = self.configuration["args"]
+                    if "subject_id" in args:
+                        subject_id = args["subject_id"]
+                    if "sample_id" in args:
+                        sample_id = args["sample_id"]
+                    if "columns" in args:
+                        columns = args["columns"]
+                    if "values" in args:
+                        values = args["values"]
+                    if "extra" in args:
+                        extra = args["extra"]
+                    if 'imputation_method' in args:
+                        imputation = True
+                        imputation_method = args['imputation_method']
+                    if 'group_id' in args:
+                        group_id = args['group_id']
 
-            processed_data = analytics.get_clinical_measurements_ready(data, subject_id=subject_id, sample_id=sample_id, group_id=group_id, columns=columns, values=values, extra=extra, imputation=imputation, imputation_method=imputation_method)
+                processed_data = analytics.get_clinical_measurements_ready(data, subject_id=subject_id, sample_id=sample_id, group_id=group_id, columns=columns, values=values, extra=extra, imputation=imputation, imputation_method=imputation_method)
         return processed_data
     
     def generate_knowledge(self):

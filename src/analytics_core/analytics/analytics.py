@@ -199,22 +199,23 @@ def imputation_KNN(data, drop_cols=['group', 'sample', 'subject'], group='group'
     df = data.copy()
     cols = df.columns
     df = df._get_numeric_data()
-    df[group] = data[group]
-    cols = list(set(cols).difference(df.columns))
-    value_cols = [c for c in df.columns if c not in drop_cols]
-    for g in df[group].unique():
-        missDf = df.loc[df[group]==g, value_cols]
-        missDf = missDf.loc[:, missDf.notnull().mean() >= cutoff]
-        if missDf.isnull().values.any():
-            X = np.array(missDf.values, dtype=np.float64)
-            X_trans = KNN(k=3,verbose=False).fit_transform(X)
-            missingdata_df = missDf.columns.tolist()
-            dfm = pd.DataFrame(X_trans, index =list(missDf.index), columns = missingdata_df)
-            df.update(dfm)
-    if alone:
-        df = df.dropna(axis=1)
+    if group in df.columns:
+        df[group] = data[group]
+        cols = list(set(cols).difference(df.columns))
+        value_cols = [c for c in df.columns if c not in drop_cols]
+        for g in df[group].unique():
+            missDf = df.loc[df[group]==g, value_cols]
+            missDf = missDf.loc[:, missDf.notnull().mean() >= cutoff]
+            if missDf.isnull().values.any():
+                X = np.array(missDf.values, dtype=np.float64)
+                X_trans = KNN(k=3,verbose=False).fit_transform(X)
+                missingdata_df = missDf.columns.tolist()
+                dfm = pd.DataFrame(X_trans, index =list(missDf.index), columns = missingdata_df)
+                df.update(dfm)
+        if alone:
+            df = df.dropna(axis=1)
 
-    df = df.join(data[cols])
+        df = df.join(data[cols])
 
     return df
 
@@ -429,31 +430,32 @@ def get_proteomics_measurements_ready(df, index_cols=['group', 'sample', 'subjec
 
         result = get_proteomics_measurements_ready(df, index_cols=['group', 'sample', 'subject'], drop_cols=['sample'], group='group', identifier='identifier', extra_identifier='name', imputation = True, method = 'mixed', missing_method = 'at_least_x', missing_per_group=False, min_valid=5, value_col='LFQ_intensity')
     """
-    df = df.set_index(index_cols)
-    if extra_identifier is not None and extra_identifier in df.columns:
-        df[identifier] = df[extra_identifier].map(str) + "~" + df[identifier].map(str)
-    df = df.pivot_table(values=value_col, index=df.index, columns=identifier, aggfunc='first')
-    df = df.reset_index()
-    df[index_cols] = df["index"].apply(pd.Series)
-    df = df.drop(["index"], axis=1)
-    aux = index_cols
-    if missing_per_group == False:
-        group = None
-    if missing_method == 'at_least_x':
-        aux.extend(extract_number_missing(df, min_valid, drop_cols, group=group))
-    elif missing_method == 'percentage':
-        aux.extend(extract_percentage_missing(df,  missing_max, drop_cols, group=group))
-
-    df = df[list(set(aux))]
-    if imputation:
-        if method == "KNN":
-            df = imputation_KNN(df)
-        elif method == "distribution":
-            df = imputation_normal_distribution(df, shift = 1.8, nstd = 0.3)
-        elif method == 'mixed':
-            df = imputation_mixed_norm_KNN(df)
-
+    if df.columns.isin(index_cols).sum() == len(index_cols):
+        df = df.set_index(index_cols)
+        if extra_identifier is not None and extra_identifier in df.columns:
+            df[identifier] = df[extra_identifier].map(str) + "~" + df[identifier].map(str)
+        df = df.pivot_table(values=value_col, index=df.index, columns=identifier, aggfunc='first')
         df = df.reset_index()
+        df[index_cols] = df["index"].apply(pd.Series)
+        df = df.drop(["index"], axis=1)
+        aux = index_cols
+        if missing_per_group == False:
+            group = None
+        if missing_method == 'at_least_x':
+            aux.extend(extract_number_missing(df, min_valid, drop_cols, group=group))
+        elif missing_method == 'percentage':
+            aux.extend(extract_percentage_missing(df,  missing_max, drop_cols, group=group))
+
+        df = df[list(set(aux))]
+        if imputation:
+            if method == "KNN":
+                df = imputation_KNN(df)
+            elif method == "distribution":
+                df = imputation_normal_distribution(df, shift = 1.8, nstd = 0.3)
+            elif method == 'mixed':
+                df = imputation_mixed_norm_KNN(df)
+
+            df = df.reset_index()
 
     return df
 

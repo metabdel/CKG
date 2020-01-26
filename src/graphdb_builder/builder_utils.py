@@ -360,6 +360,10 @@ def getMedlineAbstracts(idList):
 
     return abstracts
 
+def remove_directory(directory):
+    if os.path.exists(directory):
+        shutil.rmtree(directory, ignore_errors=False, onerror=None)
+
 def listDirectoryFiles(directory):
     """
     Lists all files in a specified directory.
