@@ -18,7 +18,7 @@ def parser(databases_directory, download= True):
     fileName = os.path.join(directory, url.split('/')[-1])
     if download:
         builder_utils.downloadDB(url, directory)
-    with open(fileName, 'r') as catalog:
+    with open(fileName, 'r', encoding="utf-8") as catalog:
         for line in catalog:
             data = line.rstrip("\r\n").split("\t")
             pubmedid = data[1]

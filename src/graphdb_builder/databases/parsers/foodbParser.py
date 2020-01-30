@@ -73,7 +73,7 @@ def parseContents(fhandler):
 def parseFood(fhandler):
     food = set()
     mapping = defaultdict(set)
-    df = pd.read_csv(fhandler, sep=',', header=None, error_bad_lines=False, low_memory=False)
+    df = pd.read_csv(fhandler, sep=',', header=None, error_bad_lines=False, low_memory=False, encoding="utf-8")
     first = True
     for index, row in df.iterrows():
         if first:
@@ -95,7 +95,7 @@ def parseFood(fhandler):
 def parseCompounds(fhandler):
     compounds = {}
     first = True
-    df = pd.read_csv(fhandler, sep=',', header=None, error_bad_lines=False, low_memory=False)
+    df = pd.read_csv(fhandler, sep=',', header=None, error_bad_lines=False, low_memory=False, encoding="utf-8")
     first = True
     for index, row in df.iterrows():
         if first:

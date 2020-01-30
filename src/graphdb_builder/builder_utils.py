@@ -233,7 +233,7 @@ def downloadDB(databaseURL, directory=None, file_name=None, user="", password=""
     if directory is None:
         directory = dbconfig["databasesDir"]
     if file_name is None:
-        file_name = databaseURL.split('/')[-1]
+        file_name = databaseURL.split('/')[-1].replace('?','_').replace('=','_')
     header = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36'}
     try:
         mode = 'wb'
@@ -541,7 +541,7 @@ def read_gzipped_file(filepath, mode='unix'):
         except Exception:
             pass
     
-    handle = gzip.open(filepath, "rt")
+    handle = gzip.open(filepath, "rb")
     
     return handle
 

@@ -23,7 +23,7 @@ def parser(databases_directory, download = True):
     if download:
         builder_utils.downloadDB(url, directory)
 
-    with open(fileName, 'r') as idf:
+    with open(fileName, 'r', encoding="utf-8") as idf:
         first = True
         for line in idf:
             if first:

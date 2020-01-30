@@ -37,7 +37,7 @@ def parse_substrates(filename, modifications, accronyms, amino_acids):
     entities = set()
     relationships = defaultdict(set)
     first = True
-    with open(filename) as fhandler:
+    with open(filename, 'r', encoding="utf-8") as fhandler:
         for line in fhandler:
             if first:
                 first = False

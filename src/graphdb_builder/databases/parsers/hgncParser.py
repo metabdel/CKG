@@ -18,7 +18,7 @@ def parser(databases_directory, download = True):
     if download:
         builder_utils.downloadDB(url, directory)
     
-    with open(fileName, 'r') as df:
+    with open(fileName, 'r', encoding="utf-8") as df:
         first = True
         for line in df:
             if first:

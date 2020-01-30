@@ -3,9 +3,9 @@ import os
 def setup_config_file(file_name, path):
     with open(file_name, 'r') as f:
         config = f.read()
-        config = config.replace('{PATH}', path)
-    with open(file_name.replace('_template', ''), 'w') as out:
-        out.write(config)
+        config = config.replace('{PATH}', path).replace('\\','/')
+        with open(file_name.replace('_template', ''), 'w') as out:
+            out.write(config)
 
 
 if __name__ == '__main__':

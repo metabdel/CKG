@@ -34,7 +34,7 @@ def extract_metabolites(config, databases_directory, download = True):
     structuredFields = config['HMDB_structures']
     with zipfile.ZipFile(fileName, 'r') as zipped:
         for f in zipped.namelist():
-            data = zipped.read(f) 
+            data = zipped.read(f).decode('utf-8') 
             root = etree.fromstring(data)
             context = etree.iterwalk(root, events=("end",), tag=prefix+"metabolite")
             for _,elem in context:
@@ -82,7 +82,7 @@ def build_metabolite_entity(config, databases_directory, metabolites):
 def build_relationships_from_HMDB(config, metabolites, mapping):
     relationships = defaultdict(list)
     associations = config['HMDB_associations']
-    for metid in metabolites:
+    for metid in metabolites:p
         for ass in associations:
             ident = ass
             if len(associations[ass]) > 1:
