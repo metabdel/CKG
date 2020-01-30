@@ -7,9 +7,9 @@ import wget
 import requests
 import ftplib
 import json
+import gzip
 import shutil
-from Bio import Entrez
-from Bio import Medline
+from Bio import Entrez, Medline, SeqIO
 import os.path
 import collections
 import pprint
@@ -525,14 +525,66 @@ def compress_directory(folder_to_backup, dest_folder, file_name):
     os.system("tar -zcf {} {}".format(filePath, folder_to_backup))
 
 
-def read_gzipped_file(filepath):
+def read_gzipped_file(filepath, mode='unix'):
     """
     Opens an underlying process to access a gzip file through the creation of a new pipe to the child.
 
     :param str filepath: path to gzip file.
     :return: A bytes sequence that specifies the standard output.
     """
-    p = subprocess.Popen(["gzcat", filepath],
-        stdout=subprocess.PIPE
-    )
-    return p.stdout
+    if mode == 'unix':
+        try:
+            p = subprocess.Popen(["gzcat", filepath],
+                stdout=subprocess.PIPE
+            )
+            return p.stdout
+        except Exception:
+            pass
+    
+    handle = gzip.open(filepath, "rt")
+    
+    return handle
+
+def parse_fasta(file_handler):
+    """
+    Using BioPython to read fasta file as SeqIO objects
+    
+    :param file_handler file_handler: opened fasta file
+    :return iterator records: iterator of sequence objects
+    """
+    records = SeqIO.parse(file_handler,"fasta")
+    
+    return records
+    
+def batch_iterator(iterator, batch_size):
+    """Returns lists of length batch_size.
+
+    This can be used on any iterator, for example to batch up
+    SeqRecord objects from Bio.SeqIO.parse(...), or to batch
+    Alignment objects from Bio.AlignIO.parse(...), or simply
+    lines from a file handle.
+
+    This is a generator function, and it returns lists of the
+    entries from the supplied iterator.  Each list will have
+    batch_size entries, although the final list may be shorter.
+    
+    :param iterator iterator: batch to be extracted
+    :param integer batch_size: size of the batch
+    :return list batch: list with the batch elements of size batch_size
+        
+    source: https://biopython.org/wiki/Split_large_file
+    """
+    entry = True
+    while entry:
+        batch = []
+        while len(batch) < batch_size:
+            try:
+                entry = next(iterator)
+            except StopIteration:
+                entry = None
+            if entry is None:
+                # End of file
+                break
+            batch.append(entry)
+        if batch:
+            yield batch

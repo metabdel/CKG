@@ -103,7 +103,7 @@ ADD ./requirements.txt /requirements.txt
 ## Install Python libraries
 RUN pip3 install --ignore-installed -r requirements.txt
 RUN mkdir /CKG
-#ADD . /CKG/
+ADD . /CKG/
 ENV PYTHONPATH "${PYTHONPATH}:/CKG/src"
 
 # JupyterHub
