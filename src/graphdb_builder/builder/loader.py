@@ -79,7 +79,6 @@ def updateDB(driver, imports=None, specific=[]):
     """
     if imports is None:
         imports = config["graph"]
-
     try:
         cypher_queries = ckg_utils.get_queries(os.path.join(cwd, config['cypher_queries_file']))
     except Exception as err:
@@ -89,19 +88,19 @@ def updateDB(driver, imports=None, specific=[]):
         queries = []
         logger.info("Loading {} into the database".format(i))
         try:
-            import_dir = os.path.join(cwd, directories["databasesDirectory"])
+            import_dir = os.path.join(cwd, directories["databasesDirectory"]).replace('\\','/')
             #Ontologies
             if i== "ontologies":
-                entities = config["ontology_entities"]
+                entities = [e.lower() for e in config["ontology_entities"]]
                 if len(specific) > 0:
-                    entities = list(set(entities).intersection(specific))
-                import_dir = os.path.join(cwd, directories["ontologiesDirectory"])
+                    entities = list(set(entities).intersection([s.lower() for s in specific]))
+                import_dir = os.path.join(cwd, directories["ontologiesDirectory"]).replace('\\','/')
                 ontologyDataImportCode = cypher_queries['IMPORT_ONTOLOGY_DATA']['query']
                 for entity in entities:
-                    queries.extend(ontologyDataImportCode.replace("ENTITY", entity).replace("IMPORTDIR", import_dir).split(';')[0:-1])
+                    queries.extend(ontologyDataImportCode.replace("ENTITY", entity.capitalize()).replace("IMPORTDIR", import_dir).split(';')[0:-1])
             elif i == "biomarkers":
                 code = cypher_queries['IMPORT_BIOMARKERS']['query']
-                import_dir = os.path.join(cwd, directories["curatedDirectory"])
+                import_dir = os.path.join(cwd, directories["curatedDirectory"]).replace('\\','/')
                 queries = code.replace("IMPORTDIR", import_dir).split(';')[0:-1]
             #Databases
             #Chromosomes
@@ -238,29 +237,29 @@ def updateDB(driver, imports=None, specific=[]):
 
             #Projects
             elif i == "project":
-                import_dir = os.path.join(cwd, directories["experimentsDirectory"])
+                import_dir = os.path.join(cwd, directories["experimentsDirectory"]).replace('\\','/')
                 projects = builder_utils.listDirectoryFolders(import_dir)
                 if len(specific) > 0:
                     projects = list(set(projects).intersection(specific))
                 project_cypher = cypher_queries['IMPORT_PROJECT']
                 for project in projects:
                     projectDir = os.path.join(import_dir, project)
-                    projectDir = os.path.join(projectDir, 'clinical')
+                    projectDir = os.path.join(projectDir, 'clinical').replace('\\','/')
                     for project_section in project_cypher:
                         code = project_section['query']
                         queries.extend(code.replace("IMPORTDIR", projectDir).replace('PROJECTID', project).split(';')[0:-1])
             #Datasets
             elif i == "experiment":
-                import_dir = os.path.join(cwd, directories["experimentsDirectory"])
+                import_dir = os.path.join(cwd, directories["experimentsDirectory"]).replace('\\','/')
                 datasets_cypher = cypher_queries['IMPORT_DATASETS']
                 projects = builder_utils.listDirectoryFolders(import_dir)
                 if len(specific) > 0:
                     projects = list(set(projects).intersection(specific))
                 for project in projects:
-                    projectDir = os.path.join(import_dir, project)
+                    projectDir = os.path.join(import_dir, project).replace('\\','/')
                     datasetTypes = builder_utils.listDirectoryFolders(projectDir)
                     for dtype in datasetTypes:
-                        datasetDir = os.path.join(projectDir, dtype)
+                        datasetDir = os.path.join(projectDir, dtype).replace('\\','/')
                         dataset = datasets_cypher[dtype]
                         code = dataset['query']
                         queries.extend(code.replace("IMPORTDIR", datasetDir).replace('PROJECTID', project).split(';')[0:-1])

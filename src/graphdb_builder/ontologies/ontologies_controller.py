@@ -54,6 +54,7 @@ def parse_ontology(ontology, download=True):
     ontology_directory = os.path.join(directory, ontology)
     builder_utils.checkDirectory(ontology_directory)
     ontology_files = []
+    ontologyData = None
     if ontology in config["ontology_types"]:
         otype = config["ontology_types"][ontology]
         if 'urls' in config:
@@ -63,7 +64,7 @@ def parse_ontology(ontology, download=True):
                     f = url.split('/')[-1]
                     ontology_files.append(os.path.join(ontology_directory, f))
                     if download:
-                        builder_utils.downloadDB(url, directory=ontology_directory)
+                        builder_utils.downloadDB(url, directory=ontology_directory, file_name=f)
             elif otype in config["files"]:
                 ofiles = config["files"][otype]
                 ###Check SNOMED-CT files exist
@@ -108,11 +109,13 @@ def generate_graphFiles(import_directory, ontologies=None, download=True):
     if ontologies is not None:
         entities = {}
         for ontology in ontologies:
-            entities.update({ontology:config["ontologies"][ontology]})
+            ontology = ontology.capitalize()
+            if ontology.capitalize() in config["ontologies"]:
+                entities.update({ontology:config["ontologies"][ontology]})
     
     updated_on = None
     if download:
-        updated_on = date.today()
+        updated_on = str(date.today())
 
     stats = set()
     for entity in entities:
@@ -120,29 +123,33 @@ def generate_graphFiles(import_directory, ontologies=None, download=True):
         if ontology in config["ontology_types"]:
             ontologyType = config["ontology_types"][ontology]
         try:
-            terms, relationships, definitions = parse_ontology(ontology, download)
-            for namespace in terms:
-                if namespace in config["entities"]:
-                    name = config["entities"][namespace]
-                entity_outputfile = os.path.join(import_directory, name+".tsv")
-                with open(entity_outputfile, 'w') as csvfile:
-                    writer = csv.writer(csvfile, delimiter='\t', escapechar='\\', quotechar='"', quoting=csv.QUOTE_ALL)
-                    writer.writerow(['ID', ':LABEL', 'name', 'description', 'type', 'synonyms'])
-                    for term in terms[namespace]:
-                        writer.writerow([term, entity, list(terms[namespace][term])[0], definitions[term], ontologyType, ",".join(terms[namespace][term])])
-                logger.info("Ontology {} - Number of {} entities: {}".format(ontology, name, len(terms[namespace])))
-                stats.add(builder_utils.buildStats(len(terms[namespace]), "entity", name, ontology, entity_outputfile, updated_on))
-                if namespace in relationships:
-                    relationships_outputfile = os.path.join(import_directory, name+"_has_parent.tsv")
-                    relationshipsDf = pd.DataFrame(list(relationships[namespace]))
-                    relationshipsDf.columns = ['START_ID', 'END_ID', 'TYPE']
-                    relationshipsDf.to_csv(path_or_buf=relationships_outputfile,
-                                                sep='\t',
-                                                header=True, index=False, quotechar='"',
-                                                quoting=csv.QUOTE_ALL,
-                                                line_terminator='\n', escapechar='\\')
-                    logger.info("Ontology {} - Number of {} relationships: {}".format(ontology, name+"_has_parent", len(relationships[namespace])))
-                    stats.add(builder_utils.buildStats(len(relationships[namespace]), "relationships", name+"_has_parent", ontology, relationships_outputfile, updated_on))
+            result = parse_ontology(ontology, download)
+            if result is not None:
+                terms, relationships, definitions = result
+                for namespace in terms:
+                    if namespace in config["entities"]:
+                        name = config["entities"][namespace]
+                    entity_outputfile = os.path.join(import_directory, name+".tsv")
+                    with open(entity_outputfile, 'w') as csvfile:
+                        writer = csv.writer(csvfile, delimiter='\t', escapechar='\\', quotechar='"', quoting=csv.QUOTE_ALL)
+                        writer.writerow(['ID', ':LABEL', 'name', 'description', 'type', 'synonyms'])
+                        for term in terms[namespace]:
+                            writer.writerow([term, entity, list(terms[namespace][term])[0], definitions[term], ontologyType, ",".join(terms[namespace][term])])
+                    logger.info("Ontology {} - Number of {} entities: {}".format(ontology, name, len(terms[namespace])))
+                    stats.add(builder_utils.buildStats(len(terms[namespace]), "entity", name, ontology, entity_outputfile, updated_on))
+                    if namespace in relationships:
+                        relationships_outputfile = os.path.join(import_directory, name+"_has_parent.tsv")
+                        relationshipsDf = pd.DataFrame(list(relationships[namespace]))
+                        relationshipsDf.columns = ['START_ID', 'END_ID', 'TYPE']
+                        relationshipsDf.to_csv(path_or_buf=relationships_outputfile,
+                                                    sep='\t',
+                                                    header=True, index=False, quotechar='"',
+                                                    quoting=csv.QUOTE_ALL,
+                                                    line_terminator='\n', escapechar='\\')
+                        logger.info("Ontology {} - Number of {} relationships: {}".format(ontology, name+"_has_parent", len(relationships[namespace])))
+                        stats.add(builder_utils.buildStats(len(relationships[namespace]), "relationships", name+"_has_parent", ontology, relationships_outputfile, updated_on))
+            else:
+                logger.warning("Ontology {} - The parsing did not work".format(ontology))
         except Exception as err:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
