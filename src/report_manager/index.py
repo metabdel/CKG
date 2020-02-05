@@ -361,6 +361,7 @@ def image_formatter(im):
                State('date-picker-end', 'date')])
 def create_project(n_clicks, name, acronym, responsible, participant, datatype, timepoints, disease, tissue, intervention, number_subjects, description, start_date, end_date):
     if n_clicks > 0:
+        session_cookie = flask.request.cookies.get('custom-auth-session')
         responsible = separator.join(responsible)
         participant = separator.join(participant)
         datatype = separator.join(datatype)
@@ -402,7 +403,7 @@ def create_project(n_clicks, name, acronym, responsible, participant, datatype, 
         epoch = time.time()
         internal_id = "%s%d" % ("CP", epoch)
         projectData.insert(loc=0, column='internal_id', value=internal_id)           
-        result = create_new_project.apply_async(args=[internal_id, projectData.to_json(), separator], task_id='project_creation_'+internal_id)
+        result = create_new_project.apply_async(args=[internal_id, projectData.to_json(), separator], task_id='project_creation_'+session_cookie+internal_id)
         result_output = result.get()
         external_id = list(result_output.keys())[0]
 
@@ -516,10 +517,8 @@ def save_files_in_tmp(contents, dataset, prot_tool, projectid, uploaded_files):
             contents = None
         if contents is not None:
             for file in zip(filenames, contents):
-                with open(os.path.join(directory, file[0]), 'wb') as out:
-                    content_type, content_string = file[1].split(',')
-                    decoded = base64.b64decode(content_string)
-                    out.write(decoded)
+                data = builder_utils.parse_contents(file[1], file[0])
+                builder_utils.export_contents(data, directory, file[0])
             
             uploaded = '   \n'.join(uploaded_files)
             uploaded_files = []
@@ -554,9 +553,15 @@ def run_processing(n_clicks, project_id):
                 if 'subject external_id' in designData.columns and 'biological_sample external_id' in designData.columns and 'biological_sample external_id' in designData.columns:
                     if (res_n > 0).any().values.sum() > 0:
                         res = dataUpload.remove_samples_nodes_db(driver, project_id)
-                    result = create_new_identifiers.apply_async(args=[project_id, designData.to_json(), directory, experimental_filename], task_id='data_upload_'+session_cookie)
+                        print('REMOVED SAMPLES')
+                        print(res)
+                    print(project_id)
+                    res_n = None
+                    result = create_new_identifiers.apply_async(args=[project_id, designData.to_json(), directory, experimental_filename], task_id='data_upload_'+session_cookie+datetime.now().strftime('%Y%m-%d%H-%M%S-'))
                     result_output = result.wait(timeout=None, propagate=True, interval=0.2)
                     res_n = pd.DataFrame.from_dict(result_output['res_n'])
+                    print('QUEUE')
+                    print("res", res_n)
                 else:
                     message = 'ERROR: The Experimental design file provided ({}) is missing some of the required fields: {}'.format(experimental_filename, ','.join(['subject external_id','biological_sample external_id','analytical_sample external_id']))
                     builder_utils.remove_directory(directory)
@@ -570,6 +575,7 @@ def run_processing(n_clicks, project_id):
             if config['file_clinical'].replace('PROJECTID', project_id) in clinical_files:
                 clinical_filename = config['file_clinical'].replace('PROJECTID', project_id)
                 data = builder_utils.readDataset(os.path.join(directory, clinical_filename))
+                print(data.head())
                 external_ids = {}
                 if 'subject external_id' in data and 'biological_sample external_id' in data and 'analytical_sample external_id' in data:
                     external_ids['subjects'] = data['subject external_id'].astype(str).unique().tolist()
@@ -583,7 +589,13 @@ def run_processing(n_clicks, project_id):
                         
                         return message, style
                     else:
-                        db_ids = dataUpload.check_external_ids_in_db(driver, project_id, external_ids).to_dict()
+                        print('EXTERNAL IDS')
+                        print(project_id)
+                        db_ids = dataUpload.check_external_ids_in_db(driver, project_id).to_dict()
+                        print(db_ids)
+                        print('--------------')
+                        print(external_ids)
+                        print('==============')
                         message = ''
                         intersections = {}
                         differences_in = {}
@@ -607,7 +619,22 @@ def run_processing(n_clicks, project_id):
         for dataset in datasets:
             source = os.path.join(temporaryDirectory, dataset)
             destination = os.path.join(destDir, dataset)
+            print('DEST')
+            print(source)
+            print(destination)
+            print('-------------')
             builder_utils.copytree(source, destination)
+            # dir_tree = os.listdir(directory)
+            # for branch in dir_tree:
+            #     source = os.path.join(directory, branch)
+            #     print('SOURCE')
+            #     print(source)
+            #     print('-------------')
+            #     if os.path.isdir(source):
+            #         destination = os.path.join(destination, os.path.basename(source))
+            #         shutil.copytree(source, destination)
+            #     else:
+            #         shutil.copy(source, destination)
             datasetPath = os.path.join(os.path.join(experimentsImportDir, project_id), dataset)
             if dataset != "experimental_design":
                 eh.generate_dataset_imports(project_id, dataset, datasetPath)

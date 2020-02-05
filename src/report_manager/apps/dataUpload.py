@@ -130,39 +130,39 @@ def check_samples_in_project(driver, projectId):
 
 	"""
 	query_name = 'extract_samples_numbers'
-	res = pd.DataFrame()
+	result = pd.DataFrame()
 	try:
 		data_upload_cypher = get_data_upload_queries()
 		query = data_upload_cypher[query_name]['query']
-		res = connector.getCursorData(driver, query, parameters={'external_id': str(projectId)})
+		result = connector.getCursorData(driver, query, parameters={'external_id': str(projectId)})
 	except Exception as err:
 		exc_type, exc_obj, exc_tb = sys.exc_info()
 		fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
 		logger.error("Reading query {}: {}, file: {},line: {}".format(query_name, sys.exc_info(), fname, exc_tb.tb_lineno))
-	return res
+	return result
 
-def check_external_ids_in_db(driver, projectId, external_ids):
+def check_external_ids_in_db(driver, projectId):
 	"""
 	
 	
-	"""
+	"""	
 	query_name = 'check_external_ids'
-	parameters = dict()
-	parameters['external_id'] = projectId
-	parameters['subject_ids'] = external_ids['subjects']
-	parameters['biological_sample_ids'] = external_ids['biological_samples']
-	parameters['analytical_sample_ids'] = external_ids['analytical_samples']
-	res = pd.DataFrame()
+	result = pd.DataFrame()
 	try:
 		data_upload_cypher = get_data_upload_queries()
 		query = data_upload_cypher[query_name]['query']
-		res = connector.getCursorData(driver, query, parameters=parameters)
+		print('QUERY')
+		print(query)
+		result = connector.getCursorData(driver, query, parameters={'external_id': str(projectId)})
+		print('result')
+		print(result)
+		print('###############')
 	except Exception as err:
 		exc_type, exc_obj, exc_tb = sys.exc_info()
 		fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
 		logger.error("Reading query {}: {}, file: {},line: {}".format(query_name, sys.exc_info(), fname, exc_tb.tb_lineno))
 
-	return res
+	return result
 
 def remove_samples_nodes_db(driver, projectId):
 	"""
@@ -291,6 +291,10 @@ def create_experiment_internal_identifiers(driver, projectId, data, directory, f
 	df = create_new_subjects(driver, data, projectId)
 	df1 = create_new_biosamples(driver, df)
 	df2 = create_new_ansamples(driver, df1)
+
+	print('EXP. DATA')
+	print(directory)
+	print(df2)
 	builder_utils.export_contents(df2, directory, filename)
 	done += 1
 	return done
@@ -331,7 +335,7 @@ def create_mapping_cols_clinical(driver, data, directory, filename, separator='|
 	
 	builder_utils.export_contents(data, directory, filename)
 
-def create_new_experiment_in_db(driver, projectId, data, separator='|'):
+# def create_new_experiment_in_db(driver, projectId, data, separator='|'):
 	"""
 	Creates a new project in the graph database, following the steps:
 	1. Maps intervention, disease and tissue names to database identifiers and adds data to \
