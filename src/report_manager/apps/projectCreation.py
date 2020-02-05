@@ -3,6 +3,7 @@ import sys
 import re
 import pandas as pd
 import numpy as np
+from py2neo import ClientError
 import config.ckg_config as ckg_config
 import ckg_utils
 from graphdb_connector import connector
@@ -84,12 +85,22 @@ def get_new_project_identifier(driver, projectId):
     try:
         project_creation_cypher = get_project_creation_queries()
         query = project_creation_cypher[query_name]['query']
-        external_identifier = connector.getCursorData(driver, query).values[0][0]
+        last_project, new_id  = connector.getCursorData(driver, query).values[0]
+        if last_project is None and new_id is None:
+            external_identifier = 'P0000001'
+        else:
+            length = len(last_project.split('P')[-1])
+            new_length = len(str(new_id))
+            external_identifier = 'P'+'0'*(length-new_length)+str(new_id)
+        print(external_identifier)
+        print('===============')
     except Exception as err:
         external_identifier = None
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         logger.error("Reading query {}: {}, file: {},line: {}".format(query_name, sys.exc_info(), fname, exc_tb.tb_lineno))
+    print(external_identifier)
+    print('-----------')
     return external_identifier
 
 def get_subject_number_in_project(driver, projectId):
@@ -147,7 +158,7 @@ def create_new_project(driver, projectId, data, separator='|'):
             datasetPath = os.path.join(os.path.join(importDir, external_identifier), 'clinical')
             ckg_utils.checkDirectory(datasetPath)
             eh.generate_dataset_imports(external_identifier, 'clinical', datasetPath)
-            loader.partialUpdate(imports=['project'])
+            loader.partialUpdate(imports=['project'], specific=[external_identifier])
             done = 1
         else:
             done = 0
