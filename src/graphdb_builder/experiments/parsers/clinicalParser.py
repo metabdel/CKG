@@ -18,7 +18,7 @@ def parser(projectId):
         design_directory = os.path.join(cwd, config['design_directory'])
     design_directory = design_directory.replace('PROJECTID', projectId)
     project_dfs = project_parser(projectId, config, clinical_directory, separator)
-    design_dfs = experimental_desgin_parser(projectId, config, design_directory)
+    design_dfs = experimental_design_parser(projectId, config, design_directory)
     clinical_dfs = clinical_parser(projectId, config, clinical_directory, separator)
     data = project_dfs
     data.update(design_dfs)
@@ -40,7 +40,7 @@ def project_parser(projectId, config, directory, separator):
     
     return data
 
-def experimental_desgin_parser(projectId, config, directory):
+def experimental_design_parser(projectId, config, directory):
     data = {}
     design_data = parse_dataset(projectId, config, directory, key='design')
     if design_data is not None:

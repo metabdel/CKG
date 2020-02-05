@@ -231,7 +231,7 @@ def updateDB(driver, imports=None, specific=[]):
                     queries.extend(code.replace("IMPORTDIR", import_dir).replace("ENTITY", entity).split(';')[0:-1])
             #Users
             elif i == "user":
-                usersDir = os.path.join(cwd, directories["usersDirectory"])   
+                usersDir = os.path.join(cwd, directories["usersImportDirectory"])
                 user_cypher = cypher_queries['CREATE_USER_NODE']
                 code = user_cypher['query']
                 queries.extend(code.replace("IMPORTDIR", usersDir).split(';')[0:-1])

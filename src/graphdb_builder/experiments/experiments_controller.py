@@ -21,11 +21,15 @@ def generate_dataset_imports(projectId, dataType, dataset_import_dir):
         if dataType == 'clinical':
             data = clinicalParser.parser(projectId)
             for dtype, ot in data:
+                print(dtype, ot)
                 generate_graph_files(data[(dtype, ot)],dtype, projectId, stats, ot, dataset_import_dir)
+            print('DONE CLINICAL')
         elif dataType == "proteomics":
             data = proteomicsParser.parser(projectId)
             for dtype, ot in data:
+                print(dtype, ot)
                 generate_graph_files(data[(dtype, ot)],dtype, projectId, stats, ot, dataset_import_dir)
+            print('DONE PROTEOMICS')
         elif dataType == "wes":
             data = wesParser.parser(projectId)
             for dtype, ot in data:
