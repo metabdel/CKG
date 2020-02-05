@@ -441,7 +441,9 @@ def update_download_link(project):
 def serve_static(value):
     directory = os.path.join(cwd,'apps/templates/')
     filename = os.path.join(directory, value)
+    utils.compress_directory(filename, os.path.join(directory, 'files'), compression_format='zip')
     url = filename+'.zip'
+
     return flask.send_file(url, attachment_filename = value+'.zip', as_attachment = True)
 
 
@@ -575,7 +577,6 @@ def run_processing(n_clicks, project_id):
             if config['file_clinical'].replace('PROJECTID', project_id) in clinical_files:
                 clinical_filename = config['file_clinical'].replace('PROJECTID', project_id)
                 data = builder_utils.readDataset(os.path.join(directory, clinical_filename))
-                print(data.head())
                 external_ids = {}
                 if 'subject external_id' in data and 'biological_sample external_id' in data and 'analytical_sample external_id' in data:
                     external_ids['subjects'] = data['subject external_id'].astype(str).unique().tolist()
@@ -586,16 +587,10 @@ def run_processing(n_clicks, project_id):
                         samples = ', '.join([k for (k,v) in res_n if v == 0])
                         message = 'ERROR: No {} for project {} in the database. Please upload first the experimental design (ExperimentalDesign_{}.xlsx)'.format(samples, project_id, project_id)
                         builder_utils.remove_directory(directory)
-                        
+
                         return message, style
                     else:
-                        print('EXTERNAL IDS')
-                        print(project_id)
                         db_ids = dataUpload.check_external_ids_in_db(driver, project_id).to_dict()
-                        print(db_ids)
-                        print('--------------')
-                        print(external_ids)
-                        print('==============')
                         message = ''
                         intersections = {}
                         differences_in = {}
@@ -619,22 +614,7 @@ def run_processing(n_clicks, project_id):
         for dataset in datasets:
             source = os.path.join(temporaryDirectory, dataset)
             destination = os.path.join(destDir, dataset)
-            print('DEST')
-            print(source)
-            print(destination)
-            print('-------------')
             builder_utils.copytree(source, destination)
-            # dir_tree = os.listdir(directory)
-            # for branch in dir_tree:
-            #     source = os.path.join(directory, branch)
-            #     print('SOURCE')
-            #     print(source)
-            #     print('-------------')
-            #     if os.path.isdir(source):
-            #         destination = os.path.join(destination, os.path.basename(source))
-            #         shutil.copytree(source, destination)
-            #     else:
-            #         shutil.copy(source, destination)
             datasetPath = os.path.join(os.path.join(experimentsImportDir, project_id), dataset)
             if dataset != "experimental_design":
                 eh.generate_dataset_imports(project_id, dataset, datasetPath)
