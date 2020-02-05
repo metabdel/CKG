@@ -13,8 +13,10 @@ from graphdb_builder import mapping as mp, builder_utils
 def parser(databases_directory, import_directory, download=True, updated_on=None):
     config = builder_utils.get_config(config_name="uniprotConfig.yml", data_type='databases')
     relationships_header = config['relationships_header']
+    parse_release_notes(databases_directory, config, download)
+    stats = parse_fasta(databases_directory, config, import_directory, download=download, updated_on=updated_on)
     #Proteins
-    stats = parse_idmapping_file(databases_directory, config, import_directory, download=download, updated_on=updated_on)
+    stats.update(parse_idmapping_file(databases_directory, config, import_directory, download=download, updated_on=updated_on))
     #Peptides
     entities, relationships = parseUniProtPeptides(config, databases_directory, download)
     entities_header = config['peptides_header']
@@ -32,6 +34,48 @@ def parser(databases_directory, import_directory, download=True, updated_on=None
 
     return stats 
 
+def parse_release_notes(databases_directory, config, download=True):
+    release_notes_url = config['release_notes']
+    directory = os.path.join(databases_directory,"UniProt")
+    builder_utils.checkDirectory(directory)
+    if download:
+        builder_utils.downloadDB(release_notes_url, directory)
+        
+def parse_fasta(databases_directory, config, import_directory, download=True, updated_on=None):
+    stats = set()
+    url = config['uniprot_fasta_file']
+    entities_output_file = os.path.join(import_directory, "Amino_acid_sequence.tsv")
+    rel_output_file = os.path.join(import_directory, "Protein_HAS_Sequence_Amino_acid_sequence.tsv")
+    
+    directory = os.path.join(databases_directory,"UniProt")
+    builder_utils.checkDirectory(directory)
+    file_name = os.path.join(directory, url.split('/')[-1])
+    
+    if download:
+        builder_utils.downloadDB(url, directory)
+        
+    ff = builder_utils.read_gzipped_file(file_name, mode=None)
+    records = builder_utils.parse_fasta(ff)
+    num_entities = 0
+    with open(entities_output_file, 'w') as ef:
+        ef.write('ID\theader\tsequence\tsize\tsource\n')
+        with open(rel_output_file, 'w') as rf:
+            rf.write('START_ID\tEND_ID\tTYPE\tsource\n')
+            for i, batch in enumerate(builder_utils.batch_iterator(records, 1000)):
+                for record in batch:
+                    identifier = record.id.split('|')[1]
+                    header = record.id
+                    sequence = str(record.seq)
+                    sequence_len = len(str(sequence))
+                    ef.write(identifier+"\t"+header+'\t'+sequence+'\t'+str(sequence_len)+'\tUniProt\n')
+                    rf.write(identifier+'\t'+identifier+'\tHAS_SEQUENCE\tUniProt\n')
+                    num_entities += 1
+    
+    stats.add(builder_utils.buildStats(num_entities, "entity", "Amino_acid_sequence", "UniProt", entities_output_file, updated_on))
+    stats.add(builder_utils.buildStats(num_entities, "relationships", "HAS_SEQUENCE", "UniProt", rel_output_file, updated_on))
+    
+    return stats
+    
 def parse_idmapping_file(databases_directory, config, import_directory, download=True, updated_on=None):
     regex_transcript = r"(-\d+$)"
     taxids = config['species']

@@ -46,6 +46,18 @@ IMPORT_PROTEIN_DATA:
         FIELDTERMINATOR '\t'
         MERGE (p:Protein {id:line.ID}) 
         ON CREATE SET p.accession=line.accession,p.name=line.name,p.description=line.description,p.taxid=line.taxid,p.synonyms=SPLIT(line.synonyms,',')
+        CREATE CONSTRAINT ON (a:Amino_acid_sequence) ASSERT a.id IS UNIQUE;
+        USING PERIODIC COMMIT 10000
+        LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Amino_acid_sequence.tsv" AS line
+        FIELDTERMINATOR '\t'
+        MERGE (aa:Amino_acid_sequence {id:line.ID}) 
+        ON CREATE SET aa.header=line.header,aa.sequence=line.sequence,aa.size=line.size,aa.source=line.source;
+        USING PERIODIC COMMIT 10000 
+        LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Protein_HAS_Sequence_Amino_acid_sequence.tsv" AS line 
+        FIELDTERMINATOR '\t'
+        MATCH (p:Protein {id:line.START_ID})
+        MATCH (aa:Amino_acid_sequence {id:line.END_ID}) 
+        MERGE (p)-[r:HAS_SEQUENCE{source:line.source}]->(aa)
         RETURN COUNT(p) AS proteins;
         CREATE CONSTRAINT ON (p:Peptide) ASSERT p.id IS UNIQUE;
         USING PERIODIC COMMIT 10000

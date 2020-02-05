@@ -70,14 +70,14 @@ RUN service neo4j start && \
     cat /var/log/neo4j/neo4j.log
 
 ## Load backup with Clinical Knowledge Graph
-COPY /resources/neo4j_db/backups /var/lib/neo4j/data/backups
-RUN mkdir -p /var/lib/neo4j/data/databases/graph.db
-RUN ls -lrth /var/lib/neo4j/data/
-RUN sudo -u neo4j neo4j-admin load --from=/var/lib/neo4j/data/backups/graph.db/2019_1909.dump --database=graph.db --force
+#COPY /resources/neo4j_db/backups /var/lib/neo4j/data/backups
+#RUN mkdir -p /var/lib/neo4j/data/databases/graph.db
+#RUN ls -lrth /var/lib/neo4j/data/
+#RUN sudo -u neo4j neo4j-admin load --from=/var/lib/neo4j/data/backups/graph.db/2019_1909.dump --database=graph.db --force
 
 ## Remove dump file
-RUN echo "Done with restoring backup, removing backup folder"
-RUN rm -rf /var/lib/neo4j/data/backups 
+#RUN echo "Done with restoring backup, removing backup folder"
+#RUN rm -rf /var/lib/neo4j/data/backups 
 
 RUN ls -lrth  /var/lib/neo4j/data/databases
 RUN [ -e  /var/lib/neo4j/data/databases/store_lock ] && rm /var/lib/neo4j/data/databases/store_lock
@@ -103,7 +103,7 @@ ADD ./requirements.txt /requirements.txt
 ## Install Python libraries
 RUN pip3 install --ignore-installed -r requirements.txt
 RUN mkdir /CKG
-#ADD . /CKG/
+ADD . /CKG/
 ENV PYTHONPATH "${PYTHONPATH}:/CKG/src"
 
 # JupyterHub
