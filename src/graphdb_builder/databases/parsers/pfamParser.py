@@ -26,7 +26,7 @@ def parser(databases_directory, import_directory, download=True, updated_on=None
 
     directory = os.path.join(databases_directory,'Pfam')
     builder_utils.checkDirectory(directory)
-    protein_mapping = mp.getMappingForEntity(entity="Protein")    
+    protein_mapping = mp.getMappingForEntity(entity="Protein")
     valid_proteins = list(set(protein_mapping.values()))
 
     ftp_url = config['ftp_url']
@@ -124,7 +124,7 @@ def print_files(data, header, outputfile, is_first, filter_for=None):
     if filter_for is not None:
         df = df[df[filter_for[0]].isin(filter_for[1])]
     if not df.empty:
-        with open(outputfile, 'a') as f:
+        with open(outputfile, 'a', encoding='utf-8') as f:
             df.to_csv(path_or_buf=f, sep='\t',
                     header=is_first, index=False, quotechar='"', 
                     line_terminator='\n', escapechar='\\')
