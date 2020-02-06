@@ -173,10 +173,10 @@ def extract_percentage_missing(data, missing_max, drop_cols=['sample'], group='g
         groups = data.loc[:, data.isnull().mean() <= missing_max].columns
     else:
         groups = data.copy()
-        groups = groups.drop(drop_cols, axis = 1)
+        groups = groups.drop(drop_cols, axis=1)
         groups = groups.set_index(group)
         groups = groups.isnull().groupby(level=0).mean()
-        groups = groups[groups<=missing_max]
+        groups = groups[groups <= missing_max]
         groups = groups.dropna(how='all', axis=1).columns.unique().tolist()
 
     return groups
@@ -199,18 +199,18 @@ def imputation_KNN(data, drop_cols=['group', 'sample', 'subject'], group='group'
     df = data.copy()
     cols = df.columns
     df = df._get_numeric_data()
-    if group in df.columns:
+    if group in data.columns:
         df[group] = data[group]
         cols = list(set(cols).difference(df.columns))
         value_cols = [c for c in df.columns if c not in drop_cols]
         for g in df[group].unique():
-            missDf = df.loc[df[group]==g, value_cols]
+            missDf = df.loc[df[group] == g, value_cols]
             missDf = missDf.loc[:, missDf.notnull().mean() >= cutoff]
             if missDf.isnull().values.any():
                 X = np.array(missDf.values, dtype=np.float64)
-                X_trans = KNN(k=3,verbose=False).fit_transform(X)
+                X_trans = KNN(k=3, verbose=False).fit_transform(X)
                 missingdata_df = missDf.columns.tolist()
-                dfm = pd.DataFrame(X_trans, index =list(missDf.index), columns = missingdata_df)
+                dfm = pd.DataFrame(X_trans, index=list(missDf.index), columns=missingdata_df)
                 df.update(dfm)
         if alone:
             df = df.dropna(axis=1)
@@ -1213,18 +1213,20 @@ def calculate_anova_samr(df, labels, s0=0):
 
     return result
 
-def calculate_anova(df, group='group'):
+def calculate_anova(df, column, group='group'):
     """
     Calculates one-way ANOVA using scipy stats.
 
     :param df: pandas dataframe with group as rows and protein identifier as column
+    :param str column: name of the column in df to run ANOVA on
     :param str group: column with group identifiers
     :return: Tuple with t-statistics and p-value.
     """
-    group_values = df.groupby(group).apply(np.array).values
-    t, pvalue = stats.f_oneway(*group_values)
+    aov_result = pg.anova(data=df, dv=column, between=group, detailed=True)
+    aov_result.columns = ['Source', 'SS', 'DF', 'MS', 'F', 'pvalue', 'padj', 'np2']
+    t, pvalue = aov_result.loc[0, ['F', 'pvalue']].values
 
-    return (t, pvalue)
+    return (column, t, pvalue)
 
 def calculate_repeated_measures_anova(df, column, subject='subject', group='group'):
     """
@@ -1311,7 +1313,7 @@ def run_dabest(df, drop_cols=['sample'], subject='subject', group='group', test=
 
     return scores
 
-def run_anova(df, alpha=0.05, drop_cols=["sample",'subject'], subject='subject', group='group', permutations=50):
+def run_anova_old(df, alpha=0.05, drop_cols=["sample",'subject'], subject='subject', group='group', permutations=50):
     """
     Performs statistical test for each protein in a dataset.
     Checks what type of data is the input (paired, unpaired or repeated measurements) and performs posthoc tests for multiclass data.
@@ -1351,6 +1353,48 @@ def run_anova(df, alpha=0.05, drop_cols=["sample",'subject'], subject='subject',
 
         max_perm = get_max_permutations(df, group=group)
         res = format_anova_table(df, aov_results, pairwise_results,  group, permutations, alpha, max_perm)
+        res['Method'] = 'One-way anova'
+
+    return res
+
+def run_anova(df, alpha=0.05, drop_cols=["sample",'subject'], subject='subject', group='group', permutations=50):
+    """
+    Performs statistical test for each protein in a dataset.
+    Checks what type of data is the input (paired, unpaired or repeated measurements) and performs posthoc tests for multiclass data.
+    Multiple hypothesis correction uses permutation-based if permutations>0 and Benjamini/Hochberg if permutations=0.
+
+    :param df: pandas dataframe with samples as rows and protein identifiers as columns (with additional columns 'group', 'sample' and 'subject').
+    :param str subject: column with subject identifiers
+    :param str group: column with group identifiers
+    :param list drop_cols: column labels to be dropped from the dataframe
+    :param float alpha: error rate for multiple hypothesis correction
+    :param int permutations: number of permutations used to estimate false discovery rates.
+    :return: Pandas dataframe with columns 'identifier', 'group1', 'group2', 'mean(group1)', 'mean(group2)', 'Log2FC', 'std_error', 'tail', 't-statistics', 'padj_THSD', 'effsize', 'efftype', 'FC', 'rejected', 'F-statistics', 'p-value', 'correction', '-log10 p-value', and 'method'.
+
+    Example::
+
+        result = run_anova(df, alpha=0.05, drop_cols=["sample",'subject'], subject='subject', group='group', permutations=50)
+    """
+    if subject is not None and check_is_paired(df, subject, group):
+        groups = df[group].unique()
+        drop_cols = [d for d in drop_cols if d != subject]
+        if len(df[subject].unique()) == 1:
+            res = run_ttest(df, groups[0], groups[1], alpha = alpha, drop_cols=drop_cols, subject=subject, group=group, paired=True, correction='indep', permutations=permutations)
+        else:
+
+            res = run_repeated_measurements_anova(df, alpha=alpha, drop_cols=drop_cols, subject=subject, group=group, permutations=0)
+    else:
+        df = df.set_index([subject,group])
+        df = df.drop(drop_cols, axis=1).dropna(axis=1)
+        aov_results = []
+        pairwise_results = []
+        for col in df.columns:
+            aov = calculate_anova(df.reset_index(), column=col, group=group)
+            aov_results.append(aov)
+            pairwise_results.append(calculate_pairwise_ttest(df[col].reset_index(), column=col, subject=subject, group=group))
+
+        max_perm = get_max_permutations(df, group=group)
+        res = format_anova_table(df, aov_results, pairwise_results, group, permutations, alpha, max_perm)
         res['Method'] = 'One-way anova'
 
     return res
