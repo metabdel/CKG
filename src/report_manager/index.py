@@ -553,6 +553,7 @@ def run_processing(n_clicks, project_id):
             if config['file_design'].replace('PROJECTID', project_id) in experimental_files:
                 experimental_filename = config['file_design'].replace('PROJECTID', project_id)
                 designData = builder_utils.readDataset(os.path.join(directory, experimental_filename))
+                designData = designData.astype(str)
                 if 'subject external_id' in designData.columns and 'biological_sample external_id' in designData.columns and 'biological_sample external_id' in designData.columns:
                     if (res_n > 0).any().values.sum() > 0:
                         res = dataUpload.remove_samples_nodes_db(driver, project_id)
