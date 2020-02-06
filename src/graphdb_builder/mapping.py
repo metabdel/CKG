@@ -232,20 +232,28 @@ def map_experiment_files(project_id, datasetPath, mapping):
     for file in files:
         outputfile = os.path.join(datasetPath, file)
         data = builder_utils.readDataset(outputfile)
-        data = map_experimental_data(data, mapping)        
-        with open(outputfile, 'w') as f:
-            data.to_csv(path_or_buf = f, sep='\t',
-                        header=True, index=False, quotechar='"',
-                        line_terminator='\n', escapechar='\\')
+        data = map_experimental_data(data, mapping)
+        builder_utils.export_contents(data, datasetPath, file)    
+        # with open(outputfile, 'w') as f:
+        #     data.to_csv(path_or_buf = f, sep='\t',
+        #                 header=True, index=False, quotechar='"',
+        #                 line_terminator='\n', escapechar='\\')
 
 def map_experimental_data(data, mapping):
     mapping_cols = {}
 
     if not data.empty:
         for column in data.columns:
-            for external_id in mapping:
-                if external_id in column:
-                    mapping_cols[column] = column.replace(external_id, mapping[external_id])
+            ids = re.search('_\w*', column)
+            if ids is not None:
+                ids = ids.group(0)
+            # for external_id in mapping:
+                # if external_id in column:
+                    # mapping_cols[column] = column.replace(external_id, mapping[external_id])
+                if ids.split('_', 1)[-1] in mapping:
+                    mapping_cols[column] = column.replace(ids, '_'+mapping[ids.split('_', 1)[-1]])
+            else:
+                continue
         data = data.rename(columns=mapping_cols)
 
     return data

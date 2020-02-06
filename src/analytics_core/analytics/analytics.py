@@ -492,7 +492,6 @@ def get_clinical_measurements_ready(df, subject_id='subject', sample_id='biologi
             df = imputation_mixed_norm_KNN(processed_df,index_cols=index, group=group_id)
 
     #df = df.set_index(index)
-
     return df
 
 def get_summary_data_matrix(data):
@@ -549,6 +548,7 @@ def run_pca(data, drop_cols=['sample', 'subject'], group='group', components=2, 
 
         result = run_pca(data, drop_cols=['sample', 'subject'], group='group', components=2, dropna=True)
     """
+
     np.random.seed(112736)
     result = {}
     args = {}
