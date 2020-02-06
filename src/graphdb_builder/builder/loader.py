@@ -25,7 +25,7 @@ from graphdb_builder import builder_utils
 import logging
 import logging.config
 
-cwd = os.path.abspath(os.path.dirname(__file__))
+cwd = os.path.abspath(os.path.dirname(__file__)).replace('/','\')
 log_config = ckg_config.graphdb_builder_log
 logger = builder_utils.setup_logging(log_config, key="loader")
 START_TIME = datetime.now()
@@ -91,7 +91,7 @@ def updateDB(driver, imports=None, specific=[]):
         try:
             import_dir = os.path.join(cwd, directories["databasesDirectory"])
             #Ontologies
-            if i== "ontologies":
+            if i == "ontologies":
                 entities = config["ontology_entities"]
                 if len(specific) > 0:
                     entities = list(set(entities).intersection(specific))
