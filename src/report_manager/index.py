@@ -441,8 +441,9 @@ def update_download_link(project):
 def serve_static(value):
     directory = os.path.join(cwd,'apps/templates/')
     filename = os.path.join(directory, value)
-    utils.compress_directory(filename, os.path.join(directory, 'files'), compression_format='zip')
     url = filename+'.zip'
+    if not os.path.isfile(url):
+        utils.compress_directory(filename, os.path.join(directory, 'files'), compression_format='zip')
 
     return flask.send_file(url, attachment_filename = value+'.zip', as_attachment = True)
 
