@@ -25,7 +25,7 @@ from graphdb_builder import builder_utils
 import logging
 import logging.config
 
-cwd = os.path.abspath(os.path.dirname(__file__)).replace('/','\')
+cwd = os.path.abspath(os.path.dirname(__file__))
 log_config = ckg_config.graphdb_builder_log
 logger = builder_utils.setup_logging(log_config, key="loader")
 START_TIME = datetime.now()
