@@ -1061,7 +1061,7 @@ def calculate_ttest_samr(df, labels, n=2, s0=0, paired=False):
 
     return result
 
-def calculate_ttest(df, condition1, condition2):
+def calculate_ttest(df, condition1, condition2, paired=False, tail='two-sided',  correction='auto', r=0.707):
     """
     Calculates the t-test for the means of independent samples belonging to two different groups. For more information visit https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.ttest_ind.html.
 
@@ -1074,14 +1074,21 @@ def calculate_ttest(df, condition1, condition2):
 
         result = calculate_ttest(df, 'group1', 'group2')
     """
+    t = None
+    pvalue = np.nan
     group1 = df[[condition1]].values
     group2 = df[[condition2]].values
 
     mean1 = group1.mean()
     mean2 = group2.mean()
     log2fc = mean1 - mean2
-    t, pvalue = stats.ttest_ind(group1, group2, nan_policy='omit')
-
+    result = pg.ttest(group1,group2, paired, tail, correction, r)
+    
+    if 'T' in result.columns:
+        t = result['T']
+    if 'p-val' in result.columns:
+        pvalue = result['p-val']
+    
     return (t, pvalue, mean1, mean2, log2fc)
 
 def calculate_THSD(df, group='group', alpha=0.05):
@@ -1497,12 +1504,11 @@ def run_ttest(df, condition1, condition2, alpha = 0.05, drop_cols=["sample"], su
     columns = ['T-statistics', 'pvalue', 'mean_group1', 'mean_group2', 'log2FC']
     df = df.set_index([group, subject])
     df = df.drop(drop_cols, axis = 1)
+    method = 'Unpaired t-test'
     if paired:
         method = 'Paired t-test'
-        scores = df.T.apply(func = calculate_paired_ttest, axis=1, result_type='expand', args =(condition1, condition2))
-    else:
-        method = 'Unpaired t-test'
-        scores = df.T.apply(func = calculate_ttest, axis=1, result_type='expand', args =(condition1, condition2))
+        
+    scores = df.T.apply(func = calculate_ttest, axis=1, result_type='expand', args =(condition1, condition2, paired))
     scores.columns = columns
     scores = scores.dropna(how="all")
 
