@@ -1085,10 +1085,11 @@ def calculate_ttest(df, condition1, condition2, paired=False, tail='two-sided', 
     result = pg.ttest(group1,group2, paired, tail, correction, r)
     
     if 'T' in result.columns:
-        t = result['T']
+        t = result['T'].values[0]
     if 'p-val' in result.columns:
-        pvalue = result['p-val']
-    
+        pvalue = result['p-val'].values[0]
+    print('T',t )
+    print('pvalue', pvalue)    
     return (t, pvalue, mean1, mean2, log2fc)
 
 def calculate_THSD(df, group='group', alpha=0.05):
@@ -1172,8 +1173,6 @@ def calculate_dabest(df, idx, x, y, paired=False, id_col=None, test='mean_diff')
     :param id_col:
     :param test:
     :return:
-
-
     """
     cols = ["group1", "group2", "effect size", "paired", 'difference', "CI", "bca low", "bca high", "bca interval idx", "pct low", "pct high", "pct interval idx", "bootstraps", 'resamples', 'random seed', 'pvalue Welch', 'statistic Welch', 'pvalue Student T', 'statistic Student T', 'pvalue Mann Whitney', 'statistic Mann Whitney']
     valid_cols = ["group1", "group2", "effect size", "paired", 'difference', "CI", 'pvalue Welch', 'statistic Welch', 'pvalue Student T', 'statistic Student T', 'pvalue Mann Whitney', 'statistic Mann Whitney']
