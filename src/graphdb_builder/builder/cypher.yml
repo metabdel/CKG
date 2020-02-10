@@ -58,7 +58,7 @@ IMPORT_PROTEIN_DATA:
         MATCH (p:Protein {id:line.START_ID})
         MATCH (aa:Amino_acid_sequence {id:line.END_ID}) 
         MERGE (p)-[r:HAS_SEQUENCE{source:line.source}]->(aa)
-        RETURN COUNT(p) AS proteins;
+        RETURN COUNT(p) AS protein_has_sequence;
         CREATE CONSTRAINT ON (p:Peptide) ASSERT p.id IS UNIQUE;
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Peptide.tsv" AS line
