@@ -84,16 +84,17 @@ def getMappingForEntity(entity):
         while not os.path.isfile(mapping_file) and max_wait < 5000:
             time.sleep(5)
             max_wait += 1
+        
         try:
-            with open(mapping_file, 'r') as mf:
+            with open(mapping_file, 'r', encoding='utf-8') as mf:
                 for line in mf:
                     data = line.rstrip("\r\n").split("\t")
                     if len(data) > 1:
                         ident = data[0]
                         alias = data[1]
                         mapping[alias] = ident
-        except:
-            raise Exception("mapping - No mapping file {} for entity {}".format(mapping_file, entity))
+        except Exception as err:
+            raise Exception("mapping - No mapping file {} for entity {}. Error: {}".format(mapping_file, entity, err))
 
     return mapping
 

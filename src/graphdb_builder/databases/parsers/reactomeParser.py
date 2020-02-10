@@ -19,8 +19,6 @@ def parser(databases_directory, download=True):
     metabolite_mapping = mp.getMappingForEntity("Metabolite")
     #drug_mapping = mp.getMappingForEntity("Drug")
 
-    print('FINISHED MAPPING')
-    
     for dataset in urls:
         url = urls[dataset]
         file_name = url.split('/')[-1]

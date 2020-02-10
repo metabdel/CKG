@@ -65,7 +65,7 @@ def parse_substrates(filename, modifications, accronyms, amino_acids):
                         relationships[("Protein", "has_modified_site")].add((target, modified_protein_id, "HAS_MODIFIED_SITE", "SIGNOR"))
                         relationships[("Peptide", "has_modified_site")].add((seq_window.upper(), modified_protein_id, "HAS_MODIFIED_SITE", "SIGNOR"))
                         relationships[("Modified_protein", "has_modification")].add((modified_protein_id, modification, "HAS_MODIFICATION", "SIGNOR"))
-                        relationships[('Modified_protein','is_substrate_of')].add((modified_protein_id,source,"IS_SUBSTRATE_OF", regulation,"CURATED", 5, "SIGNOR"))
+                        relationships[('Substrate','is_substrate_of')].add((modified_protein_id,source,"IS_SUBSTRATE_OF", regulation,"CURATED", 5, "SIGNOR"))
                         if pubmedid != '':
                             relationships['Modified_protein_Publication','mentioned_in_publication'].add((pubmedid, modified_protein_id, "MENTIONED_IN_PUBLICATION"))
         

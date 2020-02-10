@@ -209,8 +209,11 @@ def parseDatabase(importDirectory, database, download=True):
             logger.info("Database {} - Number of {} entities: {}".format(database, "GWAS_study", len(entities)))
             stats.add(builder_utils.buildStats(len(entities), "entity", "GWAS_study", database, entity_outputfile, updated_on))
             for relationship in relationships:
+                header = ['START_ID', 'END_ID','TYPE', 'source']
+                if relationship in relationships_header:
+                    header = relationships_header[relationship]
                 outputfile = os.path.join(importDirectory, "GWAS_study_"+relationship+".tsv")
-                builder_utils.write_relationships(relationships[relationship], relationships_header, outputfile)
+                builder_utils.write_relationships(relationships[relationship], header, outputfile)
                 logger.info("Database {} - Number of {} relationships: {}".format(database, relationship, len(relationships[relationship])))
                 stats.add(builder_utils.buildStats(len(relationships[relationship]), "relationships", relationship, database, outputfile, updated_on))
         elif database.lower() == "phosphositeplus":

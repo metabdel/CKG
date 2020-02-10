@@ -12,7 +12,8 @@ if __name__ == "__main__":
                                     "imports/ontologies",
                                     "imports/stats",
                                     "ontologies"
-                                    ]
+                                    ],
+                                "log":[]
                                 }
     
     for directory in data_directory_structure:

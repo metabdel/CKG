@@ -61,7 +61,7 @@ def parse_ontology(ontology, download=True):
             if otype in config['urls']:
                 urls = config['urls'][otype]
                 for url in urls:
-                    f = url.split('/')[-1]
+                    f = url.split('/')[-1].replace('?','_').replace('=','_')
                     ontology_files.append(os.path.join(ontology_directory, f))
                     if download:
                         builder_utils.downloadDB(url, directory=ontology_directory, file_name=f)
@@ -130,7 +130,7 @@ def generate_graphFiles(import_directory, ontologies=None, download=True):
                     if namespace in config["entities"]:
                         name = config["entities"][namespace]
                     entity_outputfile = os.path.join(import_directory, name+".tsv")
-                    with open(entity_outputfile, 'w') as csvfile:
+                    with open(entity_outputfile, 'w', encoding='utf-8') as csvfile:
                         writer = csv.writer(csvfile, delimiter='\t', escapechar='\\', quotechar='"', quoting=csv.QUOTE_ALL)
                         writer.writerow(['ID', ':LABEL', 'name', 'description', 'type', 'synonyms'])
                         for term in terms[namespace]:

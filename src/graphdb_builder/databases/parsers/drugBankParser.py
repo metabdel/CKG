@@ -33,37 +33,38 @@ def extract_drugs(config, databases_directory):
     vocabulary = parseDrugBankVocabulary(config, databases_directory)
 
     with zipfile.ZipFile(fileName, 'r') as zipped:
-        for f in zipped.namelist():
-            data = zipped.read(f) 
-            root = etree.fromstring(data)
-            context = etree.iterwalk(root, events=("end",), tag=prefix+"drug")
-            for a,elem in context:
-                synonyms = set()
-                values = {child.tag.replace(prefix,''):child.text for child in elem.iterchildren() if child.tag.replace(prefix,'') in fields and child.text is not None}
-                if "drugbank-id" in values:
-                    synonyms.add(values["drugbank-id"])
-                for child in elem.iterchildren(): 
-                    if child.tag.replace(prefix,'') in parentFields:
-                        label = child.tag.replace(prefix,'')
-                        values[label] = []
-                        for intchild in child.iter():
-                            if intchild.text is not None and intchild.text.strip() != "":
-                                if label in structuredFields:
-                                    if intchild.tag.replace(prefix,'') in structuredFields[label]:
-                                        if label == "external-identifiers":
-                                            synonyms.add(intchild.text)
-                                        else:
-                                            values[label].append(intchild.text) 
-                                elif intchild.tag.replace(prefix,'') in fields and intchild.text:
-                                    values[label].append(intchild.text) 
-                
-                if "drugbank-id" in values and len(values) > 2:
-                    if values["drugbank-id"] in vocabulary:
-                        values["id"] = vocabulary[values["drugbank-id"]]
+        for zfile in zipped.namelist():
+            zipped.extract(member=zfile, path=directory)
+            xfile = os.path.join(directory, zfile)
+            with open(xfile, 'rb') as f:
+                context = etree.iterparse(f, events=("end",), tag=prefix+"drug")
+                for a,elem in context:
+                    synonyms = set()
+                    values = {child.tag.replace(prefix,''):child.text for child in elem.iterchildren() if child.tag.replace(prefix,'') in fields and child.text is not None}
+                    if "drugbank-id" in values:
                         synonyms.add(values["drugbank-id"])
-                        #values["alt_drugbank-id"] = vocabulary[values['id']]
-                        values["synonyms"] = list(synonyms)
-                        drugs[values["id"]] = values
+                    for child in elem.iterchildren(): 
+                        if child.tag.replace(prefix,'') in parentFields:
+                            label = child.tag.replace(prefix,'')
+                            values[label] = []
+                            for intchild in child.iter():
+                                if intchild.text is not None and intchild.text.strip() != "":
+                                    if label in structuredFields:
+                                        if intchild.tag.replace(prefix,'') in structuredFields[label]:
+                                            if label == "external-identifiers":
+                                                synonyms.add(intchild.text)
+                                            else:
+                                                values[label].append(intchild.text) 
+                                    elif intchild.tag.replace(prefix,'') in fields and intchild.text:
+                                        values[label].append(intchild.text) 
+                    
+                    if "drugbank-id" in values and len(values) > 2:
+                        if values["drugbank-id"] in vocabulary:
+                            values["id"] = vocabulary[values["drugbank-id"]]
+                            synonyms.add(values["drugbank-id"])
+                            #values["alt_drugbank-id"] = vocabulary[values['id']]
+                            values["synonyms"] = list(synonyms)
+                            drugs[values["id"]] = values
 
     return drugs
 
@@ -147,7 +148,7 @@ def build_DrugBank_dictionary(config, databases_directory, drugs):
     filename = config['DrugBank_dictionary_file']
     outputfile = os.path.join(directory, filename)
     mp.reset_mapping(entity="Drug") 
-    with open(outputfile, 'w') as out:
+    with open(outputfile, 'w', encoding='utf-8') as out:
         for did in drugs:
             if "name" in drugs[did]:
                 name = drugs[did]["name"]

@@ -18,7 +18,7 @@ def parser(databases_directory, download = True):
     fileName = os.path.join(directory, url.split('/')[-1])
     if download:
         builder_utils.downloadDB(url, directory)
-    with open(fileName, 'r') as associations:
+    with open(fileName, 'r', encoding='utf-8') as associations:
         first = True
         for line in associations:
             if first:

@@ -45,7 +45,7 @@ IMPORT_PROTEIN_DATA:
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Protein.tsv" AS line
         FIELDTERMINATOR '\t'
         MERGE (p:Protein {id:line.ID}) 
-        ON CREATE SET p.accession=line.accession,p.name=line.name,p.description=line.description,p.taxid=line.taxid,p.synonyms=SPLIT(line.synonyms,',')
+        ON CREATE SET p.accession=line.accession,p.name=line.name,p.description=line.description,p.taxid=line.taxid,p.synonyms=SPLIT(line.synonyms,',');
         CREATE CONSTRAINT ON (a:Amino_acid_sequence) ASSERT a.id IS UNIQUE;
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Amino_acid_sequence.tsv" AS line
@@ -58,7 +58,7 @@ IMPORT_PROTEIN_DATA:
         MATCH (p:Protein {id:line.START_ID})
         MATCH (aa:Amino_acid_sequence {id:line.END_ID}) 
         MERGE (p)-[r:HAS_SEQUENCE{source:line.source}]->(aa)
-        RETURN COUNT(p) AS proteins;
+        RETURN COUNT(p) AS protein_has_sequence;
         CREATE CONSTRAINT ON (p:Peptide) ASSERT p.id IS UNIQUE;
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Peptide.tsv" AS line
@@ -146,6 +146,13 @@ IMPORT_MODIFIED_PROTEINS:
         MATCH (mp:Modified_protein {id:line.END_ID})
         MERGE (p)-[r:HAS_MODIFIED_SITE]->(mp)
         RETURN COUNT(r) AS peptide_has_modified_site;
+        USING PERIODIC COMMIT 10000
+        LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/RESOURCE_substrate_is_substrate_of.tsv" AS line
+        FIELDTERMINATOR '\t'
+        MATCH (m:Modified_protein {id:line.START_ID})
+        MATCH (p:Protein {id:line.END_ID})
+        MERGE (m)-[r:IS_SUBSTRATE_OF{score:toFloat(line.score),regulation:line.regulation,source:line.source,evidence_type:line.evidence_type}]->(p)
+        RETURN COUNT(r) AS modified_protein_is_substrate_of_protein;
 
 IMPORT_PROTEIN_ANNOTATIONS: 
     'name': 'import protein annotations'
@@ -230,13 +237,6 @@ IMPORT_MODIFIED_PROTEIN_ANNOTATIONS:
         MATCH (b:Biological_process {id:line.END_ID})
         MERGE (m)-[r:ASSOCIATED_WITH{score:toFloat(line.score),source:line.source,evidence_type:line.evidence_type,publications:line.publications,action:line.action}]->(b)
         RETURN COUNT(r) AS modified_protein_associated_with_biological_process;
-        USING PERIODIC COMMIT 10000
-        LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/RESOURCE_substrate_is_substrate_of.tsv" AS line
-        FIELDTERMINATOR '\t'
-        MATCH (m:Modified_protein {id:line.START_ID})
-        MATCH (p:Protein {id:line.END_ID})
-        MERGE (m)-[r:IS_SUBSTRATE_OF{score:toFloat(line.score),regulation:line.regulation,source:line.source,evidence_type:line.evidence_type}]->(p)
-        RETURN COUNT(r) AS modified_protein_is_substrate_of_protein;
 
 IMPORT_PROTEIN_STRUCTURES:
     'name': 'import protein structure data'
@@ -379,6 +379,19 @@ IMPORT_PUBLISHED_IN:
         MATCH (p:Publication {id:line.END_ID})
         MERGE (g)-[r:PUBLISHED_IN]->(p)
         RETURN COUNT(r) AS ENTITY_published_in_publication;
+
+IMPORT_VARIANT_FOUND_IN_GWAS:
+    'name': 'import variants found in GWAS studies'
+    'description': 'Loads into the database all the variants found in GWAS studies'
+    'query': >
+        USING PERIODIC COMMIT 10000
+        LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/GWAS_study_variant_found_in_gwas.tsv" AS line
+        FIELDTERMINATOR '\t'
+        MATCH (v:Known_variant)
+        MATCH (g:GWAS_study {id:line.END_ID})
+        MERGE (v)-[r:VARIANT_FOUND_IN_GWAS{frequency:toFloat(line.frequency),pvalue:line.pvalue,odds_ratio:line.odds_ratio,trait:line.trait,source:line.source}]->(g) WHERE line.START_ID IN SPLIT(k.alternative_names,',')
+        RETURN COUNT(r) AS VARIANT_FOUND_IN_GWAS;
+        
         
 IMPORT_DISEASE_DATA:
     'name': 'import Disease nodes'
@@ -964,3 +977,4 @@ IMPORT_PROJECT:
     - *create_bio
     - *create_ana
     - *create_timepoint
+

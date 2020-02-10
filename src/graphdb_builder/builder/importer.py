@@ -169,7 +169,8 @@ def generateStatsDataFrame(stats):
     :return: Pandas dataframe with the collected statistics.
     """
     statsDf = pd.DataFrame.from_records(list(stats), columns=config["statsCols"])
-    statsDf['import_id'] = import_id
+    print(import_id)
+    statsDf['import_id'] = str(import_id)
     
     return statsDf
 
@@ -239,8 +240,9 @@ def writeStats(statsDf, import_type, stats_name=None):
         if stats_name is None:
             stats_name = getStatsName(import_type)
         with pd.HDFStore(stats_file) as hdf:
-            hdf.append(stats_name, statsDf, data_columns=True, min_itemsize=2000)
-            hdf.close()
+            statsDf.to_hdf(stats_name,'df', mode='a',format='table')
+            #hdf.append(stats_name, statsDf, data_columns=True, min_itemsize=2000)
+            #hdf.close()
     except Exception as err:
         logger.error("Writing Stats object {} in file:{} > {}.".format(stats_name, stats_file, err))
 

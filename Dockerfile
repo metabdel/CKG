@@ -1,4 +1,4 @@
-#Download base image ubuntu 16.04
+#Download base image ubuntu 18.04
 FROM ubuntu:latest
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -63,17 +63,20 @@ RUN ls -lrth /var/lib/neo4j/plugins
 ## Change configuration
 COPY /resources/neo4j_db/neo4j.conf  /etc/neo4j/.
 
+RUN ls -lrth /var/run/neo4j
+RUN echo "$USER"
+
 ## Test the service Neo4j
-RUN service neo4j start && \
+RUN sudo service neo4j start && \
     sleep 30 && \
-    service neo4j stop && \
+    sudo service neo4j stop && \
     cat /var/log/neo4j/neo4j.log
 
 ## Load backup with Clinical Knowledge Graph
 COPY /resources/neo4j_db/backups /var/lib/neo4j/data/backups
 RUN mkdir -p /var/lib/neo4j/data/databases/graph.db
 RUN ls -lrth /var/lib/neo4j/data/
-RUN sudo -u neo4j neo4j-admin load --from=/var/lib/neo4j/data/backups/graph.db/2019_1909.dump --database=graph.db --force
+RUN sudo -u neo4j neo4j-admin load --from=/var/lib/neo4j/data/backups/graph.db/2020_1001.dump --database=graph.db --force
 
 ## Remove dump file
 RUN echo "Done with restoring backup, removing backup folder"
@@ -101,7 +104,7 @@ RUN Rscript R_packages.R
 ADD ./requirements.txt /requirements.txt
 
 ## Install Python libraries
-RUN pip3 install --ignore-installed -r requirements.txt
+RUN cat requirements.txt | xargs -n 1 pip3 install
 RUN mkdir /CKG
 ADD . /CKG/
 ENV PYTHONPATH "${PYTHONPATH}:/CKG/src"

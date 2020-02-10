@@ -525,23 +525,14 @@ def compress_directory(folder_to_backup, dest_folder, file_name):
     os.system("tar -zcf {} {}".format(filePath, folder_to_backup))
 
 
-def read_gzipped_file(filepath, mode='unix'):
+def read_gzipped_file(filepath):
     """
     Opens an underlying process to access a gzip file through the creation of a new pipe to the child.
 
     :param str filepath: path to gzip file.
     :return: A bytes sequence that specifies the standard output.
     """
-    if mode == 'unix':
-        try:
-            p = subprocess.Popen(["gzcat", filepath],
-                stdout=subprocess.PIPE
-            )
-            return p.stdout
-        except Exception:
-            pass
-    
-    handle = gzip.open(filepath, "rb")
+    handle = gzip.open(filepath, "rt")
     
     return handle
 
@@ -552,7 +543,7 @@ def parse_fasta(file_handler):
     :param file_handler file_handler: opened fasta file
     :return iterator records: iterator of sequence objects
     """
-    records = SeqIO.parse(file_handler,"fasta")
+    records = SeqIO.parse(file_handler,format="fasta")
     
     return records
     

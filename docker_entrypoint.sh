@@ -21,7 +21,7 @@ celery -A worker worker --loglevel=DEBUG --concurrency=3 -E &
 
 echo "Building CKG graph database"
 cd /CKG/src/graphdb_builder/builder
-python3 builder.py -b full -u ckg
+#python3 builder.py -b full -u ckg
 
 if [ -e /debug1 ]; then
   echo "Running app in debug mode!"

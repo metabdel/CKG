@@ -52,11 +52,10 @@ def parser(databases_directory, import_directory, download=True, updated_on=None
         read_lines = 0
         num_entities = 0
         num_relationships = {}
-        for line in fhandler:
-            i += 1
-            read_lines +=1
-            try:
-                line = line.decode('utf-8')
+        try:
+            for line in fhandler:
+                i += 1
+                read_lines +=1
                 if line.startswith("# STOCKHOLM"):
                     if identifier is not None:
                         entities.add((identifier, 'Functional_region', name, " ".join(description), "PFam"))
@@ -97,12 +96,12 @@ def parser(databases_directory, import_directory, download=True, updated_on=None
                     relationships['found_in_protein'].add((identifier, protein, "FOUND_IN_PROTEIN", start, end, sequence, "PFam"))
                     if protein.split('-')[0] != protein:
                         relationships['found_in_protein'].add((identifier, protein.split('-')[0], "FOUND_IN_PROTEIN", start, end, sequence, "PFam"))
-            except UnicodeDecodeError:
-                lines.append(i)
-                missed += 1
+        except UnicodeDecodeError:
+            lines.append(i)
+            missed += 1
 
         fhandler.close()
-
+        print("Total missed lines {}".format(missed))
         if len(entities) > 0:
             print_files(entities, entity_header, outputfile=os.path.join(import_directory,'Functional_region.tsv'), is_first=is_first)
             num_entities += len(entities)
@@ -128,7 +127,7 @@ def print_files(data, header, outputfile, is_first, filter_for=None):
             df.to_csv(path_or_buf=f, sep='\t',
                     header=is_first, index=False, quotechar='"', 
                     line_terminator='\n', escapechar='\\')
-
+    
 if __name__ == "__main__":
     parser(databases_directory='../../../../data/databases', import_directory='../../../../data/imports', download=False)
 

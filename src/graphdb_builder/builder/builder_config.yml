@@ -72,8 +72,8 @@ graph:
     - protein_structure
     - food
     - gwas
-    - pathway
     - published
+    - pathway
     - user
     - project
     - experiment
@@ -94,6 +94,8 @@ ontology_entities:
 modified_proteins_resources:
     - 'psp'
     - 'signor'
+modified_proteins_annotation_resources:
+    - psp
 #Protein complexes
 complexes_resources:
     - 'CORUM'

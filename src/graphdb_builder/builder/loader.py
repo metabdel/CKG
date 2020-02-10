@@ -17,6 +17,7 @@
 
 import os
 import sys
+import re
 from datetime import datetime
 import config.ckg_config as ckg_config
 import ckg_utils
@@ -45,18 +46,25 @@ def load_into_database(driver, queries, requester):
     :param list[dict] queries: list of queries to be passed to the database.
     :param str requester: identifier of the query.
     """
+    regex = r"file:\/\/\/(.+\.tsv)"
     result = None
     for query in queries:
         try:
-            result = connector.sendQuery(driver, query+";").data()
-            if len(result) > 0:
-                counts = result.pop()
-                if 0 in counts.values():
-                    logger.warning("{} - No data was inserted in query: {}.\n results: {}".format(requester, query, counts))
+            matches = re.search(regex, query)
+            if matches:
+                file_path = matches.group(1)
+                if os.path.isfile(file_path):
+                    result = connector.sendQuery(driver, query+";").data()
+                    if len(result) > 0:
+                        counts = result.pop()
+                        if 0 in counts.values():
+                            logger.warning("{} - No data was inserted in query: {}.\n results: {}".format(requester, query, counts))
 
-                logger.info("{} - cypher query: {}.\n results: {}".format(requester, query, counts))
-            else:
-                logger.info("{} - cypher query: {}".format(requester, query))
+                        logger.info("{} - cypher query: {}.\n results: {}".format(requester, query, counts))
+                    else:
+                        logger.info("{} - cypher query: {}".format(requester, query))
+                else:
+                    logger.error("Error loading: File does not exist. Query: {}".format(query))
         except Exception as err:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
@@ -138,7 +146,7 @@ def updateDB(driver, imports=None, specific=[]):
                 for resource in config["modified_proteins_resources"]:
                     queries.extend(code.replace("IMPORTDIR", import_dir).replace("RESOURCE", resource.lower()).split(';')[0:-1])
                 code = cypher_queries['IMPORT_MODIFIED_PROTEIN_ANNOTATIONS']['query']
-                for resource in config["modified_proteins_resources"]:
+                for resource in config["modified_proteins_annotation_resources"]:
                     queries.extend(code.replace("IMPORTDIR", import_dir).replace("RESOURCE", resource.lower()).split(';')[0:-1])
             #Pathology expression
             elif i == "pathology_expression":
@@ -272,7 +280,7 @@ def updateDB(driver, imports=None, specific=[]):
             logger.error("Loading: {}: {}, file: {}, line: {}".format(i, err, fname, exc_tb.tb_lineno))
 
 def fullUpdate():
-    """
+    """ 
     Main method that controls the population of the graph database. Firstly, it gets a connection \
     to the database (driver) and then initiates the update of the entire database getting \
     all the graph entities to update from configuration. Once the graph database has been \
