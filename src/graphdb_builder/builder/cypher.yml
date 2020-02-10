@@ -17,7 +17,8 @@ IMPORT_ONTOLOGY_DATA:
     'name': "import ontology data"
     'description': "Creates all the onotology nodes and has parent relationships"
     'query': >
-        CREATE INDEX ON :ENTITY(name);  
+        CREATE INDEX ON :ENTITY(name);
+        CREATE INDEX ON :ENTITY(id);
         CREATE CONSTRAINT ON (e:ENTITY) ASSERT e.id IS UNIQUE; 
         USING PERIODIC COMMIT 100000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/ENTITY.tsv" AS line
@@ -47,6 +48,7 @@ IMPORT_PROTEIN_DATA:
         FIELDTERMINATOR '\t'
         MERGE (p:Protein {id:line.ID}) 
         ON CREATE SET p.accession=line.accession,p.name=line.name,p.description=line.description,p.taxid=line.taxid,p.synonyms=SPLIT(line.synonyms,',');
+        CREATE INDEX ON :Amino_acid_sequence(id);
         CREATE CONSTRAINT ON (a:Amino_acid_sequence) ASSERT a.id IS UNIQUE;
         USING PERIODIC COMMIT 100000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Amino_acid_sequence.tsv" AS line
@@ -60,6 +62,7 @@ IMPORT_PROTEIN_DATA:
         MATCH (aa:Amino_acid_sequence {id:line.END_ID}) 
         MERGE (p)-[r:HAS_SEQUENCE{source:line.source}]->(aa)
         RETURN COUNT(p) AS protein_has_sequence;
+        CREATE INDEX ON :Peptide(id);
         CREATE CONSTRAINT ON (p:Peptide) ASSERT p.id IS UNIQUE;
         USING PERIODIC COMMIT 100000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Peptide.tsv" AS line
@@ -267,7 +270,7 @@ IMPORT_GENE_DATA:
     'description': 'Creates the Gene nodes'
     'query': >
         CREATE CONSTRAINT ON (g:Gene) ASSERT g.id IS UNIQUE;
-        CREATE CONSTRAINT ON :Gene(id);
+        CREATE INDEX ON :Gene(id);
         CREATE CONSTRAINT ON (g:Gene) ASSERT g.name IS UNIQUE; 
         USING PERIODIC COMMIT 100000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Gene.tsv" AS line
@@ -308,6 +311,7 @@ IMPORT_CHROMOSOME_DATA:
     'description': 'Creates the Chromosome nodes'
     'query': >
         CREATE CONSTRAINT ON (c:Chromosome) ASSERT c.id IS UNIQUE; 
+        CREATE INDEX ON :Chromosome(id);
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Chromosome.tsv" AS line
         FIELDTERMINATOR '\t'
         MERGE (c:Chromosome {id:line.ID})
@@ -772,6 +776,7 @@ IMPORT_DATASETS:
         'description': 'Loads into the database all the sequenced data obtained in a Project. Creates Somatic_mutation nodes and links them to Known_variant and Clinically_relevant nodes'
         'query': >
             CREATE CONSTRAINT ON (s:Somatic_mutation) ASSERT s.id IS UNIQUE; 
+            CREATE INDEX ON :Somatic_mutation(id);
             USING PERIODIC COMMIT 10000
             LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/PROJECTID_somatic_mutation.tsv" AS line
             FIELDTERMINATOR '\t'
@@ -880,6 +885,7 @@ CREATE_SUBJECTS: &create_subject
     'description': 'Creates Subject nodes and links them to Project nodes'
     'query': >
         CREATE CONSTRAINT ON (s:Subject) ASSERT s.id IS UNIQUE;
+        CREATE INDEX ON :Subject(id);
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/PROJECTID_subjects.tsv" AS line
         FIELDTERMINATOR '\t'
@@ -938,6 +944,7 @@ CREATE_ANALYTICALSAMPLES: &create_ana
     'description': 'Creates Analytical_sample nodes and links them to the Biological_sample nodes of origin. Analytical samples are material from biological samples used in experimental protocols, i.e. MS/MS'
     'query': >
         CREATE INDEX ON :Analytical_sample(group);
+        CREATE INDEX ON :Analytical_sample(id);
         CREATE CONSTRAINT ON (s:Analytical_sample) ASSERT s.id IS UNIQUE; 
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/PROJECTID_analytical_samples.tsv" AS line
@@ -992,3 +999,4 @@ IMPORT_PROJECT:
     - *create_bio
     - *create_ana
     - *create_timepoint
+
