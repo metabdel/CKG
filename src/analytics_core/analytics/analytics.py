@@ -1240,7 +1240,7 @@ def calculate_anova(df, column, group='group'):
     :return: Tuple with t-statistics and p-value.
     """
     aov_result = pg.anova(data=df, dv=column, between=group, detailed=True)
-    aov_result.columns = ['Source', 'SS', 'DF', 'MS', 'F', 'pvalue', 'padj', 'np2']
+    aov_result.columns = ['Source', 'SS', 'DF', 'MS', 'F', 'pvalue', 'np2']
     t, pvalue = aov_result.loc[0, ['F', 'pvalue']].values
 
     return (column, t, pvalue)
@@ -1361,8 +1361,8 @@ def run_anova(df, alpha=0.05, drop_cols=["sample",'subject'], subject='subject',
 
             res = run_repeated_measurements_anova(df, alpha=alpha, drop_cols=drop_cols, subject=subject, group=group, permutations=0)
     else:
-        df = df.set_index([subject,group])
-        df = df.drop(drop_cols, axis=1).dropna(axis=1)
+        df = df.set_index([group])
+        df = df.drop(drop_cols, axis=1)
         aov_results = []
         pairwise_results = []
         for col in df.columns:
