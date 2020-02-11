@@ -17,6 +17,7 @@
 
 import os
 import sys
+import re
 from datetime import datetime
 import config.ckg_config as ckg_config
 import ckg_utils
@@ -45,18 +46,30 @@ def load_into_database(driver, queries, requester):
     :param list[dict] queries: list of queries to be passed to the database.
     :param str requester: identifier of the query.
     """
+    regex = r"file:\/\/\/(.+\.tsv)"
     result = None
     for query in queries:
         try:
-            result = connector.sendQuery(driver, query+";").data()
-            if len(result) > 0:
-                counts = result.pop()
-                if 0 in counts.values():
-                    logger.warning("{} - No data was inserted in query: {}.\n results: {}".format(requester, query, counts))
+            if "file" in query:
+                matches = re.search(regex, query)
+                if matches:
+                    file_path = matches.group(1)
+                    if os.path.isfile(file_path):
+                        print(query+';')
+                        result = connector.sendQuery(driver, query+";").data()
+                        if len(result) > 0:
+                            counts = result.pop()
+                            if 0 in counts.values():
+                                logger.warning("{} - No data was inserted in query: {}.\n results: {}".format(requester, query, counts))
 
-                logger.info("{} - cypher query: {}.\n results: {}".format(requester, query, counts))
+                            logger.info("{} - cypher query: {}.\n results: {}".format(requester, query, counts))
+                        else:
+                            logger.info("{} - cypher query: {}".format(requester, query))
+                    else:
+                        logger.error("Error loading: File does not exist. Query: {}".format(query))
             else:
-                logger.info("{} - cypher query: {}".format(requester, query))
+                print("No match", query)
+                result = connector.sendQuery(driver, query+";").data()
         except Exception as err:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
@@ -79,7 +92,6 @@ def updateDB(driver, imports=None, specific=[]):
     """
     if imports is None:
         imports = config["graph"]
-
     try:
         cypher_queries = ckg_utils.get_queries(os.path.join(cwd, config['cypher_queries_file']))
     except Exception as err:
@@ -89,19 +101,19 @@ def updateDB(driver, imports=None, specific=[]):
         queries = []
         logger.info("Loading {} into the database".format(i))
         try:
-            import_dir = os.path.join(cwd, directories["databasesDirectory"])
+            import_dir = os.path.join(cwd, directories["databasesDirectory"]).replace('\\','/')
             #Ontologies
-            if i == "ontologies":
-                entities = config["ontology_entities"]
+            if i== "ontologies":
+                entities = [e.lower() for e in config["ontology_entities"]]
                 if len(specific) > 0:
-                    entities = list(set(entities).intersection(specific))
-                import_dir = os.path.join(cwd, directories["ontologiesDirectory"])
+                    entities = list(set(entities).intersection([s.lower() for s in specific]))
+                import_dir = os.path.join(cwd, directories["ontologiesDirectory"]).replace('\\','/')
                 ontologyDataImportCode = cypher_queries['IMPORT_ONTOLOGY_DATA']['query']
                 for entity in entities:
-                    queries.extend(ontologyDataImportCode.replace("ENTITY", entity).replace("IMPORTDIR", import_dir).split(';')[0:-1])
+                    queries.extend(ontologyDataImportCode.replace("ENTITY", entity.capitalize()).replace("IMPORTDIR", import_dir).split(';')[0:-1])
             elif i == "biomarkers":
                 code = cypher_queries['IMPORT_BIOMARKERS']['query']
-                import_dir = os.path.join(cwd, directories["curatedDirectory"])
+                import_dir = os.path.join(cwd, directories["curatedDirectory"]).replace('\\','/')
                 queries = code.replace("IMPORTDIR", import_dir).split(';')[0:-1]
             #Databases
             #Chromosomes
@@ -139,7 +151,7 @@ def updateDB(driver, imports=None, specific=[]):
                 for resource in config["modified_proteins_resources"]:
                     queries.extend(code.replace("IMPORTDIR", import_dir).replace("RESOURCE", resource.lower()).split(';')[0:-1])
                 code = cypher_queries['IMPORT_MODIFIED_PROTEIN_ANNOTATIONS']['query']
-                for resource in config["modified_proteins_resources"]:
+                for resource in config["modified_proteins_annotation_resources"]:
                     queries.extend(code.replace("IMPORTDIR", import_dir).replace("RESOURCE", resource.lower()).split(';')[0:-1])
             #Pathology expression
             elif i == "pathology_expression":
@@ -231,36 +243,36 @@ def updateDB(driver, imports=None, specific=[]):
                     queries.extend(code.replace("IMPORTDIR", import_dir).replace("ENTITY", entity).split(';')[0:-1])
             #Users
             elif i == "user":
-                usersDir = os.path.join(cwd, directories["usersImportDirectory"])
+                usersDir = os.path.join(cwd, directories["usersDirectory"])   
                 user_cypher = cypher_queries['CREATE_USER_NODE']
                 code = user_cypher['query']
                 queries.extend(code.replace("IMPORTDIR", usersDir).split(';')[0:-1])
 
             #Projects
             elif i == "project":
-                import_dir = os.path.join(cwd, directories["experimentsDirectory"])
+                import_dir = os.path.join(cwd, directories["experimentsDirectory"]).replace('\\','/')
                 projects = builder_utils.listDirectoryFolders(import_dir)
                 if len(specific) > 0:
                     projects = list(set(projects).intersection(specific))
                 project_cypher = cypher_queries['IMPORT_PROJECT']
                 for project in projects:
                     projectDir = os.path.join(import_dir, project)
-                    projectDir = os.path.join(projectDir, 'clinical')
+                    projectDir = os.path.join(projectDir, 'clinical').replace('\\','/')
                     for project_section in project_cypher:
                         code = project_section['query']
                         queries.extend(code.replace("IMPORTDIR", projectDir).replace('PROJECTID', project).split(';')[0:-1])
             #Datasets
             elif i == "experiment":
-                import_dir = os.path.join(cwd, directories["experimentsDirectory"])
+                import_dir = os.path.join(cwd, directories["experimentsDirectory"]).replace('\\','/')
                 datasets_cypher = cypher_queries['IMPORT_DATASETS']
                 projects = builder_utils.listDirectoryFolders(import_dir)
                 if len(specific) > 0:
                     projects = list(set(projects).intersection(specific))
                 for project in projects:
-                    projectDir = os.path.join(import_dir, project)
+                    projectDir = os.path.join(import_dir, project).replace('\\','/')
                     datasetTypes = builder_utils.listDirectoryFolders(projectDir)
                     for dtype in datasetTypes:
-                        datasetDir = os.path.join(projectDir, dtype)
+                        datasetDir = os.path.join(projectDir, dtype).replace('\\','/')
                         dataset = datasets_cypher[dtype]
                         code = dataset['query']
                         queries.extend(code.replace("IMPORTDIR", datasetDir).replace('PROJECTID', project).split(';')[0:-1])
@@ -273,7 +285,7 @@ def updateDB(driver, imports=None, specific=[]):
             logger.error("Loading: {}: {}, file: {}, line: {}".format(i, err, fname, exc_tb.tb_lineno))
 
 def fullUpdate():
-    """
+    """ 
     Main method that controls the population of the graph database. Firstly, it gets a connection \
     to the database (driver) and then initiates the update of the entire database getting \
     all the graph entities to update from configuration. Once the graph database has been \
@@ -328,4 +340,3 @@ def archiveImportDirectory(archive_type="full"):
 if __name__ == "__main__":
     fullUpdate()
     #partialUpdate(imports=["clinical variants"])
-

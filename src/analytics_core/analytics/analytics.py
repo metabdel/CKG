@@ -4,7 +4,7 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from sklearn.cluster import AffinityPropagation
 from sklearn.utils import shuffle
-from statsmodels.stats import multitest, anova as aov
+from statsmodels.stats import multitest
 import dabest
 import scipy.stats
 from scipy.special import factorial, betainc
@@ -16,8 +16,6 @@ import numpy as np
 import networkx as nx
 import community
 import snf
-from sklearn.cluster import spectral_clustering
-from sklearn.metrics import v_measure_score
 import math
 from fancyimpute import KNN
 import kmapper as km
@@ -25,15 +23,12 @@ from analytics_core import utils
 from analytics_core.analytics import wgcnaAnalysis as wgcna
 import statsmodels.api as sm
 from statsmodels.formula.api import ols
-import time
-from joblib import Parallel, delayed
 
 try:
     from rpy2 import robjects as ro
     from rpy2.robjects.packages import importr
     from rpy2.robjects import pandas2ri
-    import rpy2.robjects.numpy2ri
-
+    
     pandas2ri.activate()
     R = ro.r
     base = importr('base')
@@ -47,7 +42,8 @@ except ImportError:
 
 def transform_into_wide_format(data, index, columns, values, extra=[]):
     """
-    This function converts a Pandas DataFrame from long to wide format using pandas pivot_table() function.
+    This function converts a Pandas DataFrame from long to wide format using 
+    pandas pivot_table() function.
 
     :param data: long-format Pandas DataFrame
     :param list index: columns that will be converted into the index
@@ -78,9 +74,11 @@ def transform_into_wide_format(data, index, columns, values, extra=[]):
 
     return df
 
-def transform_into_long_format(data, drop_columns, group, columns=['name','y']):
+
+def transform_into_long_format(data, drop_columns, group, columns=['name', 'y']):
     """
-    Converts a Pandas DataDrame from wide to long format using pd.melt() function.
+    Converts a Pandas DataDrame from wide to long format using pd.melt() 
+    function.
 
     :param data: wide-format Pandas DataFrame
     :param list drop_columns: columns to be deleted
@@ -102,6 +100,7 @@ def transform_into_long_format(data, drop_columns, group, columns=['name','y']):
         long_data.columns = columns
 
     return long_data
+
 
 def get_ranking_with_markers(data, drop_columns, group, columns, list_markers, annotation={}):
     """
@@ -146,15 +145,16 @@ def extract_number_missing(data, min_valid, drop_cols=['sample'], group='group')
         result = extract_number_missing(data, min_valid=3, drop_cols=['sample'], group='group')
     """
     if group is None:
-        groups = data.loc[:, data.notnull().sum(axis = 1) >= min_valid]
+        groups = data.loc[:, data.notnull().sum(axis=1) >= min_valid]
     else:
         groups = data.copy()
-        groups = groups.drop(drop_cols, axis = 1)
-        groups = groups.set_index(group).notnull().groupby(level=0).sum(axis = 1)
-        groups = groups[groups>=min_valid]
+        groups = groups.drop(drop_cols, axis=1)
+        groups = groups.set_index(group).notnull().groupby(level=0).sum(axis=1)
+        groups = groups[groups >= min_valid]
 
     groups = groups.dropna(how='all', axis=1)
     return groups.columns.unique().tolist()
+
 
 def extract_percentage_missing(data, missing_max, drop_cols=['sample'], group='group'):
     """
@@ -181,7 +181,8 @@ def extract_percentage_missing(data, missing_max, drop_cols=['sample'], group='g
 
     return groups
 
-def imputation_KNN(data, drop_cols=['group', 'sample', 'subject'], group='group', cutoff=0.6, alone = True):
+
+def imputation_KNN(data, drop_cols=['group', 'sample', 'subject'], group='group', cutoff=0.6, alone=True):
     """
     k-Nearest Neighbors imputation for pandas dataframes with missing data. For more information visit https://github.com/iskandr/fancyimpute/blob/master/fancyimpute/knn.py.
 
@@ -219,7 +220,8 @@ def imputation_KNN(data, drop_cols=['group', 'sample', 'subject'], group='group'
 
     return df
 
-def imputation_mixed_norm_KNN(data, index_cols=['group', 'sample', 'subject'], shift = 1.8, nstd = 0.3, group='group', cutoff=0.6):
+
+def imputation_mixed_norm_KNN(data, index_cols=['group', 'sample', 'subject'], shift=1.8, nstd=0.3, group='group', cutoff=0.6):
     """
     Missing values are replaced in two steps: 1) using k-Nearest Neighbors we impute protein columns with a higher ratio of missing/valid values than the defined cutoff, \
     2) the remaining missing values are replaced by random numbers that are drawn from a normal distribution.
@@ -243,7 +245,8 @@ def imputation_mixed_norm_KNN(data, index_cols=['group', 'sample', 'subject'], s
 
     return df
 
-def imputation_normal_distribution(data, index_cols=['group', 'sample', 'subject'], shift = 1.8, nstd = 0.3):
+
+def imputation_normal_distribution(data, index_cols=['group', 'sample', 'subject'], shift=1.8, nstd=0.3):
     """
     Missing values will be replaced by random numbers that are drawn from a normal distribution. The imputation is done for each sample (across all proteins) separately.
     For more information visit http://www.coxdocs.org/doku.php?id=perseus:user:activities:matrixprocessing:imputation:replacemissingfromgaussian.
@@ -279,9 +282,10 @@ def imputation_normal_distribution(data, index_cols=['group', 'sample', 'subject
     return data_imputed.T
 
 
-def polish_median_normalization(data, max_iter = 10):
+def polish_median_normalization(data, max_iter=10):
     """
-    This function iteratively normalizes each sample and each feature to its median until medians converge.
+    This function iteratively normalizes each sample and each feature to its 
+    median until medians converge.
 
     :param data:
     :param int max_iter: number of maximum iterations to prevent infinite loop.
@@ -293,9 +297,9 @@ def polish_median_normalization(data, max_iter = 10):
     """
     mediandf = data.copy()
     for i in range(max_iter):
-        col_median = mediandf.median(axis= 0)
-        row_median = mediandf.median(axis = 1)
-        if row_median.mean() == 0 and col_median.mean() ==0:
+        col_median = mediandf.median(axis=0)
+        row_median = mediandf.median(axis=1)
+        if row_median.mean() == 0 and col_median.mean() == 0:
             break
 
         mediandf = mediandf.sub(row_median, axis=0)
@@ -304,6 +308,7 @@ def polish_median_normalization(data, max_iter = 10):
     normData = data - mediandf
 
     return normData
+
 
 def quantile_normalization(data):
     """
@@ -321,7 +326,8 @@ def quantile_normalization(data):
 
     return normdf
 
-def linear_normalization(data, method = "l1", axis = 0):
+
+def linear_normalization(data, method="l1", axis=0):
     """
     This function scales input data to a unit norm. For more information visit https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.normalize.html.
 
@@ -335,9 +341,10 @@ def linear_normalization(data, method = "l1", axis = 0):
         result = linear_normalization(data, method = "l1", axis = 0)
     """
     normvalues = preprocessing.normalize(data.fillna(0).values, norm=method, axis=axis, copy=True, return_norm=False)
-    normdf = pd.DataFrame(normvalues, index = data.index, columns = data.columns)
+    normdf = pd.DataFrame(normvalues, index=data.index, columns=data.columns)
 
     return normdf
+
 
 def remove_group(data):
     """
@@ -353,9 +360,12 @@ def remove_group(data):
     data.drop(['group'], axis=1)
     return data
 
+
 def calculate_coefficient_variation(values):
     """
-    Compute the coefficient of variation, the ratio of the biased standard deviation to the mean, in percentage. For more information visit https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.variation.html.
+    Compute the coefficient of variation, the ratio of the biased standard 
+    deviation to the mean, in percentage. For more information 
+    visit https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.variation.html.
 
     :param ndarray values: numpy array
     :return: The calculated variation along rows.
@@ -368,6 +378,7 @@ def calculate_coefficient_variation(values):
     cv = scipy.stats.variation(values.apply(lambda x: np.power(2,x)).values) *100
 
     return cv
+
 
 def get_coefficient_variation(data, drop_columns, group, columns):
     """
@@ -391,7 +402,7 @@ def get_coefficient_variation(data, drop_columns, group, columns):
     for i in cvs.index:
         gcvs = cvs[i].tolist()
         ints = formated_df.set_index('group').mean().values.tolist()
-        tdf = pd.DataFrame(data= {'name':cols, 'x':gcvs, 'y':ints})
+        tdf = pd.DataFrame(data={'name': cols, 'x': gcvs, 'y': ints})
         tdf['group'] = i
 
         if cvs_df.empty:
@@ -402,7 +413,7 @@ def get_coefficient_variation(data, drop_columns, group, columns):
     return cvs_df
 
 
-def get_proteomics_measurements_ready(df, index_cols=['group', 'sample', 'subject'], drop_cols=['sample'], group='group', identifier='identifier', extra_identifier='name', imputation = True, method = 'distribution', missing_method = 'percentage', missing_per_group=True, missing_max = 0.3, min_valid=1, value_col='LFQ_intensity'):
+def get_proteomics_measurements_ready(df, index_cols=['group', 'sample', 'subject'], drop_cols=['sample'], group='group', identifier='identifier', extra_identifier='name', imputation=True, method='distribution', missing_method = 'percentage', missing_per_group=True, missing_max = 0.3, min_valid=1, value_col='LFQ_intensity'):
     """
     Processes proteomics data extracted from the database: 1) filter proteins with high number of missing values (> missing_max or min_valid), 2) impute missing values.
     For more information on imputation method visit http://www.coxdocs.org/doku.php?id=perseus:user:activities:matrixprocessing:filterrows:filtervalidvaluesrows.
@@ -459,6 +470,7 @@ def get_proteomics_measurements_ready(df, index_cols=['group', 'sample', 'subjec
 
     return df
 
+
 def get_clinical_measurements_ready(df, subject_id='subject', sample_id='biological_sample', group_id='group', columns=['clinical_variable'], values='values', extra=['group'], imputation=True, imputation_method='KNN'):
     """
     Processes clinical data extracted from the database by converting dataframe to wide-format and imputing missing values.
@@ -493,6 +505,7 @@ def get_clinical_measurements_ready(df, subject_id='subject', sample_id='biologi
 
     #df = df.set_index(index)
     return df
+
 
 def get_summary_data_matrix(data):
     """
@@ -531,6 +544,7 @@ def check_normality(data):
         test_normality = pg.normality(data, method='normaltest').reset_index()
 
     return test_normality
+
 
 def run_pca(data, drop_cols=['sample', 'subject'], group='group', components=2, dropna=True):
     """
@@ -588,6 +602,7 @@ def run_pca(data, drop_cols=['sample', 'subject'], group='group', components=2, 
         result['pca'] = (resultDf, loadings)
     return result, args
 
+
 def run_tsne(data, drop_cols=['sample', 'subject'], group='group', components=2, perplexity=40, n_iter=1000, init='pca', dropna=True):
     """
     Performs t-distributed Stochastic Neighbor Embedding analysis. For more information visit https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html.
@@ -636,6 +651,7 @@ def run_tsne(data, drop_cols=['sample', 'subject'], group='group', components=2,
         result['tsne'] = resultDf
     return result, args
 
+
 def run_umap(data, drop_cols=['sample', 'subject'], group='group', n_neighbors=10, min_dist=0.3, metric='cosine', dropna=True):
     """
     Performs Uniform Manifold Approximation and Projection. For more information vist https://umap-learn.readthedocs.io.
@@ -676,6 +692,7 @@ def run_umap(data, drop_cols=['sample', 'subject'], group='group', n_neighbors=1
         result['umap'] = resultDf
     return result, args
 
+
 def calculate_correlations(x, y, method='pearson'):
     """
     Calculates a Spearman (nonparametric) or a Pearson (parametric) correlation coefficient and p-value to test for non-correlation.
@@ -696,6 +713,7 @@ def calculate_correlations(x, y, method='pearson'):
 
     return (coefficient, pvalue)
 
+
 def apply_pvalue_fdrcorrection(pvalues, alpha=0.05, method='indep'):
     """
     Performs p-value correction for false discovery rate. For more information visit https://www.statsmodels.org/devel/generated/statsmodels.stats.multitest.fdrcorrection.html.
@@ -713,6 +731,7 @@ def apply_pvalue_fdrcorrection(pvalues, alpha=0.05, method='indep'):
 
     return (rejected, padj)
 
+
 def apply_pvalue_twostage_fdrcorrection(pvalues, alpha=0.05, method='bh'):
     """
     Iterated two stage linear step-up procedure with estimation of number of true hypotheses. For more information visit https://www.statsmodels.org/dev/generated/statsmodels.stats.multitest.fdrcorrection_twostage.html.
@@ -729,6 +748,7 @@ def apply_pvalue_twostage_fdrcorrection(pvalues, alpha=0.05, method='bh'):
     rejected, padj, num_hyp, alpha_stages = multitest.fdrcorrection_twostage(pvalues, alpha, method)
 
     return (rejected, padj)
+
 
 def apply_pvalue_permutation_fdrcorrection(df, observed_pvalues, group, alpha=0.05, permutations=50):
     """
@@ -780,6 +800,7 @@ def apply_pvalue_permutation_fdrcorrection(df, observed_pvalues, group, alpha=0.
 
     return count
 
+
 def get_counts_permutation_fdr(value, random, observed, n, alpha):
     """
     Calculates local FDR values (q-values) by computing the fraction of accepted hits from the permuted data over accepted hits from the measured data normalized by the total number of permutations.
@@ -801,6 +822,7 @@ def get_counts_permutation_fdr(value, random, observed, n, alpha):
 
     return (qvalue, qvalue <= alpha)
 
+
 def convertToEdgeList(data, cols):
     """
     This function converts a pandas dataframe to an edge list where index becomes the source nodes and columns the target nodes.
@@ -814,6 +836,7 @@ def convertToEdgeList(data, cols):
     edge_list.columns = cols
 
     return edge_list
+
 
 def run_correlation(df, alpha=0.05, subject='subject', group='group', method='pearson', correction=('fdr', 'indep')):
     """
@@ -856,6 +879,7 @@ def run_correlation(df, alpha=0.05, subject='subject', group='group', method='pe
 
     return correlation
 
+
 def run_multi_correlation(df, alpha=0.05, subject='subject', on=['subject', 'biological_sample'] , group='group', method='pearson', correction=('fdr', 'indep')):
     """
     This function merges all input dataframes and calculates pairwise correlations for all columns.
@@ -884,6 +908,7 @@ def run_multi_correlation(df, alpha=0.05, subject='subject', on=['subject', 'bio
 
         correlation = run_correlation(multidf, alpha=0.05, subject=subject, group=group, method=method, correction=correction)
     return correlation
+
 
 def calculate_rm_correlation(df, x, y, subject):
     """
@@ -923,6 +948,7 @@ def calculate_rm_correlation(df, x, y, subject):
 
     return (x, y, rm, pvalue, dof)
 
+
 def run_rm_correlation(df, alpha=0.05, subject='subject', correction=('fdr', 'indep')):
     """
     Computes pairwise repeated measurements correlations for all columns in dataframe, and returns results as an edge list with 'weight' as correlation score, p-values, degrees of freedom and ajusted p-values.
@@ -959,6 +985,7 @@ def run_rm_correlation(df, alpha=0.05, subject='subject', correction=('fdr', 'in
 
     return correlation
 
+
 def run_efficient_correlation(data, method='pearson'):
     """
     Calculates pairwise correlations and returns lower triangle of the matrix with correlation values and p-values.
@@ -992,28 +1019,6 @@ def run_efficient_correlation(data, method='pearson'):
 
     return r, p
 
-def calculate_paired_ttest(df, condition1, condition2):
-    """
-    Calculates the t-test on RELATED samples belonging to two different groups. For more information visit https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.stats.ttest_rel.html.
-
-    :param df: pandas dataframe with groups and subjects as rows and protein identifier as column.
-    :param str condition1: identifier of first group.
-    :param str condition2: identifier of second group.
-    :return: Tuple with t-statistics, two-tailed p-value, mean of first group, mean of second group and logfc.
-
-    Example::
-
-        result = calculate_paired_ttest(df, 'group1', 'group2')
-    """
-    group1 = df[[condition1]].values
-    group2 = df[[condition2]].values
-
-    mean1 = group1.mean()
-    mean2 = group2.mean()
-    log2fc = mean1 - mean2
-    t, pvalue = stats.ttest_rel(group1, group2, nan_policy='omit')
-
-    return (t, pvalue, mean1, mean2, log2fc)
 
 def calculate_ttest_samr(df, labels, n=2, s0=0, paired=False):
     """
@@ -1061,6 +1066,7 @@ def calculate_ttest_samr(df, labels, n=2, s0=0, paired=False):
 
     return result
 
+
 def calculate_ttest(df, condition1, condition2, paired=False, tail='two-sided',  correction='auto', r=0.707):
     """
     Calculates the t-test for the means of independent samples belonging to two different groups. For more information visit https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.ttest_ind.html.
@@ -1088,9 +1094,9 @@ def calculate_ttest(df, condition1, condition2, paired=False, tail='two-sided', 
         t = result['T'].values[0]
     if 'p-val' in result.columns:
         pvalue = result['p-val'].values[0]
-    print('T',t )
-    print('pvalue', pvalue)    
+    
     return (t, pvalue, mean1, mean2, log2fc)
+
 
 def calculate_THSD(df, group='group', alpha=0.05):
     """
@@ -1117,6 +1123,7 @@ def calculate_THSD(df, group='group', alpha=0.05):
         df_results['rejected'] = df_results['padj_THSD'].apply(lambda x: True if x < alpha else False)
 
     return df_results
+
 
 def calculate_pairwise_ttest(df, column, subject='subject', group='group', correction='none'):
     """
@@ -1147,6 +1154,7 @@ def calculate_pairwise_ttest(df, column, subject='subject', group='group', corre
 
     return posthoc
 
+
 def complement_posthoc(posthoc, identifier):
     """
     Calculates fold-changes after posthoc test.
@@ -1160,6 +1168,7 @@ def complement_posthoc(posthoc, identifier):
     posthoc['FC'] = posthoc['log2FC'].apply(lambda x: np.power(2,np.abs(x)) * -1 if x < 0 else np.power(2,np.abs(x)))
 
     return posthoc
+
 
 def calculate_dabest(df, idx, x, y, paired=False, id_col=None, test='mean_diff'):
     """
@@ -1196,6 +1205,7 @@ def calculate_dabest(df, idx, x, y, paired=False, id_col=None, test='mean_diff')
 
     return result
 
+
 def calculate_anova_samr(df, labels, s0=0):
     """
     Calculates modified one-way ANOVA using 'samr' R package.
@@ -1219,6 +1229,7 @@ def calculate_anova_samr(df, labels, s0=0):
 
     return result
 
+
 def calculate_anova(df, column, group='group'):
     """
     Calculates one-way ANOVA using scipy stats.
@@ -1233,6 +1244,7 @@ def calculate_anova(df, column, group='group'):
     t, pvalue = aov_result.loc[0, ['F', 'pvalue']].values
 
     return (column, t, pvalue)
+
 
 def calculate_repeated_measures_anova(df, column, subject='subject', group='group'):
     """
@@ -1254,6 +1266,7 @@ def calculate_repeated_measures_anova(df, column, subject='subject', group='grou
 
     return (column, t, pvalue)
 
+
 def get_max_permutations(df, group='group'):
     """
     Get maximum number of permutations according to number of samples.
@@ -1268,6 +1281,7 @@ def get_max_permutations(df, group='group'):
     max_perm = factorial(num_groups)/np.prod(factorial(np.array(num_per_group)))
 
     return max_perm
+
 
 def check_is_paired(df, subject, group):
     """
@@ -1319,49 +1333,6 @@ def run_dabest(df, drop_cols=['sample'], subject='subject', group='group', test=
 
     return scores
 
-def run_anova_old(df, alpha=0.05, drop_cols=["sample",'subject'], subject='subject', group='group', permutations=50):
-    """
-    Performs statistical test for each protein in a dataset.
-    Checks what type of data is the input (paired, unpaired or repeated measurements) and performs posthoc tests for multiclass data.
-    Multiple hypothesis correction uses permutation-based if permutations>0 and Benjamini/Hochberg if permutations=0.
-
-    :param df: pandas dataframe with samples as rows and protein identifiers as columns (with additional columns 'group', 'sample' and 'subject').
-    :param str subject: column with subject identifiers
-    :param str group: column with group identifiers
-    :param list drop_cols: column labels to be dropped from the dataframe
-    :param float alpha: error rate for multiple hypothesis correction
-    :param int permutations: number of permutations used to estimate false discovery rates.
-    :return: Pandas dataframe with columns 'identifier', 'group1', 'group2', 'mean(group1)', 'mean(group2)', 'Log2FC', 'std_error', 'tail', 't-statistics', 'padj_THSD', 'effsize', 'efftype', 'FC', 'rejected', 'F-statistics', 'p-value', 'correction', '-log10 p-value', and 'method'.
-
-    Example::
-
-        result = run_anova(df, alpha=0.05, drop_cols=["sample",'subject'], subject='subject', group='group', permutations=50)
-    """
-    if subject is not None and check_is_paired(df, subject, group):
-        groups = df[group].unique()
-        drop_cols = [d for d in drop_cols if d != subject]
-        if len(df[subject].unique()) == 1:
-            res = run_ttest(df, groups[0], groups[1], alpha = alpha, drop_cols=drop_cols, subject=subject, group=group, paired=True, correction='indep', permutations=permutations)
-        else:
-
-            res = run_repeated_measurements_anova(df, alpha=alpha, drop_cols=drop_cols, subject=subject, group=group, permutations=0)
-    else:
-        df = df.set_index([group])
-        df = df.drop(drop_cols, axis=1)
-        aov_results = []
-        pairwise_results = []
-        for col in df.columns:
-            rows = df[col]
-            aov_results.append((col,) + calculate_anova(rows, group=group))
-            thsd_result = calculate_THSD(rows, group=group)
-            if thsd_result is not None:
-                pairwise_results.append(thsd_result)
-
-        max_perm = get_max_permutations(df, group=group)
-        res = format_anova_table(df, aov_results, pairwise_results,  group, permutations, alpha, max_perm)
-        res['Method'] = 'One-way anova'
-
-    return res
 
 def run_anova(df, alpha=0.05, drop_cols=["sample",'subject'], subject='subject', group='group', permutations=50):
     """
@@ -1405,6 +1376,7 @@ def run_anova(df, alpha=0.05, drop_cols=["sample",'subject'], subject='subject',
 
     return res
 
+
 def run_repeated_measurements_anova(df, alpha=0.05, drop_cols=['sample'], subject='subject', group='group', permutations=50):
     """
     Performs repeated measurements anova and pairwise posthoc tests for each protein in dataframe.
@@ -1435,6 +1407,7 @@ def run_repeated_measurements_anova(df, alpha=0.05, drop_cols=['sample'], subjec
     res['Method'] = 'Repeated measurements anova'
 
     return res
+
 
 def format_anova_table(df, aov_results, pairwise_results, group, permutations, alpha, max_permutations):
     """
@@ -1479,6 +1452,7 @@ def format_anova_table(df, aov_results, pairwise_results, group, permutations, a
     res['-log10 pvalue'] = res['padj'].apply(lambda x: - np.log10(x))
 
     return res
+
 
 def run_ttest(df, condition1, condition2, alpha = 0.05, drop_cols=["sample"], subject='subject', group='group', paired=False, correction='indep', permutations=50):
     """
@@ -1534,6 +1508,7 @@ def run_ttest(df, condition1, condition2, alpha = 0.05, drop_cols=["sample"], su
     scores = scores.reset_index()
 
     return scores
+
 
 def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample'], alpha=0.05, s0=1, permutations=250):
     """
@@ -1692,6 +1667,7 @@ def run_fisher(group1, group2, alternative='two-sided'):
 
     return (odds, pvalue)
 
+
 def run_regulation_enrichment(regulation_data, annotation, identifier='identifier', groups=['group1', 'group2'], annotation_col='annotation', reject_col='rejected', group_col='group', method='fisher'):
     """
     This function runs a simple enrichment analysis for significantly regulated features in a dataset.
@@ -1726,6 +1702,7 @@ def run_regulation_enrichment(regulation_data, annotation, identifier='identifie
     result = run_enrichment(annotation, foreground='foreground', background='background', foreground_pop=len(foreground_list), background_pop=len(background_list), annotation_col=annotation_col, group_col=group_col, identifier_col=identifier, method=method)
 
     return result
+
 
 def run_enrichment(data, foreground, background, foreground_pop, background_pop, annotation_col='annotation', group_col='group', identifier_col='identifier', method='fisher'):
     """
@@ -1780,6 +1757,7 @@ def run_enrichment(data, foreground, background, foreground_pop, background_pop,
 
     return result
 
+
 def calculate_fold_change(df, condition1, condition2):
     """
     Calculates fold-changes between two groups for all proteins in a dataframe.
@@ -1811,6 +1789,7 @@ def calculate_fold_change(df, condition1, condition2):
         fold_change = np.nanmedian(group1) - np.nanmedian(group2)
 
     return fold_change
+
 
 def cohen_d(df, condition1, condition2, ddof = 0):
     """
@@ -1852,6 +1831,7 @@ def cohen_d(df, condition1, condition2, ddof = 0):
         d = (meang1 - meang2) / np.sqrt(((ng1-1)* sdg1 ** 2 + (ng2-1)* sdg2 ** 2) / dof)
 
     return d
+
 
 def hedges_g(df, condition1, condition2, ddof = 0):
     """
@@ -1899,6 +1879,7 @@ def hedges_g(df, condition1, condition2, ddof = 0):
 
     return g
 
+
 def run_mapper(data, lenses=["l2norm"], n_cubes = 15, overlap=0.5, n_clusters=3, linkage="complete", affinity="correlation"):
     """
 
@@ -1937,6 +1918,7 @@ def run_mapper(data, lenses=["l2norm"], n_cubes = 15, overlap=0.5, n_clusters=3,
 
 
     return simplicial_complex, {"labels":labels}
+
 
 def run_WGCNA(data, drop_cols_exp, drop_cols_cli, RsquaredCut=0.8, networkType='unsigned', minModuleSize=30, deepSplit=2, pamRespectsDendro=False, merge_modules=True, MEDissThres=0.25, verbose=0):
     """
@@ -2004,6 +1986,7 @@ def run_WGCNA(data, drop_cols_exp, drop_cols_cli, RsquaredCut=0.8, networkType='
 
     return result
 
+
 def most_central_edge(G):
     """
     Compute the eigenvector centrality for the graph G, and finds the highest value.
@@ -2015,6 +1998,7 @@ def most_central_edge(G):
     centrality = nx.eigenvector_centrality_numpy(G, weight='width')
 
     return max(centrality, key=centrality.get)
+
 
 def get_louvain_partitions(G, weight):
     """
@@ -2028,6 +2012,7 @@ def get_louvain_partitions(G, weight):
     partition = community.best_partition(G, weight=weight)
 
     return partition
+
 
 def get_network_communities(graph, args):
     """
@@ -2065,6 +2050,7 @@ def get_network_communities(graph, args):
 
     return communities
 
+
 def get_publications_abstracts(data, publication_col="publication", join_by=['publication','Proteins','Diseases'], index="PMID"):
     """
     Accesses NCBI PubMed over the WWW and retrieves the abstracts corresponding to a list of one or more PubMed IDs.
@@ -2087,6 +2073,7 @@ def get_publications_abstracts(data, publication_col="publication", join_by=['pu
             abstracts = abstracts.join(data.reset_index()[join_by].set_index(publication_col)).reset_index()
     return abstracts
 
+
 def eta_squared(aov):
     """
     Calculates the effect size using Eta-squared.
@@ -2097,6 +2084,7 @@ def eta_squared(aov):
     aov['eta_sq'] = 'NaN'
     aov['eta_sq'] = aov[:-1]['sum_sq']/sum(aov['sum_sq'])
     return aov
+
 
 def omega_squared(aov):
     """
@@ -2109,6 +2097,7 @@ def omega_squared(aov):
     aov['omega_sq'] = 'NaN'
     aov['omega_sq'] = (aov[:-1]['sum_sq']-(aov[:-1]['df']*mse))/(sum(aov['sum_sq'])+mse)
     return aov
+
 
 def run_two_way_anova(df, drop_cols=['sample'], subject='subject', group=['group', 'secondary_group']):
     """
@@ -2149,6 +2138,7 @@ def run_two_way_anova(df, drop_cols=['sample'], subject='subject', group=['group
     anova_df = anova_df.dropna(how="all")
 
     return anova_df, residuals
+
 
 def run_snf(df_dict, clusters, distance_metric, K_affinity, mu_affinity):
     """

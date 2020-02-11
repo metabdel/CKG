@@ -6,8 +6,8 @@ COUNT_RELATIONSHIPS:
 REMOVE_RELATIONSHIPS: 
     'name': "remove_relationship"
     'description': "Removes the specified relationship type between the specified entity types"
-    'query': "MATCH (:ENTITY1)-[r:RELATIONSHIP]->(:ENTITY2) delete r;"
 
+    'query': "MATCH (:ENTITY1)-[r:RELATIONSHIP]->(:ENTITY2) delete r;"
 REMOVE_NODE:
     'name': "remove_node"
     'description': "Removes all the instances of the specified type of node"
@@ -17,15 +17,14 @@ IMPORT_ONTOLOGY_DATA:
     'name': "import ontology data"
     'description': "Creates all the onotology nodes and has parent relationships"
     'query': >
-        CREATE INDEX ON :ENTITY(name);
-        CREATE CONSTRAINT ON (e:ENTITY) ASSERT e.id IS UNIQUE; 
+        CREATE CONSTRAINT ON (e:ENTITY) ASSERT e.id IS UNIQUE;
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/ENTITY.tsv" AS line
         FIELDTERMINATOR '\t'
         MERGE (e:ENTITY {id:line.ID})
         ON CREATE SET e.name=line.name,e.description=line.description,e.type=line.type,e.synonyms=SPLIT(line.synonyms,',')
         RETURN COUNT(e) AS ENTITY; 
-        USING PERIODIC COMMIT 10000 
+        USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/ENTITY_has_parent.tsv" AS line
         FIELDTERMINATOR '\t'
         MATCH (e1:ENTITY{id:line.START_ID})
@@ -37,15 +36,14 @@ IMPORT_PROTEIN_DATA:
     'name': "import protein data"
     'description': "Creates Protein and Peptide nodes, their relationship and relationships to Gene and Transcript nodes"
     'query': >
-        CREATE INDEX ON :Protein(accession);
         CREATE INDEX ON :Protein(name); 
-        CREATE CONSTRAINT ON (a:Protein) ASSERT a.id IS UNIQUE; 
-        CREATE CONSTRAINT ON (a:Protein) ASSERT a.accesion IS UNIQUE; 
+        CREATE INDEX ON :Protein(accession);
+        CREATE CONSTRAINT ON (p:Protein) ASSERT p.id IS UNIQUE;
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Protein.tsv" AS line
         FIELDTERMINATOR '\t'
         MERGE (p:Protein {id:line.ID}) 
-        ON CREATE SET p.accession=line.accession,p.name=line.name,p.description=line.description,p.taxid=line.taxid,p.synonyms=SPLIT(line.synonyms,',')
+        ON CREATE SET p.accession=line.accession,p.name=line.name,p.description=line.description,p.taxid=line.taxid,p.synonyms=SPLIT(line.synonyms,',');
         CREATE CONSTRAINT ON (a:Amino_acid_sequence) ASSERT a.id IS UNIQUE;
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Amino_acid_sequence.tsv" AS line
@@ -58,7 +56,7 @@ IMPORT_PROTEIN_DATA:
         MATCH (p:Protein {id:line.START_ID})
         MATCH (aa:Amino_acid_sequence {id:line.END_ID}) 
         MERGE (p)-[r:HAS_SEQUENCE{source:line.source}]->(aa)
-        RETURN COUNT(p) AS proteins;
+        RETURN COUNT(p) AS protein_has_sequence;
         CREATE CONSTRAINT ON (p:Peptide) ASSERT p.id IS UNIQUE;
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Peptide.tsv" AS line
@@ -92,7 +90,7 @@ IMPORT_FUNCTIONAL_REGIONS:
     'name': 'import funtional regions data'
     'description': 'Creates Functional Regions nodes and their relationships to Protein and Publication nodes'
     'query': >
-        CREATE CONSTRAINT ON (f:Functional_region) ASSERT f.id IS UNIQUE; 
+        CREATE CONSTRAINT ON (f:Functional_region) ASSERT f.id IS UNIQUE;
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Functional_region.tsv" AS line
         FIELDTERMINATOR '\t'
@@ -146,6 +144,13 @@ IMPORT_MODIFIED_PROTEINS:
         MATCH (mp:Modified_protein {id:line.END_ID})
         MERGE (p)-[r:HAS_MODIFIED_SITE]->(mp)
         RETURN COUNT(r) AS peptide_has_modified_site;
+        USING PERIODIC COMMIT 10000
+        LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/RESOURCE_substrate_is_substrate_of.tsv" AS line
+        FIELDTERMINATOR '\t'
+        MATCH (m:Modified_protein {id:line.START_ID})
+        MATCH (p:Protein {id:line.END_ID})
+        MERGE (m)-[r:IS_SUBSTRATE_OF{score:toFloat(line.score),regulation:line.regulation,source:line.source,evidence_type:line.evidence_type}]->(p)
+        RETURN COUNT(r) AS modified_protein_is_substrate_of_protein;
 
 IMPORT_PROTEIN_ANNOTATIONS: 
     'name': 'import protein annotations'
@@ -189,7 +194,7 @@ IMPORT_COMPLEXES:
     'name': 'import protein complexes'
     'description': 'Creates the Complex nodes and the relationship between Proten and Complex nodes (IS_SUBUNIT_OF)'
     'query': >
-        CREATE CONSTRAINT ON (c:Complex) ASSERT c.id IS UNIQUE; 
+        CREATE CONSTRAINT ON (c:Complex) ASSERT c.id IS UNIQUE;
         CREATE CONSTRAINT ON (c:Complex) ASSERT c.name IS UNIQUE; 
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Complex.tsv" AS line
@@ -230,19 +235,12 @@ IMPORT_MODIFIED_PROTEIN_ANNOTATIONS:
         MATCH (b:Biological_process {id:line.END_ID})
         MERGE (m)-[r:ASSOCIATED_WITH{score:toFloat(line.score),source:line.source,evidence_type:line.evidence_type,publications:line.publications,action:line.action}]->(b)
         RETURN COUNT(r) AS modified_protein_associated_with_biological_process;
-        USING PERIODIC COMMIT 10000
-        LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/RESOURCE_substrate_is_substrate_of.tsv" AS line
-        FIELDTERMINATOR '\t'
-        MATCH (m:Modified_protein {id:line.START_ID})
-        MATCH (p:Protein {id:line.END_ID})
-        MERGE (m)-[r:IS_SUBSTRATE_OF{score:toFloat(line.score),regulation:line.regulation,source:line.source,evidence_type:line.evidence_type}]->(p)
-        RETURN COUNT(r) AS modified_protein_is_substrate_of_protein;
 
 IMPORT_PROTEIN_STRUCTURES:
     'name': 'import protein structure data'
     'description': 'Creates Protein structure nodes and their relationships to Protein nodes'
     'query': >
-        CREATE CONSTRAINT ON (s:Protein_structure) ASSERT s.id IS UNIQUE;
+        CREATE CONSTRAINT ON (p:Protein_structure) ASSERT p.id IS UNIQUE;
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Protein_structures.tsv" AS line
         FIELDTERMINATOR '\t'
@@ -261,8 +259,8 @@ IMPORT_GENE_DATA:
     'name': 'import gene data'
     'description': 'Creates the Gene nodes'
     'query': >
-        CREATE CONSTRAINT ON (g:Gene) ASSERT g.id IS UNIQUE; 
-        CREATE CONSTRAINT ON (g:Gene) ASSERT g.name IS UNIQUE; 
+        CREATE CONSTRAINT ON (g:Gene) ASSERT g.id IS UNIQUE;
+        CREATE CONSTRAINT ON (g:Gene) ASSERT g.name IS UNIQUE;
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Gene.tsv" AS line
         FIELDTERMINATOR '\t'
@@ -274,7 +272,7 @@ IMPORT_TRANSCRIPT_DATA:
     'name': 'import transcript data'
     'description': 'Creates the Transcript nodes and the relationships to Chromosome and Gene nodes'
     'query': >
-        CREATE CONSTRAINT ON (t:Transcript) ASSERT t.id IS UNIQUE; 
+        CREATE CONSTRAINT ON (t:Transcript) ASSERT t.id IS UNIQUE;
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Transcript.tsv" AS line
         FIELDTERMINATOR '\t'
@@ -300,8 +298,7 @@ IMPORT_CHROMOSOME_DATA:
     'name': 'import chromosome data'
     'description': 'Creates the Chromosome nodes'
     'query': >
-        CREATE CONSTRAINT ON (c:Chromosome) ASSERT c.id IS UNIQUE; 
-        USING PERIODIC COMMIT 10000
+        CREATE CONSTRAINT ON (c:Chromosome) ASSERT c.id IS UNIQUE;
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Chromosome.tsv" AS line
         FIELDTERMINATOR '\t'
         MERGE (c:Chromosome {id:line.ID})
@@ -348,12 +345,12 @@ CREATE_PUBLICATIONS:
     'name': 'create Publication node'
     'description': 'Creates Publication nodes from Pubmed'
     'query': >
-        CREATE CONSTRAINT ON (p:Publication) ASSERT p.id IS UNIQUE; 
+        CREATE CONSTRAINT ON (p:Publication) ASSERT p.id IS UNIQUE;
         USING PERIODIC COMMIT 10000      
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Publications.tsv" AS line
         FIELDTERMINATOR '\t'
         MERGE (p:Publication{id:line.ID}) 
-        ON CREATE SET p.linkout=line.linkout,p.journal=line.journal_title,p.PMC_id=line.pmcid,p.year=toInt(line.year),p.volume=line.volume,p.issue=line.issue,p.page=line.page,p.DOI=line.doi
+        ON CREATE SET p.linkout=line.linkout,p.journal=line.journal_title,p.PMC_id=line.pmcid,p.year=toInteger(line.year),p.volume=line.volume,p.issue=line.issue,p.page=line.page,p.DOI=line.doi
         RETURN COUNT(p) AS publication;
         
 IMPORT_MENTIONS:
@@ -379,6 +376,19 @@ IMPORT_PUBLISHED_IN:
         MATCH (p:Publication {id:line.END_ID})
         MERGE (g)-[r:PUBLISHED_IN]->(p)
         RETURN COUNT(r) AS ENTITY_published_in_publication;
+
+IMPORT_VARIANT_FOUND_IN_GWAS:
+    'name': 'import variants found in GWAS studies'
+    'description': 'Loads into the database all the variants found in GWAS studies'
+    'query': >
+        USING PERIODIC COMMIT 10000
+        LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/GWAS_study_variant_found_in_gwas.tsv" AS line
+        FIELDTERMINATOR '\t'
+        MATCH (v:Known_variant)
+        MATCH (g:GWAS_study {id:line.END_ID})
+        MERGE (v)-[r:VARIANT_FOUND_IN_GWAS{frequency:toFloat(line.frequency),pvalue:line.pvalue,odds_ratio:line.odds_ratio,trait:line.trait,source:line.source}]->(g) WHERE line.START_ID IN SPLIT(k.alternative_names,',')
+        RETURN COUNT(r) AS VARIANT_FOUND_IN_GWAS;
+        
         
 IMPORT_DISEASE_DATA:
     'name': 'import Disease nodes'
@@ -396,8 +406,8 @@ IMPORT_DRUG_DATA:
     'name': 'import drug data'
     'description': 'Creates the Drug nodes'
     'query': >
-        CREATE INDEX ON :Drug(name);
-        CREATE CONSTRAINT ON (d:Drug) ASSERT d.id IS UNIQUE; 
+        CREATE CONSTRAINT ON (d:Drug) ASSERT d.id IS UNIQUE;
+        CREATE CONSTRAINT ON (d:Drug) ASSERT d.name IS UNIQUE;
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Drug.tsv" AS line
         FIELDTERMINATOR '\t'
@@ -513,7 +523,7 @@ IMPORT_METABOLITE_DATA:
     'name': 'import metabolite data'
     'description': 'Creates Metabolite nodes and their associations to Protein, Disease and Tissue nodes'
     'query': >
-        CREATE CONSTRAINT ON (m:Metabolite) ASSERT m.id IS UNIQUE; 
+        CREATE CONSTRAINT ON (m:Metabolite) ASSERT m.id IS UNIQUE;
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Metabolite.tsv" AS line
         FIELDTERMINATOR '\t'
@@ -546,7 +556,7 @@ IMPORT_FOOD_DATA:
     'name': 'import food data'
     'description': 'Creates Food nodes and their relationship to Metabolite nodes'
     'query': >
-        CREATE CONSTRAINT ON (f:Food) ASSERT f.id IS UNIQUE; 
+        CREATE CONSTRAINT ON (f:Food) ASSERT f.id IS UNIQUE;
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Food.tsv" AS line
         FIELDTERMINATOR '\t'
@@ -577,8 +587,7 @@ IMPORT_KNOWN_VARIANT_DATA:
     'name': 'import known variant data'
     'description': 'Creates Known_variant nodes and their relationships to Chromosome, Gene and Protein nodes. Known variants are protein variants that have been found in a population (or disease) and registered/curated previously'
     'query': >
-        CREATE CONSTRAINT ON (k:Known_variant) ASSERT k.id IS UNIQUE; 
-        CREATE INDEX ON :Known_variant(pvariant_id);
+        CREATE CONSTRAINT ON (k:Known_variant) ASSERT k.id IS UNIQUE;
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Known_variant.tsv" AS line
         FIELDTERMINATOR '\t'
@@ -618,12 +627,12 @@ IMPORT_CLINICALLY_RELEVANT_VARIANT_DATA:
     'name': 'import clinically relevant variants'
     'description': 'Creates Clinically_relevant_variant nodes and their association to Known_variants, Disease and if they are targeted by any Drug. Clinically relevant variants are known_variants that have been found to be relevant in disease, i.e. they are associated to drug resistance'
     'query': >
-        CREATE CONSTRAINT ON (k:Clinically_relevant_variant) ASSERT k.id IS UNIQUE; 
+        CREATE CONSTRAINT ON (c:Clinically_relevant_variant) ASSERT c.id IS UNIQUE;
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/RESOURCE_Clinically_relevant_variant.tsv" AS line
         FIELDTERMINATOR '\t'
         MERGE (k:Clinically_relevant_variant {id:line.ID})
-        ON CREATE SET k.alternative_names=line.alternative_names,k.chromosome=line.chromosome,k.position=toInt(line.position),k.reference=line.reference,k.alternative=line.alternative,k.effect=line.effect,k.oncogeneicity=line.oncogeneicity,k.source=line.source
+        ON CREATE SET k.alternative_names=line.alternative_names,k.chromosome=line.chromosome,k.position=toInteger(line.position),k.reference=line.reference,k.alternative=line.alternative,k.effect=line.effect,k.oncogeneicity=line.oncogeneicity,k.source=line.source
         RETURN COUNT(k) AS clinically_relevant_variant;
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/RESOURCE_known_variant_is_clinically_relevant.tsv" AS line
@@ -792,7 +801,7 @@ CREATE_USER_NODE:
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/users.tsv" AS line
         FIELDTERMINATOR '\t'
         MERGE (u:User {id:line.ID})
-        ON CREATE SET u.acronym=line.acronym,u.name=line.name,u.username=line.username,u.password=line.password,u.email=line.email,u.secondary_email=line.secondary_email,u.phone_number=line.phone_number,u.affiliation=line.affiliation,u.expiration_date=line.expiration_date,u.rolename=line.rolename,u.image=line.image 
+        ON CREATE SET u.acronym=line.acronym,u.name=line.name,u.username=line.username,u.email=line.email,u.secondary_email=line.secondary_email,u.phone_number=line.phone_number,u.affiliation=line.affiliation,u.expiration_date=line.expiration_date,u.rolename=line.rolename,u.image=line.image 
         RETURN COUNT(u) AS Users_in_the_system;
 
 CREATE_PROJECT: &create_project 
@@ -910,7 +919,7 @@ CREATE_ANALYTICALSAMPLES: &create_ana
     'description': 'Creates Analytical_sample nodes and links them to the Biological_sample nodes of origin. Analytical samples are material from biological samples used in experimental protocols, i.e. MS/MS'
     'query': >
         CREATE INDEX ON :Analytical_sample(group);
-        CREATE CONSTRAINT ON (s:Analytical_sample) ASSERT s.id IS UNIQUE; 
+        CREATE CONSTRAINT ON (a:Analytical_sample) ASSERT a.id IS UNIQUE;
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/PROJECTID_analytical_samples.tsv" AS line
         FIELDTERMINATOR '\t'
