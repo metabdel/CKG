@@ -588,6 +588,7 @@ IMPORT_KNOWN_VARIANT_DATA:
     'description': 'Creates Known_variant nodes and their relationships to Chromosome, Gene and Protein nodes. Known variants are protein variants that have been found in a population (or disease) and registered/curated previously'
     'query': >
         CREATE CONSTRAINT ON (k:Known_variant) ASSERT k.id IS UNIQUE;
+        CREATE INDEX ON :Known_variant(pvariant_id);
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Known_variant.tsv" AS line
         FIELDTERMINATOR '\t'
