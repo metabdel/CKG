@@ -14,7 +14,6 @@ try:
     from rpy2.robjects.packages import importr
     from rpy2.robjects.vectors import StrVector, FloatVector
     import rpy2.robjects.packages as rpacks
-    from analytics_core import R_wrapper
     pandas2ri.activate()
     # sys.setrecursionlimit(10000)
 
@@ -26,10 +25,10 @@ try:
 
 
     #Call R packages
-    base = R_wrapper.call_Rpackage("package", "base")
-    stats = R_wrapper.call_Rpackage("package", "stats")
-    WGCNA = R_wrapper.call_Rpackage("package", "WGCNA")
-    flashClust = R_wrapper.call_Rpackage('package', 'flashClust')
+    base = importr('base')
+    stats = importr('stats')
+    WGCNA = importr('WGCNA')
+    flashClust = importr('flashClust')
 except ImportError:
     print("WGCNA functions will not work. Module Rpy2 not installed.")
 
