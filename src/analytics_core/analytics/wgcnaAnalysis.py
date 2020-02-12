@@ -20,10 +20,7 @@ try:
     #Call R
     R = ro.r
     R('options(stringsAsFactors = FALSE)')
-    #R('source("http://bioconductor.org/biocLite.R")')
-    #R('biocLite(c("GO.db", "preprocessCore", "impute"))')
-
-
+    
     #Call R packages
     base = importr('base')
     stats = importr('stats')
