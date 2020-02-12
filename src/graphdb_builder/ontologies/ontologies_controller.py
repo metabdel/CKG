@@ -112,7 +112,7 @@ def generate_graphFiles(import_directory, ontologies=None, download=True):
     
     updated_on = None
     if download:
-        updated_on = date.today()
+        updated_on = str(date.today())
 
     stats = set()
     for entity in entities:

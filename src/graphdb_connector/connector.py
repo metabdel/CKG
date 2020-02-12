@@ -7,7 +7,6 @@ from config import ckg_config
 from graphdb_builder import builder_utils
 
 import logging
-import logging.config
 
 log_config = ckg_config.graphdb_connector_log
 logger = builder_utils.setup_logging(log_config, key="connector")
@@ -19,7 +18,7 @@ try:
 except Exception as err:
     logger.error("Reading configuration > {}.".format(err))
 
-def getGraphDatabaseConnectionConfiguration(configuration=None):
+def getGraphDatabaseConnectionConfiguration(configuration=None, database=None):
     if configuration is None:
         configuration = config
     host = configuration['db_url']
@@ -27,6 +26,9 @@ def getGraphDatabaseConnectionConfiguration(configuration=None):
     user = configuration['db_user']
     password = configuration['db_password']
 
+    if database is not None:
+        host = host+'/'+database
+    
     driver = connectToDB(host, port, user, password)
 
     return driver
@@ -72,7 +74,7 @@ def modifyEntityProperty(parameters):
         queries_path = "./queries.yml"
         project_cypher = ckg_utils.get_queries(os.path.join(cwd, queries_path))
         for query_name in project_cypher:
-            title = query_name.lower().replace('_',' ')
+            title = query_name.lower().replace('_', ' ')
             if title == 'modify':
                 query = project_cypher[query_name]['query'] % (entity, entityid, attribute, value)
                 sendQuery(driver, query)

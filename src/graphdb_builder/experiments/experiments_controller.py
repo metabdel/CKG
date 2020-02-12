@@ -21,19 +21,15 @@ def generate_dataset_imports(projectId, dataType, dataset_import_dir):
         if dataType == 'clinical':
             data = clinicalParser.parser(projectId)
             for dtype, ot in data:
-                print(dtype, ot)
-                generate_graph_files(data[(dtype, ot)],dtype, projectId, stats, ot, dataset_import_dir)
-            print('DONE CLINICAL')
+                generate_graph_files(data[(dtype, ot)], dtype, projectId, stats, ot, dataset_import_dir)
         elif dataType == "proteomics":
             data = proteomicsParser.parser(projectId)
             for dtype, ot in data:
-                print(dtype, ot)
-                generate_graph_files(data[(dtype, ot)],dtype, projectId, stats, ot, dataset_import_dir)
-            print('DONE PROTEOMICS')
+                generate_graph_files(data[(dtype, ot)], dtype, projectId, stats, ot, dataset_import_dir)
         elif dataType == "wes":
             data = wesParser.parser(projectId)
             for dtype, ot in data:
-                generate_graph_files(data[(dtype, ot)],dtype, projectId, stats, ot, dataset_import_dir)
+                generate_graph_files(data[(dtype, ot)], dtype, projectId, stats, ot, dataset_import_dir)
         else:
             raise Exception("Error when importing experiment for project {}. Non-existing parser for data type {}".format(projectId, dataType))
     except Exception as err:
@@ -42,14 +38,14 @@ def generate_dataset_imports(projectId, dataType, dataset_import_dir):
         logger.error("Experiment {}: {} file: {}, line: {}".format(projectId, sys.exc_info(), fname, exc_tb.tb_lineno))
         raise Exception("Error when importing experiment {}.\n {}".format(projectId, err))
 
-def generate_graph_files(data, dataType, projectId, stats, ot = 'w', dataset_import_dir='experiments'):
+def generate_graph_files(data, dataType, projectId, stats, ot='w', dataset_import_dir='experiments'):
     if dataType.lower() == '':
         outputfile = os.path.join(dataset_import_dir, projectId+".tsv")
     else:
         outputfile = os.path.join(dataset_import_dir, projectId+"_"+dataType.lower()+".tsv")
     
     with open(outputfile, ot) as f:
-        data.to_csv(path_or_buf = f, sep='\t',
+        data.to_csv(path_or_buf=f, sep='\t',
             header=True, index=False, quotechar='"',
             line_terminator='\n', escapechar='\\')
     
