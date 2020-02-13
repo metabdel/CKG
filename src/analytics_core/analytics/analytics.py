@@ -1958,31 +1958,31 @@ def run_WGCNA(data, drop_cols_exp, drop_cols_cli, RsquaredCut=0.8, networkType='
 
                 dissTOM, moduleColors = wgcna.build_network(data_exp, softPower=softPower, networkType=networkType, minModuleSize=minModuleSize, deepSplit=deepSplit,
                                                     pamRespectsDendro=pamRespectsDendro, merge_modules=merge_modules, MEDissThres=MEDissThres, verbose=verbose)
+                if not dissTOM.empty and len(moduleColors) > 0:
+                    Features_per_Module = wgcna.get_FeaturesPerModule(data_exp, moduleColors, mode='dataframe')
 
-                Features_per_Module = wgcna.get_FeaturesPerModule(data_exp, moduleColors, mode='dataframe')
+                    MEs = wgcna.calculate_module_eigengenes(data_exp, moduleColors, softPower=softPower, dissimilarity=False)
 
-                MEs = wgcna.calculate_module_eigengenes(data_exp, moduleColors, softPower=softPower, dissimilarity=False)
+                    moduleTraitCor, textMatrix = wgcna.calculate_ModuleTrait_correlation(data_exp, data_cli, MEs)
 
-                moduleTraitCor, textMatrix = wgcna.calculate_ModuleTrait_correlation(data_exp, data_cli, MEs)
+                    MM, MMPvalue = wgcna.calculate_ModuleMembership(data_exp, MEs)
 
-                MM, MMPvalue = wgcna.calculate_ModuleMembership(data_exp, MEs)
+                    FS, FSPvalue = wgcna.calculate_FeatureTraitSignificance(data_exp, data_cli)
 
-                FS, FSPvalue = wgcna.calculate_FeatureTraitSignificance(data_exp, data_cli)
+                    METDiss, METcor = wgcna.get_EigengenesTrait_correlation(MEs, data_cli)
 
-                METDiss, METcor = wgcna.get_EigengenesTrait_correlation(MEs, data_cli)
-
-                result[dtype]['dissTOM'] = dissTOM
-                result[dtype]['module_colors'] = moduleColors
-                result[dtype]['features_per_module'] = Features_per_Module
-                result[dtype]['MEs'] = MEs
-                result[dtype]['module_trait_cor'] = moduleTraitCor
-                result[dtype]['text_matrix'] = textMatrix
-                result[dtype]['module_membership'] = MM
-                result[dtype]['module_membership_pval'] = MMPvalue
-                result[dtype]['feature_significance'] = FS
-                result[dtype]['feature_significance_pval'] = FSPvalue
-                result[dtype]['ME_trait_diss'] = METDiss
-                result[dtype]['ME_trait_cor'] = METcor
+                    result[dtype]['dissTOM'] = dissTOM
+                    result[dtype]['module_colors'] = moduleColors
+                    result[dtype]['features_per_module'] = Features_per_Module
+                    result[dtype]['MEs'] = MEs
+                    result[dtype]['module_trait_cor'] = moduleTraitCor
+                    result[dtype]['text_matrix'] = textMatrix
+                    result[dtype]['module_membership'] = MM
+                    result[dtype]['module_membership_pval'] = MMPvalue
+                    result[dtype]['feature_significance'] = FS
+                    result[dtype]['feature_significance_pval'] = FSPvalue
+                    result[dtype]['ME_trait_diss'] = METDiss
+                    result[dtype]['ME_trait_cor'] = METcor
 
     return result
 

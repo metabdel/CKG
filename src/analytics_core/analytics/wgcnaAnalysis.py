@@ -333,10 +333,17 @@ def merge_similar_modules(data, modColors, MEDissThres=0.4, verbose=0):
     :param int verbose: integer level of verbosity. Zero means silent, higher values make the output progressively more and more verbose.
     :return: Tuple containing pandas dataframe with eigengenes of the new merged modules, and array with module colors of each expeirmental feature.
     """
-    merge = WGCNA.mergeCloseModules(data, modColors, cutHeight=MEDissThres, verbose=verbose)
-    mergedColors = merge.rx2('colors')
-    mergedMEs = merge.rx2('newMEs')
+    mergedMEs = pd.DataFrame()
+    mergedColors = []
+    try:
+        merge = WGCNA.mergeCloseModules(data, modColors, cutHeight=MEDissThres, verbose=verbose)
+        mergedColors = merge.rx2('colors')
+        mergedMEs = merge.rx2('newMEs')
+    except embedded.RRuntimeError as err:
+        print(err)
+        
     return mergedMEs, mergedColors
+
 
 def calculate_ModuleTrait_correlation(df_exp, df_traits, MEs):
     """ 
