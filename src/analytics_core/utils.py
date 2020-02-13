@@ -12,39 +12,39 @@ from urllib import error
 
 
 def generate_html(network):
-        """
-        This method gets the data structures supporting the nodes, edges,
-        and options and updates the pyvis html template holding the visualization.
+    """
+    This method gets the data structures supporting the nodes, edges,
+    and options and updates the pyvis html template holding the visualization.
 
-        :type name_html: str
-        """
-        # here, check if an href is present in the hover data
-        use_link_template = False
-        for n in network.nodes:
-            title = n.get("title", None)
-            if title:
-                if "href" in title:
-                    """
-                    this tells the template to override default hover
-                    mechanic, as the tooltip would move with the mouse
-                    cursor which made interacting with hover data useless.
-                    """
-                    use_link_template = True
-                    break
-        template = network.template
+    :type name_html: str
+    """
+    # here, check if an href is present in the hover data
+    use_link_template = False
+    for n in network.nodes:
+        title = n.get("title", None)
+        if title:
+            if "href" in title:
+                """
+                this tells the template to override default hover
+                mechanic, as the tooltip would move with the mouse
+                cursor which made interacting with hover data useless.
+                """
+                use_link_template = True
+                break
+    template = network.template
 
-        nodes, edges, height, width, options = network.get_network_data()
-        network.html = template.render(height=height,
-                                    width=width,
-                                    nodes=nodes,
-                                    edges=edges,
-                                    options=options,
-                                    use_DOT=network.use_DOT,
-                                    dot_lang=network.dot_lang,
-                                    widget=network.widget,
-                                    bgcolor=network.bgcolor,
-                                    conf=network.conf,
-                                    tooltip_link=use_link_template)
+    nodes, edges, height, width, options = network.get_network_data()
+    network.html = template.render(height=height,
+                                width=width,
+                                nodes=nodes,
+                                edges=edges,
+                                options=options,
+                                use_DOT=network.use_DOT,
+                                dot_lang=network.dot_lang,
+                                widget=network.widget,
+                                bgcolor=network.bgcolor,
+                                conf=network.conf,
+                                tooltip_link=use_link_template)
 
 
 def neo4j_path_to_networkx(paths, key='path'):
