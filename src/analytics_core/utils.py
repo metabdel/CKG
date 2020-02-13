@@ -10,6 +10,7 @@ import networkx as nx
 from networkx.readwrite import json_graph
 from urllib import error
 
+
 def generate_html(network):
         """
         This method gets the data structures supporting the nodes, edges,
@@ -45,6 +46,7 @@ def generate_html(network):
                                     conf=network.conf,
                                     tooltip_link=use_link_template)
 
+
 def neo4j_path_to_networkx(paths, key='path'):
     regex = r"\(?(.+)\)\<?\-\>?\[\:(.+)\s\{.*\}\]\<?\-\>?\((.+)\)?"
     nodes = set()
@@ -69,10 +71,11 @@ def neo4j_path_to_networkx(paths, key='path'):
             rels.add((source, target, relationship))
     G = nx.Graph()
     G.add_nodes_from(nodes)
-    for s,t,label in rels:
-        G.add_edge(s,t,label=label)
+    for s, t, label in rels:
+        G.add_edge(s, t, label=label)
 
     return G
+
 
 def neo4j_schema_to_networkx(schema):
     regex = r"\(?(.+)\)\<?\-\>?\[\:(.+)\s\{.*\}\]\<?\-\>?\((.+)\)"
@@ -92,11 +95,12 @@ def neo4j_schema_to_networkx(schema):
     G.add_nodes_from(nodes)
     colors = dict(zip(nodes, get_hex_colors(len(nodes))))
     nx.set_node_attributes(G, colors, 'color')
-    for s,t,label in rels:
-        G.add_edge(s,t,label=label)
+    for s, t, label in rels:
+        G.add_edge(s, t, label=label)
         
     return G
             
+
 def networkx_to_cytoscape(graph):
     cy_graph = json_graph.cytoscape_data(graph)
     cy_nodes = cy_graph['elements']['nodes']
@@ -107,17 +111,21 @@ def networkx_to_cytoscape(graph):
 
     return cy_elements, mouseover_node
 
+
 def networkx_to_gml(graph, path):
     nx.write_gml(graph, path)
+
 
 def json_network_to_gml(graph_json, path):
     graph = json_network_to_networkx(graph_json)
     nx.write_gml(graph, path)
 
+
 def json_network_to_networkx(graph_json):
     graph = json_graph.node_link_graph(graph_json)
 
     return graph
+
 
 def get_clustergrammer_link(net, filename=None):
     try:
@@ -141,25 +149,28 @@ def get_clustergrammer_link(net, filename=None):
         
     link = r.text
     
-    
     return link
+
 
 def generator_to_dict(genvar):
     dictvar = {}
-    for i,gen in enumerate(genvar):
-            dictvar.update({n:i for n in gen})
+    for i, gen in enumerate(genvar):
+        dictvar.update({n: i for n in gen})
 
     return dictvar
+
 
 def parse_html(html_snippet):
     html_parsed = bs.BeautifulSoup(html_snippet)
     return html_parsed    
 
+
 def hex2rgb(color):
     hex = color.lstrip('#')
-    rgb = tuple(int(hex[i:i+2], 16) for i in (0, 2 ,4))
+    rgb = tuple(int(hex[i:i+2], 16) for i in (0, 2, 4))
     rgba = rgb + (0.6,)
     return rgba
+
 
 def get_rgb_colors(n):
     colors = []
@@ -174,8 +185,9 @@ def get_rgb_colors(n):
         r = int(r) % 256
         g = int(g) % 256
         b = int(b) % 256
-        colors.append((r,g,b)) 
+        colors.append((r, g, b)) 
     return colors
+
 
 def get_hex_colors(n):
     initial_seed = 123
@@ -187,8 +199,9 @@ def get_hex_colors(n):
 
     return colors
 
+
 def getMedlineAbstracts(idList):
-    fields = {"TI":"title", "AU":"authors", "JT":"journal", "DP":"date", "MH":"keywords", "AB":"abstract", "PMID":"PMID"}
+    fields = {"TI": "title", "AU": "authors", "JT": "journal", "DP": "date", "MH": "keywords", "AB": "abstract", "PMID": "PMID"}
     pubmedUrl = "https://www.ncbi.nlm.nih.gov/pubmed/"
     abstracts = pd.DataFrame()
     try:
@@ -208,6 +221,8 @@ def getMedlineAbstracts(idList):
             results.append(aux)
 
         abstracts = pd.DataFrame.from_dict(results)
+    except error.URLError as e:
+        print("Request to Bio.Entrez failed. Error: {}".format(e))
     except error.HTTPError as e:
         print("Request to Bio.Entrez failed. Error: {}".format(e))
 
