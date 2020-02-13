@@ -305,16 +305,23 @@ def calculate_module_eigengenes(data, modColors, softPower=6, dissimilarity=True
     :param dissimilarity: calculates dissimilarity of module eigengenes.
     :return: Pandas dataframe with calculated module eigengenes. If dissimilarity is set to True, returns a tuple with two pandas dataframes, the first with the module eigengenes and the second with the eigengenes dissimilarity. 
     """
-    MEList = WGCNA.moduleEigengenes(data, modColors, softPower=softPower)
-    MEs0 = MEList.rx2('eigengenes')
-    MEs = WGCNA.orderMEs(MEs0, verbose=0)
-    if dissimilarity:
-        MEcor = WGCNA.cor(MEs, verbose=0)
-        MEcor = R_wrapper.R_matrix2Py_matrix(MEcor, MEcor.rownames, MEcor.colnames)
-        MEDiss = 1 - MEcor
-        return MEs, MEDiss
-    else:
-        return MEs
+    MEs = pd.DataFrame()
+    MEDiss = pd.DataFrame()
+    try:
+        MEList = WGCNA.moduleEigengenes(data, modColors, softPower=softPower)
+        MEs0 = MEList.rx2('eigengenes')
+        MEs = WGCNA.orderMEs(MEs0, verbose=0)
+        if dissimilarity:
+            MEcor = WGCNA.cor(MEs, verbose=0)
+            MEcor = R_wrapper.R_matrix2Py_matrix(MEcor, MEcor.rownames, MEcor.colnames)
+            MEDiss = 1 - MEcor
+            return MEs, MEDiss
+        else:
+            return MEs, MEDiss
+    except embedded.RRuntimeError as err:
+        print(err)
+    
+    return MEs, MEDiss
 
 def merge_similar_modules(data, modColors, MEDissThres=0.4, verbose=0):
     """ 
