@@ -321,7 +321,7 @@ def generate_report_url(n_clicks, pathname):
     
 @application.route('/downloads/<value>')
 def route_report_url(value):
-    uri = os.path.join(os.getcwd(),directories['downloadsDirectory']+value+'.zip')
+    uri = os.path.join(os.getcwd(),directories['downloadsDirectory'] + '/' + value + '.zip')
     return flask.send_file(uri, attachment_filename = value+'.zip', as_attachment = True)
 
 ###Callback regenerate project
@@ -612,19 +612,22 @@ def run_processing(n_clicks, project_id):
                     builder_utils.remove_directory(directory)
                     
                     return message, style
-        
-        for dataset in datasets:
-            source = os.path.join(temporaryDirectory, dataset)
-            destination = os.path.join(destDir, dataset)
-            builder_utils.copytree(source, destination)
-            datasetPath = os.path.join(os.path.join(experimentsImportDir, project_id), dataset)
-            if dataset != "experimental_design":
-                eh.generate_dataset_imports(project_id, dataset, datasetPath)
+        try:
+            for dataset in datasets:
+                source = os.path.join(temporaryDirectory, dataset)
+                destination = os.path.join(destDir, dataset)
+                builder_utils.copytree(source, destination)
+                datasetPath = os.path.join(os.path.join(experimentsImportDir, project_id), dataset)
+                if dataset != "experimental_design":
+                    eh.generate_dataset_imports(project_id, dataset, datasetPath)
 
-        loader.partialUpdate(imports=['project', 'experiment'], specific=[project_id])
-        
-        style = {'display':'block'}
-        message = 'Files successfully uploaded.'
+                loader.partialUpdate(imports=['project', 'experiment'], specific=[project_id])
+                
+                style = {'display':'block'}
+                message = 'Files successfully uploaded.'
+        except Exception as err:
+            style = {'display':'block'}
+            message = err
         
     return message, style
 
