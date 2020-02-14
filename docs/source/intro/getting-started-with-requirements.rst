@@ -11,7 +11,7 @@ To check if you already have **Java SE Runtime Environment 1.8** installed, run 
 a path like ``/Library/Java/JavaVirtualMachines/jdk1.8.0_171.jdk/Contents/Home``. If you got this message ``Unable to find any JVMs matching version "1.8".``, 
 please follow the steps below:
 
-1. Go to ``https://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html`` and download the version that fits your OS.
+1. Go to ``https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html`` and download the version that fits your OS.
 
 #. Install the package.
 
@@ -23,7 +23,7 @@ R
 
 Another essential package for the functioning of the Clinical Knowledge Graph is R.
 
-Make sure you have installed **R version 3.5.2**:
+Make sure you have installed **R version >= 3.5.2**:
 
 .. code-block:: bash
 
@@ -46,5 +46,7 @@ To install the neccessary R packages, simply initiate R (terminal or shell) and 
 
 
 .. note:: If you need to install R, follow `these <https://web.stanford.edu/~kjytay/courses/stats32-aut2018/Session%201/Installation%20for%20Mac.html>`_ tutorial.
+
+.. warning:: In Mac OS, make sure you have **XQuartz** installed.
 
 Now that you are all set, you can move on and start with Neo4j.

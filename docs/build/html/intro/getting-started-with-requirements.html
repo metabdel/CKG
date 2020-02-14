@@ -217,7 +217,7 @@
 a path like <code class="docutils literal notranslate"><span class="pre">/Library/Java/JavaVirtualMachines/jdk1.8.0_171.jdk/Contents/Home</span></code>. If you got this message <code class="docutils literal notranslate"><span class="pre">Unable</span> <span class="pre">to</span> <span class="pre">find</span> <span class="pre">any</span> <span class="pre">JVMs</span> <span class="pre">matching</span> <span class="pre">version</span> <span class="pre">&quot;1.8&quot;.</span></code>,
 please follow the steps below:</p>
 <ol class="arabic simple">
-<li><p>Go to <code class="docutils literal notranslate"><span class="pre">https://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html</span></code> and download the version that fits your OS.</p></li>
+<li><p>Go to <code class="docutils literal notranslate"><span class="pre">https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html</span></code> and download the version that fits your OS.</p></li>
 <li><p>Install the package.</p></li>
 <li><p>Run <code class="docutils literal notranslate"><span class="pre">/usr/libexec/java_home</span> <span class="pre">-v</span> <span class="pre">1.8</span></code> in the terminal to make sure the <em>Java</em> package has been installed in <code class="docutils literal notranslate"><span class="pre">/Library/Java/JavaVirtualMachines/</span></code>.</p></li>
 </ol>
@@ -225,7 +225,7 @@ please follow the steps below:</p>
 <div class="section" id="r">
 <h2>R<a class="headerlink" href="#r" title="Permalink to this headline">¶</a></h2>
 <p>Another essential package for the functioning of the Clinical Knowledge Graph is R.</p>
-<p>Make sure you have installed <strong>R version 3.5.2</strong>:</p>
+<p>Make sure you have installed <strong>R version &gt;= 3.5.2</strong>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ R --version
 </pre></div>
 </div>
@@ -243,6 +243,10 @@ please follow the steps below:</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>If you need to install R, follow <a class="reference external" href="https://web.stanford.edu/~kjytay/courses/stats32-aut2018/Session%201/Installation%20for%20Mac.html">these</a> tutorial.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>In Mac OS, make sure you have <strong>XQuartz</strong> installed.</p>
 </div>
 <p>Now that you are all set, you can move on and start with Neo4j.</p>
 </div>

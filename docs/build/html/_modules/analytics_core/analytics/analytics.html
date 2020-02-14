@@ -207,7 +207,7 @@
 <span class="kn">from</span> <span class="nn">sklearn.manifold</span> <span class="k">import</span> <span class="n">TSNE</span>
 <span class="kn">from</span> <span class="nn">sklearn.cluster</span> <span class="k">import</span> <span class="n">AffinityPropagation</span>
 <span class="kn">from</span> <span class="nn">sklearn.utils</span> <span class="k">import</span> <span class="n">shuffle</span>
-<span class="kn">from</span> <span class="nn">statsmodels.stats</span> <span class="k">import</span> <span class="n">multitest</span><span class="p">,</span> <span class="n">anova</span> <span class="k">as</span> <span class="n">aov</span>
+<span class="kn">from</span> <span class="nn">statsmodels.stats</span> <span class="k">import</span> <span class="n">multitest</span>
 <span class="kn">import</span> <span class="nn">dabest</span>
 <span class="kn">import</span> <span class="nn">scipy.stats</span>
 <span class="kn">from</span> <span class="nn">scipy.special</span> <span class="k">import</span> <span class="n">factorial</span><span class="p">,</span> <span class="n">betainc</span>
@@ -219,8 +219,6 @@
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
 <span class="kn">import</span> <span class="nn">community</span>
 <span class="kn">import</span> <span class="nn">snf</span>
-<span class="kn">from</span> <span class="nn">sklearn.cluster</span> <span class="k">import</span> <span class="n">spectral_clustering</span>
-<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">v_measure_score</span>
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">from</span> <span class="nn">fancyimpute</span> <span class="k">import</span> <span class="n">KNN</span>
 <span class="kn">import</span> <span class="nn">kmapper</span> <span class="k">as</span> <span class="nn">km</span>
@@ -228,15 +226,12 @@
 <span class="kn">from</span> <span class="nn">analytics_core.analytics</span> <span class="k">import</span> <span class="n">wgcnaAnalysis</span> <span class="k">as</span> <span class="n">wgcna</span>
 <span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="k">as</span> <span class="nn">sm</span>
 <span class="kn">from</span> <span class="nn">statsmodels.formula.api</span> <span class="k">import</span> <span class="n">ols</span>
-<span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">from</span> <span class="nn">joblib</span> <span class="k">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">rpy2</span> <span class="k">import</span> <span class="n">robjects</span> <span class="k">as</span> <span class="n">ro</span>
     <span class="kn">from</span> <span class="nn">rpy2.robjects.packages</span> <span class="k">import</span> <span class="n">importr</span>
     <span class="kn">from</span> <span class="nn">rpy2.robjects</span> <span class="k">import</span> <span class="n">pandas2ri</span>
-    <span class="kn">import</span> <span class="nn">rpy2.robjects.numpy2ri</span>
-
+    
     <span class="n">pandas2ri</span><span class="o">.</span><span class="n">activate</span><span class="p">()</span>
     <span class="n">R</span> <span class="o">=</span> <span class="n">ro</span><span class="o">.</span><span class="n">r</span>
     <span class="n">base</span> <span class="o">=</span> <span class="n">importr</span><span class="p">(</span><span class="s1">&#39;base&#39;</span><span class="p">)</span>
@@ -250,7 +245,8 @@
 
 <div class="viewcode-block" id="transform_into_wide_format"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.transform_into_wide_format">[docs]</a><span class="k">def</span> <span class="nf">transform_into_wide_format</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="p">[]):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This function converts a Pandas DataFrame from long to wide format using pandas pivot_table() function.</span>
+<span class="sd">    This function converts a Pandas DataFrame from long to wide format using </span>
+<span class="sd">    pandas pivot_table() function.</span>
 
 <span class="sd">    :param data: long-format Pandas DataFrame</span>
 <span class="sd">    :param list index: columns that will be converted into the index</span>
@@ -281,9 +277,11 @@
 
     <span class="k">return</span> <span class="n">df</span></div>
 
-<div class="viewcode-block" id="transform_into_long_format"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.transform_into_long_format">[docs]</a><span class="k">def</span> <span class="nf">transform_into_long_format</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">drop_columns</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">]):</span>
+
+<div class="viewcode-block" id="transform_into_long_format"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.transform_into_long_format">[docs]</a><span class="k">def</span> <span class="nf">transform_into_long_format</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">drop_columns</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">]):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts a Pandas DataDrame from wide to long format using pd.melt() function.</span>
+<span class="sd">    Converts a Pandas DataDrame from wide to long format using pd.melt() </span>
+<span class="sd">    function.</span>
 
 <span class="sd">    :param data: wide-format Pandas DataFrame</span>
 <span class="sd">    :param list drop_columns: columns to be deleted</span>
@@ -305,6 +303,7 @@
         <span class="n">long_data</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">columns</span>
 
     <span class="k">return</span> <span class="n">long_data</span></div>
+
 
 <div class="viewcode-block" id="get_ranking_with_markers"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.get_ranking_with_markers">[docs]</a><span class="k">def</span> <span class="nf">get_ranking_with_markers</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">drop_columns</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">list_markers</span><span class="p">,</span> <span class="n">annotation</span><span class="o">=</span><span class="p">{}):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -349,15 +348,16 @@
 <span class="sd">        result = extract_number_missing(data, min_valid=3, drop_cols=[&#39;sample&#39;], group=&#39;group&#39;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">group</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">groups</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">data</span><span class="o">.</span><span class="n">notnull</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">min_valid</span><span class="p">]</span>
+        <span class="n">groups</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">data</span><span class="o">.</span><span class="n">notnull</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">min_valid</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">groups</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="n">groups</span> <span class="o">=</span> <span class="n">groups</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">drop_cols</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="n">groups</span> <span class="o">=</span> <span class="n">groups</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">group</span><span class="p">)</span><span class="o">.</span><span class="n">notnull</span><span class="p">()</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="n">groups</span> <span class="o">=</span> <span class="n">groups</span><span class="p">[</span><span class="n">groups</span><span class="o">&gt;=</span><span class="n">min_valid</span><span class="p">]</span>
+        <span class="n">groups</span> <span class="o">=</span> <span class="n">groups</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">drop_cols</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">groups</span> <span class="o">=</span> <span class="n">groups</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">group</span><span class="p">)</span><span class="o">.</span><span class="n">notnull</span><span class="p">()</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">groups</span> <span class="o">=</span> <span class="n">groups</span><span class="p">[</span><span class="n">groups</span> <span class="o">&gt;=</span> <span class="n">min_valid</span><span class="p">]</span>
 
     <span class="n">groups</span> <span class="o">=</span> <span class="n">groups</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">groups</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span></div>
+
 
 <div class="viewcode-block" id="extract_percentage_missing"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.extract_percentage_missing">[docs]</a><span class="k">def</span> <span class="nf">extract_percentage_missing</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">missing_max</span><span class="p">,</span> <span class="n">drop_cols</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">],</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -376,15 +376,16 @@
         <span class="n">groups</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">data</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">missing_max</span><span class="p">]</span><span class="o">.</span><span class="n">columns</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">groups</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="n">groups</span> <span class="o">=</span> <span class="n">groups</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">drop_cols</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">groups</span> <span class="o">=</span> <span class="n">groups</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">drop_cols</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">groups</span> <span class="o">=</span> <span class="n">groups</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
         <span class="n">groups</span> <span class="o">=</span> <span class="n">groups</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-        <span class="n">groups</span> <span class="o">=</span> <span class="n">groups</span><span class="p">[</span><span class="n">groups</span><span class="o">&lt;=</span><span class="n">missing_max</span><span class="p">]</span>
+        <span class="n">groups</span> <span class="o">=</span> <span class="n">groups</span><span class="p">[</span><span class="n">groups</span> <span class="o">&lt;=</span> <span class="n">missing_max</span><span class="p">]</span>
         <span class="n">groups</span> <span class="o">=</span> <span class="n">groups</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">groups</span></div>
 
-<div class="viewcode-block" id="imputation_KNN"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.imputation_KNN">[docs]</a><span class="k">def</span> <span class="nf">imputation_KNN</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">drop_cols</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="s1">&#39;sample&#39;</span><span class="p">,</span> <span class="s1">&#39;subject&#39;</span><span class="p">],</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">alone</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+
+<div class="viewcode-block" id="imputation_KNN"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.imputation_KNN">[docs]</a><span class="k">def</span> <span class="nf">imputation_KNN</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">drop_cols</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="s1">&#39;sample&#39;</span><span class="p">,</span> <span class="s1">&#39;subject&#39;</span><span class="p">],</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">alone</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    k-Nearest Neighbors imputation for pandas dataframes with missing data. For more information visit https://github.com/iskandr/fancyimpute/blob/master/fancyimpute/knn.py.</span>
 
@@ -402,18 +403,18 @@
     <span class="n">df</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">cols</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">_get_numeric_data</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
         <span class="n">df</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">group</span><span class="p">]</span>
         <span class="n">cols</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">cols</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span>
         <span class="n">value_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">drop_cols</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
-            <span class="n">missDf</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">group</span><span class="p">]</span><span class="o">==</span><span class="n">g</span><span class="p">,</span> <span class="n">value_cols</span><span class="p">]</span>
+            <span class="n">missDf</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">==</span> <span class="n">g</span><span class="p">,</span> <span class="n">value_cols</span><span class="p">]</span>
             <span class="n">missDf</span> <span class="o">=</span> <span class="n">missDf</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">missDf</span><span class="o">.</span><span class="n">notnull</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">cutoff</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">missDf</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
                 <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">missDf</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-                <span class="n">X_trans</span> <span class="o">=</span> <span class="n">KNN</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+                <span class="n">X_trans</span> <span class="o">=</span> <span class="n">KNN</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
                 <span class="n">missingdata_df</span> <span class="o">=</span> <span class="n">missDf</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-                <span class="n">dfm</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X_trans</span><span class="p">,</span> <span class="n">index</span> <span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">missDf</span><span class="o">.</span><span class="n">index</span><span class="p">),</span> <span class="n">columns</span> <span class="o">=</span> <span class="n">missingdata_df</span><span class="p">)</span>
+                <span class="n">dfm</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X_trans</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">missDf</span><span class="o">.</span><span class="n">index</span><span class="p">),</span> <span class="n">columns</span><span class="o">=</span><span class="n">missingdata_df</span><span class="p">)</span>
                 <span class="n">df</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">dfm</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">alone</span><span class="p">:</span>
             <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -422,7 +423,8 @@
 
     <span class="k">return</span> <span class="n">df</span></div>
 
-<div class="viewcode-block" id="imputation_mixed_norm_KNN"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.imputation_mixed_norm_KNN">[docs]</a><span class="k">def</span> <span class="nf">imputation_mixed_norm_KNN</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">index_cols</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="s1">&#39;sample&#39;</span><span class="p">,</span> <span class="s1">&#39;subject&#39;</span><span class="p">],</span> <span class="n">shift</span> <span class="o">=</span> <span class="mf">1.8</span><span class="p">,</span> <span class="n">nstd</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="mf">0.6</span><span class="p">):</span>
+
+<div class="viewcode-block" id="imputation_mixed_norm_KNN"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.imputation_mixed_norm_KNN">[docs]</a><span class="k">def</span> <span class="nf">imputation_mixed_norm_KNN</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">index_cols</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="s1">&#39;sample&#39;</span><span class="p">,</span> <span class="s1">&#39;subject&#39;</span><span class="p">],</span> <span class="n">shift</span><span class="o">=</span><span class="mf">1.8</span><span class="p">,</span> <span class="n">nstd</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="mf">0.6</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Missing values are replaced in two steps: 1) using k-Nearest Neighbors we impute protein columns with a higher ratio of missing/valid values than the defined cutoff, \</span>
 <span class="sd">    2) the remaining missing values are replaced by random numbers that are drawn from a normal distribution.</span>
@@ -446,7 +448,8 @@
 
     <span class="k">return</span> <span class="n">df</span></div>
 
-<div class="viewcode-block" id="imputation_normal_distribution"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.imputation_normal_distribution">[docs]</a><span class="k">def</span> <span class="nf">imputation_normal_distribution</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">index_cols</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="s1">&#39;sample&#39;</span><span class="p">,</span> <span class="s1">&#39;subject&#39;</span><span class="p">],</span> <span class="n">shift</span> <span class="o">=</span> <span class="mf">1.8</span><span class="p">,</span> <span class="n">nstd</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">):</span>
+
+<div class="viewcode-block" id="imputation_normal_distribution"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.imputation_normal_distribution">[docs]</a><span class="k">def</span> <span class="nf">imputation_normal_distribution</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">index_cols</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="s1">&#39;sample&#39;</span><span class="p">,</span> <span class="s1">&#39;subject&#39;</span><span class="p">],</span> <span class="n">shift</span><span class="o">=</span><span class="mf">1.8</span><span class="p">,</span> <span class="n">nstd</span><span class="o">=</span><span class="mf">0.3</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Missing values will be replaced by random numbers that are drawn from a normal distribution. The imputation is done for each sample (across all proteins) separately.</span>
 <span class="sd">    For more information visit http://www.coxdocs.org/doku.php?id=perseus:user:activities:matrixprocessing:imputation:replacemissingfromgaussian.</span>
@@ -482,9 +485,10 @@
     <span class="k">return</span> <span class="n">data_imputed</span><span class="o">.</span><span class="n">T</span></div>
 
 
-<div class="viewcode-block" id="polish_median_normalization"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.polish_median_normalization">[docs]</a><span class="k">def</span> <span class="nf">polish_median_normalization</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">max_iter</span> <span class="o">=</span> <span class="mi">10</span><span class="p">):</span>
+<div class="viewcode-block" id="polish_median_normalization"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.polish_median_normalization">[docs]</a><span class="k">def</span> <span class="nf">polish_median_normalization</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This function iteratively normalizes each sample and each feature to its median until medians converge.</span>
+<span class="sd">    This function iteratively normalizes each sample and each feature to its </span>
+<span class="sd">    median until medians converge.</span>
 
 <span class="sd">    :param data:</span>
 <span class="sd">    :param int max_iter: number of maximum iterations to prevent infinite loop.</span>
@@ -496,9 +500,9 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">mediandf</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_iter</span><span class="p">):</span>
-        <span class="n">col_median</span> <span class="o">=</span> <span class="n">mediandf</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="n">row_median</span> <span class="o">=</span> <span class="n">mediandf</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">row_median</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">col_median</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+        <span class="n">col_median</span> <span class="o">=</span> <span class="n">mediandf</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">row_median</span> <span class="o">=</span> <span class="n">mediandf</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">row_median</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">col_median</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">break</span>
 
         <span class="n">mediandf</span> <span class="o">=</span> <span class="n">mediandf</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">row_median</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -507,6 +511,7 @@
     <span class="n">normData</span> <span class="o">=</span> <span class="n">data</span> <span class="o">-</span> <span class="n">mediandf</span>
 
     <span class="k">return</span> <span class="n">normData</span></div>
+
 
 <div class="viewcode-block" id="quantile_normalization"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.quantile_normalization">[docs]</a><span class="k">def</span> <span class="nf">quantile_normalization</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -524,7 +529,8 @@
 
     <span class="k">return</span> <span class="n">normdf</span></div>
 
-<div class="viewcode-block" id="linear_normalization"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.linear_normalization">[docs]</a><span class="k">def</span> <span class="nf">linear_normalization</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="s2">&quot;l1&quot;</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+
+<div class="viewcode-block" id="linear_normalization"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.linear_normalization">[docs]</a><span class="k">def</span> <span class="nf">linear_normalization</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;l1&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function scales input data to a unit norm. For more information visit https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.normalize.html.</span>
 
@@ -538,9 +544,10 @@
 <span class="sd">        result = linear_normalization(data, method = &quot;l1&quot;, axis = 0)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">normvalues</span> <span class="o">=</span> <span class="n">preprocessing</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">normdf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">normvalues</span><span class="p">,</span> <span class="n">index</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+    <span class="n">normdf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">normvalues</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">normdf</span></div>
+
 
 <div class="viewcode-block" id="remove_group"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.remove_group">[docs]</a><span class="k">def</span> <span class="nf">remove_group</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -556,9 +563,12 @@
     <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">&#39;group&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">data</span></div>
 
+
 <div class="viewcode-block" id="calculate_coefficient_variation"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.calculate_coefficient_variation">[docs]</a><span class="k">def</span> <span class="nf">calculate_coefficient_variation</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Compute the coefficient of variation, the ratio of the biased standard deviation to the mean, in percentage. For more information visit https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.variation.html.</span>
+<span class="sd">    Compute the coefficient of variation, the ratio of the biased standard </span>
+<span class="sd">    deviation to the mean, in percentage. For more information </span>
+<span class="sd">    visit https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.variation.html.</span>
 
 <span class="sd">    :param ndarray values: numpy array</span>
 <span class="sd">    :return: The calculated variation along rows.</span>
@@ -571,6 +581,7 @@
     <span class="n">cv</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">variation</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">x</span><span class="p">))</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="o">*</span><span class="mi">100</span>
 
     <span class="k">return</span> <span class="n">cv</span></div>
+
 
 <div class="viewcode-block" id="get_coefficient_variation"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.get_coefficient_variation">[docs]</a><span class="k">def</span> <span class="nf">get_coefficient_variation</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">drop_columns</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">columns</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -594,7 +605,7 @@
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">cvs</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
         <span class="n">gcvs</span> <span class="o">=</span> <span class="n">cvs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="n">ints</span> <span class="o">=</span> <span class="n">formated_df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;group&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        <span class="n">tdf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="n">cols</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span><span class="n">gcvs</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="n">ints</span><span class="p">})</span>
+        <span class="n">tdf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">cols</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">gcvs</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">ints</span><span class="p">})</span>
         <span class="n">tdf</span><span class="p">[</span><span class="s1">&#39;group&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
 
         <span class="k">if</span> <span class="n">cvs_df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
@@ -605,7 +616,7 @@
     <span class="k">return</span> <span class="n">cvs_df</span></div>
 
 
-<div class="viewcode-block" id="get_proteomics_measurements_ready"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.get_proteomics_measurements_ready">[docs]</a><span class="k">def</span> <span class="nf">get_proteomics_measurements_ready</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">index_cols</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="s1">&#39;sample&#39;</span><span class="p">,</span> <span class="s1">&#39;subject&#39;</span><span class="p">],</span> <span class="n">drop_cols</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">],</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="n">identifier</span><span class="o">=</span><span class="s1">&#39;identifier&#39;</span><span class="p">,</span> <span class="n">extra_identifier</span><span class="o">=</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="n">imputation</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;distribution&#39;</span><span class="p">,</span> <span class="n">missing_method</span> <span class="o">=</span> <span class="s1">&#39;percentage&#39;</span><span class="p">,</span> <span class="n">missing_per_group</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">missing_max</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">min_valid</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">value_col</span><span class="o">=</span><span class="s1">&#39;LFQ_intensity&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="get_proteomics_measurements_ready"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.get_proteomics_measurements_ready">[docs]</a><span class="k">def</span> <span class="nf">get_proteomics_measurements_ready</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">index_cols</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="s1">&#39;sample&#39;</span><span class="p">,</span> <span class="s1">&#39;subject&#39;</span><span class="p">],</span> <span class="n">drop_cols</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">],</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="n">identifier</span><span class="o">=</span><span class="s1">&#39;identifier&#39;</span><span class="p">,</span> <span class="n">extra_identifier</span><span class="o">=</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="n">imputation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;distribution&#39;</span><span class="p">,</span> <span class="n">missing_method</span> <span class="o">=</span> <span class="s1">&#39;percentage&#39;</span><span class="p">,</span> <span class="n">missing_per_group</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">missing_max</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">min_valid</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">value_col</span><span class="o">=</span><span class="s1">&#39;LFQ_intensity&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Processes proteomics data extracted from the database: 1) filter proteins with high number of missing values (&gt; missing_max or min_valid), 2) impute missing values.</span>
 <span class="sd">    For more information on imputation method visit http://www.coxdocs.org/doku.php?id=perseus:user:activities:matrixprocessing:filterrows:filtervalidvaluesrows.</span>
@@ -662,6 +673,7 @@
 
     <span class="k">return</span> <span class="n">df</span></div>
 
+
 <div class="viewcode-block" id="get_clinical_measurements_ready"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.get_clinical_measurements_ready">[docs]</a><span class="k">def</span> <span class="nf">get_clinical_measurements_ready</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">subject_id</span><span class="o">=</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="n">sample_id</span><span class="o">=</span><span class="s1">&#39;biological_sample&#39;</span><span class="p">,</span> <span class="n">group_id</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;clinical_variable&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="s1">&#39;values&#39;</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;group&#39;</span><span class="p">],</span> <span class="n">imputation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">imputation_method</span><span class="o">=</span><span class="s1">&#39;KNN&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Processes clinical data extracted from the database by converting dataframe to wide-format and imputing missing values.</span>
@@ -695,8 +707,8 @@
             <span class="n">df</span> <span class="o">=</span> <span class="n">imputation_mixed_norm_KNN</span><span class="p">(</span><span class="n">processed_df</span><span class="p">,</span><span class="n">index_cols</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">group_id</span><span class="p">)</span>
 
     <span class="c1">#df = df.set_index(index)</span>
-
     <span class="k">return</span> <span class="n">df</span></div>
+
 
 <div class="viewcode-block" id="get_summary_data_matrix"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.get_summary_data_matrix">[docs]</a><span class="k">def</span> <span class="nf">get_summary_data_matrix</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -736,6 +748,7 @@
 
     <span class="k">return</span> <span class="n">test_normality</span></div>
 
+
 <div class="viewcode-block" id="run_pca"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.run_pca">[docs]</a><span class="k">def</span> <span class="nf">run_pca</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">drop_cols</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">,</span> <span class="s1">&#39;subject&#39;</span><span class="p">],</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="n">components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dropna</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Performs principal component analysis and returns the values of each component for each sample and each protein, and the loadings for each protein. \</span>
@@ -752,6 +765,7 @@
 
 <span class="sd">        result = run_pca(data, drop_cols=[&#39;sample&#39;, &#39;subject&#39;], group=&#39;group&#39;, components=2, dropna=True)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">112736</span><span class="p">)</span>
     <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">args</span> <span class="o">=</span> <span class="p">{}</span>
@@ -790,6 +804,7 @@
 
         <span class="n">result</span><span class="p">[</span><span class="s1">&#39;pca&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">resultDf</span><span class="p">,</span> <span class="n">loadings</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">args</span></div>
+
 
 <div class="viewcode-block" id="run_tsne"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.run_tsne">[docs]</a><span class="k">def</span> <span class="nf">run_tsne</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">drop_cols</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">,</span> <span class="s1">&#39;subject&#39;</span><span class="p">],</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="n">components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">perplexity</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="s1">&#39;pca&#39;</span><span class="p">,</span> <span class="n">dropna</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -839,6 +854,7 @@
         <span class="n">result</span><span class="p">[</span><span class="s1">&#39;tsne&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">resultDf</span>
     <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">args</span></div>
 
+
 <div class="viewcode-block" id="run_umap"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.run_umap">[docs]</a><span class="k">def</span> <span class="nf">run_umap</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">drop_cols</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">,</span> <span class="s1">&#39;subject&#39;</span><span class="p">],</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">min_dist</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;cosine&#39;</span><span class="p">,</span> <span class="n">dropna</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Performs Uniform Manifold Approximation and Projection. For more information vist https://umap-learn.readthedocs.io.</span>
@@ -879,6 +895,7 @@
         <span class="n">result</span><span class="p">[</span><span class="s1">&#39;umap&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">resultDf</span>
     <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">args</span></div>
 
+
 <div class="viewcode-block" id="calculate_correlations"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.calculate_correlations">[docs]</a><span class="k">def</span> <span class="nf">calculate_correlations</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;pearson&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates a Spearman (nonparametric) or a Pearson (parametric) correlation coefficient and p-value to test for non-correlation.</span>
@@ -899,6 +916,7 @@
 
     <span class="k">return</span> <span class="p">(</span><span class="n">coefficient</span><span class="p">,</span> <span class="n">pvalue</span><span class="p">)</span></div>
 
+
 <div class="viewcode-block" id="apply_pvalue_fdrcorrection"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.apply_pvalue_fdrcorrection">[docs]</a><span class="k">def</span> <span class="nf">apply_pvalue_fdrcorrection</span><span class="p">(</span><span class="n">pvalues</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;indep&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Performs p-value correction for false discovery rate. For more information visit https://www.statsmodels.org/devel/generated/statsmodels.stats.multitest.fdrcorrection.html.</span>
@@ -916,6 +934,7 @@
 
     <span class="k">return</span> <span class="p">(</span><span class="n">rejected</span><span class="p">,</span> <span class="n">padj</span><span class="p">)</span></div>
 
+
 <div class="viewcode-block" id="apply_pvalue_twostage_fdrcorrection"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.apply_pvalue_twostage_fdrcorrection">[docs]</a><span class="k">def</span> <span class="nf">apply_pvalue_twostage_fdrcorrection</span><span class="p">(</span><span class="n">pvalues</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;bh&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Iterated two stage linear step-up procedure with estimation of number of true hypotheses. For more information visit https://www.statsmodels.org/dev/generated/statsmodels.stats.multitest.fdrcorrection_twostage.html.</span>
@@ -932,6 +951,7 @@
     <span class="n">rejected</span><span class="p">,</span> <span class="n">padj</span><span class="p">,</span> <span class="n">num_hyp</span><span class="p">,</span> <span class="n">alpha_stages</span> <span class="o">=</span> <span class="n">multitest</span><span class="o">.</span><span class="n">fdrcorrection_twostage</span><span class="p">(</span><span class="n">pvalues</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="n">rejected</span><span class="p">,</span> <span class="n">padj</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="apply_pvalue_permutation_fdrcorrection"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.apply_pvalue_permutation_fdrcorrection">[docs]</a><span class="k">def</span> <span class="nf">apply_pvalue_permutation_fdrcorrection</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">observed_pvalues</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">permutations</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -983,6 +1003,7 @@
 
     <span class="k">return</span> <span class="n">count</span></div>
 
+
 <div class="viewcode-block" id="get_counts_permutation_fdr"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.get_counts_permutation_fdr">[docs]</a><span class="k">def</span> <span class="nf">get_counts_permutation_fdr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">random</span><span class="p">,</span> <span class="n">observed</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates local FDR values (q-values) by computing the fraction of accepted hits from the permuted data over accepted hits from the measured data normalized by the total number of permutations.</span>
@@ -1004,6 +1025,7 @@
 
     <span class="k">return</span> <span class="p">(</span><span class="n">qvalue</span><span class="p">,</span> <span class="n">qvalue</span> <span class="o">&lt;=</span> <span class="n">alpha</span><span class="p">)</span></div>
 
+
 <div class="viewcode-block" id="convertToEdgeList"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.convertToEdgeList">[docs]</a><span class="k">def</span> <span class="nf">convertToEdgeList</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">cols</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function converts a pandas dataframe to an edge list where index becomes the source nodes and columns the target nodes.</span>
@@ -1017,6 +1039,7 @@
     <span class="n">edge_list</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">cols</span>
 
     <span class="k">return</span> <span class="n">edge_list</span></div>
+
 
 <div class="viewcode-block" id="run_correlation"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.run_correlation">[docs]</a><span class="k">def</span> <span class="nf">run_correlation</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;pearson&#39;</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;fdr&#39;</span><span class="p">,</span> <span class="s1">&#39;indep&#39;</span><span class="p">)):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -1059,6 +1082,7 @@
 
     <span class="k">return</span> <span class="n">correlation</span></div>
 
+
 <div class="viewcode-block" id="run_multi_correlation"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.run_multi_correlation">[docs]</a><span class="k">def</span> <span class="nf">run_multi_correlation</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;biological_sample&#39;</span><span class="p">]</span> <span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;pearson&#39;</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;fdr&#39;</span><span class="p">,</span> <span class="s1">&#39;indep&#39;</span><span class="p">)):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function merges all input dataframes and calculates pairwise correlations for all columns.</span>
@@ -1087,6 +1111,7 @@
 
         <span class="n">correlation</span> <span class="o">=</span> <span class="n">run_correlation</span><span class="p">(</span><span class="n">multidf</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="n">correction</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">correlation</span></div>
+
 
 <div class="viewcode-block" id="calculate_rm_correlation"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.calculate_rm_correlation">[docs]</a><span class="k">def</span> <span class="nf">calculate_rm_correlation</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">subject</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -1126,6 +1151,7 @@
 
     <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">rm</span><span class="p">,</span> <span class="n">pvalue</span><span class="p">,</span> <span class="n">dof</span><span class="p">)</span></div>
 
+
 <div class="viewcode-block" id="run_rm_correlation"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.run_rm_correlation">[docs]</a><span class="k">def</span> <span class="nf">run_rm_correlation</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;fdr&#39;</span><span class="p">,</span> <span class="s1">&#39;indep&#39;</span><span class="p">)):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes pairwise repeated measurements correlations for all columns in dataframe, and returns results as an edge list with &#39;weight&#39; as correlation score, p-values, degrees of freedom and ajusted p-values.</span>
@@ -1162,6 +1188,7 @@
 
     <span class="k">return</span> <span class="n">correlation</span></div>
 
+
 <div class="viewcode-block" id="run_efficient_correlation"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.run_efficient_correlation">[docs]</a><span class="k">def</span> <span class="nf">run_efficient_correlation</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;pearson&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates pairwise correlations and returns lower triangle of the matrix with correlation values and p-values.</span>
@@ -1195,28 +1222,6 @@
 
     <span class="k">return</span> <span class="n">r</span><span class="p">,</span> <span class="n">p</span></div>
 
-<div class="viewcode-block" id="calculate_paired_ttest"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.calculate_paired_ttest">[docs]</a><span class="k">def</span> <span class="nf">calculate_paired_ttest</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">condition1</span><span class="p">,</span> <span class="n">condition2</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculates the t-test on RELATED samples belonging to two different groups. For more information visit https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.stats.ttest_rel.html.</span>
-
-<span class="sd">    :param df: pandas dataframe with groups and subjects as rows and protein identifier as column.</span>
-<span class="sd">    :param str condition1: identifier of first group.</span>
-<span class="sd">    :param str condition2: identifier of second group.</span>
-<span class="sd">    :return: Tuple with t-statistics, two-tailed p-value, mean of first group, mean of second group and logfc.</span>
-
-<span class="sd">    Example::</span>
-
-<span class="sd">        result = calculate_paired_ttest(df, &#39;group1&#39;, &#39;group2&#39;)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">group1</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="n">condition1</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span>
-    <span class="n">group2</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="n">condition2</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span>
-
-    <span class="n">mean1</span> <span class="o">=</span> <span class="n">group1</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-    <span class="n">mean2</span> <span class="o">=</span> <span class="n">group2</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-    <span class="n">log2fc</span> <span class="o">=</span> <span class="n">mean1</span> <span class="o">-</span> <span class="n">mean2</span>
-    <span class="n">t</span><span class="p">,</span> <span class="n">pvalue</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">ttest_rel</span><span class="p">(</span><span class="n">group1</span><span class="p">,</span> <span class="n">group2</span><span class="p">,</span> <span class="n">nan_policy</span><span class="o">=</span><span class="s1">&#39;omit&#39;</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">pvalue</span><span class="p">,</span> <span class="n">mean1</span><span class="p">,</span> <span class="n">mean2</span><span class="p">,</span> <span class="n">log2fc</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="calculate_ttest_samr"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.calculate_ttest_samr">[docs]</a><span class="k">def</span> <span class="nf">calculate_ttest_samr</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">s0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -1264,7 +1269,8 @@
 
     <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="calculate_ttest"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.calculate_ttest">[docs]</a><span class="k">def</span> <span class="nf">calculate_ttest</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">condition1</span><span class="p">,</span> <span class="n">condition2</span><span class="p">):</span>
+
+<div class="viewcode-block" id="calculate_ttest"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.calculate_ttest">[docs]</a><span class="k">def</span> <span class="nf">calculate_ttest</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">condition1</span><span class="p">,</span> <span class="n">condition2</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">,</span>  <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mf">0.707</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the t-test for the means of independent samples belonging to two different groups. For more information visit https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.ttest_ind.html.</span>
 
@@ -1277,15 +1283,23 @@
 
 <span class="sd">        result = calculate_ttest(df, &#39;group1&#39;, &#39;group2&#39;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">pvalue</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
     <span class="n">group1</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="n">condition1</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span>
     <span class="n">group2</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="n">condition2</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span>
 
     <span class="n">mean1</span> <span class="o">=</span> <span class="n">group1</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
     <span class="n">mean2</span> <span class="o">=</span> <span class="n">group2</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
     <span class="n">log2fc</span> <span class="o">=</span> <span class="n">mean1</span> <span class="o">-</span> <span class="n">mean2</span>
-    <span class="n">t</span><span class="p">,</span> <span class="n">pvalue</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">ttest_ind</span><span class="p">(</span><span class="n">group1</span><span class="p">,</span> <span class="n">group2</span><span class="p">,</span> <span class="n">nan_policy</span><span class="o">=</span><span class="s1">&#39;omit&#39;</span><span class="p">)</span>
-
+    <span class="n">result</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">ttest</span><span class="p">(</span><span class="n">group1</span><span class="p">,</span><span class="n">group2</span><span class="p">,</span> <span class="n">paired</span><span class="p">,</span> <span class="n">tail</span><span class="p">,</span> <span class="n">correction</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="s1">&#39;T&#39;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s1">&#39;p-val&#39;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">pvalue</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;p-val&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    
     <span class="k">return</span> <span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">pvalue</span><span class="p">,</span> <span class="n">mean1</span><span class="p">,</span> <span class="n">mean2</span><span class="p">,</span> <span class="n">log2fc</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="calculate_THSD"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.calculate_THSD">[docs]</a><span class="k">def</span> <span class="nf">calculate_THSD</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -1312,6 +1326,7 @@
         <span class="n">df_results</span><span class="p">[</span><span class="s1">&#39;rejected&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_results</span><span class="p">[</span><span class="s1">&#39;padj_THSD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">alpha</span> <span class="k">else</span> <span class="kc">False</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">df_results</span></div>
+
 
 <div class="viewcode-block" id="calculate_pairwise_ttest"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.calculate_pairwise_ttest">[docs]</a><span class="k">def</span> <span class="nf">calculate_pairwise_ttest</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -1342,6 +1357,7 @@
 
     <span class="k">return</span> <span class="n">posthoc</span></div>
 
+
 <div class="viewcode-block" id="complement_posthoc"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.complement_posthoc">[docs]</a><span class="k">def</span> <span class="nf">complement_posthoc</span><span class="p">(</span><span class="n">posthoc</span><span class="p">,</span> <span class="n">identifier</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates fold-changes after posthoc test.</span>
@@ -1356,6 +1372,7 @@
 
     <span class="k">return</span> <span class="n">posthoc</span></div>
 
+
 <div class="viewcode-block" id="calculate_dabest"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.calculate_dabest">[docs]</a><span class="k">def</span> <span class="nf">calculate_dabest</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">id_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="s1">&#39;mean_diff&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 
@@ -1368,8 +1385,6 @@
 <span class="sd">    :param id_col:</span>
 <span class="sd">    :param test:</span>
 <span class="sd">    :return:</span>
-
-
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;group1&quot;</span><span class="p">,</span> <span class="s2">&quot;group2&quot;</span><span class="p">,</span> <span class="s2">&quot;effect size&quot;</span><span class="p">,</span> <span class="s2">&quot;paired&quot;</span><span class="p">,</span> <span class="s1">&#39;difference&#39;</span><span class="p">,</span> <span class="s2">&quot;CI&quot;</span><span class="p">,</span> <span class="s2">&quot;bca low&quot;</span><span class="p">,</span> <span class="s2">&quot;bca high&quot;</span><span class="p">,</span> <span class="s2">&quot;bca interval idx&quot;</span><span class="p">,</span> <span class="s2">&quot;pct low&quot;</span><span class="p">,</span> <span class="s2">&quot;pct high&quot;</span><span class="p">,</span> <span class="s2">&quot;pct interval idx&quot;</span><span class="p">,</span> <span class="s2">&quot;bootstraps&quot;</span><span class="p">,</span> <span class="s1">&#39;resamples&#39;</span><span class="p">,</span> <span class="s1">&#39;random seed&#39;</span><span class="p">,</span> <span class="s1">&#39;pvalue Welch&#39;</span><span class="p">,</span> <span class="s1">&#39;statistic Welch&#39;</span><span class="p">,</span> <span class="s1">&#39;pvalue Student T&#39;</span><span class="p">,</span> <span class="s1">&#39;statistic Student T&#39;</span><span class="p">,</span> <span class="s1">&#39;pvalue Mann Whitney&#39;</span><span class="p">,</span> <span class="s1">&#39;statistic Mann Whitney&#39;</span><span class="p">]</span>
     <span class="n">valid_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;group1&quot;</span><span class="p">,</span> <span class="s2">&quot;group2&quot;</span><span class="p">,</span> <span class="s2">&quot;effect size&quot;</span><span class="p">,</span> <span class="s2">&quot;paired&quot;</span><span class="p">,</span> <span class="s1">&#39;difference&#39;</span><span class="p">,</span> <span class="s2">&quot;CI&quot;</span><span class="p">,</span> <span class="s1">&#39;pvalue Welch&#39;</span><span class="p">,</span> <span class="s1">&#39;statistic Welch&#39;</span><span class="p">,</span> <span class="s1">&#39;pvalue Student T&#39;</span><span class="p">,</span> <span class="s1">&#39;statistic Student T&#39;</span><span class="p">,</span> <span class="s1">&#39;pvalue Mann Whitney&#39;</span><span class="p">,</span> <span class="s1">&#39;statistic Mann Whitney&#39;</span><span class="p">]</span>
@@ -1392,6 +1407,7 @@
     <span class="n">result</span><span class="p">[</span><span class="s1">&#39;identifier&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span>
 
     <span class="k">return</span> <span class="n">result</span></div>
+
 
 <div class="viewcode-block" id="calculate_anova_samr"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.calculate_anova_samr">[docs]</a><span class="k">def</span> <span class="nf">calculate_anova_samr</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">s0</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -1416,18 +1432,22 @@
 
     <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="calculate_anova"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.calculate_anova">[docs]</a><span class="k">def</span> <span class="nf">calculate_anova</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">):</span>
+
+<div class="viewcode-block" id="calculate_anova"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.calculate_anova">[docs]</a><span class="k">def</span> <span class="nf">calculate_anova</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates one-way ANOVA using scipy stats.</span>
 
 <span class="sd">    :param df: pandas dataframe with group as rows and protein identifier as column</span>
+<span class="sd">    :param str column: name of the column in df to run ANOVA on</span>
 <span class="sd">    :param str group: column with group identifiers</span>
 <span class="sd">    :return: Tuple with t-statistics and p-value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">group_values</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">group</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
-    <span class="n">t</span><span class="p">,</span> <span class="n">pvalue</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">f_oneway</span><span class="p">(</span><span class="o">*</span><span class="n">group_values</span><span class="p">)</span>
+    <span class="n">aov_result</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">anova</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="n">column</span><span class="p">,</span> <span class="n">between</span><span class="o">=</span><span class="n">group</span><span class="p">,</span> <span class="n">detailed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">aov_result</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Source&#39;</span><span class="p">,</span> <span class="s1">&#39;SS&#39;</span><span class="p">,</span> <span class="s1">&#39;DF&#39;</span><span class="p">,</span> <span class="s1">&#39;MS&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;pvalue&#39;</span><span class="p">,</span> <span class="s1">&#39;np2&#39;</span><span class="p">]</span>
+    <span class="n">t</span><span class="p">,</span> <span class="n">pvalue</span> <span class="o">=</span> <span class="n">aov_result</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;pvalue&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span>
 
-    <span class="k">return</span> <span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">pvalue</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="p">(</span><span class="n">column</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">pvalue</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="calculate_repeated_measures_anova"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.calculate_repeated_measures_anova">[docs]</a><span class="k">def</span> <span class="nf">calculate_repeated_measures_anova</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -1449,6 +1469,7 @@
 
     <span class="k">return</span> <span class="p">(</span><span class="n">column</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">pvalue</span><span class="p">)</span></div>
 
+
 <div class="viewcode-block" id="get_max_permutations"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.get_max_permutations">[docs]</a><span class="k">def</span> <span class="nf">get_max_permutations</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get maximum number of permutations according to number of samples.</span>
@@ -1463,6 +1484,7 @@
     <span class="n">max_perm</span> <span class="o">=</span> <span class="n">factorial</span><span class="p">(</span><span class="n">num_groups</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">factorial</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">num_per_group</span><span class="p">)))</span>
 
     <span class="k">return</span> <span class="n">max_perm</span></div>
+
 
 <div class="viewcode-block" id="check_is_paired"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.check_is_paired">[docs]</a><span class="k">def</span> <span class="nf">check_is_paired</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">subject</span><span class="p">,</span> <span class="n">group</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -1514,6 +1536,7 @@
 
     <span class="k">return</span> <span class="n">scores</span></div>
 
+
 <div class="viewcode-block" id="run_anova"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.run_anova">[docs]</a><span class="k">def</span> <span class="nf">run_anova</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">drop_cols</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;sample&quot;</span><span class="p">,</span><span class="s1">&#39;subject&#39;</span><span class="p">],</span> <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="n">permutations</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Performs statistical test for each protein in a dataset.</span>
@@ -1546,17 +1569,16 @@
         <span class="n">aov_results</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">pairwise_results</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-            <span class="n">rows</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
-            <span class="n">aov_results</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">col</span><span class="p">,)</span> <span class="o">+</span> <span class="n">calculate_anova</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">))</span>
-            <span class="n">thsd_result</span> <span class="o">=</span> <span class="n">calculate_THSD</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">thsd_result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">pairwise_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">thsd_result</span><span class="p">)</span>
+            <span class="n">aov</span> <span class="o">=</span> <span class="n">calculate_anova</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(),</span> <span class="n">column</span><span class="o">=</span><span class="n">col</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">)</span>
+            <span class="n">aov_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aov</span><span class="p">)</span>
+            <span class="n">pairwise_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">calculate_pairwise_ttest</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(),</span> <span class="n">column</span><span class="o">=</span><span class="n">col</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">))</span>
 
         <span class="n">max_perm</span> <span class="o">=</span> <span class="n">get_max_permutations</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">)</span>
-        <span class="n">res</span> <span class="o">=</span> <span class="n">format_anova_table</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">aov_results</span><span class="p">,</span> <span class="n">pairwise_results</span><span class="p">,</span>  <span class="n">group</span><span class="p">,</span> <span class="n">permutations</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">max_perm</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">format_anova_table</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">aov_results</span><span class="p">,</span> <span class="n">pairwise_results</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">permutations</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">max_perm</span><span class="p">)</span>
         <span class="n">res</span><span class="p">[</span><span class="s1">&#39;Method&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;One-way anova&#39;</span>
 
     <span class="k">return</span> <span class="n">res</span></div>
+
 
 <div class="viewcode-block" id="run_repeated_measurements_anova"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.run_repeated_measurements_anova">[docs]</a><span class="k">def</span> <span class="nf">run_repeated_measurements_anova</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">drop_cols</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">],</span> <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="n">permutations</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -1588,6 +1610,7 @@
     <span class="n">res</span><span class="p">[</span><span class="s1">&#39;Method&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Repeated measurements anova&#39;</span>
 
     <span class="k">return</span> <span class="n">res</span></div>
+
 
 <div class="viewcode-block" id="format_anova_table"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.format_anova_table">[docs]</a><span class="k">def</span> <span class="nf">format_anova_table</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">aov_results</span><span class="p">,</span> <span class="n">pairwise_results</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">permutations</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">max_permutations</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -1633,6 +1656,7 @@
 
     <span class="k">return</span> <span class="n">res</span></div>
 
+
 <div class="viewcode-block" id="run_ttest"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.run_ttest">[docs]</a><span class="k">def</span> <span class="nf">run_ttest</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">condition1</span><span class="p">,</span> <span class="n">condition2</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">drop_cols</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;sample&quot;</span><span class="p">],</span> <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="n">paired</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="s1">&#39;indep&#39;</span><span class="p">,</span> <span class="n">permutations</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Runs t-test (paired/unpaired) for each protein in dataset and performs permutation-based (if permutations&gt;0) or Benjamini/Hochberg (if permutations=0) multiple hypothesis correction.</span>
@@ -1656,12 +1680,11 @@
     <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;T-statistics&#39;</span><span class="p">,</span> <span class="s1">&#39;pvalue&#39;</span><span class="p">,</span> <span class="s1">&#39;mean_group1&#39;</span><span class="p">,</span> <span class="s1">&#39;mean_group2&#39;</span><span class="p">,</span> <span class="s1">&#39;log2FC&#39;</span><span class="p">]</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="n">group</span><span class="p">,</span> <span class="n">subject</span><span class="p">])</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">drop_cols</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;Unpaired t-test&#39;</span>
     <span class="k">if</span> <span class="n">paired</span><span class="p">:</span>
         <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;Paired t-test&#39;</span>
-        <span class="n">scores</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">func</span> <span class="o">=</span> <span class="n">calculate_paired_ttest</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">result_type</span><span class="o">=</span><span class="s1">&#39;expand&#39;</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span><span class="p">(</span><span class="n">condition1</span><span class="p">,</span> <span class="n">condition2</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;Unpaired t-test&#39;</span>
-        <span class="n">scores</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">func</span> <span class="o">=</span> <span class="n">calculate_ttest</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">result_type</span><span class="o">=</span><span class="s1">&#39;expand&#39;</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span><span class="p">(</span><span class="n">condition1</span><span class="p">,</span> <span class="n">condition2</span><span class="p">))</span>
+        
+    <span class="n">scores</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">func</span> <span class="o">=</span> <span class="n">calculate_ttest</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">result_type</span><span class="o">=</span><span class="s1">&#39;expand&#39;</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span><span class="p">(</span><span class="n">condition1</span><span class="p">,</span> <span class="n">condition2</span><span class="p">,</span> <span class="n">paired</span><span class="p">))</span>
     <span class="n">scores</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">columns</span>
     <span class="n">scores</span> <span class="o">=</span> <span class="n">scores</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
 
@@ -1688,6 +1711,7 @@
     <span class="n">scores</span> <span class="o">=</span> <span class="n">scores</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">scores</span></div>
+
 
 <div class="viewcode-block" id="run_samr"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.run_samr">[docs]</a><span class="k">def</span> <span class="nf">run_samr</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="n">drop_cols</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;sample&#39;</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">s0</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">permutations</span><span class="o">=</span><span class="mi">250</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -1846,6 +1870,7 @@
 
     <span class="k">return</span> <span class="p">(</span><span class="n">odds</span><span class="p">,</span> <span class="n">pvalue</span><span class="p">)</span></div>
 
+
 <div class="viewcode-block" id="run_regulation_enrichment"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.run_regulation_enrichment">[docs]</a><span class="k">def</span> <span class="nf">run_regulation_enrichment</span><span class="p">(</span><span class="n">regulation_data</span><span class="p">,</span> <span class="n">annotation</span><span class="p">,</span> <span class="n">identifier</span><span class="o">=</span><span class="s1">&#39;identifier&#39;</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;group1&#39;</span><span class="p">,</span> <span class="s1">&#39;group2&#39;</span><span class="p">],</span> <span class="n">annotation_col</span><span class="o">=</span><span class="s1">&#39;annotation&#39;</span><span class="p">,</span> <span class="n">reject_col</span><span class="o">=</span><span class="s1">&#39;rejected&#39;</span><span class="p">,</span> <span class="n">group_col</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;fisher&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function runs a simple enrichment analysis for significantly regulated features in a dataset.</span>
@@ -1880,6 +1905,7 @@
     <span class="n">result</span> <span class="o">=</span> <span class="n">run_enrichment</span><span class="p">(</span><span class="n">annotation</span><span class="p">,</span> <span class="n">foreground</span><span class="o">=</span><span class="s1">&#39;foreground&#39;</span><span class="p">,</span> <span class="n">background</span><span class="o">=</span><span class="s1">&#39;background&#39;</span><span class="p">,</span> <span class="n">foreground_pop</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">foreground_list</span><span class="p">),</span> <span class="n">background_pop</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">background_list</span><span class="p">),</span> <span class="n">annotation_col</span><span class="o">=</span><span class="n">annotation_col</span><span class="p">,</span> <span class="n">group_col</span><span class="o">=</span><span class="n">group_col</span><span class="p">,</span> <span class="n">identifier_col</span><span class="o">=</span><span class="n">identifier</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">result</span></div>
+
 
 <div class="viewcode-block" id="run_enrichment"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.run_enrichment">[docs]</a><span class="k">def</span> <span class="nf">run_enrichment</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">foreground</span><span class="p">,</span> <span class="n">background</span><span class="p">,</span> <span class="n">foreground_pop</span><span class="p">,</span> <span class="n">background_pop</span><span class="p">,</span> <span class="n">annotation_col</span><span class="o">=</span><span class="s1">&#39;annotation&#39;</span><span class="p">,</span> <span class="n">group_col</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="n">identifier_col</span><span class="o">=</span><span class="s1">&#39;identifier&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;fisher&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -1934,6 +1960,7 @@
 
     <span class="k">return</span> <span class="n">result</span></div>
 
+
 <div class="viewcode-block" id="calculate_fold_change"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.calculate_fold_change">[docs]</a><span class="k">def</span> <span class="nf">calculate_fold_change</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">condition1</span><span class="p">,</span> <span class="n">condition2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates fold-changes between two groups for all proteins in a dataframe.</span>
@@ -1965,6 +1992,7 @@
         <span class="n">fold_change</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmedian</span><span class="p">(</span><span class="n">group1</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmedian</span><span class="p">(</span><span class="n">group2</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">fold_change</span></div>
+
 
 <div class="viewcode-block" id="cohen_d"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.cohen_d">[docs]</a><span class="k">def</span> <span class="nf">cohen_d</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">condition1</span><span class="p">,</span> <span class="n">condition2</span><span class="p">,</span> <span class="n">ddof</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -2006,6 +2034,7 @@
         <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">meang1</span> <span class="o">-</span> <span class="n">meang2</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(((</span><span class="n">ng1</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span> <span class="n">sdg1</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">ng2</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span> <span class="n">sdg2</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">dof</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">d</span></div>
+
 
 <div class="viewcode-block" id="hedges_g"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.hedges_g">[docs]</a><span class="k">def</span> <span class="nf">hedges_g</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">condition1</span><span class="p">,</span> <span class="n">condition2</span><span class="p">,</span> <span class="n">ddof</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -2053,6 +2082,7 @@
 
     <span class="k">return</span> <span class="n">g</span></div>
 
+
 <div class="viewcode-block" id="run_mapper"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.run_mapper">[docs]</a><span class="k">def</span> <span class="nf">run_mapper</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">lenses</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;l2norm&quot;</span><span class="p">],</span> <span class="n">n_cubes</span> <span class="o">=</span> <span class="mi">15</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">n_clusters</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">linkage</span><span class="o">=</span><span class="s2">&quot;complete&quot;</span><span class="p">,</span> <span class="n">affinity</span><span class="o">=</span><span class="s2">&quot;correlation&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 
@@ -2092,6 +2122,7 @@
 
     <span class="k">return</span> <span class="n">simplicial_complex</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;labels&quot;</span><span class="p">:</span><span class="n">labels</span><span class="p">}</span></div>
 
+
 <div class="viewcode-block" id="run_WGCNA"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.run_WGCNA">[docs]</a><span class="k">def</span> <span class="nf">run_WGCNA</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">drop_cols_exp</span><span class="p">,</span> <span class="n">drop_cols_cli</span><span class="p">,</span> <span class="n">RsquaredCut</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">networkType</span><span class="o">=</span><span class="s1">&#39;unsigned&#39;</span><span class="p">,</span> <span class="n">minModuleSize</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">deepSplit</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">pamRespectsDendro</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">merge_modules</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">MEDissThres</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Runs an automated weighted gene co-expression network analysis (WGCNA), using input proteomics/transcriptomics/genomics and clinical variables data.</span>
@@ -2130,33 +2161,34 @@
 
                 <span class="n">dissTOM</span><span class="p">,</span> <span class="n">moduleColors</span> <span class="o">=</span> <span class="n">wgcna</span><span class="o">.</span><span class="n">build_network</span><span class="p">(</span><span class="n">data_exp</span><span class="p">,</span> <span class="n">softPower</span><span class="o">=</span><span class="n">softPower</span><span class="p">,</span> <span class="n">networkType</span><span class="o">=</span><span class="n">networkType</span><span class="p">,</span> <span class="n">minModuleSize</span><span class="o">=</span><span class="n">minModuleSize</span><span class="p">,</span> <span class="n">deepSplit</span><span class="o">=</span><span class="n">deepSplit</span><span class="p">,</span>
                                                     <span class="n">pamRespectsDendro</span><span class="o">=</span><span class="n">pamRespectsDendro</span><span class="p">,</span> <span class="n">merge_modules</span><span class="o">=</span><span class="n">merge_modules</span><span class="p">,</span> <span class="n">MEDissThres</span><span class="o">=</span><span class="n">MEDissThres</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">dissTOM</span><span class="o">.</span><span class="n">empty</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">moduleColors</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">Features_per_Module</span> <span class="o">=</span> <span class="n">wgcna</span><span class="o">.</span><span class="n">get_FeaturesPerModule</span><span class="p">(</span><span class="n">data_exp</span><span class="p">,</span> <span class="n">moduleColors</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;dataframe&#39;</span><span class="p">)</span>
 
-                <span class="n">Features_per_Module</span> <span class="o">=</span> <span class="n">wgcna</span><span class="o">.</span><span class="n">get_FeaturesPerModule</span><span class="p">(</span><span class="n">data_exp</span><span class="p">,</span> <span class="n">moduleColors</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;dataframe&#39;</span><span class="p">)</span>
+                    <span class="n">MEs</span> <span class="o">=</span> <span class="n">wgcna</span><span class="o">.</span><span class="n">calculate_module_eigengenes</span><span class="p">(</span><span class="n">data_exp</span><span class="p">,</span> <span class="n">moduleColors</span><span class="p">,</span> <span class="n">softPower</span><span class="o">=</span><span class="n">softPower</span><span class="p">,</span> <span class="n">dissimilarity</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-                <span class="n">MEs</span> <span class="o">=</span> <span class="n">wgcna</span><span class="o">.</span><span class="n">calculate_module_eigengenes</span><span class="p">(</span><span class="n">data_exp</span><span class="p">,</span> <span class="n">moduleColors</span><span class="p">,</span> <span class="n">softPower</span><span class="o">=</span><span class="n">softPower</span><span class="p">,</span> <span class="n">dissimilarity</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                    <span class="n">moduleTraitCor</span><span class="p">,</span> <span class="n">textMatrix</span> <span class="o">=</span> <span class="n">wgcna</span><span class="o">.</span><span class="n">calculate_ModuleTrait_correlation</span><span class="p">(</span><span class="n">data_exp</span><span class="p">,</span> <span class="n">data_cli</span><span class="p">,</span> <span class="n">MEs</span><span class="p">)</span>
 
-                <span class="n">moduleTraitCor</span><span class="p">,</span> <span class="n">textMatrix</span> <span class="o">=</span> <span class="n">wgcna</span><span class="o">.</span><span class="n">calculate_ModuleTrait_correlation</span><span class="p">(</span><span class="n">data_exp</span><span class="p">,</span> <span class="n">data_cli</span><span class="p">,</span> <span class="n">MEs</span><span class="p">)</span>
+                    <span class="n">MM</span><span class="p">,</span> <span class="n">MMPvalue</span> <span class="o">=</span> <span class="n">wgcna</span><span class="o">.</span><span class="n">calculate_ModuleMembership</span><span class="p">(</span><span class="n">data_exp</span><span class="p">,</span> <span class="n">MEs</span><span class="p">)</span>
 
-                <span class="n">MM</span><span class="p">,</span> <span class="n">MMPvalue</span> <span class="o">=</span> <span class="n">wgcna</span><span class="o">.</span><span class="n">calculate_ModuleMembership</span><span class="p">(</span><span class="n">data_exp</span><span class="p">,</span> <span class="n">MEs</span><span class="p">)</span>
+                    <span class="n">FS</span><span class="p">,</span> <span class="n">FSPvalue</span> <span class="o">=</span> <span class="n">wgcna</span><span class="o">.</span><span class="n">calculate_FeatureTraitSignificance</span><span class="p">(</span><span class="n">data_exp</span><span class="p">,</span> <span class="n">data_cli</span><span class="p">)</span>
 
-                <span class="n">FS</span><span class="p">,</span> <span class="n">FSPvalue</span> <span class="o">=</span> <span class="n">wgcna</span><span class="o">.</span><span class="n">calculate_FeatureTraitSignificance</span><span class="p">(</span><span class="n">data_exp</span><span class="p">,</span> <span class="n">data_cli</span><span class="p">)</span>
+                    <span class="n">METDiss</span><span class="p">,</span> <span class="n">METcor</span> <span class="o">=</span> <span class="n">wgcna</span><span class="o">.</span><span class="n">get_EigengenesTrait_correlation</span><span class="p">(</span><span class="n">MEs</span><span class="p">,</span> <span class="n">data_cli</span><span class="p">)</span>
 
-                <span class="n">METDiss</span><span class="p">,</span> <span class="n">METcor</span> <span class="o">=</span> <span class="n">wgcna</span><span class="o">.</span><span class="n">get_EigengenesTrait_correlation</span><span class="p">(</span><span class="n">MEs</span><span class="p">,</span> <span class="n">data_cli</span><span class="p">)</span>
-
-                <span class="n">result</span><span class="p">[</span><span class="n">dtype</span><span class="p">][</span><span class="s1">&#39;dissTOM&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dissTOM</span>
-                <span class="n">result</span><span class="p">[</span><span class="n">dtype</span><span class="p">][</span><span class="s1">&#39;module_colors&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">moduleColors</span>
-                <span class="n">result</span><span class="p">[</span><span class="n">dtype</span><span class="p">][</span><span class="s1">&#39;features_per_module&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Features_per_Module</span>
-                <span class="n">result</span><span class="p">[</span><span class="n">dtype</span><span class="p">][</span><span class="s1">&#39;MEs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">MEs</span>
-                <span class="n">result</span><span class="p">[</span><span class="n">dtype</span><span class="p">][</span><span class="s1">&#39;module_trait_cor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">moduleTraitCor</span>
-                <span class="n">result</span><span class="p">[</span><span class="n">dtype</span><span class="p">][</span><span class="s1">&#39;text_matrix&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">textMatrix</span>
-                <span class="n">result</span><span class="p">[</span><span class="n">dtype</span><span class="p">][</span><span class="s1">&#39;module_membership&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">MM</span>
-                <span class="n">result</span><span class="p">[</span><span class="n">dtype</span><span class="p">][</span><span class="s1">&#39;module_membership_pval&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">MMPvalue</span>
-                <span class="n">result</span><span class="p">[</span><span class="n">dtype</span><span class="p">][</span><span class="s1">&#39;feature_significance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">FS</span>
-                <span class="n">result</span><span class="p">[</span><span class="n">dtype</span><span class="p">][</span><span class="s1">&#39;feature_significance_pval&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">FSPvalue</span>
-                <span class="n">result</span><span class="p">[</span><span class="n">dtype</span><span class="p">][</span><span class="s1">&#39;ME_trait_diss&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">METDiss</span>
-                <span class="n">result</span><span class="p">[</span><span class="n">dtype</span><span class="p">][</span><span class="s1">&#39;ME_trait_cor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">METcor</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">dtype</span><span class="p">][</span><span class="s1">&#39;dissTOM&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dissTOM</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">dtype</span><span class="p">][</span><span class="s1">&#39;module_colors&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">moduleColors</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">dtype</span><span class="p">][</span><span class="s1">&#39;features_per_module&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Features_per_Module</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">dtype</span><span class="p">][</span><span class="s1">&#39;MEs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">MEs</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">dtype</span><span class="p">][</span><span class="s1">&#39;module_trait_cor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">moduleTraitCor</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">dtype</span><span class="p">][</span><span class="s1">&#39;text_matrix&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">textMatrix</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">dtype</span><span class="p">][</span><span class="s1">&#39;module_membership&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">MM</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">dtype</span><span class="p">][</span><span class="s1">&#39;module_membership_pval&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">MMPvalue</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">dtype</span><span class="p">][</span><span class="s1">&#39;feature_significance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">FS</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">dtype</span><span class="p">][</span><span class="s1">&#39;feature_significance_pval&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">FSPvalue</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">dtype</span><span class="p">][</span><span class="s1">&#39;ME_trait_diss&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">METDiss</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">dtype</span><span class="p">][</span><span class="s1">&#39;ME_trait_cor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">METcor</span>
 
     <span class="k">return</span> <span class="n">result</span></div>
+
 
 <div class="viewcode-block" id="most_central_edge"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.most_central_edge">[docs]</a><span class="k">def</span> <span class="nf">most_central_edge</span><span class="p">(</span><span class="n">G</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -2170,6 +2202,7 @@
 
     <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">centrality</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">centrality</span><span class="o">.</span><span class="n">get</span><span class="p">)</span></div>
 
+
 <div class="viewcode-block" id="get_louvain_partitions"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.get_louvain_partitions">[docs]</a><span class="k">def</span> <span class="nf">get_louvain_partitions</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">weight</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes the partition of the graph nodes which maximises the modularity (or try..) using the Louvain heuristices. For more information visit https://python-louvain.readthedocs.io/en/latest/api.html.</span>
@@ -2182,6 +2215,7 @@
     <span class="n">partition</span> <span class="o">=</span> <span class="n">community</span><span class="o">.</span><span class="n">best_partition</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">partition</span></div>
+
 
 <div class="viewcode-block" id="get_network_communities"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.get_network_communities">[docs]</a><span class="k">def</span> <span class="nf">get_network_communities</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -2219,6 +2253,7 @@
 
     <span class="k">return</span> <span class="n">communities</span></div>
 
+
 <div class="viewcode-block" id="get_publications_abstracts"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.get_publications_abstracts">[docs]</a><span class="k">def</span> <span class="nf">get_publications_abstracts</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">publication_col</span><span class="o">=</span><span class="s2">&quot;publication&quot;</span><span class="p">,</span> <span class="n">join_by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;publication&#39;</span><span class="p">,</span><span class="s1">&#39;Proteins&#39;</span><span class="p">,</span><span class="s1">&#39;Diseases&#39;</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="s2">&quot;PMID&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Accesses NCBI PubMed over the WWW and retrieves the abstracts corresponding to a list of one or more PubMed IDs.</span>
@@ -2241,6 +2276,7 @@
             <span class="n">abstracts</span> <span class="o">=</span> <span class="n">abstracts</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()[</span><span class="n">join_by</span><span class="p">]</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">publication_col</span><span class="p">))</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">abstracts</span></div>
 
+
 <div class="viewcode-block" id="eta_squared"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.eta_squared">[docs]</a><span class="k">def</span> <span class="nf">eta_squared</span><span class="p">(</span><span class="n">aov</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the effect size using Eta-squared.</span>
@@ -2251,6 +2287,7 @@
     <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;eta_sq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;NaN&#39;</span>
     <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;eta_sq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">aov</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;sum_sq&#39;</span><span class="p">]</span><span class="o">/</span><span class="nb">sum</span><span class="p">(</span><span class="n">aov</span><span class="p">[</span><span class="s1">&#39;sum_sq&#39;</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">aov</span></div>
+
 
 <div class="viewcode-block" id="omega_squared"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.omega_squared">[docs]</a><span class="k">def</span> <span class="nf">omega_squared</span><span class="p">(</span><span class="n">aov</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -2263,6 +2300,7 @@
     <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;omega_sq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;NaN&#39;</span>
     <span class="n">aov</span><span class="p">[</span><span class="s1">&#39;omega_sq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">aov</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;sum_sq&#39;</span><span class="p">]</span><span class="o">-</span><span class="p">(</span><span class="n">aov</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;df&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">mse</span><span class="p">))</span><span class="o">/</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">aov</span><span class="p">[</span><span class="s1">&#39;sum_sq&#39;</span><span class="p">])</span><span class="o">+</span><span class="n">mse</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">aov</span></div>
+
 
 <div class="viewcode-block" id="run_two_way_anova"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.run_two_way_anova">[docs]</a><span class="k">def</span> <span class="nf">run_two_way_anova</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">drop_cols</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">],</span> <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="s1">&#39;secondary_group&#39;</span><span class="p">]):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -2303,6 +2341,7 @@
     <span class="n">anova_df</span> <span class="o">=</span> <span class="n">anova_df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">anova_df</span><span class="p">,</span> <span class="n">residuals</span></div>
+
 
 <div class="viewcode-block" id="run_snf"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.run_snf">[docs]</a><span class="k">def</span> <span class="nf">run_snf</span><span class="p">(</span><span class="n">df_dict</span><span class="p">,</span> <span class="n">clusters</span><span class="p">,</span> <span class="n">distance_metric</span><span class="p">,</span> <span class="n">K_affinity</span><span class="p">,</span> <span class="n">mu_affinity</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>

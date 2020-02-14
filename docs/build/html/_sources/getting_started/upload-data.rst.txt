@@ -1,10 +1,29 @@
 .. _Upload Data:
 
+NOT FINISHED!!!!f
+
 Upload project experimental data
 ==================================
 
 Prepare data for upload
 -----------------------
+
+.. _Experimental Design:
+
+Experimental Design
+^^^^^^^^^^^^^^^^^^^^
+
+.. figure:: ../_static/images/experimental_design.png
+    :width: 80%
+    :align: center
+
+    Experimental Design file example
+
+Open the Experimental Design excel file, automatically downloaded when the project was created, and fill in the columns for `subject external_id`, `biological_sample external_id` and `analytical_sample external_id`.
+The identifiers provided in this file **must** correspond to the identifiers used in the *Clinical Data* file, and to the column names in the *Proteomics* files (see below).
+
+.. warning:: Make sure, within each column, the identifiers are unique. This means, if you have a subject "KO1", no other subject can have the same identifier, but you can have a biological sample and/or analytical sample "KO1".
+
 
 Clinical Data
 ^^^^^^^^^^^^^^^^^^
@@ -18,19 +37,19 @@ Clinical Data
 Open the Clinical Data excel file, automatically downloaded when the project was created, and fill in as much information as you can.
 Be aware that the following columns are mandatory to fill in:
 
-- **subject external_id**: This is the identifier your subject has in your study so far.
+- **subject external_id**: This is the identifier your subject has in your study so far (same identifiers as used in :ref:`Experimental Design`, **subject external_id**).
 
 - **tissue**: This is the name of the tissue each sample came from. Make sure it is also one of the tissues selected during Project creation.
 
 - **disease**: This should match the disease(s) you selected from the drop-down menu in the :ref:`Project Creation`.
 
-- **biological_sample external_id**: This is the identifier of the sample taken from your subject, if you have both blood and urine for every subject, you should correspondingly have two biological sample identifiers for each subject identifier.
+- **biological_sample external_id**: This is the identifier of the sample taken from your subject, if you have both blood and urine for every subject, you should correspondingly have two biological sample identifiers for each subject identifier (same identifiers as used in :ref:`Experimental Design`, **biological_sample external_id**).
 
 - **biological_sample quantity**: Amount of biological sample.
 
 - **biological_sample quantity_units**: Unit.
 
-- **analytical_sample external_id**: If multiple analyses were performed on the same biological sample, eg. proteomics and transcriptomics, there should be multiple analytical sample identifiers for every biological sample.
+- **analytical_sample external_id**: If multiple analyses were performed on the same biological sample, eg. proteomics and transcriptomics, there should be multiple analytical sample identifiers for every biological sample (same identifiers as used in :ref:`Experimental Design`, **analytical_sample external_id**).
 
 - **analytical_sample quantity**: Amount of sample used in the experiment.
 
@@ -53,6 +72,10 @@ To find an adequate SNOMED term for your clinical variables, please visit the `S
 
 **Additional columns:**
 
+- **timpeoint**: To be used in the case of a longitudinal study. This is a relative measure within your samples timepoints. For example, if your timepoints are years 2015, 2016, 2017, 2018 and 2019, you would use "0", "1", "2", "3" and "4" as values in this column.
+
+- **timepoint units**: Unit in which your **timepoint** is measured (e.g. "hours", "days", "years").
+
 - **had_intervention**: If a subject has been subjected to a determined medical intervention. For now, select only drugs that have been given to the subject (e.g. "327032007"). Use an appropriate SNOMED SCTID value.
 
 - **had_intervention_type**: This is the type of intervention applied to a subject. "drug treatment" is the only value available for now.
@@ -66,9 +89,34 @@ To find an adequate SNOMED term for your clinical variables, please visit the `S
 
 Proteomics data
 ^^^^^^^^^^^^^^^^^^
+	
+	- **MaxQuant**: Use "proteinGroups.txt", "peptides.txt" and "Oxidation (M)Sites.txt" files, and any other relevant MaxQuant output files.
+	
+	- **Spectronaut**: Use "proteinGroupsReport.xlsx". When exporting the results table from Spectronaut, please select "PG.ProteinAccessions" and "PG.Qvalue" under `Row Labels`, and under `Cell Values` select "PG.Quantity", "PG.NrOfStrippedSequencesMeasured", "PG.NrOfStrippedSequencesIdentified", "PG.NrOfPrecursorsIdentified", "PG.IsSingleHit", "PG.NrOfStrippedSequencesUsedForQuantification", "PG.NrOfModifiedSequencesUsedForQuantification", "PG.NrOfPrecursorsUsedForQuantification", "PG.MS1Quantity" and "PG.MS2Quantity".
 
-Do not perform any imputations or similar on your data before uploading it. This will be carried out by the CKG.
-You can proceed to :ref:`Upload` when you have prepared your experimental design file, and clinical and proteomics data.
+It is very important that all your column names have the following format: "LFQ intensity TechnicalReplicateNumber_AnalyticalSampleIdentifier" or "TechnicalReplicateNumber_AnalyticalSampleIdentifier.PG.Quantity". Where "TechnicalReplicateNumber_AnalyticalSampleIdentifier" should be replaced as shown in the example table below:
+
++-----------+------------+-----------+----------------+
+| Technical | Analytical |           |                |     
+| replicate | sample id  | Timepoint |       Result   |
++===========+============+===========+================+
+|  1        | KO_plate1  |           | 1_KO_plate1    |
++-----------+------------+-----------+----------------+
+|  1        | KO2_plate1 |          0| 1_KO_plate1_0  |
++-----------+------------+-----------+----------------+
+|  1        | KO3_plate1 |         30| 1_KO_plate1_30 |
++-----------+------------+-----------+----------------+
+|  1        | KO4_plate2 |           | 1_KO4_plate2   |
++-----------+------------+-----------+----------------+
+|  2        | KO4_plate2 |           | 2_KO4_plate2   |
++-----------+------------+-----------+----------------+
+
+As shown in the example table, if your experimental design is a timecourse experiment, you should add "_" followed by the timepoint, right after the analytical sample identifier. Otherwise, you can omit it.
+
+Do not perform any post-processing filtering, imputations or similar on your data before uploading it. This will be carried out by the CKG. In the case of Spectronaut outputs, the missing values are automatically replaced by the keyword "Filtered". 
+
+
+You can proceed to :ref:`Upload` when you have prepared your experimental design file, clinical and proteomics data.
 
 
 .. _Upload:
