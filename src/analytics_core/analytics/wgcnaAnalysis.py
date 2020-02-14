@@ -12,6 +12,7 @@ try:
     from rpy2 import robjects as ro
     from rpy2.robjects import pandas2ri
     from rpy2.robjects.packages import importr
+    from rpy2.rinterface_lib import embedded
     from rpy2.robjects.vectors import StrVector, FloatVector
     import rpy2.robjects.packages as rpacks
     pandas2ri.activate()
