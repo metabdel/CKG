@@ -375,7 +375,7 @@ def calculate_coefficient_variation(values):
 
         result = calculate_coefficient_variation()
     """
-    cv = scipy.stats.variation(values.apply(lambda x: np.power(2,x)).values) *100
+    cv = scipy.stats.variation(values.apply(lambda x: np.power(2, x)).values) * 100
 
     return cv
 
@@ -580,7 +580,7 @@ def run_pca(data, drop_cols=['sample', 'subject'], group='group', components=2, 
         pca = PCA(n_components=components)
         X = pca.fit_transform(X)
         var_exp = pca.explained_variance_ratio_
-        loadings = pd.DataFrame(pca.components_.transpose() * np.sqrt(pca.explained_variance_))
+        loadings = pd.DataFrame(pca.components_.transpose())
         loadings.index = df.columns
         loadings.columns = ['x', 'y']
         loadings['value'] = np.sqrt(np.power(loadings['x'],2) + np.power(loadings['y'],2))
@@ -1961,7 +1961,7 @@ def run_WGCNA(data, drop_cols_exp, drop_cols_cli, RsquaredCut=0.8, networkType='
                 if not dissTOM.empty and len(moduleColors) > 0:
                     Features_per_Module = wgcna.get_FeaturesPerModule(data_exp, moduleColors, mode='dataframe')
 
-                    MEs = wgcna.calculate_module_eigengenes(data_exp, moduleColors, softPower=softPower, dissimilarity=False)
+                    MEs, MEDiss = wgcna.calculate_module_eigengenes(data_exp, moduleColors, softPower=softPower, dissimilarity=False)
 
                     moduleTraitCor, textMatrix = wgcna.calculate_ModuleTrait_correlation(data_exp, data_cli, MEs)
 
