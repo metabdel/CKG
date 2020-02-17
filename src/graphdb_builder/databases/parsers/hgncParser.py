@@ -5,11 +5,11 @@ from graphdb_builder import builder_utils
 #########################################
 #          HUGO Gene Nomenclature       # 
 #########################################
-def parser(databases_directory, download = True):
+def parser(databases_directory, download=True):
     config = builder_utils.get_config(config_name="hgncConfig.yml", data_type='databases')
     url = config['hgnc_url']
     entities = set()
-    directory = os.path.join(databases_directory,"HGNC")
+    directory = os.path.join(databases_directory, "HGNC")
     builder_utils.checkDirectory(directory)
     fileName = os.path.join(directory, url.split('/')[-1])
     taxid = 9606
@@ -18,7 +18,7 @@ def parser(databases_directory, download = True):
     if download:
         builder_utils.downloadDB(url, directory)
     
-    with open(fileName, 'r') as df:
+    with open(fileName, 'r', encoding="utf-8") as df:
         first = True
         for line in df:
             if first:
@@ -38,4 +38,3 @@ def parser(databases_directory, download = True):
             #relationships.add((geneSymbol, transcript, "TRANSCRIBED_INTO"))
 
     return entities, entities_header
-

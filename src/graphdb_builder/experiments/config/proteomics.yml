@@ -124,7 +124,7 @@ maxquant :
             - 'Q-value'
             - 'Score'
             - 'id'
-            - 'LFQ intensity \w+_AS\d+_?-?\d*'  #subject_replicate_timepoint
+            - 'LFQ intensity \w+_AS\d+_?-?\d*'  #replicate_analytical_sample_timepoint
             - 'Intensity \w+_AS\d+_?-?\d*'
             - 'Reverse'
             - 'Only identified by site'
@@ -193,8 +193,7 @@ spectronaut :
             - 'PG.Qvalue'
             - 'is_razor'
             - 'id'
-            - '\w*_?AS\d+_?-?\d*\.PG\.Quantity'  #subject_replicate_timepoint
-            - '\w*_?AS\d+_?-?\d*\.PG\.Qvalue'
+            - '\w*_?AS\d+_?-?\d*\.PG\.Quantity'  #replicate_analytical_sample_timepoint
             - '\w*_?AS\d+_?-?\d*\.PG\.NrOfStrippedSequencesMeasured'
             - '\w*_?AS\d+_?-?\d*\.PG\.NrOfStrippedSequencesIdentified'
             - '\w*_?AS\d+_?-?\d*\.PG\.NrOfPrecursorsIdentified'

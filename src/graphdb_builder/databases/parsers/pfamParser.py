@@ -24,22 +24,22 @@ def parser(databases_directory, import_directory, download=True, updated_on=None
     entity_header = config['entity_header']
     relationship_headers = config['relationship_headers']
 
-    directory = os.path.join(databases_directory,'Pfam')
+    directory = os.path.join(databases_directory, 'Pfam')
     builder_utils.checkDirectory(directory)
-    protein_mapping = mp.getMappingForEntity(entity="Protein")    
+    protein_mapping = mp.getMappingForEntity(entity="Protein")
     valid_proteins = list(set(protein_mapping.values()))
 
     ftp_url = config['ftp_url']
     filename = config['full_uniprot_file']
     # url = config['test']
     
-    if not os.path.exists(os.path.join(directory,filename)):
+    if not os.path.exists(os.path.join(directory, filename)):
         if download:
             builder_utils.downloadDB(ftp_url+filename, directory)
 
     stats = set()
     if os.path.exists(os.path.join(directory, filename)):
-        fhandler = builder_utils.read_gzipped_file(os.path.join(directory,filename))
+        fhandler = builder_utils.read_gzipped_file(os.path.join(directory, filename))
         
         identifier = None
         description = []
@@ -52,11 +52,10 @@ def parser(databases_directory, import_directory, download=True, updated_on=None
         read_lines = 0
         num_entities = 0
         num_relationships = {}
-        for line in fhandler:
-            i += 1
-            read_lines +=1
-            try:
-                line = line.decode('utf-8')
+        try:
+            for line in fhandler:
+                i += 1
+                read_lines +=1
                 if line.startswith("# STOCKHOLM"):
                     if identifier is not None:
                         entities.add((identifier, 'Functional_region', name, " ".join(description), "PFam"))
@@ -97,12 +96,12 @@ def parser(databases_directory, import_directory, download=True, updated_on=None
                     relationships['found_in_protein'].add((identifier, protein, "FOUND_IN_PROTEIN", start, end, sequence, "PFam"))
                     if protein.split('-')[0] != protein:
                         relationships['found_in_protein'].add((identifier, protein.split('-')[0], "FOUND_IN_PROTEIN", start, end, sequence, "PFam"))
-            except UnicodeDecodeError:
-                lines.append(i)
-                missed += 1
+        except UnicodeDecodeError:
+            lines.append(i)
+            missed += 1
 
         fhandler.close()
-
+        
         if len(entities) > 0:
             print_files(entities, entity_header, outputfile=os.path.join(import_directory,'Functional_region.tsv'), is_first=is_first)
             num_entities += len(entities)
@@ -124,11 +123,11 @@ def print_files(data, header, outputfile, is_first, filter_for=None):
     if filter_for is not None:
         df = df[df[filter_for[0]].isin(filter_for[1])]
     if not df.empty:
-        with open(outputfile, 'a') as f:
+        with open(outputfile, 'a', encoding='utf-8') as f:
             df.to_csv(path_or_buf=f, sep='\t',
                     header=is_first, index=False, quotechar='"', 
                     line_terminator='\n', escapechar='\\')
-
+    
 if __name__ == "__main__":
     parser(databases_directory='../../../../data/databases', import_directory='../../../../data/imports', download=False)
 

@@ -42,7 +42,7 @@ def parser(databases_directory, download=True):
             compound_code = compounds[compound_id].replace("HMDB","HMDB00")
             relationships[("food", "has_content")].add((food_id, compound_code, "HAS_CONTENT") + contents[(food_id, compound_id)])
     mp.reset_mapping(entity="Food")
-    with open(os.path.join(directory, "mapping.tsv"), 'w') as out:
+    with open(os.path.join(directory, "mapping.tsv"), 'w', encoding='utf-8') as out:
         for food_id in mapping:
             for alias in mapping[food_id]:
                 out.write(str(food_id)+"\t"+str(alias)+"\n")
@@ -73,7 +73,7 @@ def parseContents(fhandler):
 def parseFood(fhandler):
     food = set()
     mapping = defaultdict(set)
-    df = pd.read_csv(fhandler, sep=',', header=None, error_bad_lines=False, low_memory=False)
+    df = pd.read_csv(fhandler, sep=',', header=None, error_bad_lines=False, low_memory=False, encoding="utf-8")
     first = True
     for index, row in df.iterrows():
         if first:
@@ -95,7 +95,7 @@ def parseFood(fhandler):
 def parseCompounds(fhandler):
     compounds = {}
     first = True
-    df = pd.read_csv(fhandler, sep=',', header=None, error_bad_lines=False, low_memory=False)
+    df = pd.read_csv(fhandler, sep=',', header=None, error_bad_lines=False, low_memory=False, encoding="utf-8")
     first = True
     for index, row in df.iterrows():
         if first:
@@ -109,4 +109,3 @@ def parseCompounds(fhandler):
             
 if __name__ == "__main__":
     pass
-

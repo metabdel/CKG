@@ -55,7 +55,6 @@ def load_into_database(driver, queries, requester):
                 if matches:
                     file_path = matches.group(1)
                     if os.path.isfile(file_path):
-                        print(query+';')
                         result = connector.sendQuery(driver, query+";").data()
                         if len(result) > 0:
                             counts = result.pop()
@@ -68,7 +67,6 @@ def load_into_database(driver, queries, requester):
                     else:
                         logger.error("Error loading: File does not exist. Query: {}".format(query))
             else:
-                print("No match", query)
                 result = connector.sendQuery(driver, query+";").data()
         except Exception as err:
             exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -243,7 +241,7 @@ def updateDB(driver, imports=None, specific=[]):
                     queries.extend(code.replace("IMPORTDIR", import_dir).replace("ENTITY", entity).split(';')[0:-1])
             #Users
             elif i == "user":
-                usersDir = os.path.join(cwd, directories["usersDirectory"])   
+                usersDir = os.path.join(cwd, directories["usersImportDirectory"]).replace('\\','/')   
                 user_cypher = cypher_queries['CREATE_USER_NODE']
                 code = user_cypher['query']
                 queries.extend(code.replace("IMPORTDIR", usersDir).split(';')[0:-1])

@@ -54,12 +54,12 @@ def parse_fasta(databases_directory, config, import_directory, download=True, up
     if download:
         builder_utils.downloadDB(url, directory)
         
-    ff = builder_utils.read_gzipped_file(file_name, mode=None)
+    ff = builder_utils.read_gzipped_file(file_name)
     records = builder_utils.parse_fasta(ff)
     num_entities = 0
-    with open(entities_output_file, 'w') as ef:
+    with open(entities_output_file, 'w', encoding='utf-8') as ef:
         ef.write('ID\theader\tsequence\tsize\tsource\n')
-        with open(rel_output_file, 'w') as rf:
+        with open(rel_output_file, 'w', encoding='utf-8') as rf:
             rf.write('START_ID\tEND_ID\tTYPE\tsource\n')
             for i, batch in enumerate(builder_utils.batch_iterator(records, 1000)):
                 for record in batch:
@@ -103,9 +103,9 @@ def parse_idmapping_file(databases_directory, config, import_directory, download
     aux = {}
     stats = set()
     mp.reset_mapping(entity="Protein")
-    with open(mapping_file, 'w') as out:
+    with open(mapping_file, 'w', encoding='utf-8') as out:
         for line in uf:
-            data = line.decode('utf-8').rstrip("\r\n").split("\t")
+            data = line.rstrip("\r\n").split("\t")
             iid = data[0]
             if 'UniParc' in data:
                 if re.search(regex_transcript,iid):
@@ -217,7 +217,7 @@ def print_single_file(data, header, output_file, data_type, data_object, is_firs
     stats = set()
     df = pd.DataFrame(list(data), columns=header)
     stats.add(builder_utils.buildStats(len(data), data_type, data_object, "UniProt", output_file, updated_on))
-    with open(output_file, 'a') as ef:
+    with open(output_file, 'a', encoding='utf-8') as ef:
         df.to_csv(path_or_buf=ef, sep='\t',
                 header=is_first, index=False, quotechar='"', 
                 line_terminator='\n', escapechar='\\')
@@ -228,9 +228,9 @@ def print_multiple_relationships_files(data, header, output_dir, is_first, updat
     stats = set()
     for entity, relationship in data:
         df = pd.DataFrame(list(data[(entity, relationship)]), columns=header)
-        output_file = os.path.join(output_dir, entity+"_"+relationship.lower()+".tsv")
-        stats.add(builder_utils.buildStats(len(data[(entity,relationship)]), 'relationships', relationship, "UniProt", output_file, updated_on))
-        with open(output_file, 'a') as ef:
+        output_file = os.path.join(output_dir, entity+"_"+relationship.lower() + ".tsv")
+        stats.add(builder_utils.buildStats(len(data[(entity, relationship)]), 'relationships', relationship, "UniProt", output_file, updated_on))
+        with open(output_file, 'a', encoding='utf-8') as ef:
             df.to_csv(path_or_buf=ef, sep='\t',
             header=is_first, index=False, quotechar='"', 
             line_terminator='\n', escapechar='\\')
@@ -238,7 +238,7 @@ def print_multiple_relationships_files(data, header, output_dir, is_first, updat
     return stats
 
 def addUniProtTexts(textsFile, proteins):
-    with open(textsFile, 'r') as tf:
+    with open(textsFile, 'r', encoding='utf-8') as tf:
         for line in tf:
             data = line.rstrip("\r\n").split("\t")
             protein = data[0]
@@ -246,7 +246,7 @@ def addUniProtTexts(textsFile, proteins):
             function = data[3]
             
             if protein in proteins:
-                proteins[protein].update({"description":function})
+                proteins[protein].update({"description": function})
 
 def parseUniProtVariants(config, databases_directory, import_directory, download=True, updated_on=None):
     data = defaultdict()
@@ -268,7 +268,7 @@ def parseUniProtVariants(config, databases_directory, import_directory, download
     stats = set()
     is_first = True
     for line in vf:
-        line = line.decode('utf-8')
+        line = line
         if not line.startswith('#') and not din:
             continue
         elif i<=2:
@@ -335,7 +335,7 @@ def parseUniProtAnnotations(config, databases_directory, download=True):
 
     af = builder_utils.read_gzipped_file(fileName)
     for line in af:
-        line = line.decode('utf-8')
+        line = line
         if line.startswith('!'):
             continue
         data = line.rstrip("\r\n").split("\t")
@@ -360,7 +360,7 @@ def parseUniProtPeptides(config, databases_directory, download=True):
         if download:
             builder_utils.downloadDB(url, directory)
         first = True
-        with open(fileName, 'r') as f:
+        with open(fileName, 'r', encoding='utf-8') as f:
             for line in f:
                 if first:
                     first = False

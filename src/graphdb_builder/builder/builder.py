@@ -82,9 +82,9 @@ if __name__ == '__main__':
                             logger.error("The indicated entities (--data) cannot be imported: {}".format(args.data))
                             print("The indicated entities (--data) cannot be imported: {}".format(args.data))
                     elif import_type.lower() == 'ontologies' or import_type.lower() == 'ontology':
-                        ontologies = [d.lower   () for d in oconfig['ontologies']]
+                        ontologies = [d for d in oconfig['ontologies']]
                         if args.data is not None:
-                            valid_entities = [x.capitalize() for x in args.data if x.lower() in ontologies]
+                            valid_entities = [x.capitalize() for x in args.data if x.capitalize() in ontologies]
                         else:
                             valid_entities = ontologies
                         if len(valid_entities) > 0:

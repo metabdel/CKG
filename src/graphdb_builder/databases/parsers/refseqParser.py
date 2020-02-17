@@ -22,7 +22,7 @@ def parser(databases_directory, download=True):
     if download:
         file_dir = builder_utils.list_ftp_directory(ftp_dir)[0]
         new_file = file_dir.split('/')[-1]+"_feature_table.txt.gz"
-        url = ftp_dir + file_dir.split('/')[-1] +"/"+ new_file
+        url = ftp_dir + file_dir.split('/')[-1] + "/" + new_file
         builder_utils.downloadDB(url, directory)
         fileName = os.path.join(directory,new_file)
     
@@ -33,7 +33,7 @@ def parser(databases_directory, download=True):
             if first:
                 first = False
                 continue
-            data = line.decode('utf-8').rstrip("\r\n").split("\t")
+            data = line.rstrip("\r\n").split("\t")
             tclass = data[1]
             assembly = data[2]
             chrom = data[5]

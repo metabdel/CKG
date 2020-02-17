@@ -19,8 +19,6 @@ def parser(databases_directory, download=True):
     metabolite_mapping = mp.getMappingForEntity("Metabolite")
     #drug_mapping = mp.getMappingForEntity("Drug")
 
-    print('FINISHED MAPPING')
-    
     for dataset in urls:
         url = urls[dataset]
         file_name = url.split('/')[-1]
@@ -100,8 +98,7 @@ def parsePathwayRelationships(config, fhandler, mapping=None):
                     elif name in mapping:
                         identifier = mapping[name]
                     else:
-                        #print(name, identifier)
                         continue
                 relationships.add((identifier, pathway, "ANNOTATED_TO_PATHWAY", evidence, organism, loc, "Reactome"))
-    
+
     return relationships

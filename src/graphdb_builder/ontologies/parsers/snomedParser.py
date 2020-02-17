@@ -16,13 +16,13 @@ def parser(files, filters):
                         the relationship type between them.
         - definitions: Dictionary with SNOMED CT Identifiers as keys (*str*), and definition of the terms as values (*str*).
     """
-    terms = {"SNOMED-CT":defaultdict(list)}
+    terms = {"SNOMED-CT": defaultdict(list)}
     relationships = defaultdict(set)
     definitions = defaultdict()
     inactive_terms = read_concept_file(files[0])
     for f in files:
         first = True
-        with open(f, 'r') as fh:
+        with open(f, 'r', encoding='utf-8') as fh:
             if "Description" in f:
                 for line in fh:
                     if first:
@@ -68,7 +68,7 @@ def read_concept_file(concept_file):
     """
     inactive_terms = set()
     first = True
-    with open(concept_file, 'r') as cf:
+    with open(concept_file, 'r', encoding='utf-8') as cf:
         for line in cf:
             if first:
                 first = False
