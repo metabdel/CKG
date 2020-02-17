@@ -1,3 +1,5 @@
+.. _Proteomics Data conf file:
+
 Proteomics data analysis parameters
 ====================================
 

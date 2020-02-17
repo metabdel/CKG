@@ -210,7 +210,6 @@
 <span class="kn">from</span> <span class="nn">graphdb_builder</span> <span class="k">import</span> <span class="n">builder_utils</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">logging.config</span>
 
 <span class="n">log_config</span> <span class="o">=</span> <span class="n">ckg_config</span><span class="o">.</span><span class="n">graphdb_connector_log</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">builder_utils</span><span class="o">.</span><span class="n">setup_logging</span><span class="p">(</span><span class="n">log_config</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;connector&quot;</span><span class="p">)</span>
@@ -222,7 +221,7 @@
 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Reading configuration &gt; </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
 
-<div class="viewcode-block" id="getGraphDatabaseConnectionConfiguration"><a class="viewcode-back" href="../../_autosummary/graphdb_connector.html#graphdb_connector.connector.getGraphDatabaseConnectionConfiguration">[docs]</a><span class="k">def</span> <span class="nf">getGraphDatabaseConnectionConfiguration</span><span class="p">(</span><span class="n">configuration</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="getGraphDatabaseConnectionConfiguration"><a class="viewcode-back" href="../../_autosummary/graphdb_connector.html#graphdb_connector.connector.getGraphDatabaseConnectionConfiguration">[docs]</a><span class="k">def</span> <span class="nf">getGraphDatabaseConnectionConfiguration</span><span class="p">(</span><span class="n">configuration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">configuration</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">configuration</span> <span class="o">=</span> <span class="n">config</span>
     <span class="n">host</span> <span class="o">=</span> <span class="n">configuration</span><span class="p">[</span><span class="s1">&#39;db_url&#39;</span><span class="p">]</span>
@@ -230,6 +229,9 @@
     <span class="n">user</span> <span class="o">=</span> <span class="n">configuration</span><span class="p">[</span><span class="s1">&#39;db_user&#39;</span><span class="p">]</span>
     <span class="n">password</span> <span class="o">=</span> <span class="n">configuration</span><span class="p">[</span><span class="s1">&#39;db_password&#39;</span><span class="p">]</span>
 
+    <span class="k">if</span> <span class="n">database</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">host</span> <span class="o">=</span> <span class="n">host</span><span class="o">+</span><span class="s1">&#39;/&#39;</span><span class="o">+</span><span class="n">database</span>
+    
     <span class="n">driver</span> <span class="o">=</span> <span class="n">connectToDB</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">driver</span></div>
@@ -275,7 +277,7 @@
         <span class="n">queries_path</span> <span class="o">=</span> <span class="s2">&quot;./queries.yml&quot;</span>
         <span class="n">project_cypher</span> <span class="o">=</span> <span class="n">ckg_utils</span><span class="o">.</span><span class="n">get_queries</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cwd</span><span class="p">,</span> <span class="n">queries_path</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">query_name</span> <span class="ow">in</span> <span class="n">project_cypher</span><span class="p">:</span>
-            <span class="n">title</span> <span class="o">=</span> <span class="n">query_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="n">query_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">title</span> <span class="o">==</span> <span class="s1">&#39;modify&#39;</span><span class="p">:</span>
                 <span class="n">query</span> <span class="o">=</span> <span class="n">project_cypher</span><span class="p">[</span><span class="n">query_name</span><span class="p">][</span><span class="s1">&#39;query&#39;</span><span class="p">]</span> <span class="o">%</span> <span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="n">entityid</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
                 <span class="n">sendQuery</span><span class="p">(</span><span class="n">driver</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>

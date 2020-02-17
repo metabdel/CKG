@@ -6,10 +6,11 @@ A Python project that allows you to analyse proteomics and clinical data, and in
 * Documentation: `https://CKG.readthedocs.io <https://CKG.readthedocs.io>`_
 
 * GitHub: `https://github.com/MannLabs/CKG <https://github.com/MannLabs/CKG>`_
-* Free and open source software: `MIT license <https://github.com/...>`_
+* Free and open source software: `MIT license <https://github.com/MannLabs/CKG/LICENSE.rst>`_
 
-.. figure:: src/report_manager/assets/banner.jpg
-   :alt: ckg logo
+.. image:: /_static/images/banner.jpg
+  
+
 
 
 Abstract
@@ -20,6 +21,8 @@ Several omics data types are already used as diagnostic markers, beacons of poss
 Features
 ---------------
 
-* Cross-platform: Windows, Mac, and Linux are officially supported.
+* Cross-platform: Mac, and Linux are officially supported.
+
+* Docker container runs all neccessary steps to setup the CKG. 
 
 

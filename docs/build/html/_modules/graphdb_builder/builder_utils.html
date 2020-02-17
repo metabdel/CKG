@@ -206,13 +206,15 @@
 <span class="kn">import</span> <span class="nn">certifi</span>
 <span class="kn">import</span> <span class="nn">urllib3</span>
 <span class="kn">import</span> <span class="nn">urllib</span>
+<span class="kn">import</span> <span class="nn">base64</span>
+<span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">wget</span>
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">import</span> <span class="nn">ftplib</span>
 <span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">gzip</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
-<span class="kn">from</span> <span class="nn">Bio</span> <span class="k">import</span> <span class="n">Entrez</span>
-<span class="kn">from</span> <span class="nn">Bio</span> <span class="k">import</span> <span class="n">Medline</span>
+<span class="kn">from</span> <span class="nn">Bio</span> <span class="k">import</span> <span class="n">Entrez</span><span class="p">,</span> <span class="n">Medline</span><span class="p">,</span> <span class="n">SeqIO</span>
 <span class="kn">import</span> <span class="nn">os.path</span>
 <span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">import</span> <span class="nn">pprint</span>
@@ -265,9 +267,25 @@
 
     <span class="k">return</span> <span class="n">data</span></div>
 
+<div class="viewcode-block" id="parse_contents"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.parse_contents">[docs]</a><span class="k">def</span> <span class="nf">parse_contents</span><span class="p">(</span><span class="n">contents</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reads binary string files and returns a Pandas DataFrame.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">content_type</span><span class="p">,</span> <span class="n">content_string</span> <span class="o">=</span> <span class="n">contents</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+    <span class="n">decoded</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">content_string</span><span class="p">)</span>
+    <span class="n">file</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    
+    <span class="k">if</span> <span class="n">file</span> <span class="o">==</span> <span class="s1">&#39;txt&#39;</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(</span><span class="n">decoded</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)),</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">low_memory</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">file</span> <span class="o">==</span> <span class="s1">&#39;csv&#39;</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(</span><span class="n">decoded</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)),</span> <span class="n">low_memory</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">file</span> <span class="o">==</span> <span class="s1">&#39;xlsx&#39;</span> <span class="ow">or</span> <span class="n">file</span> <span class="o">==</span> <span class="s1">&#39;xls&#39;</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">decoded</span><span class="p">))</span>        
+    <span class="k">return</span> <span class="n">df</span></div>
+
 <div class="viewcode-block" id="export_contents"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.export_contents">[docs]</a><span class="k">def</span> <span class="nf">export_contents</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dataDir</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Export Pandas DataFrame to file, with UTF-8 endocing.</span>
+<span class="sd">    Export Pandas DataFrame to file, with UTF-8 encoding.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">file</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -728,17 +746,69 @@
     <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;tar -zcf </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="n">folder_to_backup</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="read_gzipped_file"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.read_gzipped_file">[docs]</a><span class="k">def</span> <span class="nf">read_gzipped_file</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+<div class="viewcode-block" id="read_gzipped_file"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.read_gzipped_file">[docs]</a><span class="k">def</span> <span class="nf">read_gzipped_file</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;unix&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Opens an underlying process to access a gzip file through the creation of a new pipe to the child.</span>
 
 <span class="sd">    :param str filepath: path to gzip file.</span>
 <span class="sd">    :return: A bytes sequence that specifies the standard output.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="s2">&quot;gzcat&quot;</span><span class="p">,</span> <span class="n">filepath</span><span class="p">],</span>
-        <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span>
-    <span class="p">)</span>
-    <span class="k">return</span> <span class="n">p</span><span class="o">.</span><span class="n">stdout</span></div>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;unix&#39;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="s2">&quot;gzcat&quot;</span><span class="p">,</span> <span class="n">filepath</span><span class="p">],</span>
+                <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">p</span><span class="o">.</span><span class="n">stdout</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>
+    
+    <span class="n">handle</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;rt&quot;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">handle</span></div>
+
+<div class="viewcode-block" id="parse_fasta"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.parse_fasta">[docs]</a><span class="k">def</span> <span class="nf">parse_fasta</span><span class="p">(</span><span class="n">file_handler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Using BioPython to read fasta file as SeqIO objects</span>
+<span class="sd">    </span>
+<span class="sd">    :param file_handler file_handler: opened fasta file</span>
+<span class="sd">    :return iterator records: iterator of sequence objects</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">records</span> <span class="o">=</span> <span class="n">SeqIO</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">file_handler</span><span class="p">,</span><span class="s2">&quot;fasta&quot;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">records</span></div>
+    
+<div class="viewcode-block" id="batch_iterator"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.batch_iterator">[docs]</a><span class="k">def</span> <span class="nf">batch_iterator</span><span class="p">(</span><span class="n">iterator</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns lists of length batch_size.</span>
+
+<span class="sd">    This can be used on any iterator, for example to batch up</span>
+<span class="sd">    SeqRecord objects from Bio.SeqIO.parse(...), or to batch</span>
+<span class="sd">    Alignment objects from Bio.AlignIO.parse(...), or simply</span>
+<span class="sd">    lines from a file handle.</span>
+
+<span class="sd">    This is a generator function, and it returns lists of the</span>
+<span class="sd">    entries from the supplied iterator.  Each list will have</span>
+<span class="sd">    batch_size entries, although the final list may be shorter.</span>
+<span class="sd">    </span>
+<span class="sd">    :param iterator iterator: batch to be extracted</span>
+<span class="sd">    :param integer batch_size: size of the batch</span>
+<span class="sd">    :return list batch: list with the batch elements of size batch_size</span>
+<span class="sd">        </span>
+<span class="sd">    source: https://biopython.org/wiki/Split_large_file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">entry</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">while</span> <span class="n">entry</span><span class="p">:</span>
+        <span class="n">batch</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">batch_size</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">entry</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">iterator</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+                <span class="n">entry</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">entry</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># End of file</span>
+                <span class="k">break</span>
+            <span class="n">batch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">batch</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">batch</span></div>
 </pre></div>
 
            </div>

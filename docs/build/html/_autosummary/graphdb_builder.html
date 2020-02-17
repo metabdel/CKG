@@ -319,9 +319,15 @@
 </dd></dl>
 
 <dl class="function">
+<dt id="graphdb_builder.builder_utils.parse_contents">
+<code class="sig-prename descclassname">graphdb_builder.builder_utils.</code><code class="sig-name descname">parse_contents</code><span class="sig-paren">(</span><em class="sig-param">contents</em>, <em class="sig-param">filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/builder_utils.html#parse_contents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.builder_utils.parse_contents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads binary string files and returns a Pandas DataFrame.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="graphdb_builder.builder_utils.export_contents">
 <code class="sig-prename descclassname">graphdb_builder.builder_utils.</code><code class="sig-name descname">export_contents</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">dataDir</em>, <em class="sig-param">filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/builder_utils.html#export_contents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.builder_utils.export_contents" title="Permalink to this definition">¶</a></dt>
-<dd><p>Export Pandas DataFrame to file, with UTF-8 endocing.</p>
+<dd><p>Export Pandas DataFrame to file, with UTF-8 encoding.</p>
 </dd></dl>
 
 <dl class="function">
@@ -675,7 +681,7 @@ Generator flattening the structure</p>
 
 <dl class="function">
 <dt id="graphdb_builder.builder_utils.read_gzipped_file">
-<code class="sig-prename descclassname">graphdb_builder.builder_utils.</code><code class="sig-name descname">read_gzipped_file</code><span class="sig-paren">(</span><em class="sig-param">filepath</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/builder_utils.html#read_gzipped_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.builder_utils.read_gzipped_file" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">graphdb_builder.builder_utils.</code><code class="sig-name descname">read_gzipped_file</code><span class="sig-paren">(</span><em class="sig-param">filepath</em>, <em class="sig-param">mode='unix'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/builder_utils.html#read_gzipped_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.builder_utils.read_gzipped_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Opens an underlying process to access a gzip file through the creation of a new pipe to the child.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -685,6 +691,45 @@ Generator flattening the structure</p>
 <dd class="field-even"><p>A bytes sequence that specifies the standard output.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="graphdb_builder.builder_utils.parse_fasta">
+<code class="sig-prename descclassname">graphdb_builder.builder_utils.</code><code class="sig-name descname">parse_fasta</code><span class="sig-paren">(</span><em class="sig-param">file_handler</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/builder_utils.html#parse_fasta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.builder_utils.parse_fasta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Using BioPython to read fasta file as SeqIO objects</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file_handler</strong> (<em>file_handler</em>) – opened fasta file</p>
+</dd>
+<dt class="field-even">Return iterator records</dt>
+<dd class="field-even"><p>iterator of sequence objects</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="graphdb_builder.builder_utils.batch_iterator">
+<code class="sig-prename descclassname">graphdb_builder.builder_utils.</code><code class="sig-name descname">batch_iterator</code><span class="sig-paren">(</span><em class="sig-param">iterator</em>, <em class="sig-param">batch_size</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/builder_utils.html#batch_iterator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.builder_utils.batch_iterator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns lists of length batch_size.</p>
+<p>This can be used on any iterator, for example to batch up
+SeqRecord objects from Bio.SeqIO.parse(…), or to batch
+Alignment objects from Bio.AlignIO.parse(…), or simply
+lines from a file handle.</p>
+<p>This is a generator function, and it returns lists of the
+entries from the supplied iterator.  Each list will have
+batch_size entries, although the final list may be shorter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>iterator</strong> (<em>iterator</em>) – batch to be extracted</p></li>
+<li><p><strong>batch_size</strong> (<em>integer</em>) – size of the batch</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return list batch</dt>
+<dd class="field-even"><p>list with the batch elements of size batch_size</p>
+</dd>
+</dl>
+<p>source: <a class="reference external" href="https://biopython.org/wiki/Split_large_file">https://biopython.org/wiki/Split_large_file</a></p>
 </dd></dl>
 
 </div>

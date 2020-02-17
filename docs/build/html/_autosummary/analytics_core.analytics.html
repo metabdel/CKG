@@ -233,7 +233,8 @@
 <dl class="function">
 <dt id="analytics_core.analytics.analytics.transform_into_wide_format">
 <code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">transform_into_wide_format</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">index</em>, <em class="sig-param">columns</em>, <em class="sig-param">values</em>, <em class="sig-param">extra=[]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#transform_into_wide_format"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.transform_into_wide_format" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function converts a Pandas DataFrame from long to wide format using pandas pivot_table() function.</p>
+<dd><p>This function converts a Pandas DataFrame from long to wide format using 
+pandas pivot_table() function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -257,7 +258,8 @@
 <dl class="function">
 <dt id="analytics_core.analytics.analytics.transform_into_long_format">
 <code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">transform_into_long_format</code><span class="sig-paren">(</span><em class="sig-param">data, drop_columns, group, columns=['name', 'y']</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#transform_into_long_format"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.transform_into_long_format" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converts a Pandas DataDrame from wide to long format using pd.melt() function.</p>
+<dd><p>Converts a Pandas DataDrame from wide to long format using pd.melt() 
+function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -423,7 +425,8 @@ For more information visit <a class="reference external" href="http://www.coxdoc
 <dl class="function">
 <dt id="analytics_core.analytics.analytics.polish_median_normalization">
 <code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">polish_median_normalization</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">max_iter=10</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#polish_median_normalization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.polish_median_normalization" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function iteratively normalizes each sample and each feature to its median until medians converge.</p>
+<dd><p>This function iteratively normalizes each sample and each feature to its 
+median until medians converge.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -502,7 +505,9 @@ For more information visit <a class="reference external" href="http://www.coxdoc
 <dl class="function">
 <dt id="analytics_core.analytics.analytics.calculate_coefficient_variation">
 <code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">calculate_coefficient_variation</code><span class="sig-paren">(</span><em class="sig-param">values</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#calculate_coefficient_variation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.calculate_coefficient_variation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute the coefficient of variation, the ratio of the biased standard deviation to the mean, in percentage. For more information visit <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.variation.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.variation.html</a>.</p>
+<dd><p>Compute the coefficient of variation, the ratio of the biased standard 
+deviation to the mean, in percentage. For more information 
+visit <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.variation.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.variation.html</a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>values</strong> (<em>ndarray</em>) – numpy array</p>
@@ -973,28 +978,6 @@ Pigouin test Normality: <a class="reference external" href="https://pingouin-sta
 </dd></dl>
 
 <dl class="function">
-<dt id="analytics_core.analytics.analytics.calculate_paired_ttest">
-<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">calculate_paired_ttest</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">condition1</em>, <em class="sig-param">condition2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#calculate_paired_ttest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.calculate_paired_ttest" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the t-test on RELATED samples belonging to two different groups. For more information visit <a class="reference external" href="https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.stats.ttest_rel.html">https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.stats.ttest_rel.html</a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> – pandas dataframe with groups and subjects as rows and protein identifier as column.</p></li>
-<li><p><strong>condition1</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – identifier of first group.</p></li>
-<li><p><strong>condition2</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – identifier of second group.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Tuple with t-statistics, two-tailed p-value, mean of first group, mean of second group and logfc.</p>
-</dd>
-</dl>
-<p>Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">calculate_paired_ttest</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;group1&#39;</span><span class="p">,</span> <span class="s1">&#39;group2&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="function">
 <dt id="analytics_core.analytics.analytics.calculate_ttest_samr">
 <code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">calculate_ttest_samr</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">labels</em>, <em class="sig-param">n=2</em>, <em class="sig-param">s0=0</em>, <em class="sig-param">paired=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#calculate_ttest_samr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.calculate_ttest_samr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates modified T-test using ‘samr’ R package.</p>
@@ -1020,7 +1003,7 @@ Pigouin test Normality: <a class="reference external" href="https://pingouin-sta
 
 <dl class="function">
 <dt id="analytics_core.analytics.analytics.calculate_ttest">
-<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">calculate_ttest</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">condition1</em>, <em class="sig-param">condition2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#calculate_ttest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.calculate_ttest" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">calculate_ttest</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">condition1</em>, <em class="sig-param">condition2</em>, <em class="sig-param">paired=False</em>, <em class="sig-param">tail='two-sided'</em>, <em class="sig-param">correction='auto'</em>, <em class="sig-param">r=0.707</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#calculate_ttest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.calculate_ttest" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the t-test for the means of independent samples belonging to two different groups. For more information visit <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.ttest_ind.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.ttest_ind.html</a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1148,12 +1131,13 @@ Pigouin test Normality: <a class="reference external" href="https://pingouin-sta
 
 <dl class="function">
 <dt id="analytics_core.analytics.analytics.calculate_anova">
-<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">calculate_anova</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">group='group'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#calculate_anova"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.calculate_anova" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">calculate_anova</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">column</em>, <em class="sig-param">group='group'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#calculate_anova"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.calculate_anova" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates one-way ANOVA using scipy stats.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>df</strong> – pandas dataframe with group as rows and protein identifier as column</p></li>
+<li><p><strong>column</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – name of the column in df to run ANOVA on</p></li>
 <li><p><strong>group</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – column with group identifiers</p></li>
 </ul>
 </dd>
