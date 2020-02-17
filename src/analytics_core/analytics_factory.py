@@ -5,6 +5,7 @@ import pandas as pd
 import itertools
 import time
 
+
 class Analysis:
     def __init__(self, identifier, analysis_type, args, data, result=None):
         self._identifier = identifier
@@ -73,12 +74,12 @@ class Analysis:
                 drop_cols = self.args["drop_cols"]
             self.result, nargs = analytics.run_pca(self.data, components=components, drop_cols=drop_cols)
             self.args.update(nargs)
-        elif self.analysis_type  == "tsne":
+        elif self.analysis_type == "tsne":
             components = 2
             perplexity = 40
             n_iter = 1000
             drop_cols = []
-            init='pca'
+            init = 'pca'
             if "components" in self.args:
                 components = self.args["components"]
             if "perplexity" in self.args:
@@ -91,10 +92,10 @@ class Analysis:
                 drop_cols = self.args["drop_cols"]
             self.result, nargs = analytics.run_tsne(self.data, components=components, drop_cols=drop_cols, perplexity=perplexity, n_iter=n_iter, init=init)
             self.args.update(nargs)
-        elif self.analysis_type  == "umap":
-            n_neighbors=10
-            min_dist=0.3
-            metric='cosine'
+        elif self.analysis_type == "umap":
+            n_neighbors = 10
+            min_dist = 0.3
+            metric = 'cosine'
             if "n_neighbors" in self.args:
                 n_neighbors = self.args["n_neighbors"]
             if "min_dist" in self.args:
@@ -104,7 +105,7 @@ class Analysis:
             if n_neighbors < self.data.shape[0]:
                 self.result, nargs = analytics.run_umap(self.data, n_neighbors=n_neighbors, min_dist=min_dist, metric=metric)
                 self.args.update(nargs)
-        elif self.analysis_type  == "mapper":
+        elif self.analysis_type == "mapper":
             n_cubes = 15
             overlap = 0.5
             n_clusters = 3
@@ -126,14 +127,14 @@ class Analysis:
             r, nargs = analytics.run_mapper(self.data, n_cubes=n_cubes, overlap=overlap, n_clusters=n_clusters, linkage=linkage, affinity=affinity)
             self.args.update(nargs)
             self.result[self.analysis_type] = r
-        elif self.analysis_type  == 'ttest':
+        elif self.analysis_type == 'ttest':
             alpha = 0.05
             if "alpha" in self.args:
                 alpha = self.args["alpha"]
             for pair in itertools.combinations(self.data.group.unique(),2):
-                ttest_result = analytics.run_ttest(self.data, pair[0], pair[1], alpha = 0.05)
+                ttest_result = analytics.run_ttest(self.data, pair[0], pair[1], alpha=0.05)
                 self.result[pair] = ttest_result
-        elif self.analysis_type  == 'anova':
+        elif self.analysis_type == 'anova':
             start = time.time()
             alpha = 0.05
             drop_cols = []
@@ -152,7 +153,7 @@ class Analysis:
                 permutations = self.args["permutations"]
             anova_result = analytics.run_anova(self.data, drop_cols=drop_cols, subject=subject, group=group, alpha=alpha, permutations=permutations)
             self.result[self.analysis_type] = anova_result
-        elif self.analysis_type  == 'samr':
+        elif self.analysis_type == 'samr':
             start = time.time()
             alpha = 0.05
             s0 = None
@@ -172,9 +173,9 @@ class Analysis:
                 s0 = self.args["s0"]
             if "permutations" in self.args:
                 permutations = self.args["permutations"]
-            anova_result =analytics.run_samr(self.data, drop_cols=drop_cols, subject=subject, group=group, alpha=alpha, s0=s0, permutations=permutations)
+            anova_result = analytics.run_samr(self.data, drop_cols=drop_cols, subject=subject, group=group, alpha=alpha, s0=s0, permutations=permutations)
             self.result[self.analysis_type] = anova_result
-        elif self.analysis_type  == '2-way anova':
+        elif self.analysis_type == '2-way anova':
             drop_cols = []
             subject = 'subject'
             group = ['group', 'secondary_group']
@@ -221,17 +222,17 @@ class Analysis:
                 test = self.args["test"]
             dabest_result = analytics.run_dabest(self.data, drop_cols=drop_cols, subject=subject, group=group, test=test)
             self.result[self.analysis_type] = dabest_result
-        elif self.analysis_type  == "correlation":
+        elif self.analysis_type == "correlation":
             start = time.time()
             alpha = 0.05
             method = 'pearson'
             correction = ('fdr', 'indep')
-            subject='subject'
-            group='group'
+            subject = 'subject'
+            group = 'group'
             if 'group' in self.args:
                 group = self.args['group']
             if 'subject' in self.args:
-                subject= self.args['subject']
+                subject = self.args['subject']
             if "alpha" in self.args:
                 alpha = self.args["args"]
             if "method" in self.args:
@@ -239,15 +240,15 @@ class Analysis:
             if "correction" in self.args:
                 correction = self.args["correction"]
             self.result[self.analysis_type] = analytics.run_correlation(self.data, alpha=alpha, subject=subject, group=group, method=method, correction=correction)
-        elif self.analysis_type  == "repeated_measurements_correlation":
+        elif self.analysis_type == "repeated_measurements_correlation":
             start = time.time()
             alpha = 0.05
             method = 'pearson'
             correction = ('fdr', 'indep')
             cutoff = 0.5
-            subject='subject'
+            subject = 'subject'
             if 'subject' in self.args:
-                subject= self.args['subject']
+                subject = self.args['subject']
             if "alpha" in self.args:
                 alpha = self.args["args"]
             if "method" in self.args:
@@ -259,11 +260,11 @@ class Analysis:
             self.result[self.analysis_type] = analytics.run_rm_correlation(self.data, alpha=alpha, subject=subject, correction=correction)
         elif self.analysis_type == "regulation_enrichment":
             start = time.time()
-            identifier='identifier'
-            groups=['group1', 'group2']
-            annotation_col='annotation'
-            reject_col='rejected'
-            method='fisher'
+            identifier = 'identifier'
+            groups = ['group1', 'group2']
+            annotation_col = 'annotation'
+            reject_col = 'rejected'
+            method = 'fisher'
             annotation_type = 'functional'
             if 'identifier' in self.args:
                 identifier = self.args['identifier']
@@ -321,7 +322,7 @@ class Analysis:
             pamRespectsDendro = False
             merge_modules = True
             MEDissThres = 0.25
-            verbose = 0 
+            verbose = 0
             if "drop_cols_exp" in self.args:
                 drop_cols_exp = self.args['drop_cols_exp']
             if "drop_cols_cli" in self.args:
@@ -350,15 +351,15 @@ class Analysis:
             alpha = 0.05
             method = 'pearson'
             correction = ('fdr', 'indep')
-            subject='subject'
-            group='group'
-            on=['subject', 'group']
+            subject = 'subject'
+            group = 'group'
+            on = ['subject', 'group']
             if 'on_cols' in self.args:
                 on = self.args['on_cols']
             if 'group' in self.args:
                 group = self.args['group']
             if 'subject' in self.args:
-                subject= self.args['subject']
+                subject = self.args['subject']
             if "alpha" in self.args:
                 alpha = self.args["args"]
             if "method" in self.args:
@@ -369,10 +370,10 @@ class Analysis:
 
     def get_plot(self, name, identifier):
         plot = []
-        if len(self.result) >=1:
+        if len(self.result) >= 1:
             if name == "basicTable":
-                colors = ('#C2D4FF','#F5F8FF')
-                attr =  {'width':800, 'height':1500, 'font':12}
+                colors = ('#C2D4FF', '#F5F8FF')
+                attr = {'width': 800, 'height': 1500, 'font': 12}
                 subset = None
                 figure_title = 'Basic table'
                 if "colors" in self.args:

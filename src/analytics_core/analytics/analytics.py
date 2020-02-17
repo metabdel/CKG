@@ -580,7 +580,7 @@ def run_pca(data, drop_cols=['sample', 'subject'], group='group', components=2, 
         pca = PCA(n_components=components)
         X = pca.fit_transform(X)
         var_exp = pca.explained_variance_ratio_
-        loadings = pd.DataFrame(pca.components_.transpose())
+        loadings = pd.DataFrame(pca.components_.transpose() * np.sqrt(pca.explained_variance_))
         loadings.index = df.columns
         loadings.columns = ['x', 'y']
         loadings['value'] = np.sqrt(np.power(loadings['x'],2) + np.power(loadings['y'],2))
@@ -880,11 +880,11 @@ def run_correlation(df, alpha=0.05, subject='subject', group='group', method='pe
     return correlation
 
 
-def run_multi_correlation(df, alpha=0.05, subject='subject', on=['subject', 'biological_sample'] , group='group', method='pearson', correction=('fdr', 'indep')):
+def run_multi_correlation(df_dict, alpha=0.05, subject='subject', on=['subject', 'biological_sample'] , group='group', method='pearson', correction=('fdr', 'indep')):
     """
     This function merges all input dataframes and calculates pairwise correlations for all columns.
 
-    :param dict df: dictionary of pandas dataframes with samples as rows and features as columns.
+    :param dict df_dict: dictionary of pandas dataframes with samples as rows and features as columns.
     :param str subject: name of the column containing subject identifiers.
     :param str group: name of the column containing group identifiers.
     :param list on: column names to join dataframes on (must be found in all dataframes).
@@ -895,18 +895,20 @@ def run_multi_correlation(df, alpha=0.05, subject='subject', on=['subject', 'bio
 
     Example::
 
-        result = run_multi_correlation(df, alpha=0.05, subject='subject', on=['subject', 'biological_sample'] , group='group', method='pearson', correction=('fdr', 'indep'))
+        result = run_multi_correlation(df_dict, alpha=0.05, subject='subject', on=['subject', 'biological_sample'] , group='group', method='pearson', correction=('fdr', 'indep'))
     """
     multidf = pd.DataFrame()
     correlation = None
-    if len(df) > 1:
-        for dtype in df:
-            if multidf.empty:
-                multidf = df[dtype]
-            else:
-                multidf = pd.merge(multidf, df[dtype], how='inner', on=on)
-
+    for dtype in df_dict:
+        if multidf.empty:
+            if isinstance(df_dict[dtype], pd.DataFrame):
+                multidf = df_dict[dtype]
+        else:
+            if isinstance(df_dict[dtype], pd.DataFrame):
+                multidf = pd.merge(multidf, df_dict[dtype], how='inner', on=on)
+    if not multidf.empty:
         correlation = run_correlation(multidf, alpha=0.05, subject=subject, group=group, method=method, correction=correction)
+    
     return correlation
 
 

@@ -65,6 +65,27 @@ overview: #section
             y_title: number of modified proteins
             plot_type: bar
             title: 'Number of modified proteins identified per type'
+    coefficient_variation:
+        data: processed
+        analyses:
+            - coefficient_of_variation
+        plots:
+            - scatterplot_matrix
+        args:
+            drop_columns:
+                - sample
+                - subject
+            columns:
+                - name
+                - y
+            group: group
+            index: True
+            x_title: '%CV'
+            y_title: log2 LFQ intensity
+            size: 9
+            height: 900
+            width: 1500
+            title: 'Proteins %CV'
     ranking:
         data: 
             - processed
@@ -94,27 +115,6 @@ overview: #section
             height: 900
             width: 1500
             title: Protein ranking
-    coefficient_variation:
-        data: processed
-        analyses:
-            - coefficient_of_variation
-        plots:
-            - scatterplot_matrix
-        args:
-            drop_columns:
-                - sample
-                - subject
-            columns:
-                - name
-                - y
-            group: group
-            index: True
-            x_title: '%CV'
-            y_title: log2 LFQ intensity
-            size: 9
-            height: 900
-            width: 1500
-            title: 'Proteins %CV'
 data exploration:
     stratification:
         description: '# Principal Component Analysis
@@ -152,21 +152,20 @@ data exploration:
                         ANOVA provides a statistical test of whether two or more population means are equal, and therefore generalizes the t-test beyond two means.[Wikipedia](https://en.wikipedia.org/wiki/Analysis_of_variance)'
         data: processed
         analyses:
-            - samr
+            - anova
         plots:
             - basicTable
             - volcanoplot
         store_analysis: True
         args:
             alpha: 0.05
-            s0: 0
             fc: 2.0
             group: 'group'
             subject: subject
             colorscale: 'Blues'
             showscale: False
             marker_size: 10
-            permutations: 250
+            permutations: 0
             num_annotations: 50
             x_title: logFC
             y_title: -log(pvalue)
@@ -314,3 +313,5 @@ enrichment:
             reject_col: rejected
             method: fisher
             title: 'Pathway Enrichment'
+
+

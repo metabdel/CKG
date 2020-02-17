@@ -1317,8 +1317,8 @@ def get_pca_plot(data, identifier, args):
     figure['layout'] = sct['layout']
     figure['layout'].template='plotly_white'
     for index in list(loadings.index)[0:args['loadings']]:
-        x = loadings.loc[index,'x'] * 5
-        y = loadings.loc[index, 'y'] * 5
+        x = loadings.loc[index,'x'] * 5.
+        y = loadings.loc[index, 'y'] * 5.
         value = loadings.loc[index, 'value']
 
         trace = go.Scattergl(x= [0,x],
@@ -1334,8 +1334,8 @@ def get_pca_plot(data, identifier, args):
                                     ),
                         showlegend=False,
                         )
-        annotation = dict( x=x,
-                        y=y,
+        annotation = dict( x=x * 1.15,
+                        y=y * 1.15,
                         xref='x',
                         yref='y',
                         text=index,
@@ -1711,13 +1711,13 @@ def get_WGCNAPlots(data, identifier):
             dendrogram = Dendrogram.plot_dendrogram(dendro_tree, hang=0.9, cutoff_line=False)
 
             layout = go.Layout(width=900, height=900, showlegend=False, title='',
-                                xaxis=dict(domain=[0, 1], range=[np.min(dendrogram['layout']['xaxis']['tickvals'])-6,np.max(dendrogram['layout']['xaxis']['tickvals'])+4], showgrid=False,
+                                xaxis=dict(domain=[0, 1], range=[np.min(dendrogram['layout']['xaxis']['tickvals']) - 6, np.max(dendrogram['layout']['xaxis']['tickvals'])+4], showgrid=False,
                                             zeroline=True, ticks='', automargin=True, anchor='y'),
                                 yaxis=dict(domain=[0.7, 1], autorange=True, showgrid=False, zeroline=False, ticks='outside', title='Height', automargin=True, anchor='x'),
                                 xaxis2=dict(domain=[0, 1], autorange=True, showgrid=True, zeroline=False, ticks='', showticklabels=False, automargin=True, anchor='y2'),
                                 yaxis2=dict(domain=[0, 0.64], autorange=True, showgrid=False, zeroline=False, automargin=True, anchor='x2'))
 
-            if all(list(METcor.columns.map(lambda x: METcor[x].between(-1,1, inclusive=True).all()))) != True:
+            if all(list(METcor.columns.map(lambda x: METcor[x].between(-1, 1, inclusive=True).all()))) != True:
                 df = wgcnaAnalysis.get_percentiles_heatmap(METcor, dendro_tree, bydendro=True, bycols=False).T
             else:
                 df = wgcnaAnalysis.df_sort_by_dendrogram(wgcnaAnalysis.df_sort_by_dendrogram(METcor, dendro_tree).T, dendro_tree)

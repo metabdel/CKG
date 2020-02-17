@@ -167,8 +167,9 @@ proteomics:
             MATCH (d:Disease)-[:MENTIONED_IN_PUBLICATION]->(publication:Publication)
             WHERE d IN diseases
             WITH d, publication
-            MATCH (publication)<-[:MENTIONED_IN_PUBLICATION]-(protein:Protein)
+            MATCH (protein:Protein)-[r:MENTIONED_IN_PUBLICATION]-(publication)-[:MENTIONED_IN_PUBLICATION]-(p:Protein)
             WHERE (protein.name+"~"+protein.id) IN [IDENTIFIERS]
+            WITH publication, protein, d, count(protein) AS r_count, count(p) as degree WHERE r_count>3 AND degree < 5
             RETURN DISTINCT collect(DISTINCT protein.name+"~"+protein.id) AS Proteins, collect(DISTINCT d.name) AS Diseases, publication.id AS publication, publication.linkout AS linkout;
 clinical:
     CLINICAL_VARIABLES:

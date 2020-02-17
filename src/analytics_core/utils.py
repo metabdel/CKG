@@ -1,14 +1,14 @@
 import random
-from Bio import Entrez
-Entrez.email = 'alberto.santos@cpr.ku.dk'
-from Bio import Medline
+from Bio import Entrez, Medline
 import re
 import pandas as pd
 import bs4 as bs
-import requests, json
+import requests
 import networkx as nx
 from networkx.readwrite import json_graph
 from urllib import error
+
+Entrez.email = 'alberto.santos@cpr.ku.dk'
 
 
 def generate_html(network):
@@ -34,17 +34,8 @@ def generate_html(network):
     template = network.template
 
     nodes, edges, height, width, options = network.get_network_data()
-    network.html = template.render(height=height,
-                                width=width,
-                                nodes=nodes,
-                                edges=edges,
-                                options=options,
-                                use_DOT=network.use_DOT,
-                                dot_lang=network.dot_lang,
-                                widget=network.widget,
-                                bgcolor=network.bgcolor,
-                                conf=network.conf,
-                                tooltip_link=use_link_template)
+    network.html = template.render(height=height, width=width, nodes=nodes, edges=edges, options=options, use_DOT=network.use_DOT, dot_lang=network.dot_lang, 
+                                   widget=network.widget, bgcolor=network.bgcolor, conf=network.conf, tooltip_link=use_link_template)
 
 
 def neo4j_path_to_networkx(paths, key='path'):
@@ -136,19 +127,15 @@ def get_clustergrammer_link(net, filename=None):
     if filename is None:
         file_string = net.write_matrix_to_tsv()
         file_obj = StringIO(file_string)
-        
         if 'filename' not in net.dat or net.dat['filename'] is None:
             fake_filename = 'Network.txt'
         else:
             fake_filename = net.dat['filename']
-        
         r = requests.post(clustergrammer_url, files={'file': (fake_filename, file_obj)})
     else:
         file_obj = open(filename, 'r')
         r = requests.post(clustergrammer_url, files={'file': file_obj})
-        
     link = r.text
-    
     return link
 
 
@@ -217,7 +204,6 @@ def getMedlineAbstracts(idList):
                 aux["url"] = pubmedUrl + aux["PMID"]
             else:
                 aux["url"] = ""
-            
             results.append(aux)
 
         abstracts = pd.DataFrame.from_dict(results)

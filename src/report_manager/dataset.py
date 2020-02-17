@@ -1,22 +1,19 @@
-import time
 import os
 import sys
-import json
 import pandas as pd
 import h5py as h5
 import ckg_utils
 import config.ckg_config as ckg_config
-from report_manager import report as rp, utils, knowledge
+from report_manager import report as rp, knowledge
 from analytics_core import analytics_factory
 from analytics_core.analytics import analytics
 from analytics_core.viz import viz
 from graphdb_connector import connector
-import logging
-import logging.config
 
 
 log_config = ckg_config.report_manager_log
 logger = ckg_utils.setup_logging(log_config, key="dataset")
+
 
 class Dataset:
     def __init__(self, identifier, dataset_type, configuration=None, data={}, analyses={}, analysis_queries={}, report=None):
@@ -136,7 +133,6 @@ class Dataset:
         except Exception as err:
             logger.error("Error: {} reading configuration file: {}.".format(err, config_path))
         
-
     def get_dataset_data_directory(self, directory="../../../data/reports"):
         ckg_utils.checkDirectory(directory)
         id_directory = os.path.join(directory, self.identifier)
@@ -156,11 +152,11 @@ class Dataset:
             if "replace" in self.configuration:
                 replace = self.configuration["replace"]
             for query_name in datasets_cypher[self.dataset_type]:
-                title = query_name.lower().replace('_',' ')
+                title = query_name.lower().replace('_', ' ')
                 query_type = datasets_cypher[self.dataset_type][query_name]['query_type']
                 query = datasets_cypher[self.dataset_type][query_name]['query']
-                for r,by in replace:
-                    query = query.replace(r,by)
+                for r, by in replace:
+                    query = query.replace(r, by)
                 if query_type == "pre":
                     data[title] = self.send_query(query)
                 else:
@@ -168,7 +164,7 @@ class Dataset:
         except Exception as err:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            logger.error("Reading queries from file {}: {}, file: {},line: {}".format(queries_path, sys.exc_info(), fname, exc_tb.tb_lineno))
+            logger.error("Reading queries from file {}: {}, file: {},line: {}, err: {}".format(queries_path, sys.exc_info(), fname, exc_tb.tb_lineno, err))
         
         return data
 
@@ -202,7 +198,7 @@ class Dataset:
 
     def add_configuration_to_report(self, report_pipeline):
         conf_plot = viz.generate_configuration_tree(report_pipeline, self.dataset_type)
-        self.report.update_plots({('0', self.dataset_type+'_pipeline', 'cytoscape_network'):[conf_plot]})
+        self.report.update_plots({('0', self.dataset_type+'_pipeline', 'cytoscape_network'): [conf_plot]})
 
     def generate_report(self):
         self.report = rp.Report(identifier=self.dataset_type.capitalize(), plots={})
@@ -217,7 +213,7 @@ class Dataset:
                 description, data_names, analysis_types, plot_types, store_analysis, args = self.extract_configuration(self.configuration[section][subsection])
                 if description is not None:
                     description = viz.get_markdown(description, args={})
-                report_step[section][subsection] = {'data' : data_names, 'analyses': [], 'args': {}}
+                report_step[section][subsection] = {'data': data_names, 'analyses': [], 'args': {}}
                 if isinstance(data_names, dict) or isinstance(data_names, list):
                     data = self.get_dataframes(data_names)
                 else:
@@ -237,12 +233,13 @@ class Dataset:
                                 elif r_id in data.columns:
                                     rep_str = r_id.upper()
                                     rep = ",".join(['"{}"'.format(i) for i in data[r_id].unique().tolist()])
-                                query = query.replace(rep_str,rep)
+                                query = query.replace(rep_str, rep)
+                            print(query)
                             data = self.send_query(query)
                     result = None
                     if description is not None:
-                        self.report.update_plots({(str(order), subsection+"_description", 'description'):[description]})
-                        order +=1
+                        self.report.update_plots({(str(order), subsection+"_description", 'description'): [description]})
+                        order += 1
                     if len(analysis_types) >= 1:
                         for analysis_type in analysis_types:
                             result = analytics_factory.Analysis(self.identifier, analysis_type, args, data)
@@ -258,18 +255,18 @@ class Dataset:
                                         if not reg_data.empty:
                                             sig_hits = list(set(reg_data.loc[reg_data.rejected,"identifier"]))
                                             sig_data = data[sig_hits]
-                                            self.update_data({"regulated":sig_data, "regulation table":reg_data})
+                                            self.update_data({"regulated": sig_data, "regulation table": reg_data})
                                     else:
-                                        self.update_data({subsection+"_"+analysis_type: result.result[analysis_type]})
+                                        self.update_data({subsection +"_"+ analysis_type: result.result[analysis_type]})
                                 for plot_type in plot_types:
-                                    plots = result.get_plot(plot_type, subsection+"_"+analysis_type+"_"+plot_type)
-                                    self.report.update_plots({(str(order), subsection+"_"+analysis_type, plot_type):plots})
-                                    order +=1
+                                    plots = result.get_plot(plot_type, subsection +"_"+ analysis_type +"_"+ plot_type)
+                                    self.report.update_plots({(str(order), subsection +"_"+ analysis_type, plot_type): plots})
+                                    order += 1
                     else:
                         if result is None:
                             dictresult = {}
                             dictresult["_".join(subsection.split(' '))] = data
-                            result = analytics_factory.Analysis(self.identifier,"_".join(subsection.split(' ')), args, data, result = dictresult)
+                            result = analytics_factory.Analysis(self.identifier, "_".join(subsection.split(' ')), args, data, result=dictresult)
                             report_pipeline.update(report_step)
                             self.update_analyses(result.result)
                         for plot_type in plot_types:
@@ -279,7 +276,6 @@ class Dataset:
         
         self.add_configuration_to_report(report_pipeline)
 
-
     def save_dataset_recursively(self, dset, group, dt):
         max_size = 20
         df_set = None
@@ -288,7 +284,7 @@ class Dataset:
                 grp = group.create_group(name)
                 df_set = self.save_dataset_recursively(dset[name], grp, dt)
             elif isinstance(dset[name], pd.DataFrame):
-                if dset[name].memory_usage().sum()/1000000 < max_size: #Only store if memory usage below 20Mb
+                if dset[name].memory_usage().sum()/1000000 < max_size:
                     if not dset[name].index.is_numeric():
                         dset[name] = dset[name].reset_index()
                     df_set = group.create_dataset(name, (1,), dtype=dt, compression="gzip", chunks=True, data=dset[name].to_json(orient='records'))
@@ -309,7 +305,7 @@ class Dataset:
             if isinstance(dset[name], dict):
                 self.save_dataset_recursively_to_file(dset[name], dataset_directory, name+"_"+base_name)
             elif isinstance(dset[name], pd.DataFrame):
-                dset[name].to_csv(os.path.join(dataset_directory,name+".tsv"), sep='\t', header=True, index=False, quotechar='"', line_terminator='\n', escapechar='\\')
+                dset[name].to_csv(os.path.join(dataset_directory, name+".tsv"), sep='\t', header=True, index=False, quotechar='"', line_terminator='\n', escapechar='\\')
                         
     def save_dataset_to_file(self, dataset_directory):
         if not os.path.isdir(dataset_directory):
@@ -319,7 +315,7 @@ class Dataset:
         
     def save_report(self, dataset_directory):
         if not os.path.exists(dataset_directory):
-                os.makedirs(dataset_directory)
+            os.makedirs(dataset_directory)
         self.report.save_report(directory=dataset_directory)
         
     def load_dataset_recursively(self, dset, loaded_dset={}):
@@ -341,8 +337,8 @@ class Dataset:
                             
     def load_dataset_report(self, report_dir):
         self.load_dataset(report_dir)
-        dataset_dir = os.path.join(os.path.join(os.path.abspath(os.path.dirname(__file__)),report_dir), self.dataset_type)
-        r = rp.Report(self.dataset_type,{})
+        dataset_dir = os.path.join(os.path.join(os.path.abspath(os.path.dirname(__file__)), report_dir), self.dataset_type)
+        r = rp.Report(self.dataset_type, {})
         r.read_report(dataset_dir)
         self.report = r
         
@@ -350,6 +346,7 @@ class Dataset:
         kn = knowledge.Knowledge(self.identifier, self.data, nodes={}, relationships={}, queries_file=None, colors={}, graph=None, report={})
         
         return kn
+
 
 class MultiOmicsDataset(Dataset):
     def __init__(self, identifier, data, configuration=None, analyses={}, analysis_queries={}, report=None):
@@ -364,7 +361,7 @@ class MultiOmicsDataset(Dataset):
             dataset_name = datasets[dataset_type]
             if dataset_type in self.data:
                 dataset = self.data[dataset_type]
-                data[dataset_type] = self.data[dataset_type].get_dataframe(dataset_name)
+                data[dataset_type] = dataset.get_dataframe(dataset_name)
 
         return data
     
@@ -374,6 +371,7 @@ class MultiOmicsDataset(Dataset):
         
         return kn
     
+
 class ProteomicsDataset(Dataset):
     def __init__(self, identifier, dataset_type="proteomics", data={}, configuration=None, analyses={}, analysis_queries={}, report=None):
         Dataset.__init__(self, identifier, dataset_type, data=data, configuration=configuration, analyses=analyses, analysis_queries=analysis_queries, report=report)
@@ -387,7 +385,7 @@ class ProteomicsDataset(Dataset):
 
     def process_dataset(self):
         processed_data = self.processing()
-        self.update_data({"processed":processed_data})
+        self.update_data({"processed": processed_data})
 
     def processing(self):
         processed_data = None
@@ -402,7 +400,7 @@ class ProteomicsDataset(Dataset):
                 missing_max = 0.3
                 min_valid = 1
                 value_col = 'LFQ intensity'
-                index=['group', 'sample', 'subject']
+                index = ['group', 'sample', 'subject']
                 args = {}
                 if "args" in self.configuration:
                     args = self.configuration["args"]
@@ -421,7 +419,9 @@ class ProteomicsDataset(Dataset):
                     if "value_col" in args:
                         value_col = args["value_col"]
 
-                processed_data = analytics.get_proteomics_measurements_ready(data, index_cols=index, imputation = imputation, method = method, missing_method = missing_method, missing_per_group=missing_per_group, missing_max = missing_max, min_valid=min_valid)
+                processed_data = analytics.get_proteomics_measurements_ready(data, index_cols=index, imputation=imputation, 
+                                                                             method=method, missing_method=missing_method, 
+                                                                             missing_per_group=missing_per_group, missing_max=missing_max, min_valid=min_valid)
         return processed_data
     
     def generate_knowledge(self):
@@ -430,6 +430,7 @@ class ProteomicsDataset(Dataset):
         
         return kn
 
+
 class LongitudinalProteomicsDataset(ProteomicsDataset):
     def __init__(self, identifier, data={}, configuration=None, analyses={}, analysis_queries={}, report=None):
         
@@ -437,6 +438,7 @@ class LongitudinalProteomicsDataset(ProteomicsDataset):
         if configuration is None:
             config_file = "longitudinal_proteomics.yml"
             self.update_configuration_from_file(config_file)
+
 
 class ClinicalDataset(Dataset):
     def __init__(self, identifier, data={}, configuration=None, analyses={}, analysis_queries={}, report=None):
@@ -451,7 +453,7 @@ class ClinicalDataset(Dataset):
 
     def process_dataset(self):
         processed_data = self.processing()
-        self.update_data({"processed":processed_data})
+        self.update_data({"processed": processed_data})
 
     def processing(self):
         processed_data = None
@@ -464,7 +466,7 @@ class ClinicalDataset(Dataset):
                 columns = 'clinical_variable'
                 values = 'values'
                 extra = []
-                imputation  = True
+                imputation = True
                 imputation_method = 'KNN'
                 args = {}
                 if "args" in self.configuration:
@@ -485,7 +487,9 @@ class ClinicalDataset(Dataset):
                     if 'group_id' in args:
                         group_id = args['group_id']
 
-                processed_data = analytics.get_clinical_measurements_ready(data, subject_id=subject_id, sample_id=sample_id, group_id=group_id, columns=columns, values=values, extra=extra, imputation=imputation, imputation_method=imputation_method)
+                processed_data = analytics.get_clinical_measurements_ready(data, subject_id=subject_id, sample_id=sample_id, 
+                                                                           group_id=group_id, columns=columns, values=values, 
+                                                                           extra=extra, imputation=imputation, imputation_method=imputation_method)
         return processed_data
     
     def generate_knowledge(self):

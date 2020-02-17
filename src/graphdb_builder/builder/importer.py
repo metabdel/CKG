@@ -14,14 +14,11 @@ import pandas as pd
 from joblib import Parallel, delayed
 from uuid import uuid4
 import config.ckg_config as ckg_config
-import ckg_utils
 from graphdb_builder.ontologies import ontologies_controller as oh
 from graphdb_builder.databases import databases_controller as dh
 from graphdb_builder.experiments import experiments_controller as eh
 from graphdb_builder.users import users_controller as uh
 from graphdb_builder import builder_utils
-import logging
-import logging.config
 
 log_config = ckg_config.graphdb_builder_log
 logger = builder_utils.setup_logging(log_config, key="importer")
@@ -36,10 +33,10 @@ try:
     econfig = builder_utils.setup_config('experiments')
     uconfig = builder_utils.setup_config('users')
 except Exception as err:
-    print("Error")
     logger.error("importer - Reading configuration > {}.".format(err))
 
 START_TIME = datetime.now()
+
 
 def ontologiesImport(importDirectory, ontologies=None, download=True, import_type="partial"):
     """
@@ -194,6 +191,7 @@ def setupStats(import_type):
     except Exception as err:
         logger.error("Setting up Stats object {} in file:{} > {}.".format(statsName, statsFile, err))
 
+
 def createEmptyStats(statsCols, statsFile, statsName):
     """
     Creates a HDFStore object with a empty dataframe with the collected stats columns.
@@ -227,6 +225,7 @@ def createEmptyStats(statsCols, statsFile, statsName):
 
 #     return hdf
 
+
 def writeStats(statsDf, import_type, stats_name=None):
     """
     Appends the new collected statistics to the existing stats object.
@@ -245,6 +244,7 @@ def writeStats(statsDf, import_type, stats_name=None):
     except Exception as err:
         logger.error("Writing Stats object {} in file:{} > {}.".format(stats_name, stats_file, err))
 
+
 def getStatsName(import_type):
     """
     Generates the stats object name where to store the importing statistics from the CKG version, \
@@ -254,7 +254,7 @@ def getStatsName(import_type):
     :rtype: str
     """
     version = ckg_config.version
-    statsName = import_type+'_stats_'+ str(version).replace('.', '_')
+    statsName = import_type+'_stats_' + str(version).replace('.', '_')
 
     return statsName
 
