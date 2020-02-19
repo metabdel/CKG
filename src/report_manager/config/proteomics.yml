@@ -206,6 +206,7 @@ data associations:
         analyses: []
         plots:
             - network
+        store_analysis: True
         args:
             use:
                 columns: identifiers
@@ -228,6 +229,7 @@ data associations:
         analyses: []
         plots:
             - basicTable
+        store_analysis: True
         args:
             use:
                 columns: identifiers
@@ -239,6 +241,7 @@ data associations:
         analyses: []
         plots:
             - basicTable
+        store_analysis: True
         args:
             use:
                 columns: identifiers
@@ -252,6 +255,7 @@ data associations:
         plots:
             - basicTable
             - wordcloud
+        store_analysis: True
         args:
             use:
                 columns: identifiers

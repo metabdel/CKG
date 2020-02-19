@@ -10,7 +10,7 @@ class ProjectApp(basicApp.BasicApp):
     Defines what a project App is in the report_manager.
     Includes multiple tabs for different data types.
     """
-    def __init__(self, id, projectId, title, subtitle, description, layout = [], logo = None, footer = None, force=False):
+    def __init__(self, id, projectId, title, subtitle, description, layout=[], logo=None, footer=None, force=False):
         self._id = id
         self._project_id = projectId
         self._page_type = "projectPage"
@@ -18,7 +18,7 @@ class ProjectApp(basicApp.BasicApp):
         self._configuration_files = {}
         basicApp.BasicApp.__init__(self, title, subtitle, description, self.page_type, layout, logo, footer)
         self.build_page()
-        
+
     @property
     def id(self):
         """
@@ -50,7 +50,7 @@ class ProjectApp(basicApp.BasicApp):
         :param str project_id: project identifier.
         """
         self._project_id = project_id
-    
+
     @property
     def configuration_files(self):
         """
@@ -66,7 +66,7 @@ class ProjectApp(basicApp.BasicApp):
         :param dict configuration_files: configuration files.
         """
         self._configuration_files = configuration_files
-    
+
     @property
     def force(self):
         """
@@ -88,7 +88,7 @@ class ProjectApp(basicApp.BasicApp):
                                 id='download-zip',
                                 href="",
                                 target="_blank",
-                                n_clicks = 0,
+                                n_clicks=0,
                                 className="button_link"
                                 )]),
                             html.Div([html.A("Regenerate Project Report", 
@@ -106,10 +106,10 @@ class ProjectApp(basicApp.BasicApp):
                                     {'label': 'Proteomics configuration', 'value': self.id+'/proteomics'},
                                     {'label': 'Clinical data configuration', 'value': self.id+'/clinical'},
                                     {'label': 'Multiomics configuration', 'value': self.id+'/multiomics'},
-                                    {'label': 'Reset to defaults', 'value': self.id+'/reset'}],
+                                    {'label': 'Reset to defaults', 'value': self.id + '/reset'}],
                                 value=self.id+'/defaults',
                                 clearable=False,
-                                style={'width': '50%', 'margin-bottom':'10px'}),
+                                style={'width': '50%', 'margin-bottom': '10px'}),
                             dcc.Upload(id='upload-config',
                                 children=html.Div(['Drag and Drop or ',
                                     html.A('Select Files')]),
@@ -117,7 +117,7 @@ class ProjectApp(basicApp.BasicApp):
                                 multiple=False),
                                 html.Div(id='output-data-upload')])
                             ])
-        
+
         return buttons
 
     def build_page(self):
@@ -131,30 +131,26 @@ class ProjectApp(basicApp.BasicApp):
         if os.path.exists("../../data/tmp"):
             directory = os.path.join('../../data/tmp',self.id)
             if os.path.exists(directory):
-                config_files = {f.split('.')[0]:os.path.join(directory,f) for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))}
-        
+                config_files = {f.split('.')[0]: os.path.join(directory,f) for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))}
+
         p = project.Project(self.project_id, datasets={}, knowledge=None, report={}, configuration_files=config_files)
         p.build_project(self.force)
         p.generate_report()
-        
         if p.name is not None:
             self.title = "Project: {}".format(p.name)
         else:
             self.title = ''
         self.add_basic_layout()
-        
         plots = p.show_report("app")
-        
         tabs = []
         buttons = self.build_header()
-        
+
         self.add_to_layout(buttons)
         for data_type in plots:
-            if len(plots[data_type]) >=1:
+            if len(plots[data_type]) >= 1:
                 tab_content = [html.Div(plots[data_type])]
                 tab = dcc.Tab(tab_content, label=data_type)
                 tabs.append(tab)
         lc = dcc.Tabs(tabs)
         self.add_to_layout(lc)
-        
         p = None

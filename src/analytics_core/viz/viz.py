@@ -1317,8 +1317,8 @@ def get_pca_plot(data, identifier, args):
     figure['layout'] = sct['layout']
     figure['layout'].template='plotly_white'
     for index in list(loadings.index)[0:args['loadings']]:
-        x = loadings.loc[index,'x'] * 5.
-        y = loadings.loc[index, 'y'] * 5.
+        x = loadings.loc[index,'x'] * 20.
+        y = loadings.loc[index, 'y'] * 20.
         value = loadings.loc[index, 'value']
 
         trace = go.Scattergl(x= [0,x],
@@ -1341,7 +1341,7 @@ def get_pca_plot(data, identifier, args):
                         text=index,
                         showarrow=False,
                         font=dict(
-                                size=10,
+                                size=11,
                                 color='darkgrey'
                             ),
                             align='center',

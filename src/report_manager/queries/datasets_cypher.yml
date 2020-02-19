@@ -163,14 +163,11 @@ proteomics:
         query: >
             MATCH (project:Project)-[:STUDIES_DISEASE]->(disease:Disease)-[:HAS_PARENT]->(pdisease:Disease)<-[:HAS_PARENT]-(cdiseases:Disease)
             WHERE project.id="PROJECTID"
-            WITH collect(disease)+collect(pdisease)+collect(cdiseases) AS diseases           
-            MATCH (d:Disease)-[:MENTIONED_IN_PUBLICATION]->(publication:Publication)
-            WHERE d IN diseases
-            WITH d, publication
-            MATCH (protein:Protein)-[r:MENTIONED_IN_PUBLICATION]-(publication)-[:MENTIONED_IN_PUBLICATION]-(p:Protein)
-            WHERE (protein.name+"~"+protein.id) IN [IDENTIFIERS]
-            WITH publication, protein, d, count(protein) AS r_count, count(p) as degree WHERE r_count>3 AND degree < 5
-            RETURN DISTINCT collect(DISTINCT protein.name+"~"+protein.id) AS Proteins, collect(DISTINCT d.name) AS Diseases, publication.id AS publication, publication.linkout AS linkout;
+            WITH collect(disease)+collect(pdisease)+collect(cdiseases) AS diseases
+            MATCH (d:Disease)-[:MENTIONED_IN_PUBLICATION]->(publication:Publication)<-[r:MENTIONED_IN_PUBLICATION]-(protein:Protein)
+            WHERE d IN diseases AND (protein.name+"~"+protein.id) IN [IDENTIFIERS]
+            WITH publication, protein, count(r) AS r_count WHERE r_count>3
+            RETURN DISTINCT collect(DISTINCT protein.name+"~"+protein.id) AS Proteins, publication.id AS publication, publication.linkout AS linkout;
 clinical:
     CLINICAL_VARIABLES:
         name: 'get clinical variables and clinical states'

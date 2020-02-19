@@ -52,6 +52,8 @@ def send_email(message, subject, message_from, message_to):
 def compress_directory(name, directory, compression_format='zip'):
     try:
         if os.path.exists(directory) and os.path.isdir(directory):
+            if os.path.exists(directory+'.zip'):
+                os.remove(directory+'.zip')
             shutil.make_archive(name, compression_format, directory)
             shutil.rmtree(directory)
     except Exception as err:

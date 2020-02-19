@@ -193,9 +193,9 @@ class Knowledge:
         node_color = self.colors[entity] if entity in self.colors else self.default_color
         if 'similar_projects' in self.data:
             similar_projects = pd.DataFrame.from_dict(self.data['similar_projects'])
-            for i,row in similar_projects.iterrows():
-                nodes.update({row['other'] : {'type':entity, 'color':node_color}})
-                relationships.update({(row['current'], row['other']):{'type': 'is_similar', 'weight':row['similarity_pearson'], 'width':row['similarity_pearson'],'source_color':node_color, 'target_color':node_color}})
+            for i, row in similar_projects.iterrows():
+                nodes.update({row['other']: {'type': entity, 'color': node_color}})
+                relationships.update({(row['current'], row['other']): {'type': 'is_similar', 'weight': row['similarity_pearson'], 'width': row['similarity_pearson'], 'source_color': node_color, 'target_color': node_color}})
         
         return nodes, relationships
     
@@ -211,8 +211,8 @@ class Knowledge:
                 rel_type = row['type'] if 'type' in row else 'associated'
                 weight = row['weight'] if 'weight' in row else 5
                 nodes.update({row['node1']: {'type': entity, 'color': node1_color}, row['node2'].replace("'", "").title(): {'type': node2, 'color': node2_color, 'parent': node2}})
-                relationships.update({(row['node1'], row['node2'].replace("'", "").title()): {'type': rel_type, 'weight': weight, 'width': weight,'source_color': node1_color, 'target_color': node2_color}})
-                relationships.update({(row['node2'].replace("'", "").title(), node2): {'type': 'is_a', 'weight': 5, 'width': 5,'source_color': node2_color, 'target_color': node2_color}})
+                relationships.update({(row['node1'], row['node2'].replace("'", "").title()): {'type': rel_type, 'weight': weight, 'width': weight, 'source_color': node1_color, 'target_color': node2_color}})
+                relationships.update({(row['node2'].replace("'", "").title(), node2): {'type': 'is_a', 'weight': 5, 'width': 5, 'source_color': node2_color, 'target_color': node2_color}})
         
         return nodes, relationships
     
@@ -227,11 +227,14 @@ class Knowledge:
         try:
             cwd = os.path.abspath(os.path.dirname(__file__))
             cypher_queries = ckg_utils.get_queries(os.path.join(cwd, self.queries_file))
-            for query_name in cypher_queries:
-                query = cypher_queries[query_name]['query']
-                for r, by in replace:
-                    query = query.replace(r, by)
-                query_data[query_name] = self.send_query(query)
+            if cypher_queries is not None:
+                for query_name in cypher_queries:
+                    if 'query_type' in cypher_queries[query_name]:
+                        if cypher_queries[query_name]['query_type'] == 'knowledge_report':
+                            query = cypher_queries[query_name]['query']
+                            for r, by in replace:
+                                query = query.replace(r, by)
+                            query_data[query_name] = self.send_query(query)
         except Exception as err:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]

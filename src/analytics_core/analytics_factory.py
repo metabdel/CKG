@@ -310,7 +310,7 @@ class Analysis:
         elif self.analysis_type == 'coefficient_of_variation':
             self.result[self.analysis_type] = analytics.get_coefficient_variation(self.data, drop_columns=self.args['drop_columns'], group=self.args['group'], columns=self.args['columns'])
         elif self.analysis_type == 'publications_abstracts':
-            self.result[self.analysis_type] = analytics.get_publications_abstracts(self.data, publication_col="publication", join_by=['publication','Proteins','Diseases'], index="PMID")
+            self.result[self.analysis_type] = analytics.get_publications_abstracts(self.data, publication_col="publication", join_by=['publication', 'Proteins'], index="PMID")
         elif self.analysis_type == "wgcna":
             start = time.time()
             drop_cols_exp = []

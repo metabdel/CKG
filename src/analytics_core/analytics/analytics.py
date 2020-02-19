@@ -580,7 +580,7 @@ def run_pca(data, drop_cols=['sample', 'subject'], group='group', components=2, 
         pca = PCA(n_components=components)
         X = pca.fit_transform(X)
         var_exp = pca.explained_variance_ratio_
-        loadings = pd.DataFrame(pca.components_.transpose() * np.sqrt(pca.explained_variance_))
+        loadings = pd.DataFrame(pca.components_.transpose())
         loadings.index = df.columns
         loadings.columns = ['x', 'y']
         loadings['value'] = np.sqrt(np.power(loadings['x'],2) + np.power(loadings['y'],2))
@@ -2053,7 +2053,7 @@ def get_network_communities(graph, args):
     return communities
 
 
-def get_publications_abstracts(data, publication_col="publication", join_by=['publication','Proteins','Diseases'], index="PMID"):
+def get_publications_abstracts(data, publication_col="publication", join_by=['publication', 'Proteins', 'Diseases'], index="PMID"):
     """
     Accesses NCBI PubMed over the WWW and retrieves the abstracts corresponding to a list of one or more PubMed IDs.
 

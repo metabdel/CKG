@@ -3,19 +3,14 @@ import plotly.io as pio
 import h5py as h5
 import json
 import natsort
-import plotly.utils
-import plotly.graph_objs as go
 import dash_html_components as html
 from plotly.offline import iplot
 from collections import defaultdict
-from IPython.display import IFrame, display
 from cyjupyter import Cytoscape
-import tempfile
-import networkx as nx
-from networkx.readwrite import json_graph
 from report_manager import utils
 from analytics_core.viz import viz
 from analytics_core import utils as acore_utils
+
 
 class Report:
     def __init__(self, identifier, plots={}):
@@ -198,14 +193,14 @@ class Report:
                 if plot is not None:
                     figure_name = name
                     if name in saved:
-                        figure_name = name +"_"+str(i)
+                        figure_name = name + "_" + str(i)
                         i += 1
                     if "net_json" in plot:
                         with open(os.path.join(directory, name+'.json'), 'w') as out:
                             out.write(json.dumps(plot["net_json"]))
                         try:
                             acore_utils.json_network_to_gml(plot["net_json"], os.path.join(directory, name+".gml"))
-                        except: 
+                        except Exception:
                             pass
                         if "app" in plot:
                             plot = plot["app"]
@@ -214,11 +209,11 @@ class Report:
                             try:
                                 viz.save_DASH_plot(plot['props']['figure'], name=figure_name, plot_format='svg', directory=directory)
                                 saved.add(figure_name)
-                            except:
+                            except Exception:
                                 pass
                     else:
                         try:
                             viz.save_DASH_plot(plot.figure, name=figure_name, plot_format='svg', directory=directory)
                             saved.add(figure_name)
-                        except:
+                        except Exception:
                             pass

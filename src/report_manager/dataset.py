@@ -234,7 +234,6 @@ class Dataset:
                                     rep_str = r_id.upper()
                                     rep = ",".join(['"{}"'.format(i) for i in data[r_id].unique().tolist()])
                                 query = query.replace(rep_str, rep)
-                            print(query)
                             data = self.send_query(query)
                     result = None
                     if description is not None:
@@ -259,8 +258,8 @@ class Dataset:
                                     else:
                                         self.update_data({subsection +"_"+ analysis_type: result.result[analysis_type]})
                                 for plot_type in plot_types:
-                                    plots = result.get_plot(plot_type, subsection +"_"+ analysis_type +"_"+ plot_type)
-                                    self.report.update_plots({(str(order), subsection +"_"+ analysis_type, plot_type): plots})
+                                    plots = result.get_plot(plot_type, subsection + "_" + analysis_type + "_" + plot_type)
+                                    self.report.update_plots({(str(order), subsection + "_" + analysis_type, plot_type): plots})
                                     order += 1
                     else:
                         if result is None:
@@ -269,6 +268,8 @@ class Dataset:
                             result = analytics_factory.Analysis(self.identifier, "_".join(subsection.split(' ')), args, data, result=dictresult)
                             report_pipeline.update(report_step)
                             self.update_analyses(result.result)
+                            if store_analysis:
+                                self.update_data({"_".join(subsection.split(' ')): data})
                         for plot_type in plot_types:
                             plots = result.get_plot(plot_type, "_".join(subsection.split(' '))+"_"+plot_type)
                             self.report.update_plots({(str(order), "_".join(subsection.split(' ')), plot_type): plots})
@@ -284,10 +285,10 @@ class Dataset:
                 grp = group.create_group(name)
                 df_set = self.save_dataset_recursively(dset[name], grp, dt)
             elif isinstance(dset[name], pd.DataFrame):
-                if dset[name].memory_usage().sum()/1000000 < max_size:
-                    if not dset[name].index.is_numeric():
-                        dset[name] = dset[name].reset_index()
-                    df_set = group.create_dataset(name, (1,), dtype=dt, compression="gzip", chunks=True, data=dset[name].to_json(orient='records'))
+                #if dset[name].memory_usage().sum()/1000000 < max_size:
+                if not dset[name].index.is_numeric():
+                    dset[name] = dset[name].reset_index()
+                df_set = group.create_dataset(name, (1,), dtype=dt, compression="gzip", chunks=True, data=dset[name].to_json(orient='records'))
         
         return df_set
     

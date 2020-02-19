@@ -4,24 +4,20 @@ import time
 import h5py as h5
 import json
 from collections import defaultdict
-from plotly.offline import iplot
-from IPython.display import IFrame, display
-import tempfile
 from json import dumps
 import pandas as pd
 import ckg_utils
 import config.ckg_config as ckg_config
-from report_manager.dataset import Dataset, ProteomicsDataset, ClinicalDataset, DNAseqDataset, RNAseqDataset, LongitudinalProteomicsDataset, MultiOmicsDataset
+from report_manager.dataset import Dataset, DNAseqDataset, ProteomicsDataset, ClinicalDataset, LongitudinalProteomicsDataset, MultiOmicsDataset
 from analytics_core.viz import viz
 from analytics_core import utils as acore_utils
 from report_manager import report as rp, utils, knowledge
 from graphdb_connector import query_utils
 from graphdb_connector import connector
-import logging
-import logging.config
 
 log_config = ckg_config.report_manager_log
 logger = ckg_utils.setup_logging(log_config, key="project")
+
 
 class Project:
     """
@@ -184,7 +180,7 @@ class Project:
 
     def update_report(self, new):
         self.report.update(new)
-        
+
     def remove_project(self, host="localhost", port=7687, user="neo4j", password="password"):
         try:
             cwd = os.path.abspath(os.path.dirname(__file__))
@@ -201,17 +197,15 @@ class Project:
             logger.error("Error removing project {}. Query file: {},line: {}, error: {}".format(self.identifier, fname, exc_tb.tb_lineno, err))
 
     def get_report_directory(self):
-        reports_dir = os.path.join(os.path.join(os.path.abspath(os.path.dirname(__file__)),"../../data/reports/"), self.identifier)
+        reports_dir = os.path.join(os.path.join(os.path.abspath(os.path.dirname(__file__)), "../../data/reports/"), self.identifier)
         if not os.path.isdir(reports_dir):
             os.makedirs(reports_dir)
-            
         return reports_dir
 
     def get_downloads_directory(self):
-        downloads_dir = os.path.join(os.path.join(os.path.abspath(os.path.dirname(__file__)),"../../data/downloads/"), self.identifier)
+        downloads_dir = os.path.join(os.path.join(os.path.abspath(os.path.dirname(__file__)), "../../data/downloads/"), self.identifier)
         if not os.path.isdir(downloads_dir):
             os.makedirs(downloads_dir)
-            
         return downloads_dir
 
     def set_attributes(self, project_info):
@@ -252,18 +246,18 @@ class Project:
             similarity_dict = self.similar_projects.to_dict(orient='records')
         if self.overlap is not None:
             overlap_dict = self.overlap.to_dict(orient='records')
-        d = {"identifier" : self.identifier,
-             "queries_file":self._queries_file,
-            "name" : self.name,
-            "acronym" : self.acronym,
-            "description" : self.description,
-            "data_types" : self.data_types,
-            "responsible": self.responsible,
-            "status": self.status,
-            "number_subjects": self.num_subjects,
-            "similar_projects": similarity_dict,
-            "overlap": overlap_dict
-            }
+        d = {"identifier": self.identifier,
+             "queries_file": self._queries_file,
+             "name": self.name,
+             "acronym": self.acronym,
+             "description": self.description,
+             "data_types": self.data_types,
+             "responsible": self.responsible,
+             "status": self.status,
+             "number_subjects": self.num_subjects,
+             "similar_projects": similarity_dict,
+             "overlap": overlap_dict
+             }
 
         return d
 
@@ -332,14 +326,14 @@ class Project:
         self.report = {}
         for root, data_types, files in os.walk(project_dir):
             for data_type in data_types:
-                r = rp.Report(data_type,{})
+                r = rp.Report(data_type, {})
                 r.read_report(os.path.join(root, data_type))
                 if data_type in self.datasets:
                     self.datasets[data_type].report = r
                 elif data_type == "Knowledge":
-                    self.knowledge = knowledge.Knowledge(self.identifier, {'name':self.name}, report=r)
+                    self.knowledge = knowledge.Knowledge(self.identifier, {'name': self.name}, report=r)
                 else:
-                    self.update_report({data_type:r})
+                    self.update_report({data_type: r})
                     
     def load_project(self, directory):
         dataset_store = os.path.join(directory, "project_information_dataset.h5")
@@ -349,7 +343,7 @@ class Project:
                     self.from_json(f["Project_information"][0])
 
     def load_project_data(self):
-        project_dir = os.path.join(os.path.join(os.path.abspath(os.path.dirname(__file__)),"../../data/reports/"), self.identifier)
+        project_dir = os.path.join(os.path.join(os.path.abspath(os.path.dirname(__file__)), "../../data/reports/"), self.identifier)
         self.load_project(os.path.join(project_dir, "Project information"))
         for root, data_types, files in os.walk(project_dir):
             for data_type in data_types:
@@ -366,8 +360,8 @@ class Project:
                     dataset = MultiOmicsDataset(self.identifier, data={}, analyses={}, report=None)
                 
                 if dataset is not None:
-                    dataset.load_dataset(os.path.join(root,data_type))
-                    self.update_dataset({data_type:dataset})
+                    dataset.load_dataset(os.path.join(root, data_type))
+                    self.update_dataset({data_type: dataset})
             
     def build_project(self, force=False):
         if self.check_report_exists() and not force:
@@ -422,7 +416,7 @@ class Project:
         if 'overlap' in project_info:
             self.overlap = project_info['overlap']
             if 'from' in self.overlap and 'to' in self.overlap:
-                self.overlap = self.overlap[(self.overlap['from']==self.identifier) | (self.overlap['to']==self.identifier)]
+                self.overlap = self.overlap[(self.overlap['from'] == self.identifier) | (self.overlap['to'] == self.identifier)]
 
     def get_similar_projects(self, project_info):
         if 'similarity' in project_info:
@@ -444,7 +438,7 @@ class Project:
         identifier = "Similarities"
         title = "Similarities to other Projects"
         plots.append(viz.get_table(self.similar_projects, identifier+' table', title+' table'))
-        plots.append(viz.get_sankey_plot(self.similar_projects, identifier, args={'source':'current', 'target':'other', 'weight':'similarity_pearson', 'orientation': 'h', 'valueformat': '.0f', 'width':800, 'height':800, 'font':12, 'title':title}))
+        plots.append(viz.get_sankey_plot(self.similar_projects, identifier, args={'source': 'current', 'target': 'other', 'weight': 'similarity_pearson', 'orientation': 'h', 'valueformat': '.0f', 'width': 800, 'height': 800, 'font': 12, 'title': title}))
 
         plots.append(self.get_similarity_network())
         
@@ -464,9 +458,8 @@ class Project:
         return plots
 
     def get_similarity_network_style(self):
-        #color_selector = "{'selector': '[name = \"KEY\"]', 'style': {'background-color': 'VALUE'}}"
-        stylesheet=[{'selector': 'node', 
-                     'style': {'label': 'data(name)',
+        stylesheet = [{'selector': 'node',
+                       'style': {'label': 'data(name)',
                                'text-valign': 'center',
                                'text-halign': 'center',
                                'opacity':0.8,
@@ -538,7 +531,6 @@ class Project:
         types = ["clinical", "proteomics", "longitudinal_proteomics", "wes", "wgs", "rnaseq", "multiomics"]
         for dataset_type in types:
             if dataset_type in self.datasets:
-                print(dataset_type)
                 dataset = self.datasets[dataset_type]
                 kn = dataset.generate_knowledge()
                 if dataset_type ==  "multiomics":
@@ -613,6 +605,7 @@ class Project:
             dataset_directory = os.path.join(directory, dataset_type)
             if isinstance(dataset, Dataset):
                 dataset.save_report(dataset_directory)
+                dataset = None
         print('save dataset report', time.time() - start)
         
     def save_project(self):
@@ -631,6 +624,7 @@ class Project:
             dataset_directory = os.path.join(directory, dataset_type)
             if isinstance(dataset, Dataset):
                 dataset.save_dataset(dataset_directory)
+                dataset = None
         print('save datasets', time.time() - start)
 
     def show_report(self, environment):
