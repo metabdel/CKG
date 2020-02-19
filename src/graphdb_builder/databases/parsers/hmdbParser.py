@@ -39,9 +39,9 @@ def extract_metabolites(config, databases_directory, download=True):
             with open(xfile, 'rb') as f:
                 context = etree.iterparse(f, events=("end",), tag=prefix+"metabolite")
                 for _,elem in context:
-                    values = {child.tag.replace(prefix,''):child.text for child in elem.iterchildren() if child.tag.replace(prefix,'') in fields and child.text is not None}
-                    for child in elem.iterchildren(): 
-                        if child.tag.replace(prefix,'') in parentFields:
+                    values = {child.tag.replace(prefix, ''): child.text for child in elem.iterchildren() if child.tag.replace(prefix,'') in fields and child.text is not None}
+                    for child in elem.iterchildren():
+                        if child.tag.replace(prefix, '') in parentFields:
                             label = child.tag.replace(prefix, '')
                             values[label] = set()
                             for intchild in child.iter():
@@ -49,17 +49,18 @@ def extract_metabolites(config, databases_directory, download=True):
                                     text = intchild.text
                                     if text.strip() != "":
                                         if label in structuredFields:
-                                            if intchild.tag.replace(prefix,'') in structuredFields[label]:
+                                            if intchild.tag.replace(prefix, '') in structuredFields[label]:
                                                 if len(structuredFields[label]) > 1:
-                                                    values[intchild.tag.replace(prefix,'')] = text
+                                                    values[intchild.tag.replace(prefix, '')] = text
                                                 else:
-                                                    values[label].add(text) 
-                                        elif intchild.tag.replace(prefix,'') in fields and text:
+                                                    values[label].add(text)
+                                        elif intchild.tag.replace(prefix, '') in fields and text:
                                             values[label].add(text)
                     if "accession" in values:
                         metabolites[values["accession"]] = values
                 
     return metabolites
+
 
 def build_metabolite_entity(config, databases_directory, metabolites):
     entities = set()
@@ -82,6 +83,7 @@ def build_metabolite_entity(config, databases_directory, metabolites):
     
     return entities, attributes
     
+
 def build_relationships_from_HMDB(config, metabolites, mapping):
     relationships = defaultdict(list)
     associations = config['HMDB_associations']
@@ -104,8 +106,9 @@ def build_relationships_from_HMDB(config, metabolites, mapping):
         
     return relationships
 
+
 def build_HMDB_dictionary(databases_directory, metabolites):
-    directory = os.path.join(databases_directory,"HMDB")
+    directory = os.path.join(databases_directory, "HMDB")
     filename = "mapping.tsv"
     outputfile = os.path.join(directory, filename)
     mp.reset_mapping(entity="Metabolite")
