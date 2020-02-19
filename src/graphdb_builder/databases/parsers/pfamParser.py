@@ -1,19 +1,16 @@
 import os.path
-import zipfile
 from collections import defaultdict
 import pandas as pd
 from graphdb_builder import builder_utils
-
 from graphdb_builder import mapping as mp
 
 
 #########################
-#         Pfam          # 
+#         Pfam          #
 #########################
 
 def parser(databases_directory, import_directory, download=True, updated_on=None):
     config = builder_utils.get_config(config_name="pfamConfig.yml", data_type='databases')
-    
     entity_header = config['entity_header']
     relationship_headers = config['relationship_headers']
 
@@ -32,6 +29,7 @@ def parser(databases_directory, import_directory, download=True, updated_on=None
 
     stats = set()
     if os.path.exists(os.path.join(directory, filename)):
+        fhandler = builder_utils.read_gzipped_file(os.path.join(directory, filename))
         identifier = None
         description = []
         lines = []
@@ -44,57 +42,54 @@ def parser(databases_directory, import_directory, download=True, updated_on=None
         num_entities = 0
         num_relationships = {}
         try:
-            with zipfile.ZipFile(os.path.join(directory, filename), 'r') as zipped:
-                for zfile in zipped.namelist():
-                    zipped.extract(member=zfile, path=directory)
-                    xfile = os.path.join(directory, zfile)
-                    with open(xfile, 'rb') as f:
-                        for line in f:
-                            i += 1
-                            read_lines += 1
-                            if line.startswith("# STOCKHOLM"):
-                                if identifier is not None:
-                                    entities.add((identifier, 'Functional_region', name, " ".join(description), "PFam"))
-                                    if len(entities) == 100:
-                                        print_files(entities, entity_header, outputfile=os.path.join(import_directory, 'Functional_region.tsv'), is_first=is_first)
-                                        num_entities += len(entities)
-                                        if 'mentioned_in_publication' in relationships:
-                                            print_files(relationships['mentioned_in_publication'], relationship_headers['mentioned_in_publication'], outputfile=os.path.join(import_directory,'Functional_region_mentioned_in_publication.tsv'), is_first=is_first)
-                                            if 'mentioned_in_publication' not in num_relationships:
-                                                num_relationships['mentioned_in_publication'] = 0
-                                            num_relationships['mentioned_in_publication'] += len(relationships['mentioned_in_publication'])
-                                        if 'found_in_protein' in relationships:
-                                            print_files(relationships['found_in_protein'], relationship_headers['found_in_protein'], outputfile=os.path.join(import_directory,'Functional_region_found_in_protein.tsv'), is_first=is_first, filter_for=('END_ID',valid_proteins))
-                                            if 'found_in_protein' not in num_relationships:
-                                                num_relationships['found_in_protein'] = 0
-                                            num_relationships['found_in_protein'] += len(relationships['found_in_protein'])
-                                        entities = set()
-                                        relationships = defaultdict(set)
-                                        is_first = False
-                                    identifier = None
-                                    description = []
-                            elif line.startswith("#=GF"):
-                                data = line.rstrip('\r\n').split()
-                                if 'AC' in data:
-                                    identifier = data[2].split('.')[0]
-                                elif 'DE' in data:
-                                    name = " ".join(data[2:])
-                                elif 'RM' in data:
-                                    relationships['mentioned_in_publication'].add((identifier, data[2], "MENTIONED_IN_PUBLICATION", "PFam"))
-                                elif 'CC' in data:
-                                    description.append(" ".join(data[2:]))
-                            elif not line.startswith('//'):
-                                data = line.rstrip('\r\n').split()
-                                protein, positions = data[0].split('/')
-                                protein = protein.replace('.', '-')
-                                start, end = positions.split('-')
-                                sequence = data[1]
-                                relationships['found_in_protein'].add((identifier, protein, "FOUND_IN_PROTEIN", start, end, sequence, "PFam"))
-                                if protein.split('-')[0] != protein:
-                                    relationships['found_in_protein'].add((identifier, protein.split('-')[0], "FOUND_IN_PROTEIN", start, end, sequence, "PFam"))
+            for line in fhandler:
+                i += 1
+                read_lines += 1
+                if line.startswith("# STOCKHOLM"):
+                    if identifier is not None:
+                        entities.add((identifier, 'Functional_region', name, " ".join(description), "PFam"))
+                        if len(entities) == 100:
+                            print_files(entities, entity_header, outputfile=os.path.join(import_directory, 'Functional_region.tsv'), is_first=is_first)
+                            num_entities += len(entities)
+                            if 'mentioned_in_publication' in relationships:
+                                print_files(relationships['mentioned_in_publication'], relationship_headers['mentioned_in_publication'], outputfile=os.path.join(import_directory,'Functional_region_mentioned_in_publication.tsv'), is_first=is_first)
+                                if 'mentioned_in_publication' not in num_relationships:
+                                    num_relationships['mentioned_in_publication'] = 0
+                                num_relationships['mentioned_in_publication'] += len(relationships['mentioned_in_publication'])
+                            if 'found_in_protein' in relationships:
+                                print_files(relationships['found_in_protein'], relationship_headers['found_in_protein'], outputfile=os.path.join(import_directory,'Functional_region_found_in_protein.tsv'), is_first=is_first, filter_for=('END_ID',valid_proteins))
+                                if 'found_in_protein' not in num_relationships:
+                                    num_relationships['found_in_protein'] = 0
+                                num_relationships['found_in_protein'] += len(relationships['found_in_protein'])
+                            entities = set()
+                            relationships = defaultdict(set)
+                            is_first = False
+                        identifier = None
+                        description = []
+                elif line.startswith("#=GF"):
+                    data = line.rstrip('\r\n').split()
+                    if 'AC' in data:
+                        identifier = data[2].split('.')[0]
+                    elif 'DE' in data:
+                        name = " ".join(data[2:])
+                    elif 'RM' in data:
+                        relationships['mentioned_in_publication'].add((identifier, data[2], "MENTIONED_IN_PUBLICATION", "PFam"))
+                    elif 'CC' in data:
+                        description.append(" ".join(data[2:]))
+                elif not line.startswith('//'):
+                    data = line.rstrip('\r\n').split()
+                    protein, positions = data[0].split('/')
+                    protein = protein.replace('.', '-')
+                    start, end = positions.split('-')
+                    sequence = data[1]
+                    relationships['found_in_protein'].add((identifier, protein, "FOUND_IN_PROTEIN", start, end, sequence, "PFam"))
+                    if protein.split('-')[0] != protein:
+                        relationships['found_in_protein'].add((identifier, protein.split('-')[0], "FOUND_IN_PROTEIN", start, end, sequence, "PFam"))
         except UnicodeDecodeError:
             lines.append(i)
             missed += 1
+
+        fhandler.close()
 
         if len(entities) > 0:
             print_files(entities, entity_header, outputfile=os.path.join(import_directory,'Functional_region.tsv'), is_first=is_first)

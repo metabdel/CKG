@@ -17,14 +17,15 @@ def parser(databases_directory, download=True):
     relationships = build_relationships_from_HMDB(config, metabolites, mapping)
     entities_header = ['ID'] + attributes
     relationships_header = config['relationships_header']
-    
+
     return (entities, relationships, entities_header, relationships_header)
+
 
 def extract_metabolites(config, databases_directory, download=True):
     metabolites = defaultdict()
     prefix = "{http://www.hmdb.ca}"
     url = config['HMDB_url']
-    directory = os.path.join(databases_directory,"HMDB")
+    directory = os.path.join(databases_directory, "HMDB")
     builder_utils.checkDirectory(directory)
     fileName = os.path.join(directory, url.split('/')[-1])
     if download:
@@ -37,8 +38,8 @@ def extract_metabolites(config, databases_directory, download=True):
             zipped.extract(member=zfile, path=directory)
             xfile = os.path.join(directory, zfile)
             with open(xfile, 'rb') as f:
-                context = etree.iterparse(f, events=("end",), tag=prefix+"metabolite")
-                for _,elem in context:
+                context = etree.iterparse(f, events=("end",), tag=prefix + "metabolite")
+                for _, elem in context:
                     values = {child.tag.replace(prefix, ''): child.text for child in elem.iterchildren() if child.tag.replace(prefix,'') in fields and child.text is not None}
                     for child in elem.iterchildren():
                         if child.tag.replace(prefix, '') in parentFields:
@@ -58,7 +59,7 @@ def extract_metabolites(config, databases_directory, download=True):
                                             values[label].add(text)
                     if "accession" in values:
                         metabolites[values["accession"]] = values
-                
+
     return metabolites
 
 
