@@ -84,12 +84,14 @@ def experimentsImport(projects=None, n_jobs=1, import_type="partial"):
     :param int n_jobs: number of jobs to run in parallel. 1 by default when updating one project.
     :param str import_type: type of import (´full´ or ´partial´).
     """
-    experiments_import_directory = os.path.join(directories['importDirectory'],econfig["import_directory"])
+    experiments_import_directory = os.path.join(directories['importDirectory'], econfig["import_directory"])
     builder_utils.checkDirectory(experiments_import_directory)
-    experiments_directory = os.path.join(directories['dataDirectory'],econfig["experiments_directory"])
+    experiments_directory = os.path.join(directories['dataDirectory'], econfig["experiments_directory"])
     if projects is None:
         projects = builder_utils.listDirectoryFolders(experiments_directory)
-    Parallel(n_jobs=n_jobs)(delayed(experimentImport)(experiments_import_directory, experiments_directory, project) for project in projects)
+    if len(projects) > 0:
+        Parallel(n_jobs=n_jobs)(delayed(experimentImport)(experiments_import_directory, experiments_directory, project) for project in projects)
+
 
 def experimentImport(importDirectory, experimentsDirectory, project):
     """
@@ -109,6 +111,7 @@ def experimentImport(importDirectory, experimentsDirectory, project):
             builder_utils.checkDirectory(datasetPath)
             eh.generate_dataset_imports(project, dataset, datasetPath)
 
+
 def usersImport(importDirectory, import_type='partial'):
     """
     Generates User entities from excel file and grants access of new users to the database.
@@ -121,6 +124,7 @@ def usersImport(importDirectory, import_type='partial'):
     usersImportDirectory = os.path.join(importDirectory, uconfig['usersImportDirectory'])
     builder_utils.checkDirectory(usersImportDirectory)
     uh.parseUsersFile(usersImportDirectory, expiration=365)
+
 
 def fullImport(download=True, n_jobs=4):
     """
@@ -151,7 +155,7 @@ def fullImport(download=True, n_jobs=4):
     except IOError as err:
         logger.error("Full import > {}.".format(err))
     except IndexError as err:
-        logger.error("Full import > {}.".format(err)) 
+        logger.error("Full import > {}.".format(err))
     except KeyError as err:
         logger.error("Full import > {}.".format(err))
     except MemoryError as err:
@@ -159,17 +163,19 @@ def fullImport(download=True, n_jobs=4):
     except Exception as err:
         logger.error("Full import > {}.".format(err))
 
+
 def generateStatsDataFrame(stats):
     """
     Generates a dataframe with the stats from each import.
-    
     :param list stats: a list with statistics collected from each importer function.
     :return: Pandas dataframe with the collected statistics.
     """
     statsDf = pd.DataFrame.from_records(list(stats), columns=config["statsCols"])
     statsDf['import_id'] = import_id
-    
+    statsDf['import_id'] = statsDf['import_id'].astype('str')
+
     return statsDf
+
 
 def setupStats(import_type):
     """
@@ -229,13 +235,12 @@ def createEmptyStats(statsCols, statsFile, statsName):
 def writeStats(statsDf, import_type, stats_name=None):
     """
     Appends the new collected statistics to the existing stats object.
-    
     :param statsDf: a pandas dataframe with the new statistics from the importing.
     :param str statsName: If the statistics should be stored with a specific name.
     """
     stats_directory = directories["statsDirectory"]
     stats_file = os.path.join(stats_directory, config["statsFile"])
-    try: 
+    try:
         if stats_name is None:
             stats_name = getStatsName(import_type)
         with pd.HDFStore(stats_file) as hdf:
@@ -260,6 +265,3 @@ def getStatsName(import_type):
 
 if __name__ == "__main__":
     fullImport()
-    #databasesImport(importDirectory='../../../data/imports', databases=['CancerGenomeInterpreter'], n_jobs=1, download=False, import_type="partial")
-    #experimentsImport(projects=["P0000001", "P0000002", "P0000003", "P0000004"], n_jobs=1)
-    #ontologiesImport(importDirectory='../../../data/imports')

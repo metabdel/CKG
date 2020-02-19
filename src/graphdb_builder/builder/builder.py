@@ -10,15 +10,10 @@
 
 """
 
-import os
-import sys
 import argparse
 from graphdb_builder.builder import importer, loader
 import config.ckg_config as ckg_config
-import ckg_utils
 from graphdb_builder import builder_utils
-import logging
-import logging.config
 
 log_config = ckg_config.graphdb_builder_log
 logger = builder_utils.setup_logging(log_config, key="builder")
@@ -30,6 +25,7 @@ try:
     oconfig = builder_utils.setup_config('ontologies')
 except Exception as err:
     logger.error("builder - Reading configuration > {}.".format(err))
+
 
 def set_arguments():
     """
@@ -47,10 +43,11 @@ def set_arguments():
     
     return parser
 
+
 if __name__ == '__main__':
-    parser =  set_arguments()
+    parser = set_arguments()
     args = parser.parse_args()
-    download = args.download=="True"
+    download = args.download == "True"
     if args.build_type == 'full':
         logger.info("The user {} chose to perform a full build".format(args.user))
         logger.info("Building database > step 1: Importing data from ontologies, databases and experiments")

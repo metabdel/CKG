@@ -76,6 +76,7 @@ def load_into_database(driver, queries, requester):
     
     return result
 
+
 def updateDB(driver, imports=None, specific=[]):
     """
     Populates the graph database with information for each Database, Ontology or Experiment \
@@ -99,19 +100,19 @@ def updateDB(driver, imports=None, specific=[]):
         queries = []
         logger.info("Loading {} into the database".format(i))
         try:
-            import_dir = os.path.join(cwd, directories["databasesDirectory"]).replace('\\','/')
+            import_dir = os.path.join(cwd, directories["databasesDirectory"]).replace('\\', '/')
             #Ontologies
-            if i== "ontologies":
+            if i == "ontologies":
                 entities = [e.lower() for e in config["ontology_entities"]]
                 if len(specific) > 0:
                     entities = list(set(entities).intersection([s.lower() for s in specific]))
-                import_dir = os.path.join(cwd, directories["ontologiesDirectory"]).replace('\\','/')
+                import_dir = os.path.join(cwd, directories["ontologiesDirectory"]).replace('\\', '/')
                 ontologyDataImportCode = cypher_queries['IMPORT_ONTOLOGY_DATA']['query']
                 for entity in entities:
                     queries.extend(ontologyDataImportCode.replace("ENTITY", entity.capitalize()).replace("IMPORTDIR", import_dir).split(';')[0:-1])
             elif i == "biomarkers":
                 code = cypher_queries['IMPORT_BIOMARKERS']['query']
-                import_dir = os.path.join(cwd, directories["curatedDirectory"]).replace('\\','/')
+                import_dir = os.path.join(cwd, directories["curatedDirectory"]).replace('\\', '/')
                 queries = code.replace("IMPORTDIR", import_dir).split(';')[0:-1]
             #Databases
             #Chromosomes
