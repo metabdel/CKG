@@ -4,6 +4,8 @@ import certifi
 import urllib3
 import urllib
 import wget
+import base64
+import io
 import requests
 import ftplib
 import json
@@ -15,12 +17,10 @@ import collections
 import pprint
 import obonet
 import datetime
-import tarfile
 import logging
 import logging.config
 from config import ckg_config
 import ckg_utils
-import subprocess
 
 
 def readDataset(uri):
@@ -65,6 +65,22 @@ def readDataFromExcel(uri):
 
     return data
 
+
+def parse_contents(contents, filename):
+    """
+    Reads binary string files and returns a Pandas DataFrame.
+    """
+    content_type, content_string = contents.split(',')
+    decoded = base64.b64decode(content_string)
+    file = filename.split('.')[-1]
+    
+    if file == 'txt':
+        df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), sep='\t', low_memory=False)
+    elif file == 'csv':
+        df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), low_memory=False)
+    elif file == 'xlsx' or file == 'xls':
+        df = pd.read_excel(io.BytesIO(decoded))        
+    return df
 
 def export_contents(data, dataDir, filename):
     """
