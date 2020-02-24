@@ -203,6 +203,9 @@ spectronaut :
             - '\w*_?AS\d+_?-?\d*\.PG\.NrOfPrecursorsUsedForQuantification'
             - '\w*_?AS\d+_?-?\d*\.PG\.MS1Quantity'
             - '\w*_?AS\d+_?-?\d*\.PG\.MS2Quantity'
+        'generated_columns':
+            - 'is_razor'
+            - 'id'
         'proteinCol': 'PG.ProteinAccessions'
         'valueCol': 'PG.Quantity'
         'groupCol': 'id'

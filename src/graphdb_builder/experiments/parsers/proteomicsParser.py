@@ -69,12 +69,12 @@ def parse_dataset(projectId, configuration, dataDir):
                 dataset = dataset.dropna(how='all')
     else:
         raise Exception("Error when importing proteomics experiment in project {}.\n Missing configuration: {}".format(projectId, ",".join(missing_conf)))
-    
+
     return dataset
 
 
-def check_columns(data, req_columns):
-    return set(req_columns).difference(set(data.columns))
+def check_columns(data, req_columns, generated_columns):
+    return set(req_columns).difference(set(data.columns)).difference(generated_columns)
 
 
 def check_minimum_configuration(configuration):
@@ -95,13 +95,16 @@ def load_dataset(uri, configuration):
     columns = configuration["columns"]
     regexCols = [c.replace("\\\\", "\\") for c in columns if '+' in c]
     columns = set(columns).difference(regexCols)
+    generated_columns = []
+    if 'generated_columns' in configuration:
+        generated_columns = configuration['generated_columns']
 
     if 'filters' in configuration:
         filters = configuration["filters"]
 
     indexCol = configuration["indexCol"]
     data = builder_utils.readDataset(uri)
-    missing_cols = check_columns(data, columns)
+    missing_cols = check_columns(data, columns, generated_columns)
     if len(missing_cols) == 0:
         if filters is not None:
             data = data[data[filters].isnull().all(1)]
@@ -155,6 +158,8 @@ def expand_groups(data, configuration):
     return data
 
 ############## ProteinModification entity ####################
+
+
 def extract_modification_protein_rels(data, configuration):
     modificationId = configuration["modId"]
     cols = configuration["positionCols"]
@@ -280,6 +285,8 @@ def extract_protein_modifications_modification_rels(data, configuration):
     return aux
 
 ################# Peptide entity ####################
+
+
 def extract_peptides(data, configuration):
     aux = data.copy()
     modid = configuration["type"]
@@ -334,6 +341,8 @@ def extract_peptide_protein_rels(data, configuration):
     return aux
 
 ################# Protein entity #########################
+
+
 def extract_protein_subject_rels(data, configuration):
     aux = data.filter(regex=configuration["valueCol"])
     attributes = configuration["attributes"]
