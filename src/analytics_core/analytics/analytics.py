@@ -1127,7 +1127,7 @@ def calculate_THSD(df, group='group', alpha=0.05):
     return df_results
 
 
-def calculate_pairwise_ttest(df, column, subject='subject', group='group', correction='bh'):
+def calculate_pairwise_ttest(df, column, subject='subject', group='group', correction='fdr_bh'):
     """
     Performs pairwise t-test using pingouin, as a posthoc test, and calculates fold-changes. For more information visit https://pingouin-stats.org/generated/pingouin.pairwise_ttests.html.
 
