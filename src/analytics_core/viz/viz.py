@@ -701,14 +701,14 @@ def run_volcano(data, identifier, args={'alpha':0.05, 'fc':2, 'colorscale':'Blue
         gidentifier = identifier + "_".join(map(str,group))
         title = 'Comparison: '+str(group[0])+' vs '+str(group[1])
         sig_pval = False
-        signature = signature.sort_values(by="padj",ascending=True)
+        signature = signature.sort_values(by="posthoc padj",ascending=True)
         pvals = []
         for index, row in signature.iterrows():
             # Text
-            text.append('<b>'+str(row['identifier'])+": "+str(index)+'<br>Comparison: '+str(row['group1'])+' vs '+str(row['group2'])+'<br>log2FC = '+str(round(row['log2FC'], ndigits=2))+'<br>p = '+'{:.2e}'.format(row['pvalue'])+'<br>FDR = '+'{:.2e}'.format(row['padj']))
+            text.append('<b>'+str(row['identifier'])+": "+str(index)+'<br>Comparison: '+str(row['group1'])+' vs '+str(row['group2'])+'<br>log2FC = '+str(round(row['log2FC'], ndigits=2))+'<br>p = '+'{:.2e}'.format(row['posthoc pvalue'])+'<br>FDR = '+'{:.2e}'.format(row['posthoc padj']))
 
             # Color
-            if row['padj'] < args['alpha']:
+            if row['posthoc padj'] < args['alpha']:
                 pvals.append(row['-log10 pvalue'])
                 sig_pval = True
                 if row['FC'] <= -args['fc']:
@@ -720,7 +720,7 @@ def run_volcano(data, identifier, args={'alpha':0.05, 'fc':2, 'colorscale':'Blue
                                     'showarrow': False,
                                     'ax': 0,
                                     'ay': -10,
-                                    'font': dict(color = "#2c7bb6", size = 7)})
+                                    'font': dict(color = "#2c7bb6", size = 10)})
                     color.append('rgba(44, 123, 182, 0.2)')
                     line_colors.append('#2c7bb6')
                 elif row['FC'] >= args['fc']:
@@ -732,7 +732,7 @@ def run_volcano(data, identifier, args={'alpha':0.05, 'fc':2, 'colorscale':'Blue
                                     'showarrow': False,
                                     'ax': 0,
                                     'ay': -10,
-                                    'font': dict(color = "#d7191c", size = 7)})
+                                    'font': dict(color = "#d7191c", size = 10)})
                     color.append('rgba(215, 25, 28, 0.2)')
                     line_colors.append('#d7191c')
                 elif row['FC'] < -1.:

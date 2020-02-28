@@ -167,8 +167,8 @@ data exploration:
             marker_size: 10
             permutations: 0
             num_annotations: 50
-            x_title: logFC
-            y_title: -log(pvalue)
+            x_title: log2FC
+            y_title: -log10(pvalue)
             drop_cols:
                 - sample
                 - subject
