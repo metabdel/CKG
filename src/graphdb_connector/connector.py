@@ -6,8 +6,6 @@ import ckg_utils
 from config import ckg_config
 from graphdb_builder import builder_utils
 
-import logging
-
 log_config = ckg_config.graphdb_connector_log
 logger = builder_utils.setup_logging(log_config, key="connector")
 
@@ -17,6 +15,7 @@ try:
     config = ckg_utils.get_configuration(path)
 except Exception as err:
     logger.error("Reading configuration > {}.".format(err))
+
 
 def getGraphDatabaseConnectionConfiguration(configuration=None, database=None):
     if configuration is None:
@@ -28,10 +27,11 @@ def getGraphDatabaseConnectionConfiguration(configuration=None, database=None):
 
     if database is not None:
         host = host+'/'+database
-    
+
     driver = connectToDB(host, port, user, password)
 
     return driver
+
 
 def connectToDB(host="localhost", port=7687, user="neo4j", password="password"):
     try:
@@ -52,6 +52,7 @@ def connectToDB(host="localhost", port=7687, user="neo4j", password="password"):
 
     return driver
 
+
 def removeRelationshipDB(entity1, entity2, relationship):
     driver = getGraphDatabaseConnectionConfiguration()
 
@@ -62,6 +63,7 @@ def removeRelationshipDB(entity1, entity2, relationship):
     print("Removing %d entries in the database" % sendQuery(driver, countst).data()[0]['count'])
     sendQuery(driver, deletest)
     print("Existing entries after deletion: %d" % sendQuery(driver, countst).data()[0]['count'])
+
 
 def modifyEntityProperty(parameters):
     '''parameters: tuple with entity name, entity id, property name to modify, and value'''
@@ -82,11 +84,10 @@ def modifyEntityProperty(parameters):
     except Exception as err:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            logger.error("Reading queries from file {}: {}, file: {},line: {}".format(queries_path, sys.exc_info(), fname, exc_tb.tb_lineno))
+            logger.error("Error: {}. Reading queries from file {}: {}, file: {},line: {}".format(err, queries_path, sys.exc_info(), fname, exc_tb.tb_lineno))
 
 
 def sendQuery(driver, query, parameters={}):
-    #print(query)
     result = None
     try:
         result = driver.run(query, parameters)
@@ -106,20 +107,22 @@ def sendQuery(driver, query, parameters={}):
 
     return result
 
+
 def getCursorData(driver, query, parameters={}):
     result = sendQuery(driver, query, parameters)
     df = pd.DataFrame(result.data())
 
     return df
 
+
 def create_node(driver, node_type, **kwargs):
     node = py2neo.Node(node_type, **kwargs)
     driver.create(node)
-    
     return True
+
 
 def find_node(driver, node_type, **kwargs):
     matcher = py2neo.NodeMatcher(driver)
     found = matcher.match(node_type, **kwargs).first()
-    
+
     return found
