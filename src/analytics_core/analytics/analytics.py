@@ -1127,7 +1127,7 @@ def calculate_THSD(df, group='group', alpha=0.05):
     return df_results
 
 
-def calculate_pairwise_ttest(df, column, subject='subject', group='group', correction='none'):
+def calculate_pairwise_ttest(df, column, subject='subject', group='group', correction='fdr_bh'):
     """
     Performs pairwise t-test using pingouin, as a posthoc test, and calculates fold-changes. For more information visit https://pingouin-stats.org/generated/pingouin.pairwise_ttests.html.
 
@@ -1142,12 +1142,15 @@ def calculate_pairwise_ttest(df, column, subject='subject', group='group', corre
 
         result = calculate_pairwise_ttest(df, 'protein a', subject='subject', group='group', correction='none')
     """
-    posthoc_columns = ['Contrast', 'group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'Paired', 'Parametric', 'T', 'dof', 'tail', 'padj', 'BF10', 'effsize']
     if correction == "none":
-        valid_cols = ['group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'Paired','Parametric', 'T', 'dof', 'BF10', 'effsize']
+        posthoc_columns = ['Contrast', 'group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'posthoc Paired', 'posthoc Parametric', 'posthoc T-Statistics', 'posthoc dof', ' posthoc tail', 'posthoc pvalue', 'posthoc BF10', 'posthoc effsize']
+        valid_cols = ['group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'posthoc Paired', 'posthoc Parametric', 'posthoc T-Statistics', 'posthoc dof', 'posthoc tail', 'posthoc pvalue', 'posthoc BF10', 'posthoc effsize']
     else:
-        valid_cols = posthoc_columns
+        posthoc_columns = ['Contrast', 'group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'posthoc Paired', 'posthoc Parametric', 'posthoc T-Statistics', 'posthoc dof', 'posthoc tail', 'posthoc pvalue', 'posthoc padj', 'posthoc correction', 'posthoc BF10', 'posthoc effsize']
+        valid_cols = ['group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'posthoc Paired', 'posthoc Parametric', 'posthoc T-Statistics', 'posthoc dof', 'posthoc tail', 'posthoc pvalue', 'posthoc padj', 'posthoc correction', 'posthoc BF10', 'posthoc effsize']
+
     posthoc = pg.pairwise_ttests(data=df, dv=column, between=group, subject=subject, effsize='hedges', return_desc=True, padjust=correction)
+
     posthoc.columns =  posthoc_columns
     posthoc = posthoc[valid_cols]
     posthoc = complement_posthoc(posthoc, column)
@@ -1234,7 +1237,7 @@ def calculate_anova_samr(df, labels, s0=0):
 
 def calculate_anova(df, column, group='group'):
     """
-    Calculates one-way ANOVA using scipy stats.
+    Calculates one-way ANOVA using pingouin.
 
     :param df: pandas dataframe with group as rows and protein identifier as column
     :param str column: name of the column in df to run ANOVA on
@@ -1437,7 +1440,7 @@ def format_anova_table(df, aov_results, pairwise_results, group, permutations, a
         scores= scores.join(count)
         scores['correction'] = 'permutation FDR ({} perm)'.format(permutations)
     else:
-        rejected, padj = apply_pvalue_fdrcorrection(scores["pvalue"].tolist(), alpha=alpha, method = 'indep')
+        rejected, padj = apply_pvalue_fdrcorrection(scores['pvalue'].tolist(), alpha=alpha, method = 'indep')
         scores['correction'] = 'FDR correction BH'
         scores['padj'] = padj
 
@@ -1451,8 +1454,8 @@ def format_anova_table(df, aov_results, pairwise_results, group, permutations, a
 
     res = res.reset_index()
     res['rejected'] = res['padj'] < alpha
-    res['-log10 pvalue'] = res['padj'].apply(lambda x: - np.log10(x))
-
+    res['-log10 pvalue'] = res['posthoc pvalue'].apply(lambda x: - np.log10(x))
+    
     return res
 
 
@@ -1505,7 +1508,7 @@ def run_ttest(df, condition1, condition2, alpha = 0.05, drop_cols=["sample"], su
     scores['group1'] = condition1
     scores['group2'] = condition2
     scores['FC'] = [np.power(2,np.abs(x)) * -1 if x < 0 else np.power(2,np.abs(x)) for x in scores['log2FC'].values]
-    scores['-log10 pvalue'] = [- np.log10(x) for x in scores['padj'].values]
+    scores['-log10 pvalue'] = [- np.log10(x) for x in scores['pvalue'].values]
     scores['Method'] = method
     scores = scores.reset_index()
 

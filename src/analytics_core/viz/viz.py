@@ -270,6 +270,9 @@ def get_ranking_plot(data, identifier, args):
         result = get_ranking_plot(data, identifier='ranking', args={'group':'group', 'index':'', 'x_title':'x_axis', 'y_title':'y_axis', \
                                     'title':'Ranking Plot', 'width':100, 'height':150, 'annotations':{'GPT~P24298': 'liver disease', 'CP~P00450': 'Wilson disease'}})
     """
+    # data['y'] = data['y'].rpow(2)
+    # data['y'] = np.log10(data['y'])
+
     num_cols = 3
     fig = {}
     layouts = []
@@ -326,6 +329,7 @@ def get_ranking_plot(data, identifier, args):
                                 xaxis= {"title": args['x_title'], 'autorange':True},
                                 yaxis= {"title": args['y_title'], 'range':range_y},
                                 template='plotly_white'))
+        [fig['layout'][e].update(range=range_y) for e in fig['layout'] if e[0:5] == 'yaxis']
         fig['layout'].annotations = [dict(xref='paper', yref='paper', showarrow=False, text='')] + layouts
     else:
         fig = get_simple_scatterplot(data, identifier+'_'+group, args).figure
@@ -697,14 +701,14 @@ def run_volcano(data, identifier, args={'alpha':0.05, 'fc':2, 'colorscale':'Blue
         gidentifier = identifier + "_".join(map(str,group))
         title = 'Comparison: '+str(group[0])+' vs '+str(group[1])
         sig_pval = False
-        signature = signature.sort_values(by="padj",ascending=True)
+        signature = signature.sort_values(by="posthoc padj",ascending=True)
         pvals = []
         for index, row in signature.iterrows():
             # Text
-            text.append('<b>'+str(row['identifier'])+": "+str(index)+'<br>Comparison: '+str(row['group1'])+' vs '+str(row['group2'])+'<br>log2FC = '+str(round(row['log2FC'], ndigits=2))+'<br>p = '+'{:.2e}'.format(row['pvalue'])+'<br>FDR = '+'{:.2e}'.format(row['padj']))
+            text.append('<b>'+str(row['identifier'])+": "+str(index)+'<br>Comparison: '+str(row['group1'])+' vs '+str(row['group2'])+'<br>log2FC = '+str(round(row['log2FC'], ndigits=2))+'<br>p = '+'{:.2e}'.format(row['posthoc pvalue'])+'<br>FDR = '+'{:.2e}'.format(row['posthoc padj']))
 
             # Color
-            if row['padj'] < args['alpha']:
+            if row['posthoc padj'] < args['alpha']:
                 pvals.append(row['-log10 pvalue'])
                 sig_pval = True
                 if row['FC'] <= -args['fc']:
@@ -1454,10 +1458,6 @@ def get_table(data, identifier, title, colors = ('#C2D4FF','#F5F8FF'), subset = 
         if subset is not None:
             data = data[subset]
 
-        #booleanDictionary = {True: 'TRUE', False: 'FALSE'}
-        #if 'rejected' in data.columns:
-        #    data['rejected'] = data['rejected'].replace(booleanDictionary)
-
         list_cols = data.applymap(lambda x: isinstance(x, list)).all()
         list_cols = list_cols.index[list_cols].tolist()
 
@@ -1465,24 +1465,29 @@ def get_table(data, identifier, title, colors = ('#C2D4FF','#F5F8FF'), subset = 
             data[c] = data[c].apply(lambda x: ";".join(x))
 
         data_trace = dash_table.DataTable(id='table_'+identifier,
-                                            data=data.to_dict("rows"),
+                                            data=data.astype(str).to_dict("rows"),
                                             columns=[{"name": str(i).replace('_', ' ').title(), "id": i} for i in data.columns],
-                                            css=[{
-                                                'selector': '.dash-cell div.dash-cell-value',
-                                                'rule': 'display: inline; white-space: inherit; overflow: inherit; text-overflow: inherit;'
-                                            }],
+                                            # css=[{
+                                            #     'selector': '.dash-cell div.dash-cell-value',
+                                            #     'rule': 'display: inline; white-space: inherit; overflow: inherit; text-overflow: inherit;'
+                                            # }],
                                             style_data={'whiteSpace': 'normal', 'height': 'auto'},
                                             style_cell={
-                                                'minWidth': '50px', 'maxWidth': '500px',
-                                                'textAlign': 'left', 'padding': '1px', 'vertical-align': 'top'
+                                                'height': 'fit-content', 'whiteSpace': 'normal',
+                                                'minWidth': '130px', 'maxWidth': '200px',
+                                                'textAlign': 'left', 'padding': '1px', 'vertical-align': 'top',
+                                                'overflow': 'hidden', 'textOverflow': 'ellipsis'
                                             },
+                                            style_cell_conditional=[{
+                                                'if': {'column_id': i},
+                                                'width': str(50 + round(len(i)*50))+'px'} for i in data.columns],
                                             style_table={
                                                 "height": "fit-content",
                                             #    "max-height": "500px",
-                                                "width": "fit-content",
+                                                # "width": "fit-content",
                                             #    "max-width": "1500px",
                                             #    'overflowY': 'scroll',
-                                            #    'overflowX': 'scroll'
+                                               'overflowX': 'scroll'
                                             },
                                             style_header={
                                                 'backgroundColor': '#2b8cbe',
@@ -1491,12 +1496,12 @@ def get_table(data, identifier, title, colors = ('#C2D4FF','#F5F8FF'), subset = 
                                             },
                                             style_data_conditional=[{
                                                 "if": 
-                                                    {"column_id": "Rejected", "filter_query": 'Rejected eq "True"'},
+                                                    {"column_id": "rejected", "filter_query": '{rejected} eq "True"'},
                                                     "backgroundColor": "#3B8861",
                                                     'color': 'white'
                                                 },
                                                 ],
-                                            fixed_rows={ 'headers': True },
+                                            fixed_rows={ 'headers': True, 'data': 0},
                                             filter_action='native',
                                             page_current= 0,
                                             page_size = 25,
