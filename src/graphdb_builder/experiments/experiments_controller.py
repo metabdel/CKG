@@ -1,18 +1,12 @@
 import sys
-import re
 import os.path
-import pandas as pd
-import numpy as np
-from collections import defaultdict
 from graphdb_builder import builder_utils
 from graphdb_builder.experiments.parsers import clinicalParser, proteomicsParser, wesParser
 import config.ckg_config as ckg_config
-import ckg_utils
-import logging
-import logging.config
 
 log_config = ckg_config.graphdb_builder_log
 logger = builder_utils.setup_logging(log_config, key="experiments_controller")
+
 
 def generate_dataset_imports(projectId, dataType, dataset_import_dir):
     stats = set()
@@ -38,17 +32,18 @@ def generate_dataset_imports(projectId, dataType, dataset_import_dir):
         logger.error("Experiment {}: {} file: {}, line: {}".format(projectId, sys.exc_info(), fname, exc_tb.tb_lineno))
         raise Exception("Error when importing experiment {}.\n {}".format(projectId, err))
 
+
 def generate_graph_files(data, dataType, projectId, stats, ot='w', dataset_import_dir='experiments'):
     if dataType.lower() == '':
         outputfile = os.path.join(dataset_import_dir, projectId+".tsv")
     else:
         outputfile = os.path.join(dataset_import_dir, projectId+"_"+dataType.lower()+".tsv")
-    
+   
     with open(outputfile, ot) as f:
         data.to_csv(path_or_buf=f, sep='\t',
             header=True, index=False, quotechar='"',
             line_terminator='\n', escapechar='\\')
-    
+   
     logger.info("Experiment {} - Number of {} relationships: {}".format(projectId, dataType, data.shape[0]))
     stats.add(builder_utils.buildStats(data.shape[0], "relationships", dataType, "Experiment", outputfile))
 

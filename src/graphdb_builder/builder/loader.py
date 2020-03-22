@@ -23,19 +23,19 @@ import config.ckg_config as ckg_config
 import ckg_utils
 from graphdb_connector import connector
 from graphdb_builder import builder_utils
-import logging
-import logging.config
+
 
 cwd = os.path.abspath(os.path.dirname(__file__))
 log_config = ckg_config.graphdb_builder_log
 logger = builder_utils.setup_logging(log_config, key="loader")
 START_TIME = datetime.now()
 
-try:    
+try:   
     config = builder_utils.setup_config('builder')
     directories = builder_utils.get_full_path_directories()
 except Exception as err:
     logger.error("Reading configuration > {}.".format(err))
+
 
 def load_into_database(driver, queries, requester):
     """
@@ -72,8 +72,7 @@ def load_into_database(driver, queries, requester):
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             logger.error("Loading: {}, file: {}, line: {} - query: {}".format(err, fname, exc_tb.tb_lineno, query))
-            #raise Exception("{}, file: {}, line: {}.\n Query: {}".format(err, fname, exc_tb.tb_lineno, query))        
-    
+
     return result
 
 

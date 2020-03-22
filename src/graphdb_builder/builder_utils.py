@@ -73,14 +73,15 @@ def parse_contents(contents, filename):
     content_type, content_string = contents.split(',')
     decoded = base64.b64decode(content_string)
     file = filename.split('.')[-1]
-    
+
     if file == 'txt':
         df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), sep='\t', low_memory=False)
     elif file == 'csv':
         df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), low_memory=False)
     elif file == 'xlsx' or file == 'xls':
-        df = pd.read_excel(io.BytesIO(decoded))        
+        df = pd.read_excel(io.BytesIO(decoded))
     return df
+
 
 def export_contents(data, dataDir, filename):
     """
@@ -189,7 +190,7 @@ def get_full_path_directories():
         config = ckg_utils.get_configuration(os.path.join(dirname, ckg_config.builder_config_file))
         if 'directories' in config:
             for directory in config['directories']:
-                directories[directory] = os.path.join(dirname,config['directories'][directory])
+                directories[directory] = os.path.join(dirname, config['directories'][directory])
         
     except Exception as err:
         raise Exception("Error {}: builder_utils - Reading directories from configuration > {}.".format(err, ckg_config.builder_config_file))
@@ -240,9 +241,8 @@ def setup_logging(path='log.config', key=None):
     else:
         logging.basicConfig(level=logging.DEBUG)
     logger = logging.getLogger(key)
-    
+ 
     return logger
-
 
 
 def downloadDB(databaseURL, directory=None, file_name=None, user="", password=""):
@@ -371,7 +371,7 @@ def getMedlineAbstracts(idList):
     :return: Pandas DataFrame with columns: 'title', 'authors', 'journal', 'keywords', 'abstract', 'PMID' and 'url'.
     """
 
-    fields = {"TI":"title", "AU":"authors", "JT":"journal", "DP":"date", "MH":"keywords", "AB":"abstract", "PMID":"PMID"}
+    fields = {"TI": "title", "AU": "authors", "JT": "journal", "DP": "date", "MH": "keywords", "AB": "abstract", "PMID": "PMID"}
     pubmedUrl = "https://www.ncbi.nlm.nih.gov/pubmed/"
     handle = Entrez.efetch(db="pubmed", id=idList, rettype="medline", retmode="json")
     records = Medline.parse(handle)
