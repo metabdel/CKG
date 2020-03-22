@@ -296,8 +296,8 @@ class Dataset:
         if not os.path.isdir(dataset_directory):
             os.makedirs(dataset_directory)
         if len(self.data) > 0:
-            dt = h5.special_dtype(vlen=str) 
-            with h5.File(os.path.join(dataset_directory, self.dataset_type+"_dataset.h5"), "w") as f:
+            dt = h5.special_dtype(vlen=str)
+            with h5.File(os.path.join(dataset_directory, self.dataset_type + "_dataset.h5"), "w") as f:
                 grp = f.create_group(self.dataset_type)
                 df_set = self.save_dataset_recursively(self.data, grp, dt)
 

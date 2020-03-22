@@ -1,19 +1,11 @@
 import os
 import sys
-import re
-import pandas as pd
-import numpy as np
-from py2neo import ClientError
 import config.ckg_config as ckg_config
 import ckg_utils
 from graphdb_connector import connector
 from graphdb_builder import builder_utils
 from graphdb_builder.builder import loader
 from graphdb_builder.experiments import experiments_controller as eh
-from graphdb_builder.experiments.parsers import clinicalParser as cp
-from graphdb_connector import query_utils
-import logging
-import logging.config
 
 log_config = ckg_config.report_manager_log
 logger = builder_utils.setup_logging(log_config, key="project_creation")
@@ -26,6 +18,7 @@ try:
     config = builder_utils.get_config(config_name="clinical.yml", data_type='experiments')
 except Exception as err:
     logger.error("Reading configuration > {}.".format(err))
+
 
 def get_project_creation_queries():
     """
@@ -41,8 +34,9 @@ def get_project_creation_queries():
     except Exception as err:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        logger.error("Reading queries from file {}: {}, file: {},line: {}".format(queries_path, sys.exc_info(), fname, exc_tb.tb_lineno))
+        logger.error("Reading queries from file {}: {}, file: {},line: {}, err: {}".format(queries_path, sys.exc_info(), fname, exc_tb.tb_lineno, err))
     return project_creation_cypher
+
 
 def check_if_node_exists(driver, node, node_property, value):
     """
@@ -62,14 +56,16 @@ def check_if_node_exists(driver, node, node_property, value):
         query = cypher[query_name]['query'].replace('NODE', node).replace('PROPERTY', node_property)
         for q in query.split(';')[0:-1]:
             if '$' in q:
-                result = connector.getCursorData(driver, q+';', parameters={'value':value})
+                result = connector.getCursorData(driver, q+';', parameters={'value': value})
             else:
                 result = connector.getCursorData(driver, q+';')
     except Exception as err:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         logger.error("Reading query {}: {}, file: {},line: {}, error: {}".format(query_name, sys.exc_info(), fname, exc_tb.tb_lineno, err))
+    
     return result
+
 
 def get_new_project_identifier(driver, projectId):
     """
@@ -85,23 +81,21 @@ def get_new_project_identifier(driver, projectId):
     try:
         project_creation_cypher = get_project_creation_queries()
         query = project_creation_cypher[query_name]['query']
-        last_project, new_id  = connector.getCursorData(driver, query).values[0]
+        last_project, new_id = connector.getCursorData(driver, query).values[0]
         if last_project is None and new_id is None:
             external_identifier = 'P0000001'
         else:
             length = len(last_project.split('P')[-1])
             new_length = len(str(new_id))
             external_identifier = 'P'+'0'*(length-new_length)+str(new_id)
-        print(external_identifier)
-        print('===============')
     except Exception as err:
         external_identifier = None
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        logger.error("Reading query {}: {}, file: {},line: {}".format(query_name, sys.exc_info(), fname, exc_tb.tb_lineno))
-    print(external_identifier)
-    print('-----------')
+        logger.error("Reading query {}: {}, file: {},line: {}, err: {}".format(query_name, sys.exc_info(), fname, exc_tb.tb_lineno, err))
+
     return external_identifier
+
 
 def get_subject_number_in_project(driver, projectId):
     """
@@ -116,12 +110,13 @@ def get_subject_number_in_project(driver, projectId):
     try:
         cypher = get_project_creation_queries()
         query = cypher[query_name]['query']
-        result = connector.getCursorData(driver, query, parameters={'external_id':projectId}).values[0][0]
+        result = connector.getCursorData(driver, query, parameters={'external_id': projectId}).values[0][0]
     except Exception as err:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        logger.error("Reading query {}: {}, file: {},line: {}".format(query_name, sys.exc_info(), fname, exc_tb.tb_lineno))
+        logger.error("Error: {}. Reading query {}: {}, file: {},line: {}".format(err, query_name, sys.exc_info(), fname, exc_tb.tb_lineno))
     return result
+
 
 def create_new_project(driver, projectId, data, separator='|'):
     """
@@ -140,7 +135,7 @@ def create_new_project(driver, projectId, data, separator='|'):
     :return: Two strings: number of projects created and the project external identifier.
     """
     query_name = 'create_project'
-    external_identifier='No Identifier Assigned'
+    external_identifier = 'No Identifier Assigned'
     done = None
 
     try:
@@ -151,7 +146,7 @@ def create_new_project(driver, projectId, data, separator='|'):
                 external_identifier = 'P0000001'
             data['external_id'] = external_identifier
 
-            projectDir = os.path.join(experimentDir, os.path.join(external_identifier,'clinical'))
+            projectDir = os.path.join(experimentDir, os.path.join(external_identifier, 'clinical'))
             ckg_utils.checkDirectory(projectDir)
             data.to_excel(os.path.join(projectDir, 'ProjectData_{}.xlsx'.format(external_identifier)), index=False, encoding='utf-8')
 
@@ -166,5 +161,5 @@ def create_new_project(driver, projectId, data, separator='|'):
     except Exception as err:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        logger.error("Reading query {}: {}, file: {},line: {}".format(query_name, sys.exc_info(), fname, exc_tb.tb_lineno))
+        logger.error("Reading query {}: {}, file: {},line: {}, err: {}".format(query_name, sys.exc_info(), fname, exc_tb.tb_lineno, err))
     return done, external_identifier

@@ -53,7 +53,7 @@ class Report:
             name = "_".join(plot_id)
             for plot in self._plots[plot_id]:
                 figure = plot.figure
-                pio.write_image(figure, os.path.join(directory,name+"."+plot_format))
+                pio.write_image(figure, os.path.join(directory, name + "." + plot_format))
 
     def save_report(self, directory):
         dt = h5.special_dtype(vlen=str)
@@ -61,8 +61,8 @@ class Report:
             order = 0
             markdown = utils.convert_dash_to_json(utils.get_markdown_date("Report created on:"))
             figure_json = json.dumps(markdown, cls=utils.NumpyEncoder)
-            figure_id = str(order) +"_date"
-            grp = f.create_group(str(order) +"_date")
+            figure_id = str(order) + "_date"
+            grp = f.create_group(str(order) + "_date")
             fig_set = grp.create_dataset(figure_id, (1,), dtype=dt)
             fig_set[:] = str(figure_json)
             fig_set.attrs['identifier'] = figure_id
@@ -85,7 +85,7 @@ class Report:
                         if 'net_tables' in plot:
                             json_str_nodes = utils.convert_dash_to_json(plot['net_tables'][0])
                             json_str_edges = utils.convert_dash_to_json(plot['net_tables'][1])
-                            figure_json["net_tables"] = (json_str_nodes,json_str_edges)
+                            figure_json["net_tables"] = (json_str_nodes, json_str_edges)
                         figure_json = json.dumps(figure_json, cls=utils.NumpyEncoder)
                         figure_id = str(i)+'_net'
                     else:
@@ -128,19 +128,19 @@ class Report:
                     if environment == "notebook":
                         if "notebook" in plot:
                             net = plot['notebook']
-                            report_plots.append(Cytoscape(data={'elements':net[0]}, visual_style=net[1], layout={'width':'100%', 'height':'700px'}))
+                            report_plots.append(Cytoscape(data={'elements': net[0]}, visual_style=net[1], layout={'width': '100%', 'height': '700px'}))
                         else:
                             if isinstance(plot, dict):
                                 if 'props' in plot:
                                     if 'figure' in plot['props']:
                                         try:
                                             iplot(plot['props']['figure'])
-                                        except:
+                                        except Exception:
                                             pass
                             elif hasattr(plot, 'figure'):
                                 try:
                                     iplot(plot.figure)
-                                except:
+                                except Exception:
                                     pass
                     else:
                         app_plot = plot
@@ -168,7 +168,7 @@ class Report:
                         if 'figure' in plot['props']:
                             try:
                                 iplot(plot['props']['figure'])
-                            except:
+                            except Exception:
                                 pass
                      
             else:

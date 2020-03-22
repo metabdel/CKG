@@ -286,11 +286,11 @@ class Project:
 
     def query_data(self):
         data = {}
-        try:            
+        try:
             cwd = os.path.abspath(os.path.dirname(__file__))
             queries_path = os.path.join(cwd, self.queries_file)
             project_cypher = query_utils.read_queries(queries_path)
-            
+
             driver = connector.getGraphDatabaseConnectionConfiguration()
             replace = [("PROJECTID", self.identifier)]
             for query_name in project_cypher:
@@ -310,19 +310,19 @@ class Project:
 
     def check_report_exists(self):
         exists = True
-        report_dir = os .path.join(os.path.join(os.path.abspath(os.path.dirname(__file__)),"../../data/reports/"), self.identifier)
+        report_dir = os .path.join(os.path.join(os.path.abspath(os.path.dirname(__file__)), "../../data/reports/"), self.identifier)
         if not os.path.isdir(report_dir):
             return False
         for dataset in self.report:
             if os.path.isdir(os.path.join(report_dir, dataset)):
                 continue
             exists = False
-        
+
         return exists
 
     def load_project_report(self):
         self.load_project_data()
-        project_dir = os.path.join(os.path.join(os.path.abspath(os.path.dirname(__file__)),"../../data/reports/"), self.identifier)
+        project_dir = os.path.join(os.path.join(os.path.abspath(os.path.dirname(__file__)), "../../data/reports/"), self.identifier)
         self.report = {}
         for root, data_types, files in os.walk(project_dir):
             for data_type in data_types:
@@ -358,18 +358,18 @@ class Project:
                     dataset = LongitudinalProteomicsDataset(self.identifier, data={}, analyses={}, analysis_queries={}, report=None)
                 elif data_type == "multiomics":
                     dataset = MultiOmicsDataset(self.identifier, data={}, analyses={}, report=None)
-                
+
                 if dataset is not None:
                     dataset.load_dataset(os.path.join(root, data_type))
                     self.update_dataset({data_type: dataset})
-            
+
     def build_project(self, force=False):
         if self.check_report_exists() and not force:
             self.load_project_report()
         elif force:
             self.report = {}
             self.datasets = {}
-        
+
         if len(self.report) == 0 or len(self.datasets) == 0:
             project_info = self.query_data()
             if len(project_info) > 0:
@@ -397,11 +397,11 @@ class Project:
                         if "longitudinal_proteomics" in self.configuration_files:
                             configuration = ckg_utils.get_configuration(self.configuration_files["longitudinal_proteomics"])
                         dataset = LongitudinalProteomicsDataset(self.identifier, data={}, configuration=configuration, analyses={}, analysis_queries={}, report=None)
-                
+
                     if dataset is not None:
                         dataset.generate_dataset()
-                        self.update_dataset({data_type:dataset})
-                
+                        self.update_dataset({data_type: dataset})
+
                 if len(self.datasets) > 1:
                     if "multiomics" in self.configuration_files:
                         configuration = ckg_utils.get_configuration(self.configuration_files["multiomics"])
@@ -423,7 +423,7 @@ class Project:
             self.similar_projects = project_info['similarity']
             if 'similarity_pearson' in self.similar_projects:
                 self.similar_projects = self.similar_projects[self.similar_projects['similarity_pearson'] > 0.5]
-        
+
     def generate_project_attributes_plot(self):
         project_df = self.to_dataframe()
         project_df = project_df.drop(['similar_projects', 'overlap'], axis=1)
@@ -441,9 +441,9 @@ class Project:
         plots.append(viz.get_sankey_plot(self.similar_projects, identifier, args={'source': 'current', 'target': 'other', 'weight': 'similarity_pearson', 'orientation': 'h', 'valueformat': '.0f', 'width': 800, 'height': 800, 'font': 12, 'title': title}))
 
         plots.append(self.get_similarity_network())
-        
+
         return plots
-        
+
     def generate_overlap_plots(self):
         plots = []
         identifier = "Overlap"
@@ -460,34 +460,32 @@ class Project:
     def get_similarity_network_style(self):
         stylesheet = [{'selector': 'node',
                        'style': {'label': 'data(name)',
-                               'text-valign': 'center',
-                               'text-halign': 'center',
-                               'opacity':0.8,
-                               'font-size': '12'}},
-                    {'selector':'edge',
-                     'style':{'label':'data(label)', 
-                              'curve-style': 'bezier',
-                              'opacity':0.7,
-                              'width':0.4,
-                              'font-size': '5'}}]
+                                 'text-valign': 'center',
+                                 'text-halign': 'center',
+                                 'opacity': 0.8,
+                                 'font-size': '12'}},
+                      {'selector': 'edge',
+                       'style': {'label': 'data(label)',
+                                 'curve-style': 'bezier',
+                                 'opacity': 0.7,
+                                 'width': 0.4,
+                                 'font-size': '5'}}]
         layout = {'name': 'cose',
-                'idealEdgeLength': 100,
-                'nodeOverlap': 20,
-                'refresh': 20,
-                #'fit': True,
-                #'padding': 30,
-                'randomize': False,
-                'componentSpacing': 100,
-                'nodeRepulsion': 400000,
-                'edgeElasticity': 100,
-                'nestingFactor': 5,
-                'gravity': 80,
-                'numIter': 1000,
-                'initialTemp': 200,
-                'coolingFactor': 0.95,
-                'minTemp': 1.0}
-        #for k,v in node_colors.items():
-        #    stylesheet.append(ast.literal_eval(color_selector.replace("KEY", k).replace("VALUE",v)))
+                  'idealEdgeLength': 100,
+                  'nodeOverlap': 20,
+                  'refresh': 20,
+                  #'fit': True,
+                  #'padding': 30,
+                  'randomize': False,
+                  'componentSpacing': 100,
+                  'nodeRepulsion': 400000,
+                  'edgeElasticity': 100,
+                  'nestingFactor': 5,
+                  'gravity': 80,
+                  'numIter': 1000,
+                  'initialTemp': 200,
+                  'coolingFactor': 0.95,
+                  'minTemp': 1.0}
         
         return stylesheet, layout
 

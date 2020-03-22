@@ -1,18 +1,13 @@
-import io
 import os
 import shutil
 import re
-import sys
 import pandas as pd
 import numpy as np
 import time
 from datetime import datetime
 from uuid import uuid4
 import base64
-import json
-from natsort import natsorted
 import flask
-import urllib.parse
 import user
 import dash_core_components as dcc
 import dash_html_components as html
@@ -21,15 +16,12 @@ from dash.exceptions import PreventUpdate
 from app import app, server as application
 from apps import initialApp, projectCreationApp, dataUploadApp, dataUpload, projectApp, importsApp, homepageApp, loginApp, projectCreation
 from graphdb_builder import builder_utils
-from graphdb_builder.builder import loader, importer
+from graphdb_builder.builder import loader
 from graphdb_builder.experiments import experiments_controller as eh
 from report_manager import utils
-import ckg_utils
 import config.ckg_config as ckg_config
 from worker import create_new_project, create_new_identifiers
 from graphdb_connector import connector
-import logging
-import logging.config
 
 log_config = ckg_config.report_manager_log
 logger = builder_utils.setup_logging(log_config, key="index page")
@@ -50,17 +42,17 @@ separator = config["separator"]
 app.layout = dcc.Loading(
     children=[html.Div([
     dcc.Location(id='url', refresh=False),
-    html.Div(id='page-content', style={'padding-top':10}, className='container-fluid'),
-])], style={'text-align':'center',
-            'margin-top':'70px',
-            'margin-bottom':'-60px','position':'absolute',
-            'top':'50%','left':'50%', 'height':'200px'},
+    html.Div(id='page-content', style={'padding-top': 10}, className='container-fluid'),
+])], style={'text-align': 'center',
+            'margin-top': '70px',
+            'margin-bottom': '-60px', 'position': 'absolute',
+            'top': '50%', 'left': '50%', 'height': '200px'},
     type='circle', 
     color='#2b8cbe')
 
 @app.callback([Output('page-content', 'children'), 
                Output('logout_form', 'style')],
-              [Input('url','href')])
+              [Input('url', 'href')])
 def display_page(pathname):
     session_cookie = flask.request.cookies.get('custom-auth-session')
     logged_in = session_cookie is not None
@@ -115,7 +107,7 @@ def display_page(pathname):
                                       'position': 'absolute',
                                       'right': '50px'})
         else:
-            return ('404',{'display': 'block',
+            return ('404', {'display': 'block',
                            'position': 'absolute',
                            'right': '50px'})
     return (None, None)
@@ -370,21 +362,23 @@ def create_project(n_clicks, name, acronym, responsible, participant, datatype, 
         arguments = [name, number_subjects, datatype, disease, tissue, responsible]
 
         # Check if clinical variables exist in the database
-        if intervention is not None:
-            interventions = list()
-            exist = dict()
-            for i in intervention.split(separator):
-                res = projectCreation.check_if_node_exists(driver, 'Clinical_variable', 'id', i)
-                if res.empty:
-                    exist[i] = True
-                else:
-                    exist[i] = False
-                    interventions.append('{} ({})'.format(res['n.name'][0], i))
-            intervention = separator.join(interventions)
+        if intervention is not None: 
+            intervention = intervention.strip()
+            if intervention != '':
+                interventions = list()
+                exist = dict()
+                for i in intervention.split(separator):
+                    res = projectCreation.check_if_node_exists(driver, 'Clinical_variable', 'id', i)
+                    if res.empty:
+                        exist[i] = True
+                    else:
+                        exist[i] = False
+                        interventions.append('{} ({})'.format(res['n.name'][0], i))
+                intervention = separator.join(interventions)
 
-            if any(exist.values()):
-                response = 'Clinical variable(s) "{}" does(do) not exist in the database.'.format(', '.join([k for k,n in exist.items() if n==True]))
-                return response, None, {'display': 'none'}, {'display': 'none'}
+                if any(exist.values()):
+                    response = 'The intervention(s) "{}" specified does(do) not exist.'.format(', '.join([k for k,n in exist.items() if n==True]))
+                    return response, None, {'display': 'none'}, {'display': 'none'}
 
         if any(not arguments[n] for n, i in enumerate(arguments)):
             response = "Insufficient information to create project. Fill in all fields with '*'."
@@ -627,7 +621,7 @@ def run_processing(n_clicks, project_id):
                 message = 'Files successfully uploaded.'
         except Exception as err:
             style = {'display':'block'}
-            message = err
+            message = str(err)
         
     return message, style
 
