@@ -244,7 +244,7 @@ def writeStats(statsDf, import_type, stats_name=None):
         if stats_name is None:
             stats_name = getStatsName(import_type)
         with pd.HDFStore(stats_file) as hdf:
-            hdf.append(stats_name, statsDf, data_columns=True, min_itemsize=2000)
+            hdf.append(stats_name, statsDf, data_columns=True)
     except Exception as err:
         logger.error("Writing Stats object {} in file:{} > {}.".format(stats_name, stats_file, err))
 

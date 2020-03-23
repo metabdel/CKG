@@ -100,50 +100,50 @@ def updateDB(driver, imports=None, specific=[]):
         logger.info("Loading {} into the database".format(i))
         try:
             import_dir = os.path.join(cwd, directories["databasesDirectory"]).replace('\\', '/')
-            #Ontologies
             if i == "ontologies":
                 entities = [e.lower() for e in config["ontology_entities"]]
                 if len(specific) > 0:
                     entities = list(set(entities).intersection([s.lower() for s in specific]))
+                print(entities)
                 import_dir = os.path.join(cwd, directories["ontologiesDirectory"]).replace('\\', '/')
                 ontologyDataImportCode = cypher_queries['IMPORT_ONTOLOGY_DATA']['query']
                 for entity in entities:
+                    print(ontologyDataImportCode.replace("ENTITY", entity.capitalize()).replace("IMPORTDIR", import_dir).split(';')[0:-1])
                     queries.extend(ontologyDataImportCode.replace("ENTITY", entity.capitalize()).replace("IMPORTDIR", import_dir).split(';')[0:-1])
+                mappings = config['ontology_mappings']
+                mappingImportCode = cypher_queries['IMPORT_ONTOLOGY_MAPPING_DATA']['query']
+                for m in mappings:
+                    print(m)
+                    if m.lower() in entities:
+                        print("IN")
+                        for r in mappings[m]:
+                            queries.extend(mappingImportCode.replace("ENTITY1", m).replace("ENTITY2", r).replace("IMPORTDIR", import_dir).split(';')[0:-1])
             elif i == "biomarkers":
                 code = cypher_queries['IMPORT_BIOMARKERS']['query']
                 import_dir = os.path.join(cwd, directories["curatedDirectory"]).replace('\\', '/')
                 queries = code.replace("IMPORTDIR", import_dir).split(';')[0:-1]
-            #Databases
-            #Chromosomes
             elif i == "chromosomes":
                 code = cypher_queries['IMPORT_CHROMOSOME_DATA']['query']
                 queries = code.replace("IMPORTDIR", import_dir).split(';')[0:-1]
-            #Genes
             elif i == "genes":
                 code = cypher_queries['IMPORT_GENE_DATA']['query']
                 queries = code.replace("IMPORTDIR", import_dir).split(';')[0:-1]
-            #Transcripts
             elif i == "transcripts":
                 code = cypher_queries['IMPORT_TRANSCRIPT_DATA']['query']
                 queries = code.replace("IMPORTDIR", import_dir).split(';')[0:-1]
-            #Proteins
             elif i == "proteins":
                 code = cypher_queries['IMPORT_PROTEIN_DATA']['query']
                 queries = code.replace("IMPORTDIR", import_dir).split(';')[0:-1]
-            #Functional regions
             elif i == "functional_regions":
                 code = cypher_queries["IMPORT_FUNCTIONAL_REGIONS"]['query']
                 queries = code.replace("IMPORTDIR", import_dir).split(';')[0:-1]
-            #Protein annotations
             elif i == "annotations":
                 code = cypher_queries['IMPORT_PROTEIN_ANNOTATIONS']['query']
                 queries = code.replace("IMPORTDIR", import_dir).split(';')[0:-1]
-            #Protein complexes
             elif i == "complexes":
                 code = cypher_queries['IMPORT_COMPLEXES']['query']
                 for resource in config["complexes_resources"]:
                     queries.extend(code.replace("IMPORTDIR", import_dir).replace("RESOURCE", resource.lower()).split(';')[0:-1])
-            #Modified proteins
             elif i == "modified_proteins":
                 code = cypher_queries['IMPORT_MODIFIED_PROTEINS']['query']
                 for resource in config["modified_proteins_resources"]:
@@ -151,12 +151,10 @@ def updateDB(driver, imports=None, specific=[]):
                 code = cypher_queries['IMPORT_MODIFIED_PROTEIN_ANNOTATIONS']['query']
                 for resource in config["modified_proteins_annotation_resources"]:
                     queries.extend(code.replace("IMPORTDIR", import_dir).replace("RESOURCE", resource.lower()).split(';')[0:-1])
-            #Pathology expression
             elif i == "pathology_expression":
                 code = cypher_queries['IMPORT_PATHOLOGY_EXPRESSION']['query']
                 for resource in config["pathology_expression_resources"]:
                     queries.extend(code.replace("IMPORTDIR", import_dir).replace("RESOURCE", resource.lower()).split(';')[0:-1])
-            #PPIs
             elif i == "ppi":
                 code = cypher_queries['IMPORT_CURATED_PPI_DATA']['query']
                 for resource in config["curated_PPI_resources"]:
@@ -167,16 +165,13 @@ def updateDB(driver, imports=None, specific=[]):
                 code = cypher_queries['IMPORT_PPI_ACTION']['query']
                 for resource in config["PPI_action_resources"]:
                     queries.extend(code.replace("IMPORTDIR", import_dir).replace("RESOURCE", resource.lower()).split(';')[0:-1])
-            #PDBs
             elif i == "protein_structure":
-                code= cypher_queries['IMPORT_PROTEIN_STRUCTURES']['query']
+                code = cypher_queries['IMPORT_PROTEIN_STRUCTURES']['query']
                 queries = code.replace("IMPORTDIR", import_dir).split(';')[0:-1]
-            #Diseases
             elif i == "diseases":
                 code = cypher_queries['IMPORT_DISEASE_DATA']['query']
                 for entity, resource in config["disease_resources"]:
                     queries.extend(code.replace("IMPORTDIR", import_dir).replace("ENTITY", entity).replace("RESOURCE", resource.lower()).split(';')[0:-1])
-            #Drugs  
             elif i == "drugs":
                 code = cypher_queries['IMPORT_DRUG_DATA']['query']
                 queries = code.replace("IMPORTDIR", import_dir).split(';')[0:-1]
@@ -189,66 +184,57 @@ def updateDB(driver, imports=None, specific=[]):
                 code = cypher_queries['IMPORT_DRUG_ACTS_ON']['query']
                 for resource in config["drug_action_resources"]:
                     queries.extend(code.replace("IMPORTDIR", import_dir).replace("RESOURCE", resource.lower()).split(';')[0:-1])
-            #Side effects
             elif i == "side effects":
                 code = cypher_queries['IMPORT_DRUG_SIDE_EFFECTS']['query']
                 for resource in config["side_effects_resources"]:
                     queries.extend(code.replace("IMPORTDIR", import_dir).replace("RESOURCE", resource.lower()).split(';')[0:-1])
-            #Pathway
             elif i == 'pathway':
                 code = cypher_queries['IMPORT_PATHWAY_DATA']['query']
                 for resource in config["pathway_resources"]:
                     queries.extend(code.replace("IMPORTDIR", import_dir).replace("RESOURCE", resource.lower()).split(';')[0:-1])
-            #Metabolite
             elif i == 'metabolite':
                 code = cypher_queries['IMPORT_METABOLITE_DATA']['query']
                 for resource in config["metabolite_resources"]:
                     queries.extend(code.replace("IMPORTDIR", import_dir).replace("RESOURCE", resource.lower()).split(';')[0:-1])
-            #Food
             elif i == 'food':
                 code = cypher_queries['IMPORT_FOOD_DATA']['query']
                 for resource in config["food_resources"]:
                     queries.extend(code.replace("IMPORTDIR", import_dir).replace("RESOURCE", resource.lower()).split(';')[0:-1])
-            #GWAS
             elif i == "gwas":
                 code = cypher_queries['IMPORT_GWAS']['query']
                 queries = code.replace("IMPORTDIR", import_dir).split(';')[0:-1]
-            #Known variants
+                code = cypher_queries['IMPORT_VARIANT_FOUND_IN_GWAS']['query']
+                queries.extend(code.replace("IMPORTDIR", import_dir).split(';')[0:-1])
+                code = cypher_queries['IMPORT_GWAS_STUDIES_TRAIT']['query']
+                queries.extend(code.replace("IMPORTDIR", import_dir).split(';')[0:-1])
             elif i == "known_variants":
                 code = cypher_queries['IMPORT_KNOWN_VARIANT_DATA']['query']
                 queries = code.replace("IMPORTDIR", import_dir).split(';')[0:-1]
-            #Clinically_relevant_variants
             elif i == "clinical variants":
                 code = cypher_queries['IMPORT_CLINICALLY_RELEVANT_VARIANT_DATA']['query']
                 for resource in config["clinical_variant_resources"]:
                     queries.extend(code.replace("IMPORTDIR", import_dir).replace("RESOURCE", resource.lower()).split(';')[0:-1])
-            #Jensenlab.org
             elif i == "jensenlab":
                 code = cypher_queries['IMPORT_JENSENLAB_DATA']['query']
                 for (entity1, entity2) in config["jensenlabEntities"]:
                     queries.extend(code.replace("IMPORTDIR", import_dir).replace("ENTITY1", entity1).replace("ENTITY2", entity2).split(';')[0:-1])
-            #Mentions
             elif i == "mentions":
                 code = cypher_queries['CREATE_PUBLICATIONS']['query']
                 queries = code.replace("IMPORTDIR", import_dir).split(';')[0:-1]
                 code = cypher_queries['IMPORT_MENTIONS']['query']
                 for entity in config["mentionEntities"]:
                     queries.extend(code.replace("IMPORTDIR", import_dir).replace("ENTITY", entity).split(';')[0:-1])
-             #Published in
             elif i == "published":
                 code = cypher_queries['IMPORT_PUBLISHED_IN']['query']
                 for entity in config["publicationEntities"]:
                     queries.extend(code.replace("IMPORTDIR", import_dir).replace("ENTITY", entity).split(';')[0:-1])
-            #Users
             elif i == "user":
-                usersDir = os.path.join(cwd, directories["usersImportDirectory"]).replace('\\','/')   
+                usersDir = os.path.join(cwd, directories["usersImportDirectory"]).replace('\\', '/')  
                 user_cypher = cypher_queries['CREATE_USER_NODE']
                 code = user_cypher['query']
                 queries.extend(code.replace("IMPORTDIR", usersDir).split(';')[0:-1])
-
-            #Projects
             elif i == "project":
-                import_dir = os.path.join(cwd, directories["experimentsDirectory"]).replace('\\','/')
+                import_dir = os.path.join(cwd, directories["experimentsDirectory"]).replace('\\', '/')
                 projects = builder_utils.listDirectoryFolders(import_dir)
                 if len(specific) > 0:
                     projects = list(set(projects).intersection(specific))
@@ -259,18 +245,17 @@ def updateDB(driver, imports=None, specific=[]):
                     for project_section in project_cypher:
                         code = project_section['query']
                         queries.extend(code.replace("IMPORTDIR", projectDir).replace('PROJECTID', project).split(';')[0:-1])
-            #Datasets
             elif i == "experiment":
-                import_dir = os.path.join(cwd, directories["experimentsDirectory"]).replace('\\','/')
+                import_dir = os.path.join(cwd, directories["experimentsDirectory"]).replace('\\', '/')
                 datasets_cypher = cypher_queries['IMPORT_DATASETS']
                 projects = builder_utils.listDirectoryFolders(import_dir)
                 if len(specific) > 0:
                     projects = list(set(projects).intersection(specific))
                 for project in projects:
-                    projectDir = os.path.join(import_dir, project).replace('\\','/')
+                    projectDir = os.path.join(import_dir, project).replace('\\', '/')
                     datasetTypes = builder_utils.listDirectoryFolders(projectDir)
                     for dtype in datasetTypes:
-                        datasetDir = os.path.join(projectDir, dtype).replace('\\','/')
+                        datasetDir = os.path.join(projectDir, dtype).replace('\\', '/')
                         dataset = datasets_cypher[dtype]
                         code = dataset['query']
                         queries.extend(code.replace("IMPORTDIR", datasetDir).replace('PROJECTID', project).split(';')[0:-1])

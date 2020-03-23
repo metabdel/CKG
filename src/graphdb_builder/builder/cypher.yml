@@ -32,6 +32,18 @@ IMPORT_ONTOLOGY_DATA:
         MERGE (e1)-[r:HAS_PARENT]->(e2)
         RETURN COUNT(r) AS ENTITY_has_parent;
 
+IMPORT_ONTOLOGY_MAPPING_DATA:
+    'name': "import ontology mappings"
+    'description': "Creates relationships between different onotologies (i.e (EFO)-[:MAPS_TO]->(Disease)"
+    'query': >
+        USING PERIODIC COMMIT 10000
+        LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/ENTITY1_maps_to_ENTITY2.tsv" AS line
+        FIELDTERMINATOR '\t'
+        MATCH (e1:ENTITY1{id:line.START_ID})
+        MATCH (e2:ENTITY2{id:line.END_ID}) 
+        MERGE (e1)-[r:MAPS_TO]->(e2)
+        RETURN COUNT(r) AS ENTITY1_maps_to_ENTITY2;
+
 IMPORT_PROTEIN_DATA: 
     'name': "import protein data"
     'description': "Creates Protein and Peptide nodes, their relationship and relationships to Gene and Transcript nodes"
@@ -384,10 +396,22 @@ IMPORT_VARIANT_FOUND_IN_GWAS:
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/GWAS_study_variant_found_in_gwas.tsv" AS line
         FIELDTERMINATOR '\t'
-        MATCH (v:Known_variant)
+        MATCH (v:Known_variant {external_id:line.START_ID})
         MATCH (g:GWAS_study {id:line.END_ID})
-        MERGE (v)-[r:VARIANT_FOUND_IN_GWAS{frequency:toFloat(line.frequency),pvalue:line.pvalue,odds_ratio:line.odds_ratio,trait:line.trait,source:line.source}]->(g) WHERE line.START_ID IN SPLIT(k.alternative_names,',')
+        MERGE (v)-[r:VARIANT_FOUND_IN_GWAS{frequency:toFloat(line.frequency),pvalue:line.pvalue,odds_ratio:line.odds_ratio,trait:line.trait,source:line.source}]->(g) 
         RETURN COUNT(r) AS VARIANT_FOUND_IN_GWAS;
+
+IMPORT_GWAS_STUDIES_TRAIT:
+    'name': 'import traits studied by GWAS'
+    'description': 'Loads into the database all the links to traits (Experimental_factor) studied in a GWAS'
+    'query': >
+        USING PERIODIC COMMIT 10000
+        LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/GWAS_study_studies_trait.tsv" AS line
+        FIELDTERMINATOR '\t'
+        MATCH (g:GWAS_study {id:line.START_ID})
+        MATCH (e:Experimental_factor {id:line.END_ID})
+        MERGE (g)-[r:STUDIES_TRAIT{source:line.source}]->(e)
+        RETURN COUNT(r) AS GWAS_STUDIES_TRAIT;
         
         
 IMPORT_DISEASE_DATA:
@@ -589,11 +613,12 @@ IMPORT_KNOWN_VARIANT_DATA:
     'query': >
         CREATE CONSTRAINT ON (k:Known_variant) ASSERT k.id IS UNIQUE;
         CREATE INDEX ON :Known_variant(pvariant_id);
+        CREATE INDEX ON :Known_variant(external_id);
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Known_variant.tsv" AS line
         FIELDTERMINATOR '\t'
         MERGE (k:Known_variant {id:line.ID})
-        ON CREATE SET k.pvariant_id=line.pvariant_id,k.alternative_names=line.alternative_names,k.effect=line.effect,k.clinical_relevance=line.clinical_relevance,k.disease=line.disease,k.original_source=line.original_source,k.source=line.source
+        ON CREATE SET k.pvariant_id=line.pvariant_id,k.external_id=line.external_id,k.alternative_names=line.alternative_names,k.effect=line.effect,k.clinical_relevance=line.clinical_relevance,k.disease=line.disease,k.original_source=line.original_source,k.source=line.source
         RETURN COUNT(k) AS known_variant;
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/Chromosome_known_variant_found_in_chromosome.tsv" AS line
@@ -875,13 +900,18 @@ CREATE_SUBJECTS: &create_subject
         MATCH (s:Subject {id:line.END_ID}) 
         MERGE (p)-[r:HAS_ENROLLED]->(s)
         RETURN COUNT(r) AS PROJECTID_project_has_enrolled_subject;
-        USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/PROJECTID_disease.tsv" AS line 
         FIELDTERMINATOR '\t'
         MATCH (:Project {id:'PROJECTID'})-[:HAS_ENROLLED]-(s:Subject{external_id:line.START_ID})
         MATCH (d:Disease {id:line.END_ID}) 
         MERGE (s)-[r:HAS_DISEASE]->(d)
         RETURN COUNT(r) AS PROJECTID_subject_has_disease;
+        LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/PROJECTID_experimental_factor.tsv" AS line 
+        FIELDTERMINATOR '\t'
+        MATCH (:Project {id:'PROJECTID'})-[:HAS_ENROLLED]-(s:Subject{external_id:line.START_ID})
+        MATCH (e:Experimental_factor {id:line.END_ID}) 
+        MERGE (s)-[r:IS_A]->(e)
+        RETURN COUNT(r) AS PROJECTID_subject_is_a_experimental_factor;
         
 CREATE_BIOSAMPLES: &create_bio
     'name': 'create biological samples'

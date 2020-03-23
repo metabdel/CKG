@@ -89,6 +89,12 @@ ontology_entities:
     - 'Clinical_variable'
     - 'Phenotype'
     - 'Experiment'
+    - 'Experimental_factor'
+ontology_mappings:
+    Experimental_factor: 
+        - Disease
+        - Clinical_variable
+        - Phenotype
 #Database resources
 #Modified proteins
 modified_proteins_resources:
