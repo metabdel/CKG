@@ -23,3 +23,8 @@ relationships_header:
         - odds_ratio
         - trait
         - source
+    studies_trait:
+        - START_ID
+        - END_ID 
+        - TYPE
+        - source

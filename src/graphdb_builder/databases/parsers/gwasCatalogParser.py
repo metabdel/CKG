@@ -1,11 +1,8 @@
 import os.path
 from collections import defaultdict
-import ckg_utils
 from graphdb_builder import builder_utils
 
-#########################
-#   GWAS Catalog EBI    #
-#########################
+
 def parser(databases_directory, download= True):
     config = builder_utils.get_config(config_name="gwasCatalogConfig.yml", data_type='databases')
     url = config['GWASCat_url']
@@ -35,6 +32,7 @@ def parser(databases_directory, download= True):
                 pval = data[27]
                 odds_ratio = data[30]
                 trait = data[34]
+                exp_factor = data[35]
                 study = data[36]
                 
                 entities.add((study, "GWAS_study", title, date, sample_size, replication_size, trait))
@@ -42,5 +40,8 @@ def parser(databases_directory, download= True):
                     relationships["published_in_publication"].add((study, pubmedid, "PUBLISHED_IN", "GWAS Catalog"))
                 if snp_id != "":
                     relationships["variant_found_in_gwas"].add((snp_id, study, "VARIANT_FOUND_IN_GWAS", freq, pval, odds_ratio, trait, "GWAS Catalog"))
+                if exp_factor != "":
+                    exp_factor = exp_factor.split('/')[-1].replace('_', ':')
+                    relationships["studies_trait"].add((study, exp_factor, "STUDIES_TRAIT", "GWAS Catalog"))
         
     return (entities, relationships, entities_header, relationships_header)

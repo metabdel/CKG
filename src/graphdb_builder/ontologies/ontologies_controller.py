@@ -1,17 +1,10 @@
-import urllib
 from graphdb_builder import mapping as mp, builder_utils
 import config.ckg_config as ckg_config
-import ckg_utils
 from graphdb_builder.ontologies.parsers import *
 import os.path
-from collections import defaultdict
 import pandas as pd
 import csv
-import obonet
-import re
 from datetime import date
-import logging
-import logging.config
 import sys
 
 log_config = ckg_config.graphdb_builder_log
@@ -22,9 +15,6 @@ try:
 except Exception as err:
     logger.error("Reading configuration > {}.".format(err))
 
-#########################
-# General functionality #
-#########################
 
 def entries_to_remove(entries, the_dict):
     """
@@ -38,9 +28,7 @@ def entries_to_remove(entries, the_dict):
         if key in the_dict:
             del the_dict[key]
 
-############################
-# Calling the right parser #
-############################
+
 def parse_ontology(ontology, download=True):
     """
     Parses and extracts data from a given ontology file(s), and returns a tuple with multiple dictionaries.
@@ -55,13 +43,14 @@ def parse_ontology(ontology, download=True):
     builder_utils.checkDirectory(ontology_directory)
     ontology_files = []
     ontologyData = None
+    mappings = None
     if ontology in config["ontology_types"]:
         otype = config["ontology_types"][ontology]
         if 'urls' in config:
             if otype in config['urls']:
                 urls = config['urls'][otype]
                 for url in urls:
-                    f = url.split('/')[-1].replace('?','_').replace('=','_')
+                    f = url.split('/')[-1].replace('?', '_').replace('=', '_')
                     ontology_files.append(os.path.join(ontology_directory, f))
                     if download:
                         builder_utils.downloadDB(url, directory=ontology_directory, file_name=f)
@@ -79,6 +68,8 @@ def parse_ontology(ontology, download=True):
             ontologyData = snomedParser.parser(ontology_files, filters)
         elif ontology == "ICD":
             ontologyData = icdParser.parser(ontology_files)
+        elif ontology == 'EFO':
+            ontologyData, mappings = efoParser.parser(ontology_files)
         else:
             ontologyData = oboParser.parser(ontology, ontology_files)
             mp.buildMappingFromOBO(ontology_files[0], ontology)
@@ -87,11 +78,10 @@ def parse_ontology(ontology, download=True):
             logger.info("WARNING: SNOMED-CT terminology needs to be downloaded manually since it requires UMLS License. More information available here: https://www.nlm.nih.gov/databases/umls.html")
         else:
             logger.info("WARNING: Ontology {} could not be downloaded. Check that the link in configuration works.".format(ontology))
-    return ontologyData
+    
+    return ontologyData, mappings
 
-#########################
-#       Graph files     #
-#########################
+
 def generate_graphFiles(import_directory, ontologies=None, download=True):
     """
     This function parses and extracts data from a given list of ontologies. If no ontologies are provided, \
@@ -112,8 +102,8 @@ def generate_graphFiles(import_directory, ontologies=None, download=True):
             ontology = ontology.capitalize()
             if ontology.capitalize() in config["ontologies"]:
                 entities.update({ontology: config["ontologies"][ontology]})
-    
-    updated_on = None
+
+    updated_on = "None"
     if download:
         updated_on = str(date.today())
 
@@ -123,13 +113,13 @@ def generate_graphFiles(import_directory, ontologies=None, download=True):
         if ontology in config["ontology_types"]:
             ontologyType = config["ontology_types"][ontology]
         try:
-            result = parse_ontology(ontology, download)
+            result, mappings = parse_ontology(ontology, download)
             if result is not None:
                 terms, relationships, definitions = result
                 for namespace in terms:
                     if namespace in config["entities"]:
                         name = config["entities"][namespace]
-                    entity_outputfile = os.path.join(import_directory, name+".tsv")
+                    entity_outputfile = os.path.join(import_directory, name + ".tsv")
                     with open(entity_outputfile, 'w', encoding='utf-8') as csvfile:
                         writer = csv.writer(csvfile, delimiter='\t', escapechar='\\', quotechar='"', quoting=csv.QUOTE_ALL)
                         writer.writerow(['ID', ':LABEL', 'name', 'description', 'type', 'synonyms'])
@@ -150,6 +140,18 @@ def generate_graphFiles(import_directory, ontologies=None, download=True):
                         stats.add(builder_utils.buildStats(len(relationships[namespace]), "relationships", name+"_has_parent", ontology, relationships_outputfile, updated_on))
             else:
                 logger.warning("Ontology {} - The parsing did not work".format(ontology))
+            if mappings is not None:
+                for name in mappings:
+                    mappings_outputfile = os.path.join(import_directory, name + ".tsv")
+                    mappingsDf = pd.DataFrame(list(mappings[name]))
+                    mappingsDf.columns = ['START_ID', 'END_ID', 'TYPE']
+                    mappingsDf.to_csv(path_or_buf=mappings_outputfile,
+                                                sep='\t',
+                                                header=True, index=False, quotechar='"',
+                                                quoting=csv.QUOTE_ALL,
+                                                line_terminator='\n', escapechar='\\')
+                    logger.info("Ontology {} - Number of {} relationships: {}".format(ontology, name, len(mappings[name])))
+                    stats.add(builder_utils.buildStats(len(mappings[name]), "relationships", name, ontology, mappings_outputfile, updated_on))
         except Exception as err:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
@@ -158,4 +160,4 @@ def generate_graphFiles(import_directory, ontologies=None, download=True):
     return stats
 
 if __name__ == "__main__":
-    generate_graphFiles(import_directory='../../../data/imports', download=True) 
+    generate_graphFiles(import_directory='../../../data/imports', download=True)

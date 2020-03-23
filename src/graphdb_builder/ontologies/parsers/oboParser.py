@@ -1,9 +1,8 @@
 from collections import defaultdict
 from graphdb_builder import builder_utils
 import re
-##################
-# OBO ontologies # 
-##################
+
+
 def parser(ontology, files):
     """
     Multiple ontology database parser.
@@ -27,7 +26,7 @@ def parser(ontology, files):
     for obo_file in files:
         oboGraph = builder_utils.convertOBOtoNet(obo_file)
         namespace = ontology
-        for term,attr in oboGraph.nodes(data = True):
+        for term, attr in oboGraph.nodes(data=True):
             if "namespace" in attr:
                 namespace = attr["namespace"]
             if namespace not in terms:
@@ -38,12 +37,12 @@ def parser(ontology, files):
                 terms[namespace][term].append(term)
             if "synonym" in attr:
                 for s in attr["synonym"]:
-                    terms[namespace][term].append(re.match(r'\"(.+?)\"',s).group(1))
+                    terms[namespace][term].append(re.match(r'\"(.+?)\"', s).group(1))
             if "xref" in attr:
                 for s in attr["xref"]:
                     terms[namespace][term].append(s)
             if "def" in attr:
-                definitions[term] = attr["def"].replace('"','')
+                definitions[term] = attr["def"].replace('"', '')
             else:
                 definitions[term] = terms[namespace][term][0]
             if "is_a" in attr:
