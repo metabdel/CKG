@@ -129,6 +129,8 @@ maxquant :
             - 'Reverse'
             - 'Only identified by site'
             - 'is_razor'
+        'generated_columns':
+            - 'is_razor'
         'filters':
             - 'Reverse'
             - 'Only identified by site'
