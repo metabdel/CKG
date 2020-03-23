@@ -1142,8 +1142,9 @@ def calculate_pairwise_ttest(df, column, subject='subject', group='group', corre
 
         result = calculate_pairwise_ttest(df, 'protein a', subject='subject', group='group', correction='none')
     """
-    if correction == "none":
-        posthoc_columns = ['Contrast', 'group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'posthoc Paired', 'posthoc Parametric', 'posthoc T-Statistics', 'posthoc dof', ' posthoc tail', 'posthoc pvalue', 'posthoc BF10', 'posthoc effsize']
+
+    if correction == "none" or len(df[group].unique()) <= 2:
+        posthoc_columns = ['Contrast', 'group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'posthoc Paired', 'posthoc Parametric', 'posthoc T-Statistics', 'posthoc dof', 'posthoc tail', 'posthoc pvalue', 'posthoc BF10', 'posthoc effsize']
         valid_cols = ['group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'posthoc Paired', 'posthoc Parametric', 'posthoc T-Statistics', 'posthoc dof', 'posthoc tail', 'posthoc pvalue', 'posthoc BF10', 'posthoc effsize']
     else:
         posthoc_columns = ['Contrast', 'group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'posthoc Paired', 'posthoc Parametric', 'posthoc T-Statistics', 'posthoc dof', 'posthoc tail', 'posthoc pvalue', 'posthoc padj', 'posthoc correction', 'posthoc BF10', 'posthoc effsize']
@@ -1448,13 +1449,18 @@ def format_anova_table(df, aov_results, pairwise_results, group, permutations, a
     if not res.empty:
         res = res.join(scores[['F-statistics', 'pvalue', 'padj']].astype('float'))
         res['correction'] = scores['correction']
+    
     else:
         res = scores
         res["log2FC"] = np.nan
 
     res = res.reset_index()
     res['rejected'] = res['padj'] < alpha
-    res['-log10 pvalue'] = res['posthoc pvalue'].apply(lambda x: - np.log10(x))
+
+    if 'posthoc pvalue' in res.columns:
+        res['-log10 pvalue'] = res['posthoc pvalue'].apply(lambda x: - np.log10(x))
+    else:
+        res['-log10 pvalue'] = res['pvalue'].apply(lambda x: - np.log10(x))
     
     return res
 
