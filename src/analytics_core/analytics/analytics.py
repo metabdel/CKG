@@ -1142,15 +1142,10 @@ def calculate_pairwise_ttest(df, column, subject='subject', group='group', corre
 
         result = calculate_pairwise_ttest(df, 'protein a', subject='subject', group='group', correction='none')
     """
-    if correction == "none":
-        posthoc_columns = ['Contrast', 'group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'posthoc Paired', 'posthoc Parametric', 'posthoc T-Statistics', 'posthoc dof', ' posthoc tail', 'posthoc pvalue', 'posthoc BF10', 'posthoc effsize']
-        valid_cols = ['group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'posthoc Paired', 'posthoc Parametric', 'posthoc T-Statistics', 'posthoc dof', 'posthoc tail', 'posthoc pvalue', 'posthoc BF10', 'posthoc effsize']
-    else:
-        posthoc_columns = ['Contrast', 'group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'posthoc Paired', 'posthoc Parametric', 'posthoc T-Statistics', 'posthoc dof', 'posthoc tail', 'posthoc pvalue', 'posthoc padj', 'posthoc correction', 'posthoc BF10', 'posthoc effsize']
-        valid_cols = ['group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'posthoc Paired', 'posthoc Parametric', 'posthoc T-Statistics', 'posthoc dof', 'posthoc tail', 'posthoc pvalue', 'posthoc padj', 'posthoc correction', 'posthoc BF10', 'posthoc effsize']
-
-    posthoc = pg.pairwise_ttests(data=df, dv=column, between=group, subject=subject, effsize='hedges', return_desc=True, padjust=correction)
-
+    posthoc_columns = ['Contrast', 'group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'posthoc Paired', 'posthoc Parametric', 'posthoc T-Statistics', 'posthoc dof', 'posthoc tail', 'posthoc pvalue', 'posthoc BF10', 'posthoc effsize']
+    valid_cols = ['group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'posthoc Paired', 'posthoc Parametric', 'posthoc T-Statistics', 'posthoc dof', 'posthoc tail', 'posthoc pvalue', 'posthoc BF10', 'posthoc effsize']
+    posthoc = pg.pairwise_ttests(data=df, dv=column, between=group, subject=subject, effsize='hedges', return_desc=True, padjust=correction, correction=True)
+    
     posthoc.columns =  posthoc_columns
     posthoc = posthoc[valid_cols]
     posthoc = complement_posthoc(posthoc, column)
@@ -1365,6 +1360,10 @@ def run_anova(df, alpha=0.05, drop_cols=["sample",'subject'], subject='subject',
         else:
 
             res = run_repeated_measurements_anova(df, alpha=alpha, drop_cols=drop_cols, subject=subject, group=group, permutations=0)
+    elif len(df[group].unique()) <= 2:
+        groups = df[group].unique()
+        drop_cols = [d for d in drop_cols if d != subject]
+        res = run_ttest(df, groups[0], groups[1], alpha = alpha, drop_cols=drop_cols, subject=subject, group=group, paired=False, correction='indep', permutations=permutations)
     else:
         df = df.set_index([group])
         df = df.drop(drop_cols, axis=1)
@@ -1504,12 +1503,13 @@ def run_ttest(df, condition1, condition2, alpha = 0.05, drop_cols=["sample"], su
         scores['correction'] = 'FDR correction BH'
         scores['padj'] = padj
         scores['rejected'] = rejected
-    #scores['rejected'] = scores['padj'] <= alpha
+    
     scores['group1'] = condition1
     scores['group2'] = condition2
     scores['FC'] = [np.power(2,np.abs(x)) * -1 if x < 0 else np.power(2,np.abs(x)) for x in scores['log2FC'].values]
     scores['-log10 pvalue'] = [- np.log10(x) for x in scores['pvalue'].values]
     scores['Method'] = method
+    scores.index.name = 'identifier'
     scores = scores.reset_index()
 
     return scores

@@ -701,14 +701,21 @@ def run_volcano(data, identifier, args={'alpha':0.05, 'fc':2, 'colorscale':'Blue
         gidentifier = identifier + "_".join(map(str,group))
         title = 'Comparison: '+str(group[0])+' vs '+str(group[1])
         sig_pval = False
-        signature = signature.sort_values(by="posthoc padj",ascending=True)
+        padj_col = "padj"
+        pval_col = "pvalue"
+        if "posthoc padj" in signature:
+            padj_col = "posthoc padj"
+            pval_col = "posthoc pvalue"
+            signature = signature.sort_values(by="posthoc padj",ascending=True)
+        elif "padj" in signature:
+            signature = signature.sort_values(by="padj",ascending=True)
         pvals = []
         for index, row in signature.iterrows():
             # Text
-            text.append('<b>'+str(row['identifier'])+": "+str(index)+'<br>Comparison: '+str(row['group1'])+' vs '+str(row['group2'])+'<br>log2FC = '+str(round(row['log2FC'], ndigits=2))+'<br>p = '+'{:.2e}'.format(row['posthoc pvalue'])+'<br>FDR = '+'{:.2e}'.format(row['posthoc padj']))
+            text.append('<b>'+str(row['identifier'])+": "+str(index)+'<br>Comparison: '+str(row['group1'])+' vs '+str(row['group2'])+'<br>log2FC = '+str(round(row['log2FC'], ndigits=2))+'<br>p = '+'{:.2e}'.format(row[pval_col])+'<br>FDR = '+'{:.2e}'.format(row[padj_col]))
 
             # Color
-            if row['posthoc padj'] < args['alpha']:
+            if row[padj_col] < args['alpha']:
                 pvals.append(row['-log10 pvalue'])
                 sig_pval = True
                 if row['FC'] <= -args['fc']:
