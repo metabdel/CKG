@@ -2,6 +2,7 @@ import os
 import sys
 import pandas as pd
 import h5py as h5
+import numpy as np
 import ckg_utils
 import config.ckg_config as ckg_config
 from report_manager import report as rp, knowledge
@@ -252,6 +253,7 @@ class Dataset:
                                     if analysis_type.lower() == "anova" or analysis_type.lower() == "samr" or analysis_type.lower() == "ttest":
                                         reg_data = result.result[analysis_type]
                                         if not reg_data.empty:
+                                            print(reg_data)
                                             sig_hits = list(set(reg_data.loc[reg_data.rejected,"identifier"]))
                                             sig_data = data[sig_hits]
                                             self.update_data({"regulated": sig_data, "regulation table": reg_data})
@@ -278,17 +280,19 @@ class Dataset:
         self.add_configuration_to_report(report_pipeline)
 
     def save_dataset_recursively(self, dset, group, dt):
-        max_size = 20
         df_set = None
         for name in dset:
             if isinstance(dset[name], dict):
                 grp = group.create_group(name)
                 df_set = self.save_dataset_recursively(dset[name], grp, dt)
             elif isinstance(dset[name], pd.DataFrame):
-                #if dset[name].memory_usage().sum()/1000000 < max_size:
                 if not dset[name].index.is_numeric():
                     dset[name] = dset[name].reset_index()
-                df_set = group.create_dataset(name, (1,), dtype=dt, compression="gzip", chunks=True, data=dset[name].to_json(orient='records'))
+                try:
+                    df_set = group.create_dataset(name, (1,), dtype=dt, compression="gzip", chunks=True, data=dset[name].to_json(orient='records'))
+                except ValueError:
+                    print("Could not save dataset: {}. Memory usage {}".format(name, dset[name].memory_usage().sum()/1000000))
+                    print(dset[name])
         
         return df_set
     
@@ -365,13 +369,13 @@ class MultiOmicsDataset(Dataset):
                 data[dataset_type] = dataset.get_dataframe(dataset_name)
 
         return data
-    
+
     def generate_knowledge(self):
         kn = knowledge.MultiOmicsKnowledge(self.identifier, self.data, nodes={}, relationships={}, colors={}, graph=None, report={})
         kn.generate_knowledge()        
-        
+ 
         return kn
-    
+
 
 class ProteomicsDataset(Dataset):
     def __init__(self, identifier, dataset_type="proteomics", data={}, configuration=None, analyses={}, analysis_queries={}, report=None):
