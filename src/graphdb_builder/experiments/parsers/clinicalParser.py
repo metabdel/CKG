@@ -5,6 +5,7 @@ import numpy as np
 from graphdb_builder import builder_utils
 from graphdb_connector import connector
 
+
 def parser(projectId):
     cwd = os.path.abspath(os.path.dirname(__file__))
     config = builder_utils.get_config(config_name="clinical.yml", data_type='experiments')
@@ -26,6 +27,7 @@ def parser(projectId):
     
     return data
 
+
 def project_parser(projectId, config, directory, separator):
     data = {}
     project_data = parse_dataset(projectId, config, directory, key='project')
@@ -36,6 +38,7 @@ def project_parser(projectId, config, directory, separator):
         data[('studies_tissue', 'w')] = extract_project_tissue_rels(project_data, separator=separator)
         data[('studies_disease', 'w')] = extract_project_disease_rels(project_data, separator=separator)
         data[('studies_intervention', 'w')] = extract_project_intervention_rels(project_data, separator=separator)
+        data[('follows_up_project', 'w')] = extract_project_rels(project_data, separator=separator)
         data[('timepoint', 'w')] = extract_timepoints(project_data, separator=separator)
     
     return data
@@ -88,7 +91,7 @@ def parse_dataset(projectId, configuration, dataDir, key='project'):
 
 def extract_project_info(project_data):
     df = project_data.copy()
-    df.columns = ['internal_id', 'name', 'acronym', 'description', 'subjects', 'datatypes', 'timepoints', 'disease', 'tissue', 'intervention', 'responsible', 'participant', 'start_date', 'end_date', 'status', 'external_id']
+    df.columns = ['internal_id', 'name', 'acronym', 'description', 'related_to', 'subjects', 'datatypes', 'timepoints', 'disease', 'tissue', 'intervention', 'responsible', 'participant', 'start_date', 'end_date', 'status', 'external_id']
     return df
 
 def extract_responsible_rels(project_data, separator='|'):
@@ -138,10 +141,21 @@ def extract_project_intervention_rels(project_data, separator='|'):
     if 'intervention' in project_data:
         if not pd.isna(project_data['intervention'][0]):
             interventions = project_data['intervention'][0].split(separator)
-            ids = [re.search(r'\(([^)]+)',x.split()[-1]).group(1) for x in interventions]
+            ids = [re.search(r'\(([^)]+)', x.split()[-1]).group(1) for x in interventions]
             df = pd.DataFrame(ids, columns=['END_ID'])
             df.insert(loc=0, column='START_ID', value=project_data['external_id'][0])
             df['TYPE'] = 'STUDIES_INTERVENTION'
+    
+    return df
+
+def extract_project_rels(project_data, separator='|'):
+    df = pd.DataFrame(columns=['START_ID', 'END_ID', 'TYPE'])
+    if 'related_to' in project_data:
+        if not pd.isna(project_data['related_to'][0]):
+            related_projects = project_data['related_to'][0].split(separator)
+            df = pd.DataFrame(related_projects, columns=['END_ID'])
+            df.insert(loc=0, column='START_ID', value=project_data['external_id'][0])
+            df['TYPE'] = 'FOLLOWS_UP_PROJECT'
     
     return df
 
