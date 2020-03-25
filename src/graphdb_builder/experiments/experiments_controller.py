@@ -16,8 +16,8 @@ def generate_dataset_imports(projectId, dataType, dataset_import_dir):
             data = clinicalParser.parser(projectId)
             for dtype, ot in data:
                 generate_graph_files(data[(dtype, ot)], dtype, projectId, stats, ot, dataset_import_dir)
-        elif dataType == "proteomics":
-            data = proteomicsParser.parser(projectId)
+        elif dataType == "proteomics" or dataType == "interactomics":
+            data = proteomicsParser.parser(projectId, dataType)
             for dtype, ot in data:
                 generate_graph_files(data[(dtype, ot)], dtype, projectId, stats, ot, dataset_import_dir)
         elif dataType == "wes":

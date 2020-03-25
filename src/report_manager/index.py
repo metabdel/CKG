@@ -464,7 +464,7 @@ def activate_upload_form(projectid):
                Input('prot-tool', 'value')])
 def show_proteomics_options(datatype, prot_tool):
     display = ({'display': 'none'}, False)
-    if datatype in ['proteomics', 'longitudinal_proteomics']:
+    if datatype in ['proteomics', 'longitudinal_proteomics', 'interactomics']:
         if prot_tool == '':
             display = ({'display': 'block'}, True)
         else:
@@ -493,7 +493,7 @@ def save_files_in_tmp(contents, dataset, prot_tool, projectid, uploaded_files):
             shutil.rmtree(directory)
         
         builder_utils.checkDirectory(directory)
-        if dataset == 'proteomics' and prot_tool !='':
+        if dataset in ['proteomics', 'interactomics'] and prot_tool !='':
             directory = os.path.join(directory, prot_tool.lower())
             builder_utils.checkDirectory(directory)
             filenames = uploaded_files
@@ -615,10 +615,10 @@ def run_processing(n_clicks, project_id):
                 if dataset != "experimental_design":
                     eh.generate_dataset_imports(project_id, dataset, datasetPath)
 
-                loader.partialUpdate(imports=['project', 'experiment'], specific=[project_id])
-                
-                style = {'display':'block'}
-                message = 'Files successfully uploaded.'
+            loader.partialUpdate(imports=['project', 'experiment'], specific=[project_id])
+            
+            style = {'display':'block'}
+            message = 'Files successfully uploaded.'
         except Exception as err:
             style = {'display':'block'}
             message = str(err)

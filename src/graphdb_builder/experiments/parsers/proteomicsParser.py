@@ -6,14 +6,13 @@ from collections import defaultdict
 from graphdb_builder import builder_utils, mapping
 
 
-def parser(projectId):
+def parser(projectId, data_type="proteomics"):
     data = {}
     cwd = os.path.abspath(os.path.dirname(__file__))
-    directory = os.path.join(cwd, '../../../../data/experiments/PROJECTID/proteomics/')
     config = builder_utils.get_config(config_name="proteomics.yml", data_type='experiments')
-
+    directory = os.path.join(cwd, '../../../../data/experiments/PROJECTID/' + data_type)
     if 'directory' in config:
-        directory = os.path.join(cwd, config['directory'])
+        directory = os.path.join(cwd, config['directory'] + data_type)
     directory = directory.replace('PROJECTID', projectId)
     processing_results = [x[0] for x in os.walk(directory)]
 
@@ -278,7 +277,7 @@ def extract_protein_modifications_modification_rels(data, configuration):
     cols.extend(positionCols)
     aux = data.copy().reset_index()
     aux = aux[cols]
-    aux["START_ID"] =  aux[proteinCol].map(str) + "_" + aux[positionCols[1]].map(str) + aux[positionCols[0]].map(str)+'-'+configuration["mod_acronym"]
+    aux["START_ID"] = aux[proteinCol].map(str) + "_" + aux[positionCols[1]].map(str) + aux[positionCols[0]].map(str)+'-'+configuration["mod_acronym"]
     aux["END_ID"] = modID
     aux = aux[["START_ID", "END_ID"]]
 

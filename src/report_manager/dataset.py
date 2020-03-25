@@ -428,17 +428,24 @@ class ProteomicsDataset(Dataset):
                                                                              method=method, missing_method=missing_method, 
                                                                              missing_per_group=missing_per_group, missing_max=missing_max, min_valid=min_valid)
         return processed_data
-    
+
     def generate_knowledge(self):
         kn = knowledge.ProteomicsKnowledge(self.identifier, self.data, nodes={}, relationships={}, colors={}, graph=None, report={})
         kn.generate_knowledge()        
-        
+
         return kn
 
 
+class InteractomicsDataset(ProteomicsDataset):
+    def __init__(self, identifier, data={}, configuration=None, analyses={}, analysis_queries={}, report=None):
+        ProteomicsDataset.__init__(self, identifier, data=data, configuration=configuration, analyses=analyses, analysis_queries=analysis_queries, report=report)
+        if configuration is None:
+            config_file = "interactomics.yml"
+            self.update_configuration_from_file(config_file)
+            
+
 class LongitudinalProteomicsDataset(ProteomicsDataset):
     def __init__(self, identifier, data={}, configuration=None, analyses={}, analysis_queries={}, report=None):
-        
         ProteomicsDataset.__init__(self, identifier, data=data, configuration=configuration, analyses=analyses, analysis_queries=analysis_queries, report=report)
         if configuration is None:
             config_file = "longitudinal_proteomics.yml"

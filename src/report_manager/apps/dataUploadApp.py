@@ -17,7 +17,7 @@ import logging
 import logging.config
 
 driver = connector.getGraphDatabaseConnectionConfiguration()
-DataTypes = ['experimental_design', 'clinical', 'proteomics', 'wes', 'longitudinal_proteomics', 'longitudinal_clinical']
+DataTypes = ['experimental_design', 'clinical', 'proteomics', 'interactomics']
 
 class DataUploadApp(basicApp.BasicApp):
     """

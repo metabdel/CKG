@@ -8,7 +8,7 @@ from json import dumps
 import pandas as pd
 import ckg_utils
 import config.ckg_config as ckg_config
-from report_manager.dataset import Dataset, DNAseqDataset, ProteomicsDataset, ClinicalDataset, LongitudinalProteomicsDataset, MultiOmicsDataset
+from report_manager.dataset import Dataset, DNAseqDataset, ProteomicsDataset, InteractomicsDataset, ClinicalDataset, LongitudinalProteomicsDataset, MultiOmicsDataset
 from analytics_core.viz import viz
 from analytics_core import utils as acore_utils
 from report_manager import report as rp, utils, knowledge
@@ -354,6 +354,8 @@ class Project:
                     dataset = ClinicalDataset(self.identifier, data={}, analyses={}, analysis_queries={}, report=None)
                 elif data_type == "wes" or data_type == "wgs":
                     dataset = DNAseqDataset(self.identifier, dataset_type=data_type, data={}, analyses={}, analysis_queries={}, report=None)
+                elif data_type == "interactomics":
+                    dataset = InteractomicsDataset(self.identifier, data={}, analyses={}, analysis_queries={}, report=None)
                 elif data_type == "longitudinal_proteomics":
                     dataset = LongitudinalProteomicsDataset(self.identifier, data={}, analyses={}, analysis_queries={}, report=None)
                 elif data_type == "multiomics":
@@ -393,6 +395,10 @@ class Project:
                         elif "wgs" in self.configuration_files:
                             configuration = ckg_utils.get_configuration(self.configuration_files["wgs"])
                         dataset = DNAseqDataset(self.identifier, dataset_type=data_type, data={}, configuration=configuration, analyses={}, analysis_queries={}, report=None)
+                    elif data_type == "interactomics":
+                        if "interactomics" in self.configuration_files:
+                            configuration = ckg_utils.get_configuration(self.configuration_files["interactomics"])
+                        dataset = InteractomicsDataset(self.identifier, data={}, configuration=configuration, analyses={}, analysis_queries={}, report=None)
                     elif data_type == "longitudinal_proteomics":
                         if "longitudinal_proteomics" in self.configuration_files:
                             configuration = ckg_utils.get_configuration(self.configuration_files["longitudinal_proteomics"])
@@ -406,7 +412,7 @@ class Project:
                     if "multiomics" in self.configuration_files:
                         configuration = ckg_utils.get_configuration(self.configuration_files["multiomics"])
                     dataset = MultiOmicsDataset(self.identifier, data=self.datasets, configuration=configuration, analyses={}, report=None)
-                    self.update_dataset({'multiomics':dataset})
+                    self.update_dataset({'multiomics': dataset})
                     self.append_data_type('multiomics')
             else:
                 logger.error("Project {} could not be built. Error retrieving information for this project or no information associated to this project".format(self.identifier))
@@ -526,7 +532,7 @@ class Project:
         kn.generate_knowledge()
         nodes.update(kn.nodes)
         relationships.update(kn.relationships)
-        types = ["clinical", "proteomics", "longitudinal_proteomics", "wes", "wgs", "rnaseq", "multiomics"]
+        types = ["clinical", "proteomics", "interactomics","longitudinal_proteomics", "wes", "wgs", "rnaseq", "multiomics"]
         for dataset_type in types:
             if dataset_type in self.datasets:
                 dataset = self.datasets[dataset_type]
@@ -607,7 +613,7 @@ class Project:
         print('save dataset report', time.time() - start)
         
     def save_project(self):
-        directory = os.path.join(self.get_report_directory(),"Project information")
+        directory = os.path.join(self.get_report_directory(), "Project information")
         if not os.path.isdir(directory):
             os.makedirs(directory)
         dt = h5.special_dtype(vlen=str) 
@@ -626,7 +632,7 @@ class Project:
         print('save datasets', time.time() - start)
 
     def show_report(self, environment):
-        types = ["Project information", "clinical", "proteomics", "longitudinal_proteomics", "wes", "wgs", "rnaseq", "multiomics", "Knowledge Graph"]
+        types = ["Project information", "clinical", "proteomics", "interactomics","longitudinal_proteomics", "wes", "wgs", "rnaseq", "multiomics", "Knowledge Graph"]
         app_plots = defaultdict(list)
         for dataset in types:
             if dataset in self.report:
