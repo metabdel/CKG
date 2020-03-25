@@ -857,6 +857,12 @@ CREATE_PROJECT: &create_project
         MATCH (c:Clinical_variable {id:line.END_ID}) 
         MERGE (p)-[r:STUDIES_INTERVENTION]->(c)
         RETURN COUNT(r) AS PROJECTID_studies_intervention;
+        LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/PROJECTID_follows_up_project.tsv" AS line
+        FIELDTERMINATOR '\t'
+        MATCH (p1:Project {id:line.START_ID})
+        MATCH (p2:Project {id:line.END_ID}) 
+        MERGE (p1)-[r:FOLLOWS_UP_PROJECT]->(p2)
+        RETURN COUNT(r) AS PROJECTID_follows_up_project;
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/PROJECTID_studies_tissue.tsv" AS line
         FIELDTERMINATOR '\t'
         MATCH (p:Project {id:line.START_ID})

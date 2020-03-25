@@ -402,8 +402,11 @@ def create_project(n_clicks, name, acronym, responsible, participant, datatype, 
         result_output = result.get()
         if len(result_output) > 0:
             external_id = list(result_output.keys())[0]
-            if external_id != '':
+            done_msg = result_output[external_id]
+            if external_id != '' and done_msg is not None:
                 response = "Project successfully submitted. Download Clinical Data template."
+            elif done_msg is None:
+                response = "There was a problem when creating the project. Please, contact the administrator."
             else:
                 response = 'A project with the same name already exists in the database.'
         else:
@@ -551,15 +554,10 @@ def run_processing(n_clicks, project_id):
                 if 'subject external_id' in designData.columns and 'biological_sample external_id' in designData.columns and 'biological_sample external_id' in designData.columns:
                     if (res_n > 0).any().values.sum() > 0:
                         res = dataUpload.remove_samples_nodes_db(driver, project_id)
-                        print('REMOVED SAMPLES')
-                        print(res)
-                    print(project_id)
                     res_n = None
                     result = create_new_identifiers.apply_async(args=[project_id, designData.to_json(), directory, experimental_filename], task_id='data_upload_'+session_cookie+datetime.now().strftime('%Y%m-%d%H-%M%S-'))
                     result_output = result.wait(timeout=None, propagate=True, interval=0.2)
                     res_n = pd.DataFrame.from_dict(result_output['res_n'])
-                    print('QUEUE')
-                    print("res", res_n)
                 else:
                     message = 'ERROR: The Experimental design file provided ({}) is missing some of the required fields: {}'.format(experimental_filename, ','.join(['subject external_id','biological_sample external_id','analytical_sample external_id']))
                     builder_utils.remove_directory(directory)
@@ -616,7 +614,8 @@ def run_processing(n_clicks, project_id):
                     eh.generate_dataset_imports(project_id, dataset, datasetPath)
 
             loader.partialUpdate(imports=['project', 'experiment'], specific=[project_id])
-            
+            filename = os.path.join(tmpDirectory, 'Uploaded_files_'+project_id)
+            utils.compress_directory(filename, temporaryDirectory, compression_format='zip')
             style = {'display':'block'}
             message = 'Files successfully uploaded.'
         except Exception as err:
@@ -650,7 +649,7 @@ def route_upload_url(value):
     page_id, project_id = value.split('_')
     directory = os.path.join(cwd,'../../data/tmp/')
     filename = os.path.join(directory, 'Uploaded_files_'+project_id)
-    utils.compress_directory(filename, os.path.join(directory, page_id), compression_format='zip')
+    #utils.compress_directory(filename, os.path.join(directory, page_id), compression_format='zip')
     url = filename+'.zip'
     
     return flask.send_file(url, attachment_filename = filename.split('/')[-1]+'.zip', as_attachment = True)

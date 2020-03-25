@@ -56,6 +56,8 @@ def compress_directory(name, directory, compression_format='zip'):
                 os.remove(directory+'.zip')
             shutil.make_archive(name, compression_format, directory)
             shutil.rmtree(directory)
+        else:
+            print("The directory {} failed. Exists?{} Is dir?{}".format(directory, os.path.exists(directory) and os.path.isdir(directory)))
     except Exception as err:
         print("Could not compress file {} in directory {}. Error: {}".format(name, directory, err))
 
