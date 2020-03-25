@@ -135,9 +135,8 @@ def create_new_project(driver, projectId, data, separator='|'):
     :return: Two strings: number of projects created and the project external identifier.
     """
     query_name = 'create_project'
-    external_identifier = 'No Identifier Assigned'
+    external_identifier = None
     done = None
-
     try:
         db_project = check_if_node_exists(driver, 'Project', 'name', data['name'][0])
         if db_project.empty:

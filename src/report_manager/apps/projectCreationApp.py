@@ -10,7 +10,7 @@ from graphdb_connector import connector
 
 
 driver = connector.getGraphDatabaseConnectionConfiguration()
-DataTypes = ['proteomics', 'clinical', 'wes', 'longitudinal_proteomics', 'longitudinal_clinical']
+DataTypes = ['proteomics', 'clinical', 'wes', 'interactomics','longitudinal_proteomics', 'longitudinal_clinical']
 
 class ProjectCreationApp(basicApp.BasicApp):
     """
@@ -80,6 +80,11 @@ class ProjectCreationApp(basicApp.BasicApp):
                                                  style={'width':'49%', 'marginLeft':'0%', 'verticalAlign':'top', 'display':'inline-block'}),                              
                               html.Div(children=[dcc.Input(id='number_timepoints', placeholder='E.g. 2 months|15 days|24 hours...', type='text', style={'width':'100%', 'height':'35px'})],
                                                  style={'width':'49%', 'marginLeft':'2%', 'verticalAlign':'top', 'display':'inline-block'}),            
+                              html.Br(),
+                              html.Br(),
+                              html.Div(children=[html.Label('Follows up project:', style={'marginTop':15}),
+                                                 dcc.Input(id='related_to', placeholder='Use the Project Identifier (P000000X)', type='text', style={'width':'100%', 'height':'35px'})],
+                                                 style={'width':'49%', 'marginLeft':'0%', 'verticalAlign':'top', 'display':'inline-block'}),
                               html.Br(),
                               html.Br(),
                               html.Div(children=[html.Label('Project Description:', style={'marginTop':15}),

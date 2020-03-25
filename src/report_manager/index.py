@@ -344,6 +344,7 @@ def image_formatter(im):
                State('participant-picker', 'value'),
                State('data-types-picker', 'value'),
                State('number_timepoints', 'value'),
+               State('related_to', 'value'),
                State('disease-picker', 'value'),
                State('tissue-picker', 'value'),
                State('intervention-picker', 'value'),
@@ -351,7 +352,7 @@ def image_formatter(im):
                State('project description', 'value'),
                State('date-picker-start', 'date'),
                State('date-picker-end', 'date')])
-def create_project(n_clicks, name, acronym, responsible, participant, datatype, timepoints, disease, tissue, intervention, number_subjects, description, start_date, end_date):
+def create_project(n_clicks, name, acronym, responsible, participant, datatype, timepoints, related_to, disease, tissue, intervention, number_subjects, description, start_date, end_date):
     if n_clicks > 0:
         session_cookie = flask.request.cookies.get('custom-auth-session')
         responsible = separator.join(responsible)
@@ -385,8 +386,8 @@ def create_project(n_clicks, name, acronym, responsible, participant, datatype, 
             return response, None, {'display': 'none'}, {'display': 'none'}
         
         # Get project data from filled-in fields
-        projectData = pd.DataFrame([name, acronym, description, number_subjects, datatype, timepoints, disease, tissue, intervention, responsible, participant, start_date, end_date]).T
-        projectData.columns = ['name', 'acronym', 'description', 'subjects', 'datatypes', 'timepoints', 'disease', 'tissue', 'intervention', 'responsible', 'participant', 'start_date', 'end_date']
+        projectData = pd.DataFrame([name, acronym, description, related_to, number_subjects, datatype, timepoints, disease, tissue, intervention, responsible, participant, start_date, end_date]).T
+        projectData.columns = ['name', 'acronym', 'description', 'related_to', 'subjects', 'datatypes', 'timepoints', 'disease', 'tissue', 'intervention', 'responsible', 'participant', 'start_date', 'end_date']
         projectData['status'] = ''
 
         projectData.fillna(value=pd.np.nan, inplace=True)
@@ -399,15 +400,14 @@ def create_project(n_clicks, name, acronym, responsible, participant, datatype, 
         projectData.insert(loc=0, column='internal_id', value=internal_id)           
         result = create_new_project.apply_async(args=[internal_id, projectData.to_json(), separator], task_id='project_creation_'+session_cookie+internal_id)
         result_output = result.get()
-        external_id = list(result_output.keys())[0]
-
-        if result is not None:
+        if len(result_output) > 0:
+            external_id = list(result_output.keys())[0]
             if external_id != '':
                 response = "Project successfully submitted. Download Clinical Data template."
             else:
                 response = 'A project with the same name already exists in the database.'
         else:
-            response = "There was a problem when creating the project."
+            response = "There was a problem when creating the project. Please, try again or contact the administrator."
 
         return response, '- '+external_id, {'display': 'inline-block'}, {'display': 'block'}
     else:
