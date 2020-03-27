@@ -27,7 +27,7 @@ Drug:
           MATCH (protein:Protein)-[r:ACTS_ON]-(drug:Drug)
           WHERE ((protein.name+"~"+protein.id) IN [PROTEINIDS]) AND toFloat(r.score)>0.9
           WITH drug, count(protein) AS r_count
-          WHERE r_count>1
+          WHERE r_count>=LIMIT_COUNT
           MATCH (protein:Protein)-[r:ACTS_ON]-(drug)
           WHERE ((protein.name+"~"+protein.id) IN [PROTEINIDS]) AND toFloat(r.score)>0.9
           RETURN (protein.name+"~"+protein.id) AS node1, drug.name AS node2, r.score AS weight, r.action AS type
@@ -44,7 +44,7 @@ Pathway:
           MATCH (protein:Protein)-[r]-(pathway:Pathway)
           WHERE ((protein.name+"~"+protein.id) IN [PROTEINIDS]) AND toLower(r.source)="reactome"
           WITH pathway, count(protein) AS r_count
-          WHERE r_count>2
+          WHERE r_count>=LIMIT_COUNT
           MATCH (protein:Protein)-[r]-(pathway)
           WHERE ((protein.name+"~"+protein.id) IN [PROTEINIDS])
           RETURN (protein.name+"~"+protein.id) AS node1, pathway.name AS node2, r.score AS weight, type(r) AS type
@@ -63,7 +63,7 @@ Publication:
         WITH collect(disease)+collect(pdisease)+collect(cdiseases) AS diseases            
         MATCH (d:Disease)-[:MENTIONED_IN_PUBLICATION]->(publication:Publication)<-[r:MENTIONED_IN_PUBLICATION]-(protein:Protein)
         WHERE d in diseases AND (protein.name+"~"+protein.id) IN [PROTEINIDS]
-        WITH protein, publication, r, COUNT(r) AS r_count WHERE r_count > 3
+        WITH protein, publication, r, COUNT(r) AS r_count WHERE r_count>=LIMIT_COUNT
         RETURN DISTINCT (protein.name+"~"+protein.id) AS node1, ("PMID:"+publication.id) AS node2, type(r) as type, r_count ORDER BY r_count DESC LIMIT 70;
 association_disease_score:
   name: specific disease

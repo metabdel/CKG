@@ -375,9 +375,9 @@ class ProteomicsKnowledge(Knowledge):
         #self.nodes.update(correlation_knowledge[0])
         self.relationships = regulation_knowledge[1]
         #self.relationships.update(correlation_knowledge[1])
-        
         nodes = self.generate_cypher_nodes_list()
-        queries_results = self.query_data(replace=[('PROTEINIDS',nodes), ('PROJECTID', self.identifier)])
+        limit_count = 3 if len(nodes)>10 else 1
+        queries_results = self.query_data(replace=[('PROTEINIDS',nodes), ('PROJECTID', self.identifier), ('LIMIT_COUNT', str(limit_count))])
         queries_knowledge = self.generate_knowledge_from_queries(entity='Protein', queries_results=queries_results)
         self.nodes.update(queries_knowledge[0])
         self.relationships.update(queries_knowledge[1])

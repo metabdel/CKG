@@ -129,9 +129,9 @@ class ProjectApp(basicApp.BasicApp):
         """
         config_files = {}
         if os.path.exists("../../data/tmp"):
-            directory = os.path.join('../../data/tmp',self.id)
+            directory = os.path.join('../../data/tmp', self.id)
             if os.path.exists(directory):
-                config_files = {f.split('.')[0]: os.path.join(directory,f) for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))}
+                config_files = {f.split('.')[0]: os.path.join(directory, f) for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))}
 
         p = project.Project(self.project_id, datasets={}, knowledge=None, report={}, configuration_files=config_files)
         p.build_project(self.force)
@@ -142,6 +142,7 @@ class ProjectApp(basicApp.BasicApp):
             self.title = ''
         self.add_basic_layout()
         plots = p.show_report("app")
+        p = None
         tabs = []
         buttons = self.build_header()
 
@@ -153,4 +154,4 @@ class ProjectApp(basicApp.BasicApp):
                 tabs.append(tab)
         lc = dcc.Tabs(tabs)
         self.add_to_layout(lc)
-        p = None
+        

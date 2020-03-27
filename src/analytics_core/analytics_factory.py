@@ -458,22 +458,22 @@ class Analysis:
             elif name == "volcanoplot":
                 alpha = 0.05
                 lfc = 1.0
-                if "alpha" in self.args:
-                    alpha = self.args["alpha"]
-                if "lfc" in self.args:
-                    lfc = self.args["lfc"]
+                if "alpha" not in self.args:
+                    self.args["alpha"] = alpha
+                if "lfc" not in self.args:
+                    self.args["lfc"] = lfc
                 for pair in self.result:
                     signature = self.result[pair]
-                    self.args["title"] = self.args['title']+" "+pair[0]+" vs "+pair[1]
-                    p = viz.run_volcano(signature, identifier+"_"+pair[0]+"_vs_"+pair[1], self.args)
+                    self.args["title"] = self.args['title'] + " " + pair[0] + " vs " + pair[1]
+                    p = viz.run_volcano(signature, identifier + "_" + pair[0] + "_vs_" + pair[1], self.args)
                     plot.extend(p)
             elif name == 'network':
                 source = 'source'
                 target = 'target'
-                if "source" in self.args:
-                    source = self.args["source"]
-                if "target" in self.args:
-                    target = self.args["target"]
+                if "source" not in self.args:
+                    self.args["source"] = source
+                if "target" not in self.args:
+                    self.args["target"] = target
                 for id in self.result:
                     if isinstance(id, tuple):
                         identifier = identifier+"_"+id[0]+"_vs_"+id[1]
@@ -495,8 +495,8 @@ class Analysis:
             elif name == "mapper":
                 for id in self.result:
                     labels = {}
-                    if "labels" in self.args:
-                        labels = self.args["labels"]
+                    if "labels" not in self.args:
+                        self.args["labels"] = labels
                     if isinstance(id, tuple):
                         identifier = identifier+"_"+id[0]+"_vs_"+id[1]
                         figure_title = self.args['title'] + id[0]+" vs "+id[1]
