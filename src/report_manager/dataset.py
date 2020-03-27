@@ -205,77 +205,77 @@ class Dataset:
         self.report = rp.Report(identifier=self.dataset_type.capitalize(), plots={})
         order = 1
         report_pipeline = {}
-        for section in self.configuration:
-            report_step = {}
-            report_step[section] = {}
-            if section == "args":
-                continue
-            for subsection in self.configuration[section]:
-                description, data_names, analysis_types, plot_types, store_analysis, args = self.extract_configuration(self.configuration[section][subsection])
-                if description is not None:
-                    description = viz.get_markdown(description, args={})
-                report_step[section][subsection] = {'data': data_names, 'analyses': [], 'args': {}}
-                if isinstance(data_names, dict) or isinstance(data_names, list):
-                    data = self.get_dataframes(data_names)
-                else:
-                    data = self.get_dataframe(data_names)
-
-                if data is not None and len(data) > 0:
-                    if subsection in self.analysis_queries:
-                        query = self.analysis_queries[subsection]
-                        if "use" in args:
-                            for r_id in args["use"]:
-                                if r_id == "columns":
-                                    rep_str = args["use"][r_id].upper()
-                                    rep = ",".join(['"{}"'.format(i) for i in data.columns.unique().tolist()])
-                                elif r_id == "index":
-                                    rep_str = args["use"][r_id].upper()
-                                    rep = ",".join(['"{}"'.format(i) for i in data.index.unique().tolist()])
-                                elif r_id in data.columns:
-                                    rep_str = r_id.upper()
-                                    rep = ",".join(['"{}"'.format(i) for i in data[r_id].unique().tolist()])
-                                query = query.replace(rep_str, rep)
-                            data = self.send_query(query)
-                    result = None
+        if self.configuration is not None:
+            for section in self.configuration:
+                report_step = {}
+                report_step[section] = {}
+                if section == "args":
+                    continue
+                for subsection in self.configuration[section]:
+                    description, data_names, analysis_types, plot_types, store_analysis, args = self.extract_configuration(self.configuration[section][subsection])
                     if description is not None:
-                        self.report.update_plots({(str(order), subsection+"_description", 'description'): [description]})
-                        order += 1
-                    if len(analysis_types) >= 1:
-                        for analysis_type in analysis_types:
-                            result = analytics_factory.Analysis(self.identifier, analysis_type, args, data)
-                            analysis_type = result.analysis_type
-                            if analysis_type in result.result and result.result[analysis_type] is not None and len(result.result[analysis_type]) >=1:
-                                report_step[section][subsection]['analyses'].append(analysis_type)
-                                report_step[section][subsection]['args'] = result.args
+                        description = viz.get_markdown(description, args={})
+                    report_step[section][subsection] = {'data': data_names, 'analyses': [], 'args': {}}
+                    if isinstance(data_names, dict) or isinstance(data_names, list):
+                        data = self.get_dataframes(data_names)
+                    else:
+                        data = self.get_dataframe(data_names)
+
+                    if data is not None and len(data) > 0:
+                        if subsection in self.analysis_queries:
+                            query = self.analysis_queries[subsection]
+                            if "use" in args:
+                                for r_id in args["use"]:
+                                    if r_id == "columns":
+                                        rep_str = args["use"][r_id].upper()
+                                        rep = ",".join(['"{}"'.format(i) for i in data.columns.unique().tolist()])
+                                    elif r_id == "index":
+                                        rep_str = args["use"][r_id].upper()
+                                        rep = ",".join(['"{}"'.format(i) for i in data.index.unique().tolist()])
+                                    elif r_id in data.columns:
+                                        rep_str = r_id.upper()
+                                        rep = ",".join(['"{}"'.format(i) for i in data[r_id].unique().tolist()])
+                                    query = query.replace(rep_str, rep)
+                                data = self.send_query(query)
+                        result = None
+                        if description is not None:
+                            self.report.update_plots({(str(order), subsection+"_description", 'description'): [description]})
+                            order += 1
+                        if len(analysis_types) >= 1:
+                            for analysis_type in analysis_types:
+                                result = analytics_factory.Analysis(self.identifier, analysis_type, args, data)
+                                analysis_type = result.analysis_type
+                                if analysis_type in result.result and result.result[analysis_type] is not None and len(result.result[analysis_type]) >=1:
+                                    report_step[section][subsection]['analyses'].append(analysis_type)
+                                    report_step[section][subsection]['args'] = result.args
+                                    report_pipeline.update(report_step)
+                                    self.update_analyses(result.result)
+                                    if store_analysis:
+                                        if analysis_type.lower() == "anova" or analysis_type.lower() == "samr" or analysis_type.lower() == "ttest":
+                                            reg_data = result.result[analysis_type]
+                                            if not reg_data.empty:
+                                                sig_hits = list(set(reg_data.loc[reg_data.rejected,"identifier"]))
+                                                sig_data = data[sig_hits]
+                                                self.update_data({"regulated": sig_data, "regulation table": reg_data})
+                                        else:
+                                            self.update_data({subsection + "_" + analysis_type: result.result[analysis_type]})
+                                    for plot_type in plot_types:
+                                        plots = result.get_plot(plot_type, subsection + "_" + analysis_type + "_" + plot_type)
+                                        self.report.update_plots({(str(order), subsection + "_" + analysis_type, plot_type): plots})
+                                        order += 1
+                        else:
+                            if result is None:
+                                dictresult = {}
+                                dictresult["_".join(subsection.split(' '))] = data
+                                result = analytics_factory.Analysis(self.identifier, "_".join(subsection.split(' ')), args, data, result=dictresult)
                                 report_pipeline.update(report_step)
                                 self.update_analyses(result.result)
                                 if store_analysis:
-                                    if analysis_type.lower() == "anova" or analysis_type.lower() == "samr" or analysis_type.lower() == "ttest":
-                                        reg_data = result.result[analysis_type]
-                                        if not reg_data.empty:
-                                            print(reg_data)
-                                            sig_hits = list(set(reg_data.loc[reg_data.rejected,"identifier"]))
-                                            sig_data = data[sig_hits]
-                                            self.update_data({"regulated": sig_data, "regulation table": reg_data})
-                                    else:
-                                        self.update_data({subsection +"_"+ analysis_type: result.result[analysis_type]})
-                                for plot_type in plot_types:
-                                    plots = result.get_plot(plot_type, subsection + "_" + analysis_type + "_" + plot_type)
-                                    self.report.update_plots({(str(order), subsection + "_" + analysis_type, plot_type): plots})
-                                    order += 1
-                    else:
-                        if result is None:
-                            dictresult = {}
-                            dictresult["_".join(subsection.split(' '))] = data
-                            result = analytics_factory.Analysis(self.identifier, "_".join(subsection.split(' ')), args, data, result=dictresult)
-                            report_pipeline.update(report_step)
-                            self.update_analyses(result.result)
-                            if store_analysis:
-                                self.update_data({"_".join(subsection.split(' ')): data})
-                        for plot_type in plot_types:
-                            plots = result.get_plot(plot_type, "_".join(subsection.split(' '))+"_"+plot_type)
-                            self.report.update_plots({(str(order), "_".join(subsection.split(' ')), plot_type): plots})
-                            order += 1
+                                    self.update_data({"_".join(subsection.split(' ')): data})
+                            for plot_type in plot_types:
+                                plots = result.get_plot(plot_type, "_".join(subsection.split(' '))+"_"+plot_type)
+                                self.report.update_plots({(str(order), "_".join(subsection.split(' ')), plot_type): plots})
+                                order += 1
         
         self.add_configuration_to_report(report_pipeline)
 
@@ -406,6 +406,8 @@ class ProteomicsDataset(Dataset):
                 min_valid = 1
                 value_col = 'LFQ intensity'
                 index = ['group', 'sample', 'subject']
+                shift=1.8
+                nstd=0.3
                 args = {}
                 if "args" in self.configuration:
                     args = self.configuration["args"]
@@ -423,10 +425,15 @@ class ProteomicsDataset(Dataset):
                         min_valid = args['min_valid']
                     if "value_col" in args:
                         value_col = args["value_col"]
+                    if "missing_nstd" in args:
+                        nstd = args["missing_nstd"]
+                    if "missing_shift" in args:
+                        shift = args["missing_shift"]
 
                 processed_data = analytics.get_proteomics_measurements_ready(data, index_cols=index, imputation=imputation, 
                                                                              method=method, missing_method=missing_method, 
-                                                                             missing_per_group=missing_per_group, missing_max=missing_max, min_valid=min_valid)
+                                                                             missing_per_group=missing_per_group, missing_max=missing_max, 
+                                                                             min_valid=min_valid, shift=shift, nstd=nstd)
         return processed_data
 
     def generate_knowledge(self):

@@ -5,10 +5,11 @@ import ast
 from collections import defaultdict
 import dash_core_components as dcc
 import dash_html_components as html
+import matplotlib.pyplot as plt
+import plotly.tools as tls
 import plotly.graph_objs as go
 import plotly.figure_factory as FF
 import math
-import random
 import dash_table
 import plotly.subplots as tools
 import plotly.io as pio
@@ -1328,8 +1329,8 @@ def get_pca_plot(data, identifier, args):
     figure['layout'] = sct['layout']
     figure['layout'].template='plotly_white'
     for index in list(loadings.index)[0:args['loadings']]:
-        x = loadings.loc[index,'x'] * 20.
-        y = loadings.loc[index, 'y'] * 20.
+        x = loadings.loc[index,'x'] * 30.
+        y = loadings.loc[index, 'y'] * 30.
         value = loadings.loc[index, 'value']
 
         trace = go.Scattergl(x= [0,x],
@@ -2078,3 +2079,46 @@ def save_DASH_plot(plot, name, plot_format='svg', directory='.'):
             pio.write_image(plot.figure, plot_file)
         else:
             pio.write_image(plot, plot_file)
+            
+def km_plot(kmf, identifier, args):
+    title = ''
+    if 'title' in args:
+        title = args['title']
+    
+    p = kmf.plot(title=title)
+    kmf1 = plt.gcf()
+    figure = mpl_to_plotly(kmf1, legend=True)
+    
+    return dcc.Graph(id = identifier, figure=figure)
+    
+            
+def mpl_to_plotly(fig, ci=True, legend=True):
+    # Convert mpl fig obj to plotly fig obj, resize to plotly's default
+    py_fig = tls.mpl_to_plotly(fig, resize=True)
+    
+    # Add fill property to lower limit line
+    if ci == True:
+        style1 = dict(fill='tonexty')
+        # apply style
+        py_fig['data'][2].update(style1)
+        
+        # Change color scheme to black
+        py_fig['data'].update(dict(line=Line(color='black')))
+    
+    # change the default line type to 'step'
+    py_fig['data'].update(dict(line=Line(shape='hv')))
+    # Delete misplaced legend annotations 
+    py_fig['layout'].pop('annotations', None)
+    
+    if legend == True:
+        # Add legend, place it at the top right corner of the plot
+        py_fig['layout'].update(
+            showlegend=True,
+            legend=Legend(
+                x=1.05,
+                y=1
+            )
+        )
+        
+    # Send updated figure object to Plotly, show result in notebook
+    return py_fig

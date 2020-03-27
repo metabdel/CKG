@@ -15,6 +15,8 @@ import pingouin as pg
 import numpy as np
 import networkx as nx
 import community
+from lifelines import KaplanMeierFitter
+from lifelines.statistics import multivariate_logrank_test
 import snf
 import math
 from fancyimpute import KNN
@@ -413,7 +415,7 @@ def get_coefficient_variation(data, drop_columns, group, columns):
     return cvs_df
 
 
-def get_proteomics_measurements_ready(df, index_cols=['group', 'sample', 'subject'], drop_cols=['sample'], group='group', identifier='identifier', extra_identifier='name', imputation=True, method='distribution', missing_method = 'percentage', missing_per_group=True, missing_max = 0.3, min_valid=1, value_col='LFQ_intensity'):
+def get_proteomics_measurements_ready(df, index_cols=['group', 'sample', 'subject'], drop_cols=['sample'], group='group', identifier='identifier', extra_identifier='name', imputation=True, method='distribution', missing_method='percentage', missing_per_group=True, missing_max=0.3, min_valid=1, value_col='LFQ_intensity', shift=1.8, nstd=0.3):
     """
     Processes proteomics data extracted from the database: 1) filter proteins with high number of missing values (> missing_max or min_valid), 2) impute missing values.
     For more information on imputation method visit http://www.coxdocs.org/doku.php?id=perseus:user:activities:matrixprocessing:filterrows:filtervalidvaluesrows.
@@ -462,7 +464,7 @@ def get_proteomics_measurements_ready(df, index_cols=['group', 'sample', 'subjec
             if method == "KNN":
                 df = imputation_KNN(df)
             elif method == "distribution":
-                df = imputation_normal_distribution(df, shift = 1.8, nstd = 0.3)
+                df = imputation_normal_distribution(df, shift=1.8, nstd=0.3)
             elif method == 'mixed':
                 df = imputation_mixed_norm_KNN(df)
 
@@ -769,7 +771,8 @@ def apply_pvalue_permutation_fdrcorrection(df, observed_pvalues, group, alpha=0.
     i = permutations
     df_index = df.index.values
     #df_columns = df.columns.values
-    seen = [''.join(df_index)]
+    print(df_index)
+    seen = [''.join(list(df_index))]
     #columns = ['identifier']
     rand_pvalues = []
     while i>0:
@@ -1117,17 +1120,17 @@ def calculate_THSD(df, group='group', alpha=0.05):
     if isinstance(df,pd.Series):
         col = df.name
         df_results = pg.pairwise_tukey(dv=col, between=group, data=pd.DataFrame(df).reset_index(), alpha=alpha, tail='two-sided')
-        df_results.columns = ['group1', 'group2', 'mean(group1)', 'mean(group2)', 'log2FC', 'std_error', 'tail', 't-statistics', 'padj_THSD', 'effsize']
+        df_results.columns = ['group1', 'group2', 'mean(group1)', 'mean(group2)', 'log2FC', 'std_error', 'tail', 't-statistics', 'posthoc pvalue', 'effsize']
         df_results['efftype'] = 'hedges'
         df_results['identifier'] = col
         df_results = df_results.set_index('identifier')
         df_results['FC'] = df_results['log2FC'].apply(lambda x: np.power(2,np.abs(x)) * -1 if x < 0 else np.power(2,np.abs(x)))
-        df_results['rejected'] = df_results['padj_THSD'].apply(lambda x: True if x < alpha else False)
+        df_results['rejected'] = df_results['posthoc pvalue'].apply(lambda x: True if x < alpha else False)
 
     return df_results
 
 
-def calculate_pairwise_ttest(df, column, subject='subject', group='group', correction='fdr_bh'):
+def calculate_pairwise_ttest(df, column, subject='subject', group='group', correction='none'):
     """
     Performs pairwise t-test using pingouin, as a posthoc test, and calculates fold-changes. For more information visit https://pingouin-stats.org/generated/pingouin.pairwise_ttests.html.
 
@@ -1143,21 +1146,17 @@ def calculate_pairwise_ttest(df, column, subject='subject', group='group', corre
         result = calculate_pairwise_ttest(df, 'protein a', subject='subject', group='group', correction='none')
     """
 
-    if correction == "none" or len(df[group].unique()) <= 2:
-        posthoc_columns = ['Contrast', 'group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'posthoc Paired', 'posthoc Parametric', 'posthoc T-Statistics', 'posthoc dof', 'posthoc tail', 'posthoc pvalue', 'posthoc BF10', 'posthoc effsize']
-        valid_cols = ['group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'posthoc Paired', 'posthoc Parametric', 'posthoc T-Statistics', 'posthoc dof', 'posthoc tail', 'posthoc pvalue', 'posthoc BF10', 'posthoc effsize']
-    else:
-        posthoc_columns = ['Contrast', 'group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'posthoc Paired', 'posthoc Parametric', 'posthoc T-Statistics', 'posthoc dof', 'posthoc tail', 'posthoc pvalue', 'posthoc padj', 'posthoc correction', 'posthoc BF10', 'posthoc effsize']
-        valid_cols = ['group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'posthoc Paired', 'posthoc Parametric', 'posthoc T-Statistics', 'posthoc dof', 'posthoc tail', 'posthoc pvalue', 'posthoc padj', 'posthoc correction', 'posthoc BF10', 'posthoc effsize']
-
+    posthoc_columns = ['Contrast', 'group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'posthoc Paired', 'posthoc Parametric', 'posthoc T-Statistics', 'posthoc dof', 'posthoc tail', 'posthoc pvalue', 'posthoc BF10', 'posthoc effsize']
+    valid_cols = ['group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'posthoc Paired', 'posthoc Parametric', 'posthoc T-Statistics', 'posthoc dof', 'posthoc tail', 'posthoc pvalue', 'posthoc BF10', 'posthoc effsize']
+    
     posthoc = pg.pairwise_ttests(data=df, dv=column, between=group, subject=subject, effsize='hedges', return_desc=True, padjust=correction)
 
     posthoc.columns =  posthoc_columns
     posthoc = posthoc[valid_cols]
     posthoc = complement_posthoc(posthoc, column)
-    posthoc = posthoc.set_index('identifier')
+    #posthoc = posthoc.set_index('identifier')
     posthoc['efftype'] = 'hedges'
-
+    
     return posthoc
 
 
@@ -1352,7 +1351,7 @@ def run_anova(df, alpha=0.05, drop_cols=["sample",'subject'], subject='subject',
     :param list drop_cols: column labels to be dropped from the dataframe
     :param float alpha: error rate for multiple hypothesis correction
     :param int permutations: number of permutations used to estimate false discovery rates.
-    :return: Pandas dataframe with columns 'identifier', 'group1', 'group2', 'mean(group1)', 'mean(group2)', 'Log2FC', 'std_error', 'tail', 't-statistics', 'padj_THSD', 'effsize', 'efftype', 'FC', 'rejected', 'F-statistics', 'p-value', 'correction', '-log10 p-value', and 'method'.
+    :return: Pandas dataframe with columns 'identifier', 'group1', 'group2', 'mean(group1)', 'mean(group2)', 'Log2FC', 'std_error', 'tail', 't-statistics', 'posthoc pvalue', 'effsize', 'efftype', 'FC', 'rejected', 'F-statistics', 'p-value', 'correction', '-log10 p-value', and 'method'.
 
     Example::
 
@@ -1378,14 +1377,34 @@ def run_anova(df, alpha=0.05, drop_cols=["sample",'subject'], subject='subject',
         for col in df.columns:
             aov = calculate_anova(df.reset_index(), column=col, group=group)
             aov_results.append(aov)
-            pairwise_results.append(calculate_pairwise_ttest(df[col].reset_index(), column=col, subject=subject, group=group))
+            pairwise_result = calculate_pairwise_ttest(df[col].reset_index(), column=col, subject=subject, group=group)
+            pairwise_cols = pairwise_result.columns
+            pairwise_results.extend(pairwise_result.values.tolist())
 
         max_perm = get_max_permutations(df, group=group)
-        res = format_anova_table(df, aov_results, pairwise_results, group, permutations, alpha, max_perm)
+        res = format_anova_table(df, aov_results, pairwise_results, pairwise_cols, group, permutations, alpha, max_perm)
         res['Method'] = 'One-way anova'
+        res = correct_pairwise_ttest(res, alpha)
 
     return res
 
+def correct_pairwise_ttest(df, alpha):
+    posthoc_df = pd.DataFrame()
+    if 'group1' in df and 'group2' in df and "posthoc pvalue" in df:
+        for comparison in df.groupby(["group1","group2"]).groups:
+            index = df.groupby(["group1","group2"]).groups.get(comparison)
+            posthoc_pvalues = df.loc[index, "posthoc pvalue"].tolist()
+            rejected, posthoc_padj = apply_pvalue_fdrcorrection(posthoc_pvalues, alpha=alpha, method = 'indep')
+            if posthoc_df.empty:
+                posthoc_df = pd.DataFrame({"index":index, "posthoc padj":posthoc_padj})
+            else:
+                posthoc_df = posthoc_df.append(pd.DataFrame({"index":index, "posthoc padj":posthoc_padj}))
+    else:
+        print("No correction of posthoc pvalues")
+    posthoc_df = posthoc_df.set_index("index")
+    df = df.join(posthoc_df)
+    
+    return df
 
 def run_repeated_measurements_anova(df, alpha=0.05, drop_cols=['sample'], subject='subject', group='group', permutations=50):
     """
@@ -1410,16 +1429,19 @@ def run_repeated_measurements_anova(df, alpha=0.05, drop_cols=['sample'], subjec
     for col in df.columns:
         aov = calculate_repeated_measures_anova(df.reset_index(), column=col, subject=subject, group=group)
         aov_results.append(aov)
-        pairwise_results.append(calculate_pairwise_ttest(df[col].reset_index(), column=col, subject=subject, group=group))
+        pairwise_result = calculate_pairwise_ttest(df[col].reset_index(), column=col, subject=subject, group=group)
+        pairwise_cols = pairwise_result.columns
+        pairwise_results.extend(pairwise_result.values.tolist())
 
     max_perm = get_max_permutations(df, group=group)
-    res = format_anova_table(df, aov_results, pairwise_results, group, permutations, alpha, max_perm)
+    res = format_anova_table(df, aov_results, pairwise_results, pairwise_cols, group, permutations, alpha, max_perm)
     res['Method'] = 'Repeated measurements anova'
-
+    res = correct_pairwise_ttest(res, alpha)
+    
     return res
 
 
-def format_anova_table(df, aov_results, pairwise_results, group, permutations, alpha, max_permutations):
+def format_anova_table(df, aov_results, pairwise_results, pairwise_cols, group, permutations, alpha, max_permutations):
     """
     Performs p-value correction (permutation-based and FDR) and converts pandas dataframe into final format.
 
@@ -1445,15 +1467,14 @@ def format_anova_table(df, aov_results, pairwise_results, group, permutations, a
         scores= scores.join(count)
         scores['correction'] = 'permutation FDR ({} perm)'.format(permutations)
     else:
-        rejected, padj = apply_pvalue_fdrcorrection(scores['pvalue'].tolist(), alpha=alpha, method = 'indep')
+        rejected, padj = apply_pvalue_fdrcorrection(scores['pvalue'].tolist(), alpha=alpha, method='indep')
         scores['correction'] = 'FDR correction BH'
         scores['padj'] = padj
 
-    res = pd.concat(pairwise_results)
+    res = pd.DataFrame(pairwise_results, columns=pairwise_cols).set_index("identifier")
     if not res.empty:
         res = res.join(scores[['F-statistics', 'pvalue', 'padj']].astype('float'))
         res['correction'] = scores['correction']
-    
     else:
         res = scores
         res["log2FC"] = np.nan
@@ -1462,9 +1483,9 @@ def format_anova_table(df, aov_results, pairwise_results, group, permutations, a
     res['rejected'] = res['padj'] < alpha
 
     if 'posthoc pvalue' in res.columns:
-        res['-log10 pvalue'] = res['posthoc pvalue'].apply(lambda x: - np.log10(x))
+        res['-log10 pvalue'] = [- np.log10(x) for x in res['posthoc pvalue'].values]
     else:
-        res['-log10 pvalue'] = res['pvalue'].apply(lambda x: - np.log10(x))
+        res['-log10 pvalue'] = [- np.log10(x) for x in res['pvalue'].values]
     
     return res
 
@@ -1518,18 +1539,58 @@ def run_ttest(df, condition1, condition2, alpha = 0.05, drop_cols=["sample"], su
     scores['group1'] = condition1
     scores['group2'] = condition2
     scores['FC'] = [np.power(2,np.abs(x)) * -1 if x < 0 else np.power(2,np.abs(x)) for x in scores['log2FC'].values]
-    scores['-log10 pvalue'] = [- np.log10(x) for x in scores['pvalue'].values]
+    scores['-log10 pvalue'] = [-np.log10(x) for x in scores['pvalue'].values]
     scores['Method'] = method
     scores.index.name = 'identifier'
     scores = scores.reset_index()
 
     return scores
 
+def define_samr_method(df, subject, group, drop_cols):
+    """
+    Method to identify the correct problem type to run with SAMR
+
+    :param df: pandas dataframe with samples as rows and protein identifiers as columns (with additional columns 'group', 'sample' and 'subject').
+    :param str subject: column with subject identifiers
+    :param str group: column with group identifiers
+    :param str droop_cols: columns to be dropped
+    :return: tuple with the method to be used (One Class, Two class paired, Two class unpaired or Multiclass) and the labels (conditions)
+
+    Example::
+
+        method, labels = define_samr_method(df, subject, group)
+    """
+    paired = check_is_paired(df, subject, group)
+    groups = df[group].unique()
+    df = df.set_index(group).drop(drop_cols, axis=1).T
+    conditions = set(df.columns)
+    d = {v:k+1 for k, v in enumerate(conditions)}
+    labels = [d.get(item,item)  for item in df.columns]
+    method = 'Multiclass'
+    if subject is not None:
+        if len(groups) == 1:
+            method = 'One class'
+        elif len(groups) == 2:
+            if paired:
+                method = 'Two class paired'
+                labels = []
+                counts = {}
+                conditions = df.columns.unique()
+                for col in df.columns:
+                    cur_count = counts.get(col, 0)
+                    labels.append([(cur_count+1)*-1 if col == conditions[0] else (cur_count+1)][0])
+                    counts[col] = cur_count + 1
+            else:
+                method = 'Two class unpaired'
+        else:
+            method = 'Multiclass'
+    return method, labels
 
 def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample'], alpha=0.05, s0=1, permutations=250):
     """
     Python adaptation of the 'samr' R package for statistical tests with permutation-based correction and s0 parameter.
     For more information visit https://cran.r-project.org/web/packages/samr/samr.pdf.
+    The method only runs if R is installed and permutations is higher than 0, otherwise ANOVA.
 
     :param df: pandas dataframe with samples as rows and protein identifiers as columns (with additional columns 'group', 'sample' and 'subject').
     :param str subject: column with subject identifiers
@@ -1544,42 +1605,13 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
 
         result = run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample'], alpha=0.05, s0=1, permutations=250)
     """
-    if not r_installation:
-        raise Exception("No valid installation of R")
-
-    if permutations > 0:
-        R_function = R('''result <- function(data, res_type, s0, nperms) {
+    R_function = R('''result <- function(data, res_type, s0, nperms) {
                                     samr(data=data, resp.type=res_type, s0=s0, nperms=nperms, random.seed = 12345, s0.perc=NULL)
                                     }''')
-        paired = check_is_paired(df, subject, group)
-        groups = df[group].unique()
-        samples = len(df[group])
+    if permutations > 0 and r_installation:
+        method, labels = define_samr_method(df, subject, group, drop_cols)
+        groups = df[group].unique() 
         df = df.set_index(group).drop(drop_cols, axis=1).T
-
-        labels = []
-        conditions = set(df.columns)
-        d = {v:k+1 for k, v in enumerate(conditions)}
-        labels = [d.get(item,item)  for item in df.columns]
-        method = 'Multiclass'
-
-        if subject is not None:
-            if len(groups) == 1:
-                method = 'One class'
-            elif len(groups) == 2:
-                if paired:
-                    method = 'Two class paired'
-                    labels = []
-                    counts = {}
-                    conditions = df.columns.unique()
-                    for col in df.columns:
-                        cur_count = counts.get(col, 0)
-                        labels.append([(cur_count+1)*-1 if col == conditions[0] else (cur_count+1)][0])
-                        counts[col] = cur_count + 1
-                else:
-                    method = 'Two class unpaired'
-            else:
-                method = 'Multiclass'
-
         delta = alpha
         data = base.list(x=base.as_matrix(df.values), y=base.unlist(labels), geneid=base.unlist(df.index), logged2=True)
         if s0 is None or s0 == "null":
@@ -1591,7 +1623,7 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
         s0_used = samr_res[13][0]
         f_stats = samr_res[9]
         pvalues = samr.samr_pvalues_from_perms(samr_res[9], samr_res[21])
-
+        
         if isinstance(siggenes_table[0], np.ndarray):
             up = pd.DataFrame(np.reshape(siggenes_table[0], (-1, siggenes_table[3][0]))).T
         else:
@@ -1607,46 +1639,26 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
         qvalues = pd.DataFrame(qvalues)
         qvalues.insert(0, 'identifier', total[2])
         qvalues.columns = ['identifier', 'padj']
+        
+        pairwise_results = []
+        for col in df.T.columns:
+            rows = df.T[col]
+            pairwise_result = calculate_pairwise_ttest(rows.reset_index(), column=col, subject=subject, group=group)
+            pairwise_cols = pairwise_result.columns
+            pairwise_results.extend(pairwise_result.values.tolist())
+        
+        pairwise = pd.DataFrame(pairwise_results, columns=pairwise_cols).set_index("identifier")
+        res = pd.DataFrame([df.index, f_stats, pvalues]).T
+        res.columns = ['identifier', 'SAMR test statistics', 'pvalue']
+        res = pairwise.join(res.set_index('identifier')).reset_index()
+        res = correct_pairwise_ttest(res, alpha)
 
-        if method == 'One class':
-        #     res.columns = ['identifier', 't-statistics', 'pvalue', 'padj']
-            df2 = pd.DataFrame()
-
-        elif method == 'Multiclass':
-            pairwise_results = []
-            for col in df.T.columns:
-                rows = df.T[col]
-                thsd_result = calculate_THSD(rows, group=group)
-                if thsd_result is not None:
-                    pairwise_results.append(thsd_result)
-            pairwise = pd.concat(pairwise_results)
-
-            res = pd.DataFrame([df.index, f_stats, pvalues]).T
-            res.columns = ['identifier', 'SAMR test statistics', 'pvalue']
-            res = pairwise.join(res.set_index('identifier')).reset_index()
-
-            contrasts = ['diff_mean_group{}'.format(str(i+1)) for i in np.arange(len(set(labels)))]
-            df2 = total.iloc[:, 6:-1].reset_index(drop=True)
-            df2.insert(0, 'id', total[2])
-            df2.columns = ['identifier'] + contrasts
-
-        else:
-            log2FC = samr_res[10]
-            res = pd.DataFrame([log2FC, f_stats, pvalues]).T
-            res.index = df.index
-            group1 = groups[0]
-            group2 = groups[1]
-            mean1 = df[group1].mean(axis=1)
-            mean2 = df[group2].mean(axis=1)
-
-            res = res.join(pd.DataFrame([mean1, mean2]).T, rsuffix='1').reset_index()
-            res.columns = ['identifier', 'log2FC', 'SAMR test statistics', 'pvalue', 'mean(group1)', 'mean(group2)']
-            res['group1'] = group1
-            res['group2'] = group2
-            res['FC'] = [np.power(2,np.abs(x)) * -1 if x < 0 else np.power(2,np.abs(x)) for x in res['log2FC'].values]
-            res = res[['identifier', 'group1', 'group2', 'mean(group1)', 'mean(group2)', 'log2FC', 'FC', 'SAMR test statistics', 'pvalue']]
-            df2 = pd.DataFrame()
-
+        contrasts = ['diff_mean_group{}'.format(str(i+1)) for i in np.arange(len(set(labels)))]
+        res['-log10 pvalue'] = [- np.log10(x) for x in res['posthoc pvalue'].values]
+        if method != 'One class':
+            res = res.drop(['pvalue', 'posthoc Paired', 'posthoc Parametric', 
+                            'posthoc T-Statistics', 'posthoc dof', 'posthoc tail', 'posthoc BF10', 'posthoc padj'], axis=1)
+            res = res.rename(columns={'posthoc pvalue':'pvalue', 'posthoc effsize': 'effsize'})
         res = res.set_index('identifier').join(qvalues.set_index('identifier'))
         if nperms_run < permutations:
             rejected, padj = apply_pvalue_fdrcorrection(res["pvalue"].tolist(), alpha=alpha, method = 'indep')
@@ -1655,16 +1667,15 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
             res['Note'] = 'Maximum number of permutations: {}. Corrected instead using FDR correction BH'.format(nperms_run)
         else:
             res['correction'] = 'permutation FDR ({} perm)'.format(nperms_run)
+        
         res['rejected'] = res['padj'] <= alpha
-        res['-log10 pvalue'] = [- np.log10(x) for x in res['pvalue'].values]
-
         res['Method'] = 'SAMR {}'.format(method)
         res['s0'] = s0_used
         res = res.reset_index()
     else:
         res = run_anova(df, alpha=alpha, drop_cols=drop_cols, subject=subject, group=group, permutations=permutations)
 
-    return res#, df2
+    return res
 
 
 def run_fisher(group1, group2, alternative='two-sided'):
@@ -2165,3 +2176,22 @@ def run_snf(df_dict, clusters, distance_metric, K_affinity, mu_affinity):
 
     """
     pass
+
+def run_km(df, group_col, time, event):
+    import matplotlib.pyplot as plt
+    kmf = KaplanMeierFitter()
+    ax = plt.subplot(111)
+    times = []
+    events = []
+    groups = []
+    for name, grouped_df in df.groupby(group_col):
+        t = grouped_df[time]
+        e = grouped_df[event]
+        kmf.fit(t, event_observed=e)
+        kmf.survival_function_.plot(ax=ax)
+        times.extend(t)
+        events.extend(e)
+        groups.extend(name)
+    
+    summary_= multivariate_logrank_test(times, groups, events, alpha=99)
+    return kmf
