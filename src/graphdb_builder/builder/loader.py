@@ -104,18 +104,14 @@ def updateDB(driver, imports=None, specific=[]):
                 entities = [e.lower() for e in config["ontology_entities"]]
                 if len(specific) > 0:
                     entities = list(set(entities).intersection([s.lower() for s in specific]))
-                print(entities)
                 import_dir = os.path.join(cwd, directories["ontologiesDirectory"]).replace('\\', '/')
                 ontologyDataImportCode = cypher_queries['IMPORT_ONTOLOGY_DATA']['query']
                 for entity in entities:
-                    print(ontologyDataImportCode.replace("ENTITY", entity.capitalize()).replace("IMPORTDIR", import_dir).split(';')[0:-1])
                     queries.extend(ontologyDataImportCode.replace("ENTITY", entity.capitalize()).replace("IMPORTDIR", import_dir).split(';')[0:-1])
                 mappings = config['ontology_mappings']
                 mappingImportCode = cypher_queries['IMPORT_ONTOLOGY_MAPPING_DATA']['query']
                 for m in mappings:
-                    print(m)
                     if m.lower() in entities:
-                        print("IN")
                         for r in mappings[m]:
                             queries.extend(mappingImportCode.replace("ENTITY1", m).replace("ENTITY2", r).replace("IMPORTDIR", import_dir).split(';')[0:-1])
             elif i == "biomarkers":

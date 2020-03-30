@@ -29,6 +29,15 @@ def entries_to_remove(entries, the_dict):
             del the_dict[key]
 
 
+def get_extra_entities_rels(ontology_directory):
+    extra_entities_file = 'extra_entities.tsv'
+    extra_entities = builder_utils.get_extra_pairs(ontology_directory, extra_entities_file)
+    extra_rels_file = 'extra_rels.tsv'
+    extra_rels = builder_utils.get_extra_pairs(ontology_directory, extra_rels_file)
+
+    return extra_entities, extra_rels   
+
+
 def parse_ontology(ontology, download=True):
     """
     Parses and extracts data from a given ontology file(s), and returns a tuple with multiple dictionaries.
@@ -44,6 +53,8 @@ def parse_ontology(ontology, download=True):
     ontology_files = []
     ontologyData = None
     mappings = None
+    extra_entities = set()
+    extra_rels = set()
     if ontology in config["ontology_types"]:
         otype = config["ontology_types"][ontology]
         if 'urls' in config:
@@ -56,13 +67,13 @@ def parse_ontology(ontology, download=True):
                         builder_utils.downloadDB(url, directory=ontology_directory, file_name=f)
             elif otype in config["files"]:
                 ofiles = config["files"][otype]
-                ###Check SNOMED-CT files exist
                 for f in ofiles:
                     if os.path.isfile(os.path.join(directory, f)):
                         ontology_files.append(os.path.join(directory, f))
         filters = None
         if otype in config["parser_filters"]:
             filters = config["parser_filters"][otype]
+        extra_entities, extra_rels = get_extra_entities_rels(ontology_directory)
     if len(ontology_files) > 0:
         if ontology == "SNOMED-CT":
             ontologyData = snomedParser.parser(ontology_files, filters)
@@ -79,7 +90,7 @@ def parse_ontology(ontology, download=True):
         else:
             logger.info("WARNING: Ontology {} could not be downloaded. Check that the link in configuration works.".format(ontology))
     
-    return ontologyData, mappings
+    return ontologyData, mappings, extra_entities, extra_rels
 
 
 def generate_graphFiles(import_directory, ontologies=None, download=True):
@@ -113,7 +124,7 @@ def generate_graphFiles(import_directory, ontologies=None, download=True):
         if ontology in config["ontology_types"]:
             ontologyType = config["ontology_types"][ontology]
         try:
-            result, mappings = parse_ontology(ontology, download)
+            result, mappings, extra_entities, extra_rels = parse_ontology(ontology, download)
             if result is not None:
                 terms, relationships, definitions = result
                 for namespace in terms:
@@ -125,10 +136,13 @@ def generate_graphFiles(import_directory, ontologies=None, download=True):
                         writer.writerow(['ID', ':LABEL', 'name', 'description', 'type', 'synonyms'])
                         for term in terms[namespace]:
                             writer.writerow([term, entity, list(terms[namespace][term])[0], definitions[term], ontologyType, ",".join(terms[namespace][term])])
-                    logger.info("Ontology {} - Number of {} entities: {}".format(ontology, name, len(terms[namespace])))
+                        for extra_entity in extra_entities:
+                            writer.writerow(list(extra_entity))
+                    logger.info("Ontology {} - Number of {} entities: {}".format(ontology, name, len(terms[namespace])+len(list(extra_entity))))
                     stats.add(builder_utils.buildStats(len(terms[namespace]), "entity", name, ontology, entity_outputfile, updated_on))
                     if namespace in relationships:
                         relationships_outputfile = os.path.join(import_directory, name+"_has_parent.tsv")
+                        relationships[namespace].update(extra_rels)
                         relationshipsDf = pd.DataFrame(list(relationships[namespace]))
                         relationshipsDf.columns = ['START_ID', 'END_ID', 'TYPE']
                         relationshipsDf.to_csv(path_or_buf=relationships_outputfile,

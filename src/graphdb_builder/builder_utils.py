@@ -66,6 +66,19 @@ def readDataFromExcel(uri):
     return data
 
 
+def get_extra_pairs(directory, extra_file):
+    extra = set()
+    file_path = os.path.join(directory, extra_file)
+
+    if os.path.isfile(file_path):
+        with open(file_path, 'r') as f:
+            for line in f:
+                data = line.rstrip("\r\n").split("\t")
+                extra.add(tuple(data))
+
+    return extra
+
+
 def parse_contents(contents, filename):
     """
     Reads binary string files and returns a Pandas DataFrame.
