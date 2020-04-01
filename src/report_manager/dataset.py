@@ -406,8 +406,8 @@ class ProteomicsDataset(Dataset):
                 min_valid = 1
                 value_col = 'LFQ intensity'
                 index = ['group', 'sample', 'subject']
-                shift=1.8
-                nstd=0.3
+                shift = 1.8
+                nstd = 0.3
                 args = {}
                 if "args" in self.configuration:
                     args = self.configuration["args"]
