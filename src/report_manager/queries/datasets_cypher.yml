@@ -120,7 +120,7 @@ proteomics:
         query_type: post
         query: >
             MATCH (protein1:Protein)-[r:CURATED_INTERACTS_WITH|:COMPILED_INTERACTS_WITH|:ACTS_ON]->(protein2:Protein) 
-            WHERE ((protein1.name+"~"+protein1.id) IN [IDENTIFIERS]) AND ((protein2.name+"~"+protein2.id) IN [IDENTIFIERS]) AND (r.score>=0.4 OR toLower(toString(r.score))="curated")
+            WHERE ((protein1.name+"~"+protein1.id) IN [IDENTIFIERS]) AND ((protein2.name+"~"+protein2.id) IN [IDENTIFIERS]) AND (r.score>=0.4 OR TYPE(r)="CURATED_INTERACTS_WITH")
             RETURN protein1.name+"~"+protein1.id AS node1,protein2.name+"~"+protein2.id AS node2,r.score AS score, r.source AS source,r.action AS action,r.interaction_type AS interaction_type
     DRUG_ASSOCIATIONS:
         name: 'get drugs targetting the list of proteins'
