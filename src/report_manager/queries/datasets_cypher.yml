@@ -136,6 +136,21 @@ proteomics:
             MATCH (drug:Drug)-[r:ACTS_ON]->(protein:Protein) 
             WHERE ((protein.name+"~"+protein.id) IN [IDENTIFIERS]) AND r.score>=0.4
             RETURN DISTINCT collect(protein.name+"~"+protein.id) AS Proteins,drug.name AS Drug,r.score AS score, r.source AS source,r.action AS action
+    COMPLEX_ASSOCIATIONS:
+        name: 'get complexes involving the list of proteins'
+        description: 'Get all the complex-protein associations for the relevant proteins'
+        involved_nodes:
+            - Protein
+            - Comlex
+        involved_relationships:
+            - IS_SUBUNIT_OF
+        query_type: post
+        query: >
+            MATCH (complex:Complex)-[r:IS_SUBUNIT_OF]-(protein:Protein) 
+            WHERE ((protein.name+"~"+protein.id) IN [IDENTIFIERS])
+            WITH complex.name AS Complex, r.source AS source, collect(DISTINCT protein.name+"~"+protein.id) AS Proteins
+            WHERE SIZE(Proteins)>1
+            RETURN Proteins, Complex, SIZE(Proteins) AS num_proteins, source
     DISEASE_ASSOCIATIONS:
         name: 'get diseases associated to the list of proteins'
         description: 'Get all the disease-protein associations for the relevant proteins'
