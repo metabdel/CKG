@@ -39,7 +39,8 @@ class Knowledge:
                            'Publication': '#b35806',
                            'Biological_process': '#e6f598',
                            'Symptom': '#f46d43',
-                           'Project': '#3288bd'}
+                           'Project': '#3288bd',
+                           'Complex': '#31a354'}
 
     @property
     def identifier(self):
@@ -143,8 +144,8 @@ class Knowledge:
                     if row['node1'] not in filter or row['node2'] not in filter:
                         continue
                     if np.abs(row['weight']) >= cutoff:
-                        nodes.update({row['node1']: {'type':entity_node1, 'color':node1_color}, row['node2'] : {'type':entity_node2, 'color':node2_color}})
-                        relationships.update({(row['node1'], row['node2']):{'type': 'correlates', 'weight':row['weight'], 'width':np.abs(row['weight']), 'source_color':node1_color, 'target_color':node2_color}})
+                        nodes.update({row['node1']: {'type': entity_node1, 'color': node1_color}, row['node2']: {'type': entity_node2, 'color': node2_color}})
+                        relationships.update({(row['node1'], row['node2']): {'type': 'correlates', 'weight': row['weight'], 'width': np.abs(row['weight']), 'source_color': node1_color, 'target_color': node2_color}})
             
         return nodes, relationships
         
