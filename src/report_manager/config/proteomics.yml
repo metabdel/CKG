@@ -1,10 +1,11 @@
 args:
     imputation: True
-    imputation_method: distribution 
+    imputation_method: distribution
+    missing_shift: 1.8
+    missing_nstd: 0.3
     missing_method: percentage
     missing_per_group: True
     missing_max: 0.3
-    min_valid: 5
     value_col: LFQ intensity
     index:
         - group
@@ -224,6 +225,18 @@ data associations:
             color_weight: False
             node_size: 'degree'
             communities_algorithm: louvain
+    complex_associations:
+        data: regulated
+        analyses: []
+        plots:
+            - basicTable
+        store_analysis: True
+        args:
+            use:
+                columns: identifiers
+            height: 700
+            width: 900
+            title: 'List of complexes regulated proteins belong to'
     drug_associations:
         data: regulated
         analyses: []
@@ -317,5 +330,3 @@ enrichment:
             reject_col: rejected
             method: fisher
             title: 'Pathway Enrichment'
-
-

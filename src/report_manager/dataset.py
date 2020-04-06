@@ -373,7 +373,7 @@ class MultiOmicsDataset(Dataset):
     def generate_knowledge(self):
         kn = knowledge.MultiOmicsKnowledge(self.identifier, self.data, nodes={}, relationships={}, colors={}, graph=None, report={})
         kn.generate_knowledge()        
- 
+
         return kn
 
 
@@ -449,7 +449,7 @@ class InteractomicsDataset(ProteomicsDataset):
         if configuration is None:
             config_file = "interactomics.yml"
             self.update_configuration_from_file(config_file)
-            
+
 
 class LongitudinalProteomicsDataset(ProteomicsDataset):
     def __init__(self, identifier, data={}, configuration=None, analyses={}, analysis_queries={}, report=None):

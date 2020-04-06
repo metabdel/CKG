@@ -50,7 +50,7 @@ Pathway:
           RETURN (protein.name+"~"+protein.id) AS node1, pathway.name AS node2, r.score AS weight, type(r) AS type
 Publication:
   name: associated publications
-  description: get publications where at least 3 proteins have been mentioned
+  description: get publications where at least LIMIT_COUNT proteins have been mentioned
   query_type: knowledge_report
   involved_nodes:
     - Protein

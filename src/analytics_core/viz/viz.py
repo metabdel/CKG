@@ -32,7 +32,8 @@ from analytics_core.analytics import wgcnaAnalysis
 from analytics_core.viz import wgcnaFigures, Dendrogram
 import dash_cytoscape as cyto
 
-def getPlotTraces(data, key='full', type = 'lines', div_factor=float(10^10000), horizontal=False):
+
+def getPlotTraces(data, key='full', type='lines', div_factor=float(10^10000), horizontal=False):
     """
     This function returns traces for different kinds of plots.
 
@@ -61,7 +62,8 @@ def getPlotTraces(data, key='full', type = 'lines', div_factor=float(10^10000), 
         if horizontal == True:
             traces = [go.Bar(x = data[col], y = data.index, orientation = 'h', name = col+' '+key) for col in data.columns]
 
-    else: return 'Option not found'
+    else: 
+        return 'Option not found'
 
     return traces
 
@@ -603,7 +605,7 @@ def get_volcanoplot(results, args):
             range_y = [0,max(abs(result['y']))+1.]
         else:
             range_y = args["range_y"]
-        trace = go.Scatter(x=result['x'],
+        traces = [go.Scatter(x=result['x'],
                         y=result['y'],
                         mode='markers',
                         text=result['text'],
@@ -614,48 +616,53 @@ def get_volcanoplot(results, args):
                                 'size': args['marker_size'],
                                 'line': {'color':result['color'], 'width':2}
                                 }
-                        )
+                        )]
+        shapes = []
+        if ('samr' in args and not args['is_samr']) or 'samr' not in args:
+            shapes = [{'type': 'line',
+                      'x0': np.log2(args['fc']),
+                      'y0': 0,
+                      'x1': np.log2(args['fc']),
+                      'y1': range_y[1],
+                      'line': {
+                          'color': 'grey',
+                          'width': 2,
+                          'dash':'dashdot'
+                          },
+                      },
+                    {'type': 'line',
+                     'x0': -np.log2(args['fc']),
+                     'y0': 0,
+                     'x1': -np.log2(args['fc']),
+                     'y1': range_y[1],
+                     'line': {
+                         'color': 'grey',
+                         'width': 2,
+                         'dash': 'dashdot'
+                         },
+                     },
+                    {'type': 'line',
+                     'x0': -max(abs(result['x']))-0.1,
+                     'y0': result['pvalue'],
+                     'x1': max(abs(result['x']))+0.1,
+                     'y1': result['pvalue'],
+                     'line': {
+                         'color': 'grey',
+                         'width': 1,
+                         'dash': 'dashdot'
+                         },
+                     }]
+            #traces.append(go.Scatter(x=result['upfc'][0], y=result['upfc'][1]))
+            #traces.append(go.Scatter(x=result['downfc'][0], y=result['downfc'][1]))
 
-        figure["data"].append(trace)
+        figure["data"] = traces
         figure["layout"] = go.Layout(title=title,
                                         xaxis={'title': args['x_title'], 'range': range_x},
                                         yaxis={'title': args['y_title'], 'range': range_y},
                                         hovermode='closest',
-                                        shapes=[
-                                                {'type': 'line',
-                                                'x0': np.log2(args['fc']),
-                                                'y0': 0,
-                                                'x1': np.log2(args['fc']),
-                                                'y1': range_y[1],
-                                                'line': {
-                                                    'color': 'grey',
-                                                    'width': 2,
-                                                    'dash':'dashdot'
-                                                    },
-                                                    },
-                                                {'type': 'line',
-                                                'x0': -np.log2(args['fc']),
-                                                'y0': 0,
-                                                'x1': -np.log2(args['fc']),
-                                                'y1': range_y[1],
-                                                'line': {
-                                                    'color': 'grey',
-                                                    'width': 2,
-                                                    'dash': 'dashdot'
-                                                    },
-                                                    },
-                                                {'type': 'line',
-                                                'x0': -max(abs(result['x']))-0.1,
-                                                'y0': result['pvalue'],
-                                                'x1': max(abs(result['x']))+0.1,
-                                                'y1': result['pvalue'],
-                                                'line': {
-                                                    'color': 'grey',
-                                                    'width': 1,
-                                                    'dash': 'dashdot'
-                                                    },
-                                                    }
-                                                ],
+                                        shapes=shapes,
+                                        width=950,
+                                        height=1050,
                                         annotations = result['annotations']+[dict(xref='paper', yref='paper', showarrow=False, text='')],
                                         template='plotly_white',
                                         showlegend=False)
@@ -704,12 +711,14 @@ def run_volcano(data, identifier, args={'alpha':0.05, 'fc':2, 'colorscale':'Blue
         sig_pval = False
         padj_col = "padj"
         pval_col = "pvalue"
+        is_samr = 's0' in signature
         if "posthoc padj" in signature:
             padj_col = "posthoc padj"
             pval_col = "posthoc pvalue"
-            signature = signature.sort_values(by="posthoc padj",ascending=True)
+            signature = signature.sort_values(by="posthoc padj", ascending=True)
         elif "padj" in signature:
-            signature = signature.sort_values(by="padj",ascending=True)
+            signature = signature.sort_values(by="padj", ascending=True)
+        
         pvals = []
         for index, row in signature.iterrows():
             # Text
@@ -765,7 +774,7 @@ def run_volcano(data, identifier, args={'alpha':0.05, 'fc':2, 'colorscale':'Blue
         else:
             min_pval_sign = 0
 
-        volcano_plot_results[(gidentifier, title)] = {'x': signature['log2FC'].values, 'y': signature['-log10 pvalue'].values, 'text':text, 'color': color, 'line_color':line_colors, 'pvalue':min_pval_sign, 'annotations':annotations[0:num_annotations]}
+        volcano_plot_results[(gidentifier, title)] = {'x': signature['log2FC'].values, 'y': signature['-log10 pvalue'].values, 'text':text, 'color': color, 'line_color':line_colors, 'pvalue':min_pval_sign, 'is_samr':is_samr, 'annotations':annotations[0:num_annotations]}
 
     figures = get_volcanoplot(volcano_plot_results, args)
 
@@ -1137,7 +1146,7 @@ def get_network(data, identifier, args):
         nx.set_node_attributes(graph, degrees, 'degree')
         betweenness = None
         ev_centrality = None
-        if data.shape[0] < 100 and data.shape[0] > 5:
+        if data.shape[0] < 150 and data.shape[0] > 5:
             betweenness = nx.betweenness_centrality(graph, weight='width')
             ev_centrality = nx.eigenvector_centrality_numpy(graph)
             nx.set_node_attributes(graph, betweenness, 'betweenness')
@@ -1166,7 +1175,7 @@ def get_network(data, identifier, args):
 
         vis_graph = graph
         if len(vis_graph.edges()) > 500:
-            max_nodes = 100
+            max_nodes = 150
             cluster_members = defaultdict(list)
             cluster_nums = {}
             for n in clusters:
@@ -1214,7 +1223,7 @@ def get_network_style(node_colors, color_edges):
                 layout (dictionary specifying how the nodes should be positioned on the canvas).
     '''
 
-    color_selector = "{'selector': '[name = \"KEY\"]', 'style': {'background-color': 'VALUE'}}"
+    color_selector = "{'selector': '[name = \"KEY\"]', 'style': {'background-color': \"VALUE\"}}"
     stylesheet=[{'selector': 'node', 'style': {'label': 'data(name)', 
                                                'text-valign': 'center', 
                                                'text-halign': 'center', 

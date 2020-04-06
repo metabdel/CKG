@@ -42,6 +42,31 @@ except ImportError:
     print("R functions will not work. Module Rpy2 not installed.")
 
 
+def unit_vector(vector):
+    """
+    Returns the unit vector of the vector.
+    :param tuple vector: vector
+    :return tuple unit_vector: unit vector
+    """
+    return vector / np.linalg.norm(vector)
+
+
+def angle_between(v1, v2):
+    """
+    Returns the angle in radians between vectors 'v1' and 'v2'
+
+    :param tuple v1: vector 1
+    :param tuple v2: vector 2
+    :return float angle: angle between two vectors in radians
+
+    Example::
+        angle = angle_between((1, 0, 0), (0, 1, 0))
+    """
+    v1_u = unit_vector(v1)
+    v2_u = unit_vector(v2)
+    return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+
+
 def transform_into_wide_format(data, index, columns, values, extra=[]):
     """
     This function converts a Pandas DataFrame from long to wide format using 
@@ -1612,17 +1637,23 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
         method, labels = define_samr_method(df, subject, group, drop_cols)
         groups = df[group].unique() 
         df = df.set_index(group).drop(drop_cols, axis=1).T
-        delta = alpha
+        delta = 0.68
+        min_foldchange = 1
+        if 'fc' in args:
+            min_foldchange = np.log2(args['fc'])
         data = base.list(x=base.as_matrix(df.values), y=base.unlist(labels), geneid=base.unlist(df.index), logged2=True)
         if s0 is None or s0 == "null":
             s0 = ro.r("NULL")
         samr_res = R_function(data=data, res_type=method, s0=s0, nperms=permutations)
-        delta_table = samr.samr_compute_delta_table(samr_res)
+        delta_table = samr.samr_compute_delta_table(samr_res, min_foldchange)
         siggenes_table = samr.samr_compute_siggenes_table(samr_res, delta, data, delta_table, all_genes=True)
         nperms_run = samr_res[8][0]
         s0_used = samr_res[13][0]
+        s = samr_res[11] - s0_used
+        denom = samr_res[11]
         f_stats = samr_res[9]
         pvalues = samr.samr_pvalues_from_perms(samr_res[9], samr_res[21])
+        
         
         if isinstance(siggenes_table[0], np.ndarray):
             up = pd.DataFrame(np.reshape(siggenes_table[0], (-1, siggenes_table[3][0]))).T
@@ -1634,11 +1665,10 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
             down = pd.DataFrame()
 
         total = pd.concat([up, down])
-        total = total.sort_values(total.columns[-1]).reset_index(drop=True)
-        qvalues = total.iloc[:, -1].astype(float)/100
-        qvalues = pd.DataFrame(qvalues)
-        qvalues.insert(0, 'identifier', total[2])
+        total.iloc[:,-1] = total.iloc[:,-1].astype(float)/100
+        qvalues = total.iloc[:,[2,-1]]
         qvalues.columns = ['identifier', 'padj']
+        qvalues = qvalues.sort_values(["identifier"])
         
         pairwise_results = []
         for col in df.T.columns:
@@ -1650,15 +1680,16 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
         pairwise = pd.DataFrame(pairwise_results, columns=pairwise_cols).set_index("identifier")
         res = pd.DataFrame([df.index, f_stats, pvalues]).T
         res.columns = ['identifier', 'SAMR test statistics', 'pvalue']
+        
         res = pairwise.join(res.set_index('identifier')).reset_index()
         res = correct_pairwise_ttest(res, alpha)
 
         contrasts = ['diff_mean_group{}'.format(str(i+1)) for i in np.arange(len(set(labels)))]
         res['-log10 pvalue'] = [- np.log10(x) for x in res['posthoc pvalue'].values]
-        if method != 'One class':
-            res = res.drop(['pvalue', 'posthoc Paired', 'posthoc Parametric', 
-                            'posthoc T-Statistics', 'posthoc dof', 'posthoc tail', 'posthoc BF10', 'posthoc padj'], axis=1)
-            res = res.rename(columns={'posthoc pvalue':'pvalue', 'posthoc effsize': 'effsize'})
+        if method != 'Multiclass':
+            res = res.drop(['pvalue','posthoc Paired', 'posthoc Parametric', 
+                            'posthoc T-Statistics', 'posthoc dof', 'posthoc tail', 'posthoc BF10'], axis=1)
+            res = res.rename(columns={'posthoc pvalue':'pvalue', 'posthoc effsize': 'effsize', 'posthoc padj':'p-padj'})
         res = res.set_index('identifier').join(qvalues.set_index('identifier'))
         if nperms_run < permutations:
             rejected, padj = apply_pvalue_fdrcorrection(res["pvalue"].tolist(), alpha=alpha, method = 'indep')
@@ -1668,7 +1699,7 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
         else:
             res['correction'] = 'permutation FDR ({} perm)'.format(nperms_run)
         
-        res['rejected'] = res['padj'] <= alpha
+        res['rejected'] = res['padj'] < alpha
         res['Method'] = 'SAMR {}'.format(method)
         res['s0'] = s0_used
         res = res.reset_index()
@@ -1676,6 +1707,18 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
         res = run_anova(df, alpha=alpha, drop_cols=drop_cols, subject=subject, group=group, permutations=permutations)
 
     return res
+
+def calculate_discriminant_lines(result):
+    for row in result.iterrows():
+        lfc = row['log2fc']
+        lpval = row['-log10 pvalue']
+        
+        v1 = (lfc, lpval)
+        v2 = (0.0, lpval)
+        
+        angle = angle_between(v1, v2)
+        
+        
 
 
 def run_fisher(group1, group2, alternative='two-sided'):
