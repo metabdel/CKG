@@ -197,7 +197,6 @@ def buildMappingFromOBO(oboFile, ontology):
     """
     Parses and extracts ontology idnetifiers, names and synonyms from raw file, and writes all the information \
     to a .tsv file.
-    
     :param str oboFile: path to ontology raw file.
     :param str ontology: ontology database acronym as defined in ontologies_config.yml.
     """
@@ -206,9 +205,9 @@ def buildMappingFromOBO(oboFile, ontology):
     mapping_file = os.path.join(outputDir, "mapping.tsv")
     identifiers = defaultdict(list)
     re_synonyms = r'\"(.+)\"'
-    
+
     if os.path.exists(cmapping_file):
-            os.remove(cmapping_file)
+        os.remove(cmapping_file)
 
     with open(oboFile, 'r') as f:
         for line in f:
@@ -225,7 +224,7 @@ def buildMappingFromOBO(oboFile, ontology):
                 synonym_type = "".join(line.rstrip("\r\n").split(":")[1:])
                 matches = re.search(re_synonyms, synonym_type)
                 if matches:
-                     identifiers[ident.strip()].append(("SYN", matches.group(1).lstrip()))
+                    identifiers[ident.strip()].append(("SYN", matches.group(1).lstrip()))
     with open(mapping_file, 'w') as out:
         for ident in identifiers:
             for source, ref in identifiers[ident]:
@@ -236,11 +235,11 @@ def buildMappingFromOBO(oboFile, ontology):
 
 def map_experiment_files(project_id, datasetPath, mapping):
     files = builder_utils.listDirectoryFiles(datasetPath)
-    
+
     for file in files:
         outputfile = os.path.join(datasetPath, file)
         data = builder_utils.readDataset(outputfile)
-        data = map_experimental_data(data, mapping)        
+        data = map_experimental_data(data, mapping)
         builder_utils.export_contents(data, datasetPath, file)
 
 
@@ -249,12 +248,9 @@ def map_experimental_data(data, mapping):
 
     if not data.empty:
         for column in data.columns:
-            ids = re.search('_\w*', column)
+            ids = re.search('_([a-zA-Z0-9|\-,.<>\/?]*)', column)
             if ids is not None:
                 ids = ids.group(0)
-            # for external_id in mapping:
-                # if external_id in column:
-                    # mapping_cols[column] = column.replace(external_id, mapping[external_id])
                 if ids.split('_', 1)[-1] in mapping:
                     mapping_cols[column] = column.replace(ids, '_' + mapping[ids.split('_', 1)[-1]])
             else:

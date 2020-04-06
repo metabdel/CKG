@@ -109,6 +109,14 @@ def load_dataset(uri, configuration):
             data = data[data[filters].isnull().all(1)]
             data = data.drop(filters, axis=1)
             columns = set(columns).difference(filters)
+        if 'numeric filter' in configuration:
+            for f in configuration['numeric filter']:
+                key = list(f.keys())[0]
+                if key in columns:
+                    value = f[key]
+                    data = data[data[key] >= value]
+                else:
+                    raise Exception("Error when applying numeric filter on {}. The column is not in the dataset".format(f))
         data = data.dropna(subset=[configuration["proteinCol"]], axis=0)
         data = expand_groups(data, configuration)
         columns.remove(indexCol)

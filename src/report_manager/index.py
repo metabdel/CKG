@@ -26,7 +26,7 @@ from graphdb_connector import connector
 log_config = ckg_config.report_manager_log
 logger = builder_utils.setup_logging(log_config, key="index page")
 
-try:    
+try:
     config = builder_utils.setup_config('builder')
     directories = builder_utils.get_full_path_directories()
 except Exception as err:
@@ -39,50 +39,44 @@ tmpDirectory = directories['tmpDirectory']
 driver = connector.getGraphDatabaseConnectionConfiguration()
 separator = config["separator"]
 
-app.layout = dcc.Loading(
-    children=[html.Div([
-    dcc.Location(id='url', refresh=False),
-    html.Div(id='page-content', style={'padding-top': 10}, className='container-fluid'),
-])], style={'text-align': 'center',
-            'margin-top': '70px',
-            'margin-bottom': '-60px', 'position': 'absolute',
-            'top': '50%', 'left': '50%', 'height': '200px'},
-    type='circle', 
-    color='#2b8cbe')
+app.layout = dcc.Loading(children=[html.Div([dcc.Location(id='url', refresh=False),
+                                             html.Div(id='page-content', style={'padding-top': 10}, className='container-fluid')])], 
+                         style={'text-align': 'center', 'margin-top': '70px', 'margin-bottom': '-60px', 'position': 'absolute',
+                                'top': '50%', 'left': '50%', 'height': '200px'},
+                         type='circle', color='#2b8cbe')
 
-@app.callback([Output('page-content', 'children'), 
-               Output('logout_form', 'style')],
+
+@app.callback([Output('page-content', 'children'),
+               Output('logout_form', 'style'),
+               Output('error_msg', 'style')],
               [Input('url', 'href')])
 def display_page(pathname):
     session_cookie = flask.request.cookies.get('custom-auth-session')
     logged_in = session_cookie is not None
     if not logged_in:
-        login_form = loginApp.LoginApp("Login", "", "", layout = [], logo = None, footer = None)
-        return (login_form.layout, {'display': 'none'})
+        if pathname is not None and 'error' in pathname:
+            error = {'display': 'block'}
+        else:
+            error = {'display': 'none'}
+        login_form = loginApp.LoginApp("Login", "", "", layout=[], logo=None, footer=None)
+        return (login_form.layout, {'display': 'none'}, error)
     elif pathname is not None:
         if '/apps/initial' in pathname:
             return (initialApp.layout, {'display': 'block',
                                         'position': 'absolute',
-                                        'right': '50px'})
+                                        'right': '50px'}, {'display': 'none'})
         elif '/apps/login' in pathname:
             if logged_in:
-                stats_db = homepageApp.HomePageApp("CKG homepage", "Database Stats", "", layout = [], logo = None, footer = None)
+                stats_db = homepageApp.HomePageApp("CKG homepage", "Database Stats", "", layout=[], logo=None, footer=None)
                 return (stats_db.layout, {'display': 'block',
                                           'position': 'absolute',
-                                          'right': '50px'})
-            else:
-                login_form = loginApp.LoginApp("Login", "", "", layout = [], logo = None, footer = None)
-                return (login_form.layout, {'display': 'none'})
+                                          'right': '50px'}, {'display': 'none'})
         elif '/apps/projectCreationApp' in pathname:
-            projectCreation_form = projectCreationApp.ProjectCreationApp("Project Creation", "", "", layout = [], logo = None, footer = None)
-            return (projectCreation_form.layout, {'display': 'block',
-                                             'position': 'absolute',
-                                             'right': '50px'})
+            projectCreation_form = projectCreationApp.ProjectCreationApp("Project Creation", "", "", layout=[], logo=None, footer=None)
+            return (projectCreation_form.layout, {'display': 'block', 'position': 'absolute', 'right': '50px'}, {'display': 'none'})
         elif '/apps/dataUploadApp' in pathname:
-            dataUpload_form = dataUploadApp.DataUploadApp("Data Upload", "", "", layout = [], logo = None, footer = None)
-            return (dataUpload_form.layout, {'display': 'block',
-                                        'position': 'absolute',
-                                        'right': '50px'})
+            dataUpload_form = dataUploadApp.DataUploadApp("Data Upload", "", "", layout=[], logo=None, footer=None)
+            return (dataUpload_form.layout, {'display': 'block', 'position': 'absolute', 'right': '50px'}, {'display': 'none'})
         elif '/apps/project?' in pathname:
             project_id, force, session_id = get_project_params_from_url(pathname)
             if session_id is None:
@@ -90,28 +84,26 @@ def display_page(pathname):
             if project_id is None:
                 return (initialApp.layout, {'display': 'block',
                                             'position': 'absolute',
-                                            'right': '50px'})
+                                            'right': '50px'}, error)
             else:
-                project = projectApp.ProjectApp(session_id, project_id, project_id, "", "", layout = [], logo = None, footer = None, force=force)
+                project = projectApp.ProjectApp(session_id, project_id, project_id, "", "", layout=[], logo=None, footer=None, force=force)
                 return (project.layout, {'display': 'block',
                                          'position': 'absolute',
-                                         'right': '50px'})
+                                         'right': '50px'}, {'display': 'none'})
         elif '/apps/imports' in pathname:
-            imports = importsApp.ImportsApp("CKG imports monitoring", "Statistics", "", layout = [], logo = None, footer = None)
+            imports = importsApp.ImportsApp("CKG imports monitoring", "Statistics", "", layout=[], logo=None, footer=None)
             return (imports.layout, {'display': 'block',
                                      'position': 'absolute',
-                                     'right': '50px'})
+                                     'right': '50px'}, {'display': 'none'})
         elif '/apps/homepage' in pathname or pathname.count('/') <= 3:
-            stats_db = homepageApp.HomePageApp("CKG homepage", "Database Stats", "", layout = [], logo = None, footer = None)
+            stats_db = homepageApp.HomePageApp("CKG homepage", "Database Stats", "", layout=[], logo=None, footer=None)
             return (stats_db.layout, {'display': 'block',
                                       'position': 'absolute',
-                                      'right': '50px'})
+                                      'right': '50px'}, {'display': 'none'})
         else:
-            return ('404', {'display': 'block',
-                           'position': 'absolute',
-                           'right': '50px'})
-    return (None, None)
-
+            return ('404', {'display': 'block', 'position': 'absolute', 'right': '50px'}, {'display': 'none'})
+        
+    return (None, None, {'display': 'none'})
 
 
 def get_project_params_from_url(pathname):
@@ -124,13 +116,13 @@ def get_project_params_from_url(pathname):
     match_id = re.search(regex_id, pathname)
     if match_id:
         project_id = match_id.group(1)
-    match_force = re.search(regex_force,pathname)
+    match_force = re.search(regex_force, pathname)
     if match_force:
         force = bool(int(match_force.group(1)))
-    match_session = re.search(regex_session,pathname)
+    match_session = re.search(regex_session, pathname)
     if match_session:
         session_id = match_session.group(1)
-    
+
     return project_id, force, session_id
 
 
@@ -139,21 +131,21 @@ def get_project_params_from_url(pathname):
 def return_docs(value):
     docs_url = ckg_config.docs_url
     return flask.render_template(docs_url+"{}".format(value))
- 
-# Callback upload configuration files
-@app.callback([Output('upload-config', 'style'), 
-               Output('output-data-upload','children'),
+
+
+@app.callback([Output('upload-config', 'style'),
+               Output('output-data-upload', 'children'),
                Output('upload-config', 'filename')],
               [Input('upload-config', 'contents'),
-               Input('my-dropdown','value')],
+               Input('my-dropdown', 'value')],
               [State('upload-config', 'filename')])
 def update_output(contents, value, fname):
     display = {'display': 'none'}
     uploaded = None
     if value is not None:
-        page_id, dataset = value.split('/')      
+        page_id, dataset = value.split('/')
         directory = os.path.join(tmpDirectory, page_id)
-        if dataset != "defaults":  
+        if dataset != "defaults":
             display = {'width': '50%',
                        'height': '60px',
                        'lineHeight': '60px',
@@ -167,7 +159,8 @@ def update_output(contents, value, fname):
                 os.makedirs(tmpDirectory)
             elif not os.path.exists(directory):
                 os.makedirs(directory)
-            if  fname is None:
+
+            if fname is None:
                 contents = None
             if contents is not None:
                 with open(os.path.join(directory, dataset+'.yml'), 'wb') as out:
@@ -184,11 +177,10 @@ def update_output(contents, value, fname):
             if os.path.exists(directory):
                 shutil.rmtree(directory)                
     return display, uploaded, fname
-                
 
-##Callbacks for CKG homepage
+
 @app.callback(Output('db-creation-date', 'children'),
-             [Input('db_stats_df', 'data')])
+              [Input('db_stats_df', 'data')])
 def update_db_date(df):
     kernel = pd.read_json(df['kernel_monitor'], orient='records')
     db_date = kernel['storeCreationDate'][0]
@@ -207,7 +199,7 @@ def update_db_date(df):
                Output("db_indicator_11", "children"),
                Output("db_indicator_12", "children"),
                Output("db_indicator_13", "children"),
-               Output("db_indicator_14", "children"),],
+               Output("db_indicator_14", "children")],
               [Input("db_stats_df", "data")])
 def number_panel_update(df):
     projects = pd.read_json(df['projects'], orient='records')
@@ -260,24 +252,24 @@ def number_panel_update(df):
     else:
         t_open = '0'
         t_comm = '0'
-    
-    
-    return [dcc.Markdown("**{}**".format(i)) for i in [ent,labels,rel,types,prop,ent_store,rel_store,prop_store,string_store,array_store,log_store,t_open,t_comm,projects]]
+
+    return [dcc.Markdown("**{}**".format(i)) for i in [ent, labels, rel, types, prop, ent_store, rel_store, prop_store, string_store, array_store, log_store, t_open, t_comm, projects]]
+
 
 @app.callback(Output("project_url", "children"),
-             [Input("project_option", "value")])
+              [Input("project_option", "value")])
 def update_project_url(value):
     if value is not None and len(value) > 1:
         return html.A(value[0].title(),
-                        href='/apps/project?project_id={}&force=0'.format(value[1]),
-                        target='', 
-                        n_clicks=0,
-                        className="button_link")
+                      href='/apps/project?project_id={}&force=0'.format(value[1]),
+                      target='',
+                      n_clicks=0,
+                      className="button_link")
     else:
-      return ''
-  
-# Create a login route
-@app.server.route('/apps/login', methods=['POST'])
+        return ''
+
+
+@app.server.route('/apps/login', methods=['POST', 'GET'])
 def route_login():
     data = flask.request.form
     username = data.get('username')
@@ -286,35 +278,34 @@ def route_login():
     if not username or not password:
         flask.abort(401)
     elif not user.User(username).verify_password(password):
-        return dcc.Markdown('**Invalid login.** &#x274C;')
+        return flask.redirect('/login_error')
     else:
         rep = flask.redirect('/')
         rep.set_cookie('custom-auth-session', username+datetime.now().strftime('%Y%m-%d%H-%M%S-') + str(uuid4()))
         return rep
+
 
 @app.server.route('/apps/logout', methods=['POST'])
 def route_logout():
     # Redirect back to the index and remove the session cookie.
     rep = flask.redirect('/')
     rep.set_cookie('custom-auth-session', '', expires=0)
-    
+
     return rep
 
 
-
-
-###Callbacks for download project
 @app.callback(Output('download-zip', 'href'),
-             [Input('download-zip', 'n_clicks')],
-             [State('url', 'href')])
+              [Input('download-zip', 'n_clicks')],
+              [State('url', 'href')])
 def generate_report_url(n_clicks, pathname):
     project_id, force, session_id = get_project_params_from_url(pathname)
     return '/downloads/{}'.format(project_id)
-    
+
+
 @application.route('/downloads/<value>')
 def route_report_url(value):
-    uri = os.path.join(os.getcwd(),directories['downloadsDirectory'] + '/' + value + '.zip')
-    return flask.send_file(uri, attachment_filename = value+'.zip', as_attachment = True)
+    uri = os.path.join(os.getcwd(), directories['downloadsDirectory'] + '/' + value + '.zip')
+    return flask.send_file(uri, attachment_filename=value + '.zip', as_attachment=True)
 
 ###Callback regenerate project
 @app.callback(Output('regenerate', 'href'),
@@ -551,7 +542,11 @@ def run_processing(n_clicks, project_id):
                 experimental_filename = config['file_design'].replace('PROJECTID', project_id)
                 designData = builder_utils.readDataset(os.path.join(directory, experimental_filename))
                 designData = designData.astype(str)
-                if 'subject external_id' in designData.columns and 'biological_sample external_id' in designData.columns and 'biological_sample external_id' in designData.columns:
+                if 'subject external_id' in designData.columns and 'biological_sample external_id' in designData.columns and 'analytical_sample external_id' in designData.columns:
+                    if designData['analytical_sample external_id'].astype(str).str.contains('_', regex=False).any():
+                        message = 'ERROR: The "analytical_sample external_id" provided are incorrect. Do not use special character "_"'
+                        return message, style
+                    
                     if (res_n > 0).any().values.sum() > 0:
                         res = dataUpload.remove_samples_nodes_db(driver, project_id)
                     res_n = None

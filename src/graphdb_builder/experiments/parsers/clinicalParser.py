@@ -308,13 +308,13 @@ def extract_subject_intervention_rels(clinical_data, separator='|'):
     df = pd.DataFrame(columns=['START_ID', 'END_ID', 'TYPE', 'in_combination', 'response'])
     if 'had_intervention' in clinical_data:
         if not pd.isna(clinical_data['had_intervention']).all():
-            interventions = clinical_data.set_index('subject external_id')['had_intervention'].str.split(separator, expand=True).stack().str.strip().reset_index(level=1, drop=True)
+            interventions = clinical_data.set_index('subject external_id')['had_intervention'].astype(str).str.split(separator, expand=True).stack().str.strip().reset_index(level=1, drop=True)
             
             ##Uncomment line if clinical variable name is also included
             # interventions = interventions.str.split().str[-1].str.extract(r'.*\((.*)\).*')[0]
-            types = clinical_data.set_index('subject external_id')['had_intervention_type'].str.split(separator, expand=True).stack().str.strip().reset_index(level=1, drop=True)
-            combi = clinical_data.set_index('subject external_id')['had_intervention_in_combination'].str.split(separator, expand=True).stack().str.strip().reset_index(level=1, drop=True)
-            response = clinical_data.set_index('subject external_id')['had_intervention_response'].str.split(separator, expand=True).stack().str.strip().reset_index(level=1, drop=True)
+            types = clinical_data.set_index('subject external_id')['had_intervention_type'].astype(str).str.split(separator, expand=True).stack().str.strip().reset_index(level=1, drop=True)
+            combi = clinical_data.set_index('subject external_id')['had_intervention_in_combination'].astype(str).str.split(separator, expand=True).stack().str.strip().reset_index(level=1, drop=True)
+            response = clinical_data.set_index('subject external_id')['had_intervention_response'].astype(str).str.split(separator, expand=True).stack().str.strip().reset_index(level=1, drop=True)
             df = pd.concat([interventions, types, combi, response], axis=1).reset_index()
             df.columns = ['START_ID', 'END_ID', 'type', 'in_combination', 'response']
             df.insert(loc=2, column='TYPE', value='HAD_INTERVENTION')

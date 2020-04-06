@@ -10,12 +10,14 @@ ox : &var_ox
         - 'Score'
         - 'Intensity \w+_AS\d+_?-?\d*'
         - 'Reverse'
+        - Potential contaminant
         - 'Score'
         - 'Delta score'
         - 'Score for localization'
         - 'Localization prob'
     'filters':
         - 'Reverse'
+        - Potential contaminant
     'attributes':
         'col':
             - 'Sequence window'
@@ -49,12 +51,14 @@ gly : &var_gly
         - 'Score'
         - 'Intensity \w+_AS\d+_?-?\d*'
         - 'Reverse'
+        - Potential contaminant
         - 'Score'
         - 'Delta score'
         - 'Score for localization'
         - 'Localization prob'
     'filters':
         - 'Reverse'
+        - Potential contaminant
     'attributes':
         'col':
             - 'Sequence window'
@@ -88,12 +92,16 @@ p : &var_p
         - 'Score'
         - 'Intensity \w+_AS\d+_?-?\d*'
         - 'Reverse'
+        - Potential contaminant
         - 'Score'
         - 'Delta score'
         - 'Score for localization'
         - 'Localization prob'
     'filters':
         - 'Reverse'
+        - Potential contaminant
+    'numeric filter':
+        - Localization prob: 0.75
     'attributes':
         'col':
             - 'Sequence window'
@@ -115,7 +123,7 @@ p : &var_p
     'log': 'log2'
     'modId': 'MOD:00696'
     'mod_acronym': 'p'
-    'file': 'Phosphosites \(STY\).txt'
+    'file': 'Phospho \(STY\)Sites.txt'
 
 maxquant :
     'proteins':
@@ -127,6 +135,7 @@ maxquant :
             - 'LFQ intensity \w+_AS\d+_?-?\d*'  #replicate_analytical_sample_timepoint
             - 'Intensity \w+_AS\d+_?-?\d*'
             - 'Reverse'
+            - Potential contaminant
             - 'Only identified by site'
             - 'is_razor'
         'generated_columns':
@@ -134,6 +143,7 @@ maxquant :
         'filters':
             - 'Reverse'
             - 'Only identified by site'
+            - Potential contaminant
         'proteinCol': 'Majority protein IDs'
         'contaminant_tag': 'CON__'
         'valueCol': 'LFQ intensity'
