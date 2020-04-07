@@ -1,8 +1,11 @@
 from collections import defaultdict
+from graphdb_builder import builder_utils
 
 #################################
-# Clinical_variable - SNOMED-CT # 
+# Clinical_variable - SNOMED-CT #
 #################################
+
+
 def parser(files, filters):
     """
     Parses and extracts relevant data from SNOMED CT database files.
@@ -19,8 +22,16 @@ def parser(files, filters):
     terms = {"SNOMED-CT": defaultdict(list)}
     relationships = defaultdict(set)
     definitions = defaultdict()
-    inactive_terms = read_concept_file(files[0])
+
+    full_path_files = []
     for f in files:
+        f = builder_utils.get_files_by_pattern(f).pop()
+        if "Concept" in f:
+            inactive_terms = get_inactive_terms(f)
+        else:
+            full_path_files.append(f)
+
+    for f in full_path_files:
         first = True
         with open(f, 'r', encoding='utf-8') as fh:
             if "Description" in f:
@@ -42,8 +53,8 @@ def parser(files, filters):
                         continue
                     data = line.rstrip("\r\n").split("\t")
                     if int(data[2]) == 1:
-                        sourceID = data[4] #child
-                        destinationID = data[5] #parent
+                        sourceID = data[4]
+                        destinationID = data[5]
                         if sourceID not in inactive_terms and destinationID not in inactive_terms:
                             relationships["SNOMED-CT"].add((sourceID, destinationID, "HAS_PARENT"))
             elif "Definition" in f:
@@ -57,14 +68,14 @@ def parser(files, filters):
                         if conceptID not in inactive_terms:
                             definition = data[7].replace('\n', ' ').replace('"', '').replace('\\', '')
                             definitions[conceptID] = definition
-    
+
     return terms, relationships, definitions
 
-def read_concept_file(concept_file):
+
+def get_inactive_terms(concept_file):
     """
-    
     :param concept_file:
-    :return:
+    :return set inactive_terms: inactive terms 
     """
     inactive_terms = set()
     first = True

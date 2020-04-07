@@ -68,8 +68,14 @@ def parse_ontology(ontology, download=True):
             elif otype in config["files"]:
                 ofiles = config["files"][otype]
                 for f in ofiles:
-                    if os.path.isfile(os.path.join(directory, f)):
+                    if '*' not in f:
+                        if os.path.isfile(os.path.join(directory, f)):
+                            ontology_files.append(os.path.join(directory, f))
+                        else:
+                            logger.error("Error: file {} is not in the directory {}".format(f, directory))
+                    else:
                         ontology_files.append(os.path.join(directory, f))
+
         filters = None
         if otype in config["parser_filters"]:
             filters = config["parser_filters"][otype]
@@ -113,7 +119,7 @@ def generate_graphFiles(import_directory, ontologies=None, download=True):
             ontology = ontology.capitalize()
             if ontology.capitalize() in config["ontologies"]:
                 entities.update({ontology: config["ontologies"][ontology]})
-
+    
     updated_on = "None"
     if download:
         updated_on = str(date.today())
@@ -138,8 +144,8 @@ def generate_graphFiles(import_directory, ontologies=None, download=True):
                             writer.writerow([term, entity, list(terms[namespace][term])[0], definitions[term], ontologyType, ",".join(terms[namespace][term])])
                         for extra_entity in extra_entities:
                             writer.writerow(list(extra_entity))
-                    logger.info("Ontology {} - Number of {} entities: {}".format(ontology, name, len(terms[namespace])+len(list(extra_entity))))
-                    stats.add(builder_utils.buildStats(len(terms[namespace]), "entity", name, ontology, entity_outputfile, updated_on))
+                    logger.info("Ontology {} - Number of {} entities: {}".format(ontology, name, len(terms[namespace])+len(list(extra_entities))))
+                    stats.add(builder_utils.buildStats(len(terms[namespace])+len(list(extra_entities)), "entity", name, ontology, entity_outputfile, updated_on))
                     if namespace in relationships:
                         relationships_outputfile = os.path.join(import_directory, name+"_has_parent.tsv")
                         relationships[namespace].update(extra_rels)

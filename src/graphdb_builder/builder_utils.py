@@ -5,6 +5,7 @@ import urllib3
 import urllib
 import wget
 import base64
+import glob
 import io
 import requests
 import ftplib
@@ -64,6 +65,12 @@ def readDataFromExcel(uri):
     data = pd.read_excel(uri, index_col=None, na_values=['NA'], convert_float=True)
 
     return data
+
+
+def get_files_by_pattern(regex_path):
+    files = glob.glob(regex_path)
+
+    return files
 
 
 def get_extra_pairs(directory, extra_file):
