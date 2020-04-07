@@ -294,6 +294,11 @@ right ontology (defined in config), i.e. type = -40 -&gt; SNOMED CT</p>
 <dd></dd></dl>
 
 <dl class="function">
+<dt id="graphdb_builder.experiments.parsers.clinicalParser.extract_project_rels">
+<code class="sig-prename descclassname">graphdb_builder.experiments.parsers.clinicalParser.</code><code class="sig-name descname">extract_project_rels</code><span class="sig-paren">(</span><em class="sig-param">project_data</em>, <em class="sig-param">separator='|'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/experiments/parsers/clinicalParser.html#extract_project_rels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.experiments.parsers.clinicalParser.extract_project_rels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="graphdb_builder.experiments.parsers.clinicalParser.extract_timepoints">
 <code class="sig-prename descclassname">graphdb_builder.experiments.parsers.clinicalParser.</code><code class="sig-name descname">extract_timepoints</code><span class="sig-paren">(</span><em class="sig-param">project_data</em>, <em class="sig-param">separator='|'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/experiments/parsers/clinicalParser.html#extract_timepoints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.experiments.parsers.clinicalParser.extract_timepoints" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -378,12 +383,17 @@ right ontology (defined in config), i.e. type = -40 -&gt; SNOMED CT</p>
 <span id="proteomics-parser"></span><h2>Proteomics parser<a class="headerlink" href="#module-graphdb_builder.experiments.parsers.proteomicsParser" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="graphdb_builder.experiments.parsers.proteomicsParser.parser">
-<code class="sig-prename descclassname">graphdb_builder.experiments.parsers.proteomicsParser.</code><code class="sig-name descname">parser</code><span class="sig-paren">(</span><em class="sig-param">projectId</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/experiments/parsers/proteomicsParser.html#parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.experiments.parsers.proteomicsParser.parser" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">graphdb_builder.experiments.parsers.proteomicsParser.</code><code class="sig-name descname">parser</code><span class="sig-paren">(</span><em class="sig-param">projectId</em>, <em class="sig-param">data_type='proteomics'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/experiments/parsers/proteomicsParser.html#parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.experiments.parsers.proteomicsParser.parser" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="graphdb_builder.experiments.parsers.proteomicsParser.parse_dataset">
 <code class="sig-prename descclassname">graphdb_builder.experiments.parsers.proteomicsParser.</code><code class="sig-name descname">parse_dataset</code><span class="sig-paren">(</span><em class="sig-param">projectId</em>, <em class="sig-param">configuration</em>, <em class="sig-param">dataDir</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/experiments/parsers/proteomicsParser.html#parse_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.experiments.parsers.proteomicsParser.parse_dataset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="graphdb_builder.experiments.parsers.proteomicsParser.check_columns">
+<code class="sig-prename descclassname">graphdb_builder.experiments.parsers.proteomicsParser.</code><code class="sig-name descname">check_columns</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">req_columns</em>, <em class="sig-param">generated_columns</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/experiments/parsers/proteomicsParser.html#check_columns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.experiments.parsers.proteomicsParser.check_columns" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">

@@ -225,9 +225,10 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">dbconfig</span><span class="p">[</span><span class="s2">&quot;sources&quot;</span><span class="p">]:</span>
         <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dbconfig</span><span class="p">[</span><span class="s2">&quot;databasesDir&quot;</span><span class="p">],</span> <span class="n">dbconfig</span><span class="p">[</span><span class="s2">&quot;sources&quot;</span><span class="p">][</span><span class="n">entity</span><span class="p">])</span>
-        <span class="n">mapping_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span><span class="s2">&quot;complete_mapping.tsv&quot;</span><span class="p">)</span>
+        <span class="n">mapping_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;complete_mapping.tsv&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">mapping_file</span><span class="p">):</span>
             <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">mapping_file</span><span class="p">)</span> </div>
+
 
 <div class="viewcode-block" id="mark_complete_mapping"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.mapping.mark_complete_mapping">[docs]</a><span class="k">def</span> <span class="nf">mark_complete_mapping</span><span class="p">(</span><span class="n">entity</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -237,14 +238,15 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">dbconfig</span><span class="p">[</span><span class="s2">&quot;sources&quot;</span><span class="p">]:</span>
         <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dbconfig</span><span class="p">[</span><span class="s2">&quot;databasesDir&quot;</span><span class="p">],</span> <span class="n">dbconfig</span><span class="p">[</span><span class="s2">&quot;sources&quot;</span><span class="p">][</span><span class="n">entity</span><span class="p">])</span>
-        <span class="n">mapping_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span><span class="s2">&quot;mapping.tsv&quot;</span><span class="p">)</span>
-        <span class="n">new_mapping_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span><span class="s2">&quot;complete_mapping.tsv&quot;</span><span class="p">)</span>
+        <span class="n">mapping_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;mapping.tsv&quot;</span><span class="p">)</span>
+        <span class="n">new_mapping_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;complete_mapping.tsv&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">mapping_file</span><span class="p">):</span>
             <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">mapping_file</span><span class="p">,</span> <span class="n">new_mapping_file</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="getMappingFromOntology"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.mapping.getMappingFromOntology">[docs]</a><span class="k">def</span> <span class="nf">getMappingFromOntology</span><span class="p">(</span><span class="n">ontology</span><span class="p">,</span> <span class="n">source</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="getMappingFromOntology"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.mapping.getMappingFromOntology">[docs]</a><span class="k">def</span> <span class="nf">getMappingFromOntology</span><span class="p">(</span><span class="n">ontology</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts .tsv file with complete list of ontology identifiers and aliases, \</span>
+<span class="sd">    Converts .tsv file with complete list of ontology identifiers and aliases,</span>
 <span class="sd">    to dictionary with aliases as keys and ontology identifiers as values.</span>
 
 <span class="sd">    :param str ontology: ontology label as defined in ontologies_config.yml.</span>
@@ -254,8 +256,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">mapping</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">ont</span> <span class="o">=</span> <span class="n">oconfig</span><span class="p">[</span><span class="s2">&quot;ontologies&quot;</span><span class="p">][</span><span class="n">ontology</span><span class="p">]</span>
-    <span class="n">dirFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">oconfig</span><span class="p">[</span><span class="s2">&quot;ontologies_directory&quot;</span><span class="p">],</span><span class="n">ont</span><span class="p">)</span>
-    <span class="n">mapping_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirFile</span><span class="p">,</span><span class="s2">&quot;complete_mapping.tsv&quot;</span><span class="p">)</span>
+    <span class="n">dirFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">oconfig</span><span class="p">[</span><span class="s2">&quot;ontologies_directory&quot;</span><span class="p">],</span> <span class="n">ont</span><span class="p">)</span>
+    <span class="n">mapping_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirFile</span><span class="p">,</span> <span class="s2">&quot;complete_mapping.tsv&quot;</span><span class="p">)</span>
     <span class="n">max_wait</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">while</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">mapping_file</span><span class="p">)</span> <span class="ow">and</span> <span class="n">max_wait</span> <span class="o">&lt;</span> <span class="mi">5000</span><span class="p">:</span>
         <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
@@ -267,10 +269,11 @@
                 <span class="n">data</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">source</span> <span class="ow">or</span> <span class="n">source</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">mapping</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">except</span><span class="p">:</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;mapping - No mapping file </span><span class="si">{}</span><span class="s2"> for entity </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mapping_file</span><span class="p">,</span> <span class="n">ontology</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">mapping</span></div>
+
 
 <div class="viewcode-block" id="getMappingForEntity"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.mapping.getMappingForEntity">[docs]</a><span class="k">def</span> <span class="nf">getMappingForEntity</span><span class="p">(</span><span class="n">entity</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -282,23 +285,25 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">mapping</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">dbconfig</span><span class="p">[</span><span class="s2">&quot;sources&quot;</span><span class="p">]:</span>
-        <span class="n">mapping_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dbconfig</span><span class="p">[</span><span class="s2">&quot;databasesDir&quot;</span><span class="p">],</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dbconfig</span><span class="p">[</span><span class="s2">&quot;sources&quot;</span><span class="p">][</span><span class="n">entity</span><span class="p">],</span><span class="s2">&quot;complete_mapping.tsv&quot;</span><span class="p">))</span>
+        <span class="n">mapping_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dbconfig</span><span class="p">[</span><span class="s2">&quot;databasesDir&quot;</span><span class="p">],</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dbconfig</span><span class="p">[</span><span class="s2">&quot;sources&quot;</span><span class="p">][</span><span class="n">entity</span><span class="p">],</span> <span class="s2">&quot;complete_mapping.tsv&quot;</span><span class="p">))</span>
         <span class="n">max_wait</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">while</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">mapping_file</span><span class="p">)</span> <span class="ow">and</span> <span class="n">max_wait</span> <span class="o">&lt;</span> <span class="mi">5000</span><span class="p">:</span>
             <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
             <span class="n">max_wait</span> <span class="o">+=</span> <span class="mi">1</span>
+        
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">mapping_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mf</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">mapping_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mf</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">mf</span><span class="p">:</span>
                     <span class="n">data</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                         <span class="n">ident</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                         <span class="n">alias</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
                         <span class="n">mapping</span><span class="p">[</span><span class="n">alias</span><span class="p">]</span> <span class="o">=</span> <span class="n">ident</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;mapping - No mapping file </span><span class="si">{}</span><span class="s2"> for entity </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mapping_file</span><span class="p">,</span> <span class="n">entity</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;mapping - No mapping file </span><span class="si">{}</span><span class="s2"> for entity </span><span class="si">{}</span><span class="s2">. Error: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mapping_file</span><span class="p">,</span> <span class="n">entity</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">mapping</span></div>
+
 
 <div class="viewcode-block" id="getMultipleMappingForEntity"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.mapping.getMultipleMappingForEntity">[docs]</a><span class="k">def</span> <span class="nf">getMultipleMappingForEntity</span><span class="p">(</span><span class="n">entity</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -310,7 +315,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">mapping</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">set</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">dbconfig</span><span class="p">[</span><span class="s2">&quot;sources&quot;</span><span class="p">]:</span>
-        <span class="n">mapping_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dbconfig</span><span class="p">[</span><span class="s2">&quot;databasesDir&quot;</span><span class="p">],</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dbconfig</span><span class="p">[</span><span class="s2">&quot;sources&quot;</span><span class="p">][</span><span class="n">entity</span><span class="p">],</span><span class="s2">&quot;complete_mapping.tsv&quot;</span><span class="p">))</span>
+        <span class="n">mapping_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dbconfig</span><span class="p">[</span><span class="s2">&quot;databasesDir&quot;</span><span class="p">],</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dbconfig</span><span class="p">[</span><span class="s2">&quot;sources&quot;</span><span class="p">][</span><span class="n">entity</span><span class="p">],</span> <span class="s2">&quot;complete_mapping.tsv&quot;</span><span class="p">))</span>
         <span class="n">max_wait</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">while</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">mapping_file</span><span class="p">)</span> <span class="ow">and</span> <span class="n">max_wait</span> <span class="o">&lt;</span> <span class="mi">5000</span><span class="p">:</span>
             <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
@@ -324,10 +329,11 @@
                         <span class="n">ident</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                         <span class="n">alias</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
                         <span class="n">mapping</span><span class="p">[</span><span class="n">alias</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ident</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;mapping - No mapping file </span><span class="si">{}</span><span class="s2"> for entity </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mapping</span><span class="p">,</span> <span class="n">entity</span><span class="p">))</span>
     
     <span class="k">return</span> <span class="n">mapping</span></div>
+
 
 <div class="viewcode-block" id="get_STRING_mapping_url"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.mapping.get_STRING_mapping_url">[docs]</a><span class="k">def</span> <span class="nf">get_STRING_mapping_url</span><span class="p">(</span><span class="n">db</span><span class="o">=</span><span class="s2">&quot;STRING&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -346,7 +352,7 @@
     <span class="k">return</span> <span class="n">url</span></div>
         
 
-<div class="viewcode-block" id="getSTRINGMapping"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.mapping.getSTRINGMapping">[docs]</a><span class="k">def</span> <span class="nf">getSTRINGMapping</span><span class="p">(</span><span class="n">source</span> <span class="o">=</span> <span class="s2">&quot;BLAST_UniProt_AC&quot;</span><span class="p">,</span> <span class="n">download</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">db</span> <span class="o">=</span> <span class="s2">&quot;STRING&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="getSTRINGMapping"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.mapping.getSTRINGMapping">[docs]</a><span class="k">def</span> <span class="nf">getSTRINGMapping</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="s2">&quot;BLAST_UniProt_AC&quot;</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="s2">&quot;STRING&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parses database (db) and extracts relationships between identifiers to order databases (source).</span>
 
@@ -389,11 +395,11 @@
         
     <span class="k">return</span> <span class="n">mapping</span></div>
 
+
 <div class="viewcode-block" id="buildMappingFromOBO"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.mapping.buildMappingFromOBO">[docs]</a><span class="k">def</span> <span class="nf">buildMappingFromOBO</span><span class="p">(</span><span class="n">oboFile</span><span class="p">,</span> <span class="n">ontology</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parses and extracts ontology idnetifiers, names and synonyms from raw file, and writes all the information \</span>
 <span class="sd">    to a .tsv file.</span>
-<span class="sd">    </span>
 <span class="sd">    :param str oboFile: path to ontology raw file.</span>
 <span class="sd">    :param str ontology: ontology database acronym as defined in ontologies_config.yml.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -402,9 +408,9 @@
     <span class="n">mapping_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outputDir</span><span class="p">,</span> <span class="s2">&quot;mapping.tsv&quot;</span><span class="p">)</span>
     <span class="n">identifiers</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
     <span class="n">re_synonyms</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;\&quot;(.+)\&quot;&#39;</span>
-    
+
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">cmapping_file</span><span class="p">):</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">cmapping_file</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">cmapping_file</span><span class="p">)</span>
 
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">oboFile</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
@@ -421,7 +427,7 @@
                 <span class="n">synonym_type</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:])</span>
                 <span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">re_synonyms</span><span class="p">,</span> <span class="n">synonym_type</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">matches</span><span class="p">:</span>
-                     <span class="n">identifiers</span><span class="p">[</span><span class="n">ident</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s2">&quot;SYN&quot;</span><span class="p">,</span><span class="n">matches</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()))</span>
+                    <span class="n">identifiers</span><span class="p">[</span><span class="n">ident</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s2">&quot;SYN&quot;</span><span class="p">,</span> <span class="n">matches</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()))</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">mapping_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">out</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">ident</span> <span class="ow">in</span> <span class="n">identifiers</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">source</span><span class="p">,</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">identifiers</span><span class="p">[</span><span class="n">ident</span><span class="p">]:</span>
@@ -429,37 +435,33 @@
 
     <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">mapping_file</span><span class="p">,</span> <span class="n">cmapping_file</span><span class="p">)</span></div>
 
+
 <div class="viewcode-block" id="map_experiment_files"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.mapping.map_experiment_files">[docs]</a><span class="k">def</span> <span class="nf">map_experiment_files</span><span class="p">(</span><span class="n">project_id</span><span class="p">,</span> <span class="n">datasetPath</span><span class="p">,</span> <span class="n">mapping</span><span class="p">):</span>
     <span class="n">files</span> <span class="o">=</span> <span class="n">builder_utils</span><span class="o">.</span><span class="n">listDirectoryFiles</span><span class="p">(</span><span class="n">datasetPath</span><span class="p">)</span>
-    
+
     <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
         <span class="n">outputfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">datasetPath</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">builder_utils</span><span class="o">.</span><span class="n">readDataset</span><span class="p">(</span><span class="n">outputfile</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">map_experimental_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">mapping</span><span class="p">)</span>
-        <span class="n">builder_utils</span><span class="o">.</span><span class="n">export_contents</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">datasetPath</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>    </div>
-        <span class="c1"># with open(outputfile, &#39;w&#39;) as f:</span>
-        <span class="c1">#     data.to_csv(path_or_buf = f, sep=&#39;\t&#39;,</span>
-        <span class="c1">#                 header=True, index=False, quotechar=&#39;&quot;&#39;,</span>
-        <span class="c1">#                 line_terminator=&#39;\n&#39;, escapechar=&#39;\\&#39;)</span>
+        <span class="n">builder_utils</span><span class="o">.</span><span class="n">export_contents</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">datasetPath</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="map_experimental_data"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.mapping.map_experimental_data">[docs]</a><span class="k">def</span> <span class="nf">map_experimental_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">mapping</span><span class="p">):</span>
     <span class="n">mapping_cols</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-            <span class="n">ids</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;_\w*&#39;</span><span class="p">,</span> <span class="n">column</span><span class="p">)</span>
+            <span class="n">ids</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;_([a-zA-Z0-9|\-,.&lt;&gt;\/?]*)&#39;</span><span class="p">,</span> <span class="n">column</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">ids</span> <span class="o">=</span> <span class="n">ids</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-            <span class="c1"># for external_id in mapping:</span>
-                <span class="c1"># if external_id in column:</span>
-                    <span class="c1"># mapping_cols[column] = column.replace(external_id, mapping[external_id])</span>
                 <span class="k">if</span> <span class="n">ids</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">mapping</span><span class="p">:</span>
-                    <span class="n">mapping_cols</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">column</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="n">mapping</span><span class="p">[</span><span class="n">ids</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+                    <span class="n">mapping_cols</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">column</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">mapping</span><span class="p">[</span><span class="n">ids</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">continue</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">mapping_cols</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">data</span></div>
+
 
 <div class="viewcode-block" id="get_mapping_analytical_samples"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.mapping.get_mapping_analytical_samples">[docs]</a><span class="k">def</span> <span class="nf">get_mapping_analytical_samples</span><span class="p">(</span><span class="n">project_id</span><span class="p">):</span>
     <span class="kn">from</span> <span class="nn">graphdb_connector</span> <span class="k">import</span> <span class="n">connector</span>
@@ -467,16 +469,15 @@
 
     <span class="n">mapping</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;MATCH (p:Project)-[:HAS_ENROLLED]-(:Subject)-[:BELONGS_TO_SUBJECT]-()-[:SPLITTED_INTO]-(a:Analytical_sample) WHERE p.id=&#39;</span><span class="si">{}</span><span class="s2">&#39; RETURN a.external_id, a.id&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">project_id</span><span class="p">)</span>
-    <span class="n">mapping</span> <span class="o">=</span> <span class="n">connector</span><span class="o">.</span><span class="n">getCursorData</span><span class="p">(</span><span class="n">driver</span><span class="p">,</span><span class="n">query</span><span class="p">)</span>
+    <span class="n">mapping</span> <span class="o">=</span> <span class="n">connector</span><span class="o">.</span><span class="n">getCursorData</span><span class="p">(</span><span class="n">driver</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
         <span class="n">mapping</span> <span class="o">=</span> <span class="n">mapping</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;a.external_id&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;dict&#39;</span><span class="p">)[</span><span class="s2">&quot;a.id&quot;</span><span class="p">]</span>
-    
+
     <span class="k">return</span> <span class="n">mapping</span></div>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="k">pass</span>
-    <span class="c1">#buildMappingFromOBO(oboFile = &#39;../../data/ontologies/DO/do.obo&#39;, ontology=&#39;DO&#39;)</span>
 </pre></div>
 
            </div>

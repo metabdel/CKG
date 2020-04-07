@@ -234,7 +234,7 @@
 <li class="toctree-l3"><a class="reference internal" href="graphdb_builder.ontologies.parsers.html#module-graphdb_builder.ontologies.parsers.snomedParser">snomedParser.py</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="graphdb_builder.ontologies.html#module-graphdb_builder.ontologies.ontologies_controller">Ontologies Controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graphdb_builder.ontologies.html#ontologies-controller">Ontologies Controller</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="graphdb_builder.databases.html">Biomedical Databases</a><ul>
@@ -286,9 +286,9 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="graphdb_builder.builder.html">CKG Builder</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="graphdb_builder.builder.html#module-graphdb_builder.builder.create_user">User Creation Module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="graphdb_builder.builder.html#module-graphdb_builder.builder.importer">Importer Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graphdb_builder.builder.html#importer-module">Importer Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="graphdb_builder.builder.html#module-graphdb_builder.builder.loader">Loader Module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="graphdb_builder.builder.html#module-graphdb_builder.builder.builder">Builder Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graphdb_builder.builder.html#builder-module">Builder Module</a></li>
 </ul>
 </li>
 </ul>
@@ -319,6 +319,11 @@
 </dd></dl>
 
 <dl class="function">
+<dt id="graphdb_builder.builder_utils.get_extra_pairs">
+<code class="sig-prename descclassname">graphdb_builder.builder_utils.</code><code class="sig-name descname">get_extra_pairs</code><span class="sig-paren">(</span><em class="sig-param">directory</em>, <em class="sig-param">extra_file</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/builder_utils.html#get_extra_pairs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.builder_utils.get_extra_pairs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="graphdb_builder.builder_utils.parse_contents">
 <code class="sig-prename descclassname">graphdb_builder.builder_utils.</code><code class="sig-name descname">parse_contents</code><span class="sig-paren">(</span><em class="sig-param">contents</em>, <em class="sig-param">filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/builder_utils.html#parse_contents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.builder_utils.parse_contents" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads binary string files and returns a Pandas DataFrame.</p>
@@ -327,7 +332,7 @@
 <dl class="function">
 <dt id="graphdb_builder.builder_utils.export_contents">
 <code class="sig-prename descclassname">graphdb_builder.builder_utils.</code><code class="sig-name descname">export_contents</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">dataDir</em>, <em class="sig-param">filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/builder_utils.html#export_contents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.builder_utils.export_contents" title="Permalink to this definition">¶</a></dt>
-<dd><p>Export Pandas DataFrame to file, with UTF-8 encoding.</p>
+<dd><p>Export Pandas DataFrame to file, with UTF-8 endocing.</p>
 </dd></dl>
 
 <dl class="function">
@@ -569,7 +574,7 @@
 <dd><p>Code from: <a class="reference external" href="https://gist.github.com/shaxbee/0ada767debf9eefbdb6e">https://gist.github.com/shaxbee/0ada767debf9eefbdb6e</a>
 Acknowledgements: Zbigniew Mandziejewicz (shaxbee)
 Generator flattening the structure</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">flatten</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="mi">4</span><span class="p">]],</span> <span class="mi">6</span><span class="p">)]]))</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">flatten</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="mi">4</span><span class="p">]],</span> <span class="mi">6</span><span class="p">)]]))</span>
 <span class="go">[2, 2, 4, 5, 7, 2, 6, 2, 6, 6, 4, 6]</span>
 </pre></div>
 </div>
@@ -681,7 +686,7 @@ Generator flattening the structure</p>
 
 <dl class="function">
 <dt id="graphdb_builder.builder_utils.read_gzipped_file">
-<code class="sig-prename descclassname">graphdb_builder.builder_utils.</code><code class="sig-name descname">read_gzipped_file</code><span class="sig-paren">(</span><em class="sig-param">filepath</em>, <em class="sig-param">mode='unix'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/builder_utils.html#read_gzipped_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.builder_utils.read_gzipped_file" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">graphdb_builder.builder_utils.</code><code class="sig-name descname">read_gzipped_file</code><span class="sig-paren">(</span><em class="sig-param">filepath</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/builder_utils.html#read_gzipped_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.builder_utils.read_gzipped_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Opens an underlying process to access a gzip file through the creation of a new pipe to the child.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -760,7 +765,8 @@ batch_size entries, although the final list may be shorter.</p>
 <dl class="function">
 <dt id="graphdb_builder.mapping.getMappingFromOntology">
 <code class="sig-prename descclassname">graphdb_builder.mapping.</code><code class="sig-name descname">getMappingFromOntology</code><span class="sig-paren">(</span><em class="sig-param">ontology</em>, <em class="sig-param">source=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/mapping.html#getMappingFromOntology"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.mapping.getMappingFromOntology" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converts .tsv file with complete list of ontology identifiers and aliases,     to dictionary with aliases as keys and ontology identifiers as values.</p>
+<dd><p>Converts .tsv file with complete list of ontology identifiers and aliases,
+to dictionary with aliases as keys and ontology identifiers as values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -838,15 +844,9 @@ batch_size entries, although the final list may be shorter.</p>
 <dl class="function">
 <dt id="graphdb_builder.mapping.buildMappingFromOBO">
 <code class="sig-prename descclassname">graphdb_builder.mapping.</code><code class="sig-name descname">buildMappingFromOBO</code><span class="sig-paren">(</span><em class="sig-param">oboFile</em>, <em class="sig-param">ontology</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/mapping.html#buildMappingFromOBO"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.mapping.buildMappingFromOBO" title="Permalink to this definition">¶</a></dt>
-<dd><p>Parses and extracts ontology idnetifiers, names and synonyms from raw file, and writes all the information     to a .tsv file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>oboFile</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – path to ontology raw file.</p></li>
-<li><p><strong>ontology</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – ontology database acronym as defined in ontologies_config.yml.</p></li>
-</ul>
-</dd>
-</dl>
+<dd><p>Parses and extracts ontology idnetifiers, names and synonyms from raw file, and writes all the information     to a .tsv file.
+:param str oboFile: path to ontology raw file.
+:param str ontology: ontology database acronym as defined in ontologies_config.yml.</p>
 </dd></dl>
 
 <dl class="function">

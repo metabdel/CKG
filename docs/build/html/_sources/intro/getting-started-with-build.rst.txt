@@ -146,18 +146,22 @@ of the database. However, the following have to be downloaded manually.
 
 - `PhosphoSitePlus <https://www.phosphosite.org/staticDownloads>`_: *Acetylation_site_dataset.gz*, *Disease-associated_sites.gz*, *Kinase_Substrate_Dataset.gz*, *Methylation_site_dataset.gz*, *O-GalNAc_site_dataset.gz*, *O-GlcNAc_site_dataset.gz*, *Phosphorylation_site_dataset.gz*, *Regulatory_sites.gz*, *Sumoylation_site_dataset.gz* and *Ubiquitination_site_dataset.gz*.
 
-- `DrugBank <https://www.drugbank.ca/releases/latest>`_: *All drugs* and *DrugBank Vocabulary*.
+- `DrugBank <https://www.drugbank.ca/releases/latest>`_: *All drugs* (under *COMPLETE DATABASE*) and *DrugBank Vocabulary* (under *OPEN DATA*).
 
-- `SNOMED-CT <https://www.nlm.nih.gov/healthit/snomedct/us_edition.html>`_: *Download SNOMED CT to ICD-10-CM Mapping Resources*.
+- `SNOMED-CT <https://www.nlm.nih.gov/healthit/snomedct/international.html>`_: *Download RF2 Files Now!*.
 
 
 .. warning:: These three databases require login and authentication. To sign up go to `PSP Sign up <https://www.phosphosite.org/signUpAction>`_, `DrugBank Sign up <https://www.drugbank.ca/public_users/sign_up>`_ and `SNOMED-CT Sign up <https://uts.nlm.nih.gov/license.html>`_. In the case of SNOMED-CT, the UMLS license can take several business days.
+
+!!!ADD SCREENSHOT OF HOW THE FOLDERS SHOULD LOOK LIKE!!!
 
 After download, move the files to their respective folders:
 
 - PhosphoSitePlus: ``CKG/data/databases/PhosphoSitePlus``
 - DrugBank: ``CKG/data/databases/DrugBank``
 - SNOMED-CT: ``CKG/data/ontologies/SNOMED-CT``
+
+In the case of SNOMED-CT, unzip the downloaded file and copy all the subfolders and files to the ``SNOMED-CT`` folder.
 
 .. note:: If the respective database folder is not created, please do it manually.
 

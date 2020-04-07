@@ -206,9 +206,9 @@
 <span class="kn">import</span> <span class="nn">certifi</span>
 <span class="kn">import</span> <span class="nn">urllib3</span>
 <span class="kn">import</span> <span class="nn">urllib</span>
+<span class="kn">import</span> <span class="nn">wget</span>
 <span class="kn">import</span> <span class="nn">base64</span>
 <span class="kn">import</span> <span class="nn">io</span>
-<span class="kn">import</span> <span class="nn">wget</span>
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">import</span> <span class="nn">ftplib</span>
 <span class="kn">import</span> <span class="nn">json</span>
@@ -220,12 +220,10 @@
 <span class="kn">import</span> <span class="nn">pprint</span>
 <span class="kn">import</span> <span class="nn">obonet</span>
 <span class="kn">import</span> <span class="nn">datetime</span>
-<span class="kn">import</span> <span class="nn">tarfile</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">logging.config</span>
 <span class="kn">from</span> <span class="nn">config</span> <span class="k">import</span> <span class="n">ckg_config</span>
 <span class="kn">import</span> <span class="nn">ckg_utils</span>
-<span class="kn">import</span> <span class="nn">subprocess</span>
 
 
 <div class="viewcode-block" id="readDataset"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.readDataset">[docs]</a><span class="k">def</span> <span class="nf">readDataset</span><span class="p">(</span><span class="n">uri</span><span class="p">):</span>
@@ -240,32 +238,49 @@
 
     <span class="k">return</span> <span class="n">data</span></div>
 
+
 <div class="viewcode-block" id="readDataFromCSV"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.readDataFromCSV">[docs]</a><span class="k">def</span> <span class="nf">readDataFromCSV</span><span class="p">(</span><span class="n">uri</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read the data from csv file</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">sep</span> <span class="o">=</span> <span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">low_memory</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">low_memory</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">data</span></div>
+
 
 <div class="viewcode-block" id="readDataFromTXT"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.readDataFromTXT">[docs]</a><span class="k">def</span> <span class="nf">readDataFromTXT</span><span class="p">(</span><span class="n">uri</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read the data from tsv or txt file</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">sep</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">low_memory</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">low_memory</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">data</span></div>
+
 
 <div class="viewcode-block" id="readDataFromExcel"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.readDataFromExcel">[docs]</a><span class="k">def</span> <span class="nf">readDataFromExcel</span><span class="p">(</span><span class="n">uri</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read the data from Excel file</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">na_values</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;NA&#39;</span><span class="p">],</span> <span class="n">convert_float</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">na_values</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;NA&#39;</span><span class="p">],</span> <span class="n">convert_float</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="get_extra_pairs"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.get_extra_pairs">[docs]</a><span class="k">def</span> <span class="nf">get_extra_pairs</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">extra_file</span><span class="p">):</span>
+    <span class="n">extra</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">extra_file</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">extra</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">extra</span></div>
+
 
 <div class="viewcode-block" id="parse_contents"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.parse_contents">[docs]</a><span class="k">def</span> <span class="nf">parse_contents</span><span class="p">(</span><span class="n">contents</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -274,18 +289,19 @@
     <span class="n">content_type</span><span class="p">,</span> <span class="n">content_string</span> <span class="o">=</span> <span class="n">contents</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
     <span class="n">decoded</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">content_string</span><span class="p">)</span>
     <span class="n">file</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-    
+
     <span class="k">if</span> <span class="n">file</span> <span class="o">==</span> <span class="s1">&#39;txt&#39;</span><span class="p">:</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(</span><span class="n">decoded</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)),</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">low_memory</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">file</span> <span class="o">==</span> <span class="s1">&#39;csv&#39;</span><span class="p">:</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(</span><span class="n">decoded</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)),</span> <span class="n">low_memory</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">file</span> <span class="o">==</span> <span class="s1">&#39;xlsx&#39;</span> <span class="ow">or</span> <span class="n">file</span> <span class="o">==</span> <span class="s1">&#39;xls&#39;</span><span class="p">:</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">decoded</span><span class="p">))</span>        
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">decoded</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">df</span></div>
+
 
 <div class="viewcode-block" id="export_contents"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.export_contents">[docs]</a><span class="k">def</span> <span class="nf">export_contents</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dataDir</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Export Pandas DataFrame to file, with UTF-8 encoding.</span>
+<span class="sd">    Export Pandas DataFrame to file, with UTF-8 endocing.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">file</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -296,6 +312,7 @@
     <span class="k">elif</span> <span class="n">file</span> <span class="o">==</span> <span class="s1">&#39;xlsx&#39;</span> <span class="ow">or</span> <span class="n">file</span> <span class="o">==</span> <span class="s1">&#39;xls&#39;</span><span class="p">:</span>
         <span class="n">csv_string</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dataDir</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>   
     <span class="k">return</span> <span class="n">csv_string</span></div>
+
 
 <div class="viewcode-block" id="write_relationships"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.write_relationships">[docs]</a><span class="k">def</span> <span class="nf">write_relationships</span><span class="p">(</span><span class="n">relationships</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">outputfile</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -314,6 +331,7 @@
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">csv</span><span class="o">.</span><span class="n">Error</span><span class="p">(</span><span class="s2">&quot;Error writing relationships to file: </span><span class="si">{}</span><span class="s2">.</span><span class="se">\n</span><span class="s2"> </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outputfile</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span></div>
 
+
 <div class="viewcode-block" id="write_entities"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.write_entities">[docs]</a><span class="k">def</span> <span class="nf">write_entities</span><span class="p">(</span><span class="n">entities</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">outputfile</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reads a set of entities and saves them to a file.</span>
@@ -331,6 +349,7 @@
     <span class="k">except</span> <span class="n">csv</span><span class="o">.</span><span class="n">Error</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">csv</span><span class="o">.</span><span class="n">Error</span><span class="p">(</span><span class="s2">&quot;Error writing etities to file: </span><span class="si">{}</span><span class="s2">.</span><span class="se">\n</span><span class="s2"> </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outputfile</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span></div>
 
+
 <div class="viewcode-block" id="get_config"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.get_config">[docs]</a><span class="k">def</span> <span class="nf">get_config</span><span class="p">(</span><span class="n">config_name</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;databases&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reads YAML configuration file and converts it into a Python dictionary.</span>
@@ -345,6 +364,7 @@
     <span class="n">config</span> <span class="o">=</span> <span class="n">ckg_utils</span><span class="o">.</span><span class="n">get_configuration</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cwd</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/config/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="n">config_name</span><span class="p">)))</span>
 
     <span class="k">return</span> <span class="n">config</span></div>
+
 
 <div class="viewcode-block" id="setup_config"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.setup_config">[docs]</a><span class="k">def</span> <span class="nf">setup_config</span><span class="p">(</span><span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;databases&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -374,6 +394,7 @@
 
     <span class="k">return</span> <span class="n">config</span></div>
 
+
 <div class="viewcode-block" id="get_full_path_directories"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.get_full_path_directories">[docs]</a><span class="k">def</span> <span class="nf">get_full_path_directories</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reads Builder YAML configuration file and returns the full path of all directories.</span>
@@ -385,12 +406,13 @@
         <span class="n">config</span> <span class="o">=</span> <span class="n">ckg_utils</span><span class="o">.</span><span class="n">get_configuration</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">ckg_config</span><span class="o">.</span><span class="n">builder_config_file</span><span class="p">))</span>
         <span class="k">if</span> <span class="s1">&#39;directories&#39;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">directory</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;directories&#39;</span><span class="p">]:</span>
-                <span class="n">directories</span><span class="p">[</span><span class="n">directory</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;directories&#39;</span><span class="p">][</span><span class="n">directory</span><span class="p">])</span>
+                <span class="n">directories</span><span class="p">[</span><span class="n">directory</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;directories&#39;</span><span class="p">][</span><span class="n">directory</span><span class="p">])</span>
         
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Error </span><span class="si">{}</span><span class="s2">: builder_utils - Reading directories from configuration &gt; </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">err</span><span class="p">,</span> <span class="n">ckg_config</span><span class="o">.</span><span class="n">builder_config_file</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">directories</span></div>
+
 
 <div class="viewcode-block" id="list_ftp_directory"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.list_ftp_directory">[docs]</a><span class="k">def</span> <span class="nf">list_ftp_directory</span><span class="p">(</span><span class="n">ftp_url</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -415,6 +437,7 @@
 
     <span class="k">return</span> <span class="n">files</span></div>
 
+
 <div class="viewcode-block" id="setup_logging"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.setup_logging">[docs]</a><span class="k">def</span> <span class="nf">setup_logging</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s1">&#39;log.config&#39;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Setup logging configuration.</span>
@@ -429,13 +452,14 @@
             <span class="n">config</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">dictConfig</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>        
     <span class="k">else</span><span class="p">:</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
     <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-    
+ 
     <span class="k">return</span> <span class="n">logger</span></div>
+
 
 <div class="viewcode-block" id="downloadDB"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.downloadDB">[docs]</a><span class="k">def</span> <span class="nf">downloadDB</span><span class="p">(</span><span class="n">databaseURL</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -454,7 +478,7 @@
     <span class="k">if</span> <span class="n">directory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">directory</span> <span class="o">=</span> <span class="n">dbconfig</span><span class="p">[</span><span class="s2">&quot;databasesDir&quot;</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">file_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">file_name</span> <span class="o">=</span> <span class="n">databaseURL</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="n">databaseURL</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;?&#39;</span><span class="p">,</span><span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">,</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
     <span class="n">header</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;user-agent&#39;</span><span class="p">:</span><span class="s1">&#39;Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36&#39;</span><span class="p">}</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;wb&#39;</span>
@@ -462,14 +486,14 @@
             <span class="n">domain</span> <span class="o">=</span> <span class="n">databaseURL</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span>
             <span class="n">ftp_file</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">databaseURL</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="mi">3</span><span class="p">:])</span>
             <span class="k">with</span> <span class="n">ftplib</span><span class="o">.</span><span class="n">FTP</span><span class="p">(</span><span class="n">domain</span><span class="p">)</span> <span class="k">as</span> <span class="n">ftp</span><span class="p">:</span>
-                <span class="n">ftp</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">,</span> <span class="n">passwd</span> <span class="o">=</span> <span class="n">password</span><span class="p">)</span>
-                <span class="n">ftp</span><span class="o">.</span><span class="n">retrbinary</span><span class="p">(</span><span class="s2">&quot;RETR &quot;</span> <span class="o">+</span> <span class="n">ftp_file</span> <span class="p">,</span>  <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">file_name</span><span class="p">),</span> <span class="n">mode</span><span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="p">)</span>
+                <span class="n">ftp</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">,</span> <span class="n">passwd</span><span class="o">=</span><span class="n">password</span><span class="p">)</span>
+                <span class="n">ftp</span><span class="o">.</span><span class="n">retrbinary</span><span class="p">(</span><span class="s2">&quot;RETR &quot;</span> <span class="o">+</span> <span class="n">ftp_file</span><span class="p">,</span>  <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">file_name</span><span class="p">),</span> <span class="n">mode</span><span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)):</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">file_name</span><span class="p">))</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">wget</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="n">databaseURL</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">file_name</span><span class="p">))</span>
-            <span class="k">except</span><span class="p">:</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
                 <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">databaseURL</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">header</span><span class="p">)</span>
                 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">file_name</span><span class="p">),</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">out</span><span class="p">:</span>
                     <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
@@ -485,7 +509,8 @@
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Something went wrong. </span><span class="si">{}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">URL:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">err</span><span class="p">,</span><span class="n">databaseURL</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="searchPubmed"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.searchPubmed">[docs]</a><span class="k">def</span> <span class="nf">searchPubmed</span><span class="p">(</span><span class="n">searchFields</span><span class="p">,</span> <span class="n">sortby</span> <span class="o">=</span> <span class="s1">&#39;relevance&#39;</span><span class="p">,</span> <span class="n">num</span> <span class="o">=</span><span class="s2">&quot;10&quot;</span><span class="p">,</span> <span class="n">resultsFormat</span> <span class="o">=</span> <span class="s1">&#39;json&#39;</span><span class="p">):</span>
+
+<div class="viewcode-block" id="searchPubmed"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.searchPubmed">[docs]</a><span class="k">def</span> <span class="nf">searchPubmed</span><span class="p">(</span><span class="n">searchFields</span><span class="p">,</span> <span class="n">sortby</span><span class="o">=</span><span class="s1">&#39;relevance&#39;</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="s2">&quot;10&quot;</span><span class="p">,</span> <span class="n">resultsFormat</span><span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Searches PubMed database for MeSH terms and other additional fields (&#39;searchFields&#39;), sorts them by relevance and \</span>
 <span class="sd">    returns the top &#39;num&#39;.</span>
@@ -500,9 +525,9 @@
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">searchFields</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot; [MeSH Terms] AND &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">searchFields</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">query</span> <span class="o">=</span> <span class="n">searchFields</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span><span class="s2">&quot; [MeSH Terms] AND&quot;</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="n">searchFields</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; [MeSH Terms] AND&quot;</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">url</span> <span class="o">=</span> <span class="n">pubmedQueryUrl</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;TERMS&#39;</span><span class="p">,</span><span class="n">query</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;NUM&#39;</span><span class="p">,</span> <span class="n">num</span><span class="p">)</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">pubmedQueryUrl</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;TERMS&#39;</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;NUM&#39;</span><span class="p">,</span> <span class="n">num</span><span class="p">)</span>
         <span class="n">http</span> <span class="o">=</span> <span class="n">urllib3</span><span class="o">.</span><span class="n">PoolManager</span><span class="p">(</span><span class="n">cert_reqs</span><span class="o">=</span><span class="s1">&#39;CERT_REQUIRED&#39;</span><span class="p">,</span> <span class="n">ca_certs</span><span class="o">=</span><span class="n">certifi</span><span class="o">.</span><span class="n">where</span><span class="p">())</span>
         <span class="n">response</span> <span class="o">=</span> <span class="n">http</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;GET&quot;</span><span class="p">,</span> <span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
         <span class="n">jsonResponse</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
@@ -533,8 +558,9 @@
     <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="s1">&#39;esearchresult&#39;</span> <span class="ow">in</span> <span class="n">resultDict</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">resultDict</span><span class="p">[</span><span class="s1">&#39;esearchresult&#39;</span><span class="p">]</span>
-    
+
     <span class="k">return</span> <span class="n">result</span></div>
+
 
 <div class="viewcode-block" id="is_number"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.is_number">[docs]</a><span class="k">def</span> <span class="nf">is_number</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -549,6 +575,7 @@
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span></div>
 
+
 <div class="viewcode-block" id="getMedlineAbstracts"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.getMedlineAbstracts">[docs]</a><span class="k">def</span> <span class="nf">getMedlineAbstracts</span><span class="p">(</span><span class="n">idList</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function accesses NCBI over the WWWW and returns Medline data as a handle object, \</span>
@@ -560,7 +587,7 @@
 <span class="sd">    :return: Pandas DataFrame with columns: &#39;title&#39;, &#39;authors&#39;, &#39;journal&#39;, &#39;keywords&#39;, &#39;abstract&#39;, &#39;PMID&#39; and &#39;url&#39;.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">fields</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;TI&quot;</span><span class="p">:</span><span class="s2">&quot;title&quot;</span><span class="p">,</span> <span class="s2">&quot;AU&quot;</span><span class="p">:</span><span class="s2">&quot;authors&quot;</span><span class="p">,</span> <span class="s2">&quot;JT&quot;</span><span class="p">:</span><span class="s2">&quot;journal&quot;</span><span class="p">,</span> <span class="s2">&quot;DP&quot;</span><span class="p">:</span><span class="s2">&quot;date&quot;</span><span class="p">,</span> <span class="s2">&quot;MH&quot;</span><span class="p">:</span><span class="s2">&quot;keywords&quot;</span><span class="p">,</span> <span class="s2">&quot;AB&quot;</span><span class="p">:</span><span class="s2">&quot;abstract&quot;</span><span class="p">,</span> <span class="s2">&quot;PMID&quot;</span><span class="p">:</span><span class="s2">&quot;PMID&quot;</span><span class="p">}</span>
+    <span class="n">fields</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;TI&quot;</span><span class="p">:</span> <span class="s2">&quot;title&quot;</span><span class="p">,</span> <span class="s2">&quot;AU&quot;</span><span class="p">:</span> <span class="s2">&quot;authors&quot;</span><span class="p">,</span> <span class="s2">&quot;JT&quot;</span><span class="p">:</span> <span class="s2">&quot;journal&quot;</span><span class="p">,</span> <span class="s2">&quot;DP&quot;</span><span class="p">:</span> <span class="s2">&quot;date&quot;</span><span class="p">,</span> <span class="s2">&quot;MH&quot;</span><span class="p">:</span> <span class="s2">&quot;keywords&quot;</span><span class="p">,</span> <span class="s2">&quot;AB&quot;</span><span class="p">:</span> <span class="s2">&quot;abstract&quot;</span><span class="p">,</span> <span class="s2">&quot;PMID&quot;</span><span class="p">:</span> <span class="s2">&quot;PMID&quot;</span><span class="p">}</span>
     <span class="n">pubmedUrl</span> <span class="o">=</span> <span class="s2">&quot;https://www.ncbi.nlm.nih.gov/pubmed/&quot;</span>
     <span class="n">handle</span> <span class="o">=</span> <span class="n">Entrez</span><span class="o">.</span><span class="n">efetch</span><span class="p">(</span><span class="n">db</span><span class="o">=</span><span class="s2">&quot;pubmed&quot;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">idList</span><span class="p">,</span> <span class="n">rettype</span><span class="o">=</span><span class="s2">&quot;medline&quot;</span><span class="p">,</span> <span class="n">retmode</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">)</span>
     <span class="n">records</span> <span class="o">=</span> <span class="n">Medline</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span>
@@ -581,9 +608,11 @@
 
     <span class="k">return</span> <span class="n">abstracts</span></div>
 
+
 <div class="viewcode-block" id="remove_directory"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.remove_directory">[docs]</a><span class="k">def</span> <span class="nf">remove_directory</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
         <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">onerror</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="listDirectoryFiles"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.listDirectoryFiles">[docs]</a><span class="k">def</span> <span class="nf">listDirectoryFiles</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -598,6 +627,7 @@
 
     <span class="k">return</span> <span class="n">onlyfiles</span></div>
 
+
 <div class="viewcode-block" id="listDirectoryFolders"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.listDirectoryFolders">[docs]</a><span class="k">def</span> <span class="nf">listDirectoryFolders</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Lists all directories in a specified directory.</span>
@@ -609,6 +639,7 @@
     <span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">isdir</span><span class="p">,</span> <span class="n">join</span>
     <span class="n">dircontent</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span> <span class="k">if</span> <span class="n">isdir</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">f</span><span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">f</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)]</span>
     <span class="k">return</span> <span class="n">dircontent</span></div>
+
 
 <div class="viewcode-block" id="listDirectoryFoldersNotEmpty"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.listDirectoryFoldersNotEmpty">[docs]</a><span class="k">def</span> <span class="nf">listDirectoryFoldersNotEmpty</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -625,6 +656,7 @@
     
     <span class="k">return</span> <span class="n">dircontent</span></div>
 
+
 <div class="viewcode-block" id="checkDirectory"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.checkDirectory">[docs]</a><span class="k">def</span> <span class="nf">checkDirectory</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Checks if given directory exists and if not, creates it.</span>
@@ -633,6 +665,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
         <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="flatten"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.flatten">[docs]</a><span class="k">def</span> <span class="nf">flatten</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -649,6 +682,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">yield from</span> <span class="n">flatten</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
 
+
 <div class="viewcode-block" id="pretty_print"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.pretty_print">[docs]</a><span class="k">def</span> <span class="nf">pretty_print</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function provides a capability to &quot;pretty-print&quot; arbitrary Python data structures in a forma that can be \</span>
@@ -658,6 +692,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">pp</span> <span class="o">=</span> <span class="n">pprint</span><span class="o">.</span><span class="n">PrettyPrinter</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
     <span class="n">pp</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="convertOBOtoNet"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.convertOBOtoNet">[docs]</a><span class="k">def</span> <span class="nf">convertOBOtoNet</span><span class="p">(</span><span class="n">ontologyFile</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -671,6 +706,7 @@
     
     <span class="k">return</span> <span class="n">graph</span></div>
 
+
 <div class="viewcode-block" id="getCurrentTime"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.getCurrentTime">[docs]</a><span class="k">def</span> <span class="nf">getCurrentTime</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns current date (Year-Month-Day) and time (Hour-Minute-Second).</span>
@@ -679,6 +715,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
     <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">-</span><span class="si">{}</span><span class="s1">-</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">now</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">now</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="n">now</span><span class="o">.</span><span class="n">day</span><span class="p">),</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">:</span><span class="si">{}</span><span class="s1">:</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">now</span><span class="o">.</span><span class="n">hour</span><span class="p">,</span> <span class="n">now</span><span class="o">.</span><span class="n">minute</span><span class="p">,</span> <span class="n">now</span><span class="o">.</span><span class="n">second</span><span class="p">)</span> </div>
+
 
 <div class="viewcode-block" id="convert_bytes"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.convert_bytes">[docs]</a><span class="k">def</span> <span class="nf">convert_bytes</span><span class="p">(</span><span class="n">num</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -691,6 +728,7 @@
             <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%3.1f</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
         <span class="n">num</span> <span class="o">/=</span> <span class="mf">1024.0</span></div>
 
+
 <div class="viewcode-block" id="copytree"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.copytree">[docs]</a><span class="k">def</span> <span class="nf">copytree</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">symlinks</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ignore</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">src</span><span class="p">):</span>
         <span class="n">s</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
@@ -700,6 +738,7 @@
             <span class="n">copytree</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">symlinks</span><span class="p">,</span> <span class="n">ignore</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="file_size"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.file_size">[docs]</a><span class="k">def</span> <span class="nf">file_size</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -712,6 +751,7 @@
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
         <span class="n">file_info</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">file_info</span><span class="o">.</span><span class="n">st_size</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="buildStats"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.buildStats">[docs]</a><span class="k">def</span> <span class="nf">buildStats</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">otype</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">updated_on</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -731,6 +771,7 @@
     
     <span class="k">return</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">otype</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">updated_on</span><span class="p">)</span></div>
 
+
 <div class="viewcode-block" id="compress_directory"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.compress_directory">[docs]</a><span class="k">def</span> <span class="nf">compress_directory</span><span class="p">(</span><span class="n">folder_to_backup</span><span class="p">,</span> <span class="n">dest_folder</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compresses folder to .tar.gz to create data backup archive file.</span>
@@ -746,25 +787,17 @@
     <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;tar -zcf </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="n">folder_to_backup</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="read_gzipped_file"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.read_gzipped_file">[docs]</a><span class="k">def</span> <span class="nf">read_gzipped_file</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;unix&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="read_gzipped_file"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.read_gzipped_file">[docs]</a><span class="k">def</span> <span class="nf">read_gzipped_file</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Opens an underlying process to access a gzip file through the creation of a new pipe to the child.</span>
 
 <span class="sd">    :param str filepath: path to gzip file.</span>
 <span class="sd">    :return: A bytes sequence that specifies the standard output.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;unix&#39;</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="s2">&quot;gzcat&quot;</span><span class="p">,</span> <span class="n">filepath</span><span class="p">],</span>
-                <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span>
-            <span class="p">)</span>
-            <span class="k">return</span> <span class="n">p</span><span class="o">.</span><span class="n">stdout</span>
-        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-            <span class="k">pass</span>
-    
     <span class="n">handle</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;rt&quot;</span><span class="p">)</span>
     
     <span class="k">return</span> <span class="n">handle</span></div>
+
 
 <div class="viewcode-block" id="parse_fasta"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.parse_fasta">[docs]</a><span class="k">def</span> <span class="nf">parse_fasta</span><span class="p">(</span><span class="n">file_handler</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -773,10 +806,11 @@
 <span class="sd">    :param file_handler file_handler: opened fasta file</span>
 <span class="sd">    :return iterator records: iterator of sequence objects</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">records</span> <span class="o">=</span> <span class="n">SeqIO</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">file_handler</span><span class="p">,</span><span class="s2">&quot;fasta&quot;</span><span class="p">)</span>
+    <span class="n">records</span> <span class="o">=</span> <span class="n">SeqIO</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">file_handler</span><span class="p">,</span><span class="nb">format</span><span class="o">=</span><span class="s2">&quot;fasta&quot;</span><span class="p">)</span>
     
     <span class="k">return</span> <span class="n">records</span></div>
     
+
 <div class="viewcode-block" id="batch_iterator"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.batch_iterator">[docs]</a><span class="k">def</span> <span class="nf">batch_iterator</span><span class="p">(</span><span class="n">iterator</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Returns lists of length batch_size.</span>
 
