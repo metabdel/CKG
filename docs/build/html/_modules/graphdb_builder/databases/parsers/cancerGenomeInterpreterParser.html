@@ -212,20 +212,6 @@
 <span class="c1">#   The Cancer Genome Interpreter     # </span>
 <span class="c1">#######################################</span>
 <div class="viewcode-block" id="parser"><a class="viewcode-back" href="../../../../_autosummary/graphdb_builder.databases.parsers.html#graphdb_builder.databases.parsers.cancerGenomeInterpreterParser.parser">[docs]</a><span class="k">def</span> <span class="nf">parser</span><span class="p">(</span><span class="n">databases_directory</span><span class="p">,</span> <span class="n">download</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This function parses and the Cancer Genome Interpreter database and extracts data on clinically \</span>
-<span class="sd">    relevant variants associated to cancer, validated oncogenic alterations and cancer driver mutations, \</span>
-<span class="sd">    and clinically relevant drug response biomarkers.</span>
-
-<span class="sd">    :param str databases_directory: path to directory where import (.tsv) files will be written to.</span>
-<span class="sd">    :param bool download: download database raw file or not.</span>
-<span class="sd">    :return: Tuple with four components. *entities* is a set of tuples with clinically relevant variants, \</span>
-<span class="sd">    alternative names, chromosome and position, PubMed reference, effect, oncogeneicity and source of \</span>
-<span class="sd">    the data. *relationships* is a dictionary of tuples where each key corresponds to a relationship type \</span>
-<span class="sd">    (see *cancerGenomeInterpreterConfig.yml*) and values are sets of tuples with the relevant data for the \</span>
-<span class="sd">    relationship. *entities_header* is a list of column names for entities tab-delimited file, while \</span>
-<span class="sd">    *relationships_headers* is dictionary of relationship files to be created and corresponding column names.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">variant_regex</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;(\D\d+\D)$&quot;</span>
     <span class="n">regex</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;(chr\d+)\:g\.(\d+)(\w)&gt;(\w)&quot;</span>
     <span class="n">config</span> <span class="o">=</span> <span class="n">builder_utils</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="n">config_name</span><span class="o">=</span><span class="s2">&quot;cancerGenomeInterpreterConfig.yml&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;databases&#39;</span><span class="p">)</span>
@@ -308,7 +294,7 @@
                             <span class="n">tumor</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">[</span><span class="n">tumor</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
                             <span class="k">for</span> <span class="n">valid_variant</span> <span class="ow">in</span> <span class="n">valid_variants</span><span class="p">:</span>
                                 <span class="n">relationships</span><span class="p">[</span><span class="s2">&quot;associated_with&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">valid_variant</span><span class="p">,</span> <span class="n">tumor</span><span class="p">,</span> <span class="s2">&quot;ASSOCIATED_WITH&quot;</span><span class="p">,</span> <span class="s2">&quot;curated&quot;</span><span class="p">,</span><span class="s2">&quot;curated&quot;</span><span class="p">,</span> <span class="s2">&quot;CGI&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">publications</span><span class="p">)))</span>
-                                
+
     <span class="k">return</span> <span class="p">(</span><span class="n">entities</span><span class="p">,</span> <span class="n">relationships</span><span class="p">,</span> <span class="n">entities_header</span><span class="p">,</span> <span class="n">relationships_headers</span><span class="p">)</span></div>
 </pre></div>
 

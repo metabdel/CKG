@@ -202,48 +202,37 @@
             
   <h1>Source code for graphdb_builder.databases.parsers.pfamParser</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os.path</span>
-<span class="kn">import</span> <span class="nn">io</span>
-<span class="kn">import</span> <span class="nn">gzip</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
-<span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">import</span> <span class="nn">ckg_utils</span>
 <span class="kn">from</span> <span class="nn">graphdb_builder</span> <span class="k">import</span> <span class="n">builder_utils</span>
-
-<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
 <span class="kn">from</span> <span class="nn">graphdb_builder</span> <span class="k">import</span> <span class="n">mapping</span> <span class="k">as</span> <span class="n">mp</span>
 
 
 <span class="c1">#########################</span>
-<span class="c1">#         Pfam          # </span>
+<span class="c1">#         Pfam          #</span>
 <span class="c1">#########################</span>
 
 <div class="viewcode-block" id="parser"><a class="viewcode-back" href="../../../../_autosummary/graphdb_builder.databases.parsers.html#graphdb_builder.databases.parsers.pfamParser.parser">[docs]</a><span class="k">def</span> <span class="nf">parser</span><span class="p">(</span><span class="n">databases_directory</span><span class="p">,</span> <span class="n">import_directory</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">updated_on</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">config</span> <span class="o">=</span> <span class="n">builder_utils</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="n">config_name</span><span class="o">=</span><span class="s2">&quot;pfamConfig.yml&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;databases&#39;</span><span class="p">)</span>
-    
     <span class="n">entity_header</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;entity_header&#39;</span><span class="p">]</span>
     <span class="n">relationship_headers</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;relationship_headers&#39;</span><span class="p">]</span>
 
-    <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">databases_directory</span><span class="p">,</span><span class="s1">&#39;Pfam&#39;</span><span class="p">)</span>
+    <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">databases_directory</span><span class="p">,</span> <span class="s1">&#39;Pfam&#39;</span><span class="p">)</span>
     <span class="n">builder_utils</span><span class="o">.</span><span class="n">checkDirectory</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
-    <span class="n">protein_mapping</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">getMappingForEntity</span><span class="p">(</span><span class="n">entity</span><span class="o">=</span><span class="s2">&quot;Protein&quot;</span><span class="p">)</span>    
+    <span class="n">protein_mapping</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">getMappingForEntity</span><span class="p">(</span><span class="n">entity</span><span class="o">=</span><span class="s2">&quot;Protein&quot;</span><span class="p">)</span>
     <span class="n">valid_proteins</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">protein_mapping</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
 
     <span class="n">ftp_url</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;ftp_url&#39;</span><span class="p">]</span>
     <span class="n">filename</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;full_uniprot_file&#39;</span><span class="p">]</span>
     <span class="c1"># url = config[&#39;test&#39;]</span>
-    
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span><span class="n">filename</span><span class="p">)):</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">filename</span><span class="p">)):</span>
         <span class="k">if</span> <span class="n">download</span><span class="p">:</span>
             <span class="n">builder_utils</span><span class="o">.</span><span class="n">downloadDB</span><span class="p">(</span><span class="n">ftp_url</span><span class="o">+</span><span class="n">filename</span><span class="p">,</span> <span class="n">directory</span><span class="p">)</span>
 
     <span class="n">stats</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">filename</span><span class="p">)):</span>
-        <span class="n">fhandler</span> <span class="o">=</span> <span class="n">builder_utils</span><span class="o">.</span><span class="n">read_gzipped_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span><span class="n">filename</span><span class="p">))</span>
-        
+        <span class="n">fhandler</span> <span class="o">=</span> <span class="n">builder_utils</span><span class="o">.</span><span class="n">read_gzipped_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span>
         <span class="n">identifier</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">description</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
@@ -255,11 +244,10 @@
         <span class="n">read_lines</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">num_entities</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">num_relationships</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fhandler</span><span class="p">:</span>
-            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="n">read_lines</span> <span class="o">+=</span><span class="mi">1</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fhandler</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">read_lines</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;# STOCKHOLM&quot;</span><span class="p">):</span>
                     <span class="k">if</span> <span class="n">identifier</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="n">entities</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">identifier</span><span class="p">,</span> <span class="s1">&#39;Functional_region&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">description</span><span class="p">),</span> <span class="s2">&quot;PFam&quot;</span><span class="p">))</span>
@@ -300,9 +288,9 @@
                     <span class="n">relationships</span><span class="p">[</span><span class="s1">&#39;found_in_protein&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">identifier</span><span class="p">,</span> <span class="n">protein</span><span class="p">,</span> <span class="s2">&quot;FOUND_IN_PROTEIN&quot;</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="s2">&quot;PFam&quot;</span><span class="p">))</span>
                     <span class="k">if</span> <span class="n">protein</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">protein</span><span class="p">:</span>
                         <span class="n">relationships</span><span class="p">[</span><span class="s1">&#39;found_in_protein&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">identifier</span><span class="p">,</span> <span class="n">protein</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;FOUND_IN_PROTEIN&quot;</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="s2">&quot;PFam&quot;</span><span class="p">))</span>
-            <span class="k">except</span> <span class="ne">UnicodeDecodeError</span><span class="p">:</span>
-                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-                <span class="n">missed</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">except</span> <span class="ne">UnicodeDecodeError</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">missed</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="n">fhandler</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
@@ -327,14 +315,14 @@
     <span class="k">if</span> <span class="n">filter_for</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">filter_for</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">filter_for</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outputfile</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outputfile</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path_or_buf</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span>
                     <span class="n">header</span><span class="o">=</span><span class="n">is_first</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">quotechar</span><span class="o">=</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> 
                     <span class="n">line_terminator</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">escapechar</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
+
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">parser</span><span class="p">(</span><span class="n">databases_directory</span><span class="o">=</span><span class="s1">&#39;../../../../data/databases&#39;</span><span class="p">,</span> <span class="n">import_directory</span><span class="o">=</span><span class="s1">&#39;../../../../data/imports&#39;</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
 </pre></div>
 
            </div>

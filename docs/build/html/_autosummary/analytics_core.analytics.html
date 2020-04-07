@@ -231,6 +231,35 @@
 <div class="section" id="module-analytics_core.analytics.analytics">
 <span id="analytics"></span><h2>Analytics<a class="headerlink" href="#module-analytics_core.analytics.analytics" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
+<dt id="analytics_core.analytics.analytics.unit_vector">
+<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">unit_vector</code><span class="sig-paren">(</span><em class="sig-param">vector</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#unit_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.unit_vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the unit vector of the vector.
+:param tuple vector: vector
+:return tuple unit_vector: unit vector</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analytics_core.analytics.analytics.angle_between">
+<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">angle_between</code><span class="sig-paren">(</span><em class="sig-param">v1</em>, <em class="sig-param">v2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#angle_between"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.angle_between" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the angle in radians between vectors ‘v1’ and ‘v2’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>v1</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#tuple" title="(in Python v3.5)"><em>tuple</em></a>) – vector 1</p></li>
+<li><p><strong>v2</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#tuple" title="(in Python v3.5)"><em>tuple</em></a>) – vector 2</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return float angle</dt>
+<dd class="field-even"><p>angle between two vectors in radians</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Example::</dt><dd><p>angle = angle_between((1, 0, 0), (0, 1, 0))</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
 <dt id="analytics_core.analytics.analytics.transform_into_wide_format">
 <code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">transform_into_wide_format</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">index</em>, <em class="sig-param">columns</em>, <em class="sig-param">values</em>, <em class="sig-param">extra=[]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#transform_into_wide_format"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.transform_into_wide_format" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function converts a Pandas DataFrame from long to wide format using 
@@ -550,7 +579,7 @@ visit <a class="reference external" href="https://docs.scipy.org/doc/scipy/refer
 
 <dl class="function">
 <dt id="analytics_core.analytics.analytics.get_proteomics_measurements_ready">
-<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">get_proteomics_measurements_ready</code><span class="sig-paren">(</span><em class="sig-param">df, index_cols=['group', 'sample', 'subject'], drop_cols=['sample'], group='group', identifier='identifier', extra_identifier='name', imputation=True, method='distribution', missing_method='percentage', missing_per_group=True, missing_max=0.3, min_valid=1, value_col='LFQ_intensity'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#get_proteomics_measurements_ready"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.get_proteomics_measurements_ready" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">get_proteomics_measurements_ready</code><span class="sig-paren">(</span><em class="sig-param">df, index_cols=['group', 'sample', 'subject'], drop_cols=['sample'], group='group', identifier='identifier', extra_identifier='name', imputation=True, method='distribution', missing_method='percentage', missing_per_group=True, missing_max=0.3, min_valid=1, value_col='LFQ_intensity', shift=1.8, nstd=0.3</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#get_proteomics_measurements_ready"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.get_proteomics_measurements_ready" title="Permalink to this definition">¶</a></dt>
 <dd><p>Processes proteomics data extracted from the database: 1) filter proteins with high number of missing values (&gt; missing_max or min_valid), 2) impute missing values.
 For more information on imputation method visit <a class="reference external" href="http://www.coxdocs.org/doku.php?id=perseus:user:activities:matrixprocessing:filterrows:filtervalidvaluesrows">http://www.coxdocs.org/doku.php?id=perseus:user:activities:matrixprocessing:filterrows:filtervalidvaluesrows</a>.</p>
 <dl class="field-list simple">
@@ -886,12 +915,12 @@ Pigouin test Normality: <a class="reference external" href="https://pingouin-sta
 
 <dl class="function">
 <dt id="analytics_core.analytics.analytics.run_multi_correlation">
-<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">run_multi_correlation</code><span class="sig-paren">(</span><em class="sig-param">df, alpha=0.05, subject='subject', on=['subject', 'biological_sample'], group='group', method='pearson', correction=('fdr', 'indep')</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#run_multi_correlation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.run_multi_correlation" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">run_multi_correlation</code><span class="sig-paren">(</span><em class="sig-param">df_dict, alpha=0.05, subject='subject', on=['subject', 'biological_sample'], group='group', method='pearson', correction=('fdr', 'indep')</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#run_multi_correlation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.run_multi_correlation" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function merges all input dataframes and calculates pairwise correlations for all columns.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#dict" title="(in Python v3.5)"><em>dict</em></a>) – dictionary of pandas dataframes with samples as rows and features as columns.</p></li>
+<li><p><strong>df_dict</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#dict" title="(in Python v3.5)"><em>dict</em></a>) – dictionary of pandas dataframes with samples as rows and features as columns.</p></li>
 <li><p><strong>subject</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – name of the column containing subject identifiers.</p></li>
 <li><p><strong>group</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – name of the column containing group identifiers.</p></li>
 <li><p><strong>on</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#list" title="(in Python v3.5)"><em>list</em></a>) – column names to join dataframes on (must be found in all dataframes).</p></li>
@@ -905,7 +934,7 @@ Pigouin test Normality: <a class="reference external" href="https://pingouin-sta
 </dd>
 </dl>
 <p>Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">run_multi_correlation</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;biological_sample&#39;</span><span class="p">]</span> <span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;pearson&#39;</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;fdr&#39;</span><span class="p">,</span> <span class="s1">&#39;indep&#39;</span><span class="p">))</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">run_multi_correlation</span><span class="p">(</span><span class="n">df_dict</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;biological_sample&#39;</span><span class="p">]</span> <span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;pearson&#39;</span><span class="p">,</span> <span class="n">correction</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;fdr&#39;</span><span class="p">,</span> <span class="s1">&#39;indep&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1132,7 +1161,7 @@ Pigouin test Normality: <a class="reference external" href="https://pingouin-sta
 <dl class="function">
 <dt id="analytics_core.analytics.analytics.calculate_anova">
 <code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">calculate_anova</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">column</em>, <em class="sig-param">group='group'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#calculate_anova"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.calculate_anova" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates one-way ANOVA using scipy stats.</p>
+<dd><p>Calculates one-way ANOVA using pingouin.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -1248,7 +1277,7 @@ Multiple hypothesis correction uses permutation-based if permutations&gt;0 and B
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Pandas dataframe with columns ‘identifier’, ‘group1’, ‘group2’, ‘mean(group1)’, ‘mean(group2)’, ‘Log2FC’, ‘std_error’, ‘tail’, ‘t-statistics’, ‘padj_THSD’, ‘effsize’, ‘efftype’, ‘FC’, ‘rejected’, ‘F-statistics’, ‘p-value’, ‘correction’, ‘-log10 p-value’, and ‘method’.</p>
+<dd class="field-even"><p>Pandas dataframe with columns ‘identifier’, ‘group1’, ‘group2’, ‘mean(group1)’, ‘mean(group2)’, ‘Log2FC’, ‘std_error’, ‘tail’, ‘t-statistics’, ‘posthoc pvalue’, ‘effsize’, ‘efftype’, ‘FC’, ‘rejected’, ‘F-statistics’, ‘p-value’, ‘correction’, ‘-log10 p-value’, and ‘method’.</p>
 </dd>
 </dl>
 <p>Example:</p>
@@ -1256,6 +1285,11 @@ Multiple hypothesis correction uses permutation-based if permutations&gt;0 and B
 </pre></div>
 </div>
 </dd></dl>
+
+<dl class="function">
+<dt id="analytics_core.analytics.analytics.correct_pairwise_ttest">
+<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">correct_pairwise_ttest</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">alpha</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#correct_pairwise_ttest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.correct_pairwise_ttest" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="function">
 <dt id="analytics_core.analytics.analytics.run_repeated_measurements_anova">
@@ -1284,7 +1318,7 @@ Multiple hypothesis correction uses permutation-based if permutations&gt;0 and B
 
 <dl class="function">
 <dt id="analytics_core.analytics.analytics.format_anova_table">
-<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">format_anova_table</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">aov_results</em>, <em class="sig-param">pairwise_results</em>, <em class="sig-param">group</em>, <em class="sig-param">permutations</em>, <em class="sig-param">alpha</em>, <em class="sig-param">max_permutations</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#format_anova_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.format_anova_table" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">format_anova_table</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">aov_results</em>, <em class="sig-param">pairwise_results</em>, <em class="sig-param">pairwise_cols</em>, <em class="sig-param">group</em>, <em class="sig-param">permutations</em>, <em class="sig-param">alpha</em>, <em class="sig-param">max_permutations</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#format_anova_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.format_anova_table" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs p-value correction (permutation-based and FDR) and converts pandas dataframe into final format.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1334,10 +1368,34 @@ Multiple hypothesis correction uses permutation-based if permutations&gt;0 and B
 </dd></dl>
 
 <dl class="function">
+<dt id="analytics_core.analytics.analytics.define_samr_method">
+<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">define_samr_method</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">subject</em>, <em class="sig-param">group</em>, <em class="sig-param">drop_cols</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#define_samr_method"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.define_samr_method" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to identify the correct problem type to run with SAMR</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> – pandas dataframe with samples as rows and protein identifiers as columns (with additional columns ‘group’, ‘sample’ and ‘subject’).</p></li>
+<li><p><strong>subject</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – column with subject identifiers</p></li>
+<li><p><strong>group</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – column with group identifiers</p></li>
+<li><p><strong>droop_cols</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – columns to be dropped</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>tuple with the method to be used (One Class, Two class paired, Two class unpaired or Multiclass) and the labels (conditions)</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">method</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">define_samr_method</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">subject</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
 <dt id="analytics_core.analytics.analytics.run_samr">
 <code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">run_samr</code><span class="sig-paren">(</span><em class="sig-param">df, subject='subject', group='group', drop_cols=['subject', 'sample'], alpha=0.05, s0=1, permutations=250</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#run_samr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.run_samr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python adaptation of the ‘samr’ R package for statistical tests with permutation-based correction and s0 parameter.
-For more information visit <a class="reference external" href="https://cran.r-project.org/web/packages/samr/samr.pdf">https://cran.r-project.org/web/packages/samr/samr.pdf</a>.</p>
+For more information visit <a class="reference external" href="https://cran.r-project.org/web/packages/samr/samr.pdf">https://cran.r-project.org/web/packages/samr/samr.pdf</a>.
+The method only runs if R is installed and permutations is higher than 0, otherwise ANOVA.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -1359,6 +1417,11 @@ For more information visit <a class="reference external" href="https://cran.r-pr
 </pre></div>
 </div>
 </dd></dl>
+
+<dl class="function">
+<dt id="analytics_core.analytics.analytics.calculate_discriminant_lines">
+<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">calculate_discriminant_lines</code><span class="sig-paren">(</span><em class="sig-param">result</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#calculate_discriminant_lines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.calculate_discriminant_lines" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="function">
 <dt id="analytics_core.analytics.analytics.run_fisher">
@@ -1696,6 +1759,11 @@ For more information visit <a class="reference external" href="https://docs.scip
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="function">
+<dt id="analytics_core.analytics.analytics.run_km">
+<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">run_km</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">group_col</em>, <em class="sig-param">time</em>, <em class="sig-param">event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#run_km"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.run_km" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </div>
 <div class="section" id="module-analytics_core.analytics.wgcnaAnalysis">

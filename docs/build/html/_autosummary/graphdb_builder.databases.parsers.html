@@ -237,19 +237,7 @@
 <dl class="function">
 <dt id="graphdb_builder.databases.parsers.cancerGenomeInterpreterParser.parser">
 <code class="sig-prename descclassname">graphdb_builder.databases.parsers.cancerGenomeInterpreterParser.</code><code class="sig-name descname">parser</code><span class="sig-paren">(</span><em class="sig-param">databases_directory</em>, <em class="sig-param">download=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/databases/parsers/cancerGenomeInterpreterParser.html#parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.databases.parsers.cancerGenomeInterpreterParser.parser" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function parses and the Cancer Genome Interpreter database and extracts data on clinically     relevant variants associated to cancer, validated oncogenic alterations and cancer driver mutations,     and clinically relevant drug response biomarkers.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>databases_directory</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – path to directory where import (.tsv) files will be written to.</p></li>
-<li><p><strong>download</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/functions.html#bool" title="(in Python v3.5)"><em>bool</em></a>) – download database raw file or not.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Tuple with four components. <em>entities</em> is a set of tuples with clinically relevant variants,     alternative names, chromosome and position, PubMed reference, effect, oncogeneicity and source of     the data. <em>relationships</em> is a dictionary of tuples where each key corresponds to a relationship type     (see <em>cancerGenomeInterpreterConfig.yml</em>) and values are sets of tuples with the relevant data for the     relationship. <em>entities_header</em> is a list of column names for entities tab-delimited file, while     <em>relationships_headers</em> is dictionary of relationship files to be created and corresponding column names.</p>
-</dd>
-</dl>
-</dd></dl>
+<dd></dd></dl>
 
 </div>
 <div class="section" id="module-graphdb_builder.databases.parsers.corumParser">
@@ -265,53 +253,17 @@
 <dl class="function">
 <dt id="graphdb_builder.databases.parsers.disgenetParser.parser">
 <code class="sig-prename descclassname">graphdb_builder.databases.parsers.disgenetParser.</code><code class="sig-name descname">parser</code><span class="sig-paren">(</span><em class="sig-param">databases_directory</em>, <em class="sig-param">download=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/databases/parsers/disgenetParser.html#parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.databases.parsers.disgenetParser.parser" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function ….</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>databases_directory</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – path to directory where import (.tsv) files will be written to.</p></li>
-<li><p><strong>download</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/functions.html#bool" title="(in Python v3.5)"><em>bool</em></a>) – download database raw file or not.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="function">
 <dt id="graphdb_builder.databases.parsers.disgenetParser.readDisGeNetProteinMapping">
 <code class="sig-prename descclassname">graphdb_builder.databases.parsers.disgenetParser.</code><code class="sig-name descname">readDisGeNetProteinMapping</code><span class="sig-paren">(</span><em class="sig-param">config</em>, <em class="sig-param">databases_directory</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/databases/parsers/disgenetParser.html#readDisGeNetProteinMapping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.databases.parsers.disgenetParser.readDisGeNetProteinMapping" title="Permalink to this definition">¶</a></dt>
-<dd><p>Parses and collects all genes and proteins present in the DisGeNET protein     mapping file, and returns the data as a dictionary.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>config</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – </p></li>
-<li><p><strong>databases_directory</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – path to directory where import (.tsv) files     will be written to.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Dictionary of sets with NCBI Entrez Gene Identifiers as keys and UniprotKB     Identifiers as values.</p>
-</dd>
-</dl>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="function">
 <dt id="graphdb_builder.databases.parsers.disgenetParser.readDisGeNetDiseaseMapping">
 <code class="sig-prename descclassname">graphdb_builder.databases.parsers.disgenetParser.</code><code class="sig-name descname">readDisGeNetDiseaseMapping</code><span class="sig-paren">(</span><em class="sig-param">config</em>, <em class="sig-param">databases_directory</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/databases/parsers/disgenetParser.html#readDisGeNetDiseaseMapping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.databases.parsers.disgenetParser.readDisGeNetDiseaseMapping" title="Permalink to this definition">¶</a></dt>
-<dd><p>Parses and collects all UMLS CUI codes present in the DisGeNET mapping     file and retrieves corresponding values of the Disease Ontology database.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>config</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – </p></li>
-<li><p><strong>databases_directory</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – path to directory where import (.tsv) files     will be written to.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Dictionary of sets with UMLS CUI Identifiers as keys and Disease     Ontology Identifiers as values.</p>
-</dd>
-</dl>
-</dd></dl>
+<dd></dd></dl>
 
 </div>
 <div class="section" id="module-graphdb_builder.databases.parsers.drugBankParser">
@@ -319,93 +271,32 @@
 <dl class="function">
 <dt id="graphdb_builder.databases.parsers.drugBankParser.parser">
 <code class="sig-prename descclassname">graphdb_builder.databases.parsers.drugBankParser.</code><code class="sig-name descname">parser</code><span class="sig-paren">(</span><em class="sig-param">databases_directory</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/databases/parsers/drugBankParser.html#parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.databases.parsers.drugBankParser.parser" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>databases_directory</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – path to directory where import (.tsv) files     will be written to.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="function">
 <dt id="graphdb_builder.databases.parsers.drugBankParser.extract_drugs">
 <code class="sig-prename descclassname">graphdb_builder.databases.parsers.drugBankParser.</code><code class="sig-name descname">extract_drugs</code><span class="sig-paren">(</span><em class="sig-param">config</em>, <em class="sig-param">databases_directory</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/databases/parsers/drugBankParser.html#extract_drugs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.databases.parsers.drugBankParser.extract_drugs" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>config</strong> – parser configuration file.</p></li>
-<li><p><strong>databases_directory</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – path to directory where import (.tsv) files     will be written to.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="function">
 <dt id="graphdb_builder.databases.parsers.drugBankParser.parseDrugBankVocabulary">
 <code class="sig-prename descclassname">graphdb_builder.databases.parsers.drugBankParser.</code><code class="sig-name descname">parseDrugBankVocabulary</code><span class="sig-paren">(</span><em class="sig-param">config</em>, <em class="sig-param">databases_directory</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/databases/parsers/drugBankParser.html#parseDrugBankVocabulary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.databases.parsers.drugBankParser.parseDrugBankVocabulary" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>config</strong> – parser configuration file.</p></li>
-<li><p><strong>databases_directory</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – path to directory where import (.tsv) files     will be written to.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="function">
 <dt id="graphdb_builder.databases.parsers.drugBankParser.build_relationships_from_DrugBank">
 <code class="sig-prename descclassname">graphdb_builder.databases.parsers.drugBankParser.</code><code class="sig-name descname">build_relationships_from_DrugBank</code><span class="sig-paren">(</span><em class="sig-param">config</em>, <em class="sig-param">drugs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/databases/parsers/drugBankParser.html#build_relationships_from_DrugBank"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.databases.parsers.drugBankParser.build_relationships_from_DrugBank" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>config</strong> – parser configuration file.</p></li>
-<li><p><strong>drugs</strong> – </p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="function">
 <dt id="graphdb_builder.databases.parsers.drugBankParser.build_drug_entity">
 <code class="sig-prename descclassname">graphdb_builder.databases.parsers.drugBankParser.</code><code class="sig-name descname">build_drug_entity</code><span class="sig-paren">(</span><em class="sig-param">config</em>, <em class="sig-param">drugs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/databases/parsers/drugBankParser.html#build_drug_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.databases.parsers.drugBankParser.build_drug_entity" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>config</strong> – parser configuration file.</p></li>
-<li><p><strong>drugs</strong> – </p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="function">
 <dt id="graphdb_builder.databases.parsers.drugBankParser.build_DrugBank_dictionary">
 <code class="sig-prename descclassname">graphdb_builder.databases.parsers.drugBankParser.</code><code class="sig-name descname">build_DrugBank_dictionary</code><span class="sig-paren">(</span><em class="sig-param">config</em>, <em class="sig-param">databases_directory</em>, <em class="sig-param">drugs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/databases/parsers/drugBankParser.html#build_DrugBank_dictionary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.databases.parsers.drugBankParser.build_DrugBank_dictionary" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>config</strong> – parser configuration file.</p></li>
-<li><p><strong>databases_directory</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – path to directory where import (.tsv) files     will be written to.</p></li>
-<li><p><strong>drugs</strong> – </p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
+<dd></dd></dl>
 
 </div>
 <div class="section" id="module-graphdb_builder.databases.parsers.drugGeneInteractionDBParser">
