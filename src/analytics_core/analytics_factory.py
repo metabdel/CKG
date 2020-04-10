@@ -161,6 +161,7 @@ class Analysis:
             group = 'group'
             subject = 'subject'
             permutations = 250
+            fc = 0
             if "alpha" in self.args:
                 alpha = self.args["alpha"]
             if "drop_cols" in self.args:
@@ -173,7 +174,9 @@ class Analysis:
                 s0 = self.args["s0"]
             if "permutations" in self.args:
                 permutations = self.args["permutations"]
-            anova_result = analytics.run_samr(self.data, drop_cols=drop_cols, subject=subject, group=group, alpha=alpha, s0=s0, permutations=permutations)
+            if "fc" in self.args:
+                fc = self.args['fc']
+            anova_result = analytics.run_samr(self.data, drop_cols=drop_cols, subject=subject, group=group, alpha=alpha, s0=s0, permutations=permutations, fc=fc)
             self.result[self.analysis_type] = anova_result
         elif self.analysis_type == '2-way anova':
             drop_cols = []

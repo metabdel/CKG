@@ -150,7 +150,7 @@ def get_ranking_with_markers(data, drop_columns, group, columns, list_markers, a
         long_data = transform_into_long_format(data, drop_columns, group, columns)
         if len(set(long_data['name'].values.tolist()).intersection(list_markers)) > 0:
             long_data = long_data.drop_duplicates()
-            long_data['symbol'] = [ 17 if p in list_markers else 0 for p in long_data['name'].tolist()]
+            long_data['symbol'] = [17 if p in list_markers else 0 for p in long_data['name'].tolist()]
             long_data['size'] = [25 if p in list_markers else 7 for p in long_data['name'].tolist()]
             long_data['name'] = [p+' marker in '+annotation[p] if p in annotation else p for p in long_data['name'].tolist()]
 
@@ -792,35 +792,25 @@ def apply_pvalue_permutation_fdrcorrection(df, observed_pvalues, group, alpha=0.
 
         result = apply_pvalue_permutation_fdrcorrection(df, observed_pvalues, group='group', alpha=0.05, permutations=50)
     """
-    #initial_seed = 176782
     i = permutations
     df_index = df.index.values
-    #df_columns = df.columns.values
-    seen = [''.join(list(df_index))]
-    #columns = ['identifier']
+    df_columns = df.columns.values
+    seen = [str([df_index]+df_columns.tolist())]
     rand_pvalues = []
     while i>0:
         df_index = shuffle(df_index)
-        #df_columns = shuffle(df_columns)
+        df_columns = shuffle(df_columns)
         df_random = df.reset_index(drop=True)
         df_random.index = df_index
         df_random.index.name = group
-        #df_random.columns = df_columns
-        #columns = ['identifier', 'F-statistics', 'pvalue_'+str(i)]
-        if ''.join(list(df_random.index)) not in seen:
-            seen.append(''.join(list(df_random.index)))
-            #aov_results = []
-            for col in df_random.columns:
-                rows = df_random[col]
-                #aov_results.append((col,)+calculate_anova(rows, group=group))
-                rand_pvalues.append(calculate_anova(rows,group=group)[1])
-            #rand_scores = pd.DataFrame(aov_results, columns=columns)
-            #rand_scores = rand_scores.set_index("identifier")
-            #rand_scores = rand_scores.dropna(how="all")
-            #rand_scores = rand_scores[['pvalue_'+str(i)]]
-            #rand_pvalues.append(rand_scores)
+        df_random.columns = df_columns
+        rand_index = str([df_random.index]+df_columns.tolist())
+        if rand_index not in seen:
+            seen.append(rand_index)
+            df_random = df_random.reset_index()
+            for col in df_random.columns.drop(group):
+                rand_pvalues.append(calculate_anova(df_random, column=col, group=group)[-1])
             i -= 1
-    #rand_pvalues = pd.concat(rand_pvalues, axis=1)
     rand_pvalues = np.array(rand_pvalues)
     count = observed_pvalues.to_frame().apply(func=get_counts_permutation_fdr, result_type='expand', axis=1, args=(rand_pvalues, observed_pvalues, permutations, alpha))
     count.columns = ['padj', 'rejected']
@@ -1479,9 +1469,9 @@ def format_anova_table(df, aov_results, pairwise_results, pairwise_cols, group, 
     #FDR correction
     if permutations > 0: 
         max_perm = get_max_permutations(df, group=group)
-        if max_permutations>=10:
-            if max_permutations < permutations:
-                permutations = max_permutations
+        if max_perm>=10:
+            if max_perm < permutations:
+                permutations = max_perm
             observed_pvalues = scores.pvalue
             count = apply_pvalue_permutation_fdrcorrection(df, observed_pvalues, group=group, alpha=alpha, permutations=permutations)
             scores= scores.join(count)
@@ -1534,21 +1524,24 @@ def run_ttest(df, condition1, condition2, alpha = 0.05, drop_cols=["sample"], su
         result = run_ttest(df, condition1='group1', condition2='group2', alpha = 0.05, drop_cols=['sample'], subject='subject', group='group', paired=False, correction='indep', permutations=50)
     """
     columns = ['T-statistics', 'pvalue', 'mean_group1', 'mean_group2', 'log2FC']
-    df = df.set_index([group, subject])
+    df = df.set_index(group)
     df = df.drop(drop_cols, axis = 1)
     method = 'Unpaired t-test'
     if paired:
+        df = df.set_index([group, subject])
         method = 'Paired t-test'
+    else:
+        df = df.drop([subject], axis = 1)
         
     scores = df.T.apply(func = calculate_ttest, axis=1, result_type='expand', args =(condition1, condition2, paired))
     scores.columns = columns
     scores = scores.dropna(how="all")
     
-    correction = False
+    corrected = False
     #FDR correction
-    if permutations > 0: 
+    if permutations > 0:
         max_perm = get_max_permutations(df, group=group)
-        if max_permutations>=10:
+        if max_perm>=10:
             if max_perm < permutations:
                 permutations = max_perm
             observed_pvalues = scores.pvalue
@@ -1614,7 +1607,7 @@ def define_samr_method(df, subject, group, drop_cols):
             method = 'Multiclass'
     return method, labels
 
-def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample'], alpha=0.05, s0=1, permutations=250):
+def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample'], alpha=0.05, s0=1, permutations=250, fc=0):
     """
     Python adaptation of the 'samr' R package for statistical tests with permutation-based correction and s0 parameter.
     For more information visit https://cran.r-project.org/web/packages/samr/samr.pdf.
@@ -1627,11 +1620,12 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
     :param float alpha: error rate for multiple hypothesis correction
     :param float s0: exchangeability factor for denominator of test statistic
     :param int permutations: number of permutations used to estimate false discovery rates. If number of permutations is equal to zero, the function will run anova with FDR Benjamini/Hochberg correction.
+    :param float fc: minimum fold change to define practical significance (needed when computing delta table)
     :return: Pandas dataframe with columns 'identifier', 'group1', 'group2', 'mean(group1)', 'mean(group2)', 'Log2FC', 'FC', 'T-statistics', 'p-value', 'padj', 'correction', '-log10 p-value', 'rejected' and 'method'
 
     Example::
 
-        result = run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample'], alpha=0.05, s0=1, permutations=250)
+        result = run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample'], alpha=0.05, s0=1, permutations=250, fc=0)
     """
     R_function = R('''result <- function(data, res_type, s0, nperms) {
                                     samr(data=data, resp.type=res_type, s0=s0, nperms=nperms, random.seed = 12345, s0.perc=NULL)
@@ -1641,14 +1635,12 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
         groups = df[group].unique() 
         df = df.set_index(group).drop(drop_cols, axis=1).T
         delta = 0.68
-        min_foldchange = 1
-        if 'fc' in args:
-            min_foldchange = np.log2(args['fc'])
         data = base.list(x=base.as_matrix(df.values), y=base.unlist(labels), geneid=base.unlist(df.index), logged2=True)
         if s0 is None or s0 == "null":
             s0 = ro.r("NULL")
+        lfc = np.log2(fc)
         samr_res = R_function(data=data, res_type=method, s0=s0, nperms=permutations)
-        delta_table = samr.samr_compute_delta_table(samr_res, min_foldchange)
+        delta_table = samr.samr_compute_delta_table(samr_res, lfc)
         siggenes_table = samr.samr_compute_siggenes_table(samr_res, delta, data, delta_table, all_genes=True)
         nperms_run = samr_res[8][0]
         s0_used = samr_res[13][0]
@@ -1690,9 +1682,9 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
         contrasts = ['diff_mean_group{}'.format(str(i+1)) for i in np.arange(len(set(labels)))]
         res['-log10 pvalue'] = [- np.log10(x) for x in res['posthoc pvalue'].values]
         if method != 'Multiclass':
-            res = res.drop(['pvalue','posthoc Paired', 'posthoc Parametric', 
+            res = res.drop(['posthoc Paired', 'posthoc Parametric', 
                             'posthoc T-Statistics', 'posthoc dof', 'posthoc tail', 'posthoc BF10'], axis=1)
-            res = res.rename(columns={'posthoc pvalue':'pvalue', 'posthoc effsize': 'effsize', 'posthoc padj':'p-padj'})
+            res = res.rename(columns={'posthoc pvalue':'p-pvalue', 'posthoc effsize': 'effsize', 'posthoc padj':'p-padj'})
         res = res.set_index('identifier').join(qvalues.set_index('identifier'))
         if nperms_run < permutations:
             rejected, padj = apply_pvalue_fdrcorrection(res["pvalue"].tolist(), alpha=alpha, method = 'indep')

@@ -309,9 +309,9 @@ def route_report_url(value):
 
 ###Callback regenerate project
 @app.callback(Output('regenerate', 'href'),
-             [Input('regenerate', 'n_clicks'),
-              Input('regenerate', 'title')],
-             [State('url', 'href')])
+              [Input('regenerate', 'n_clicks'),
+               Input('regenerate', 'title')],
+              [State('url', 'href')])
 def regenerate_report(n_clicks, title, pathname):
     basic_path = '/'.join(pathname.split('/')[0:3]) 
     project_id, force, session_id = get_project_params_from_url(pathname)

@@ -209,9 +209,9 @@ ptm:
             - HAS_QUANTIFIED_PROTEIN
         query_type: pre
         query: >
-            MATCH (project:Project)-[:HAS_ENROLLED]->(subject:Subject)-[:BELONGS_TO_SUBJECT]-(:Biological_sample)-[:SPLITTED_INTO]->(a:Analytical_sample)-[r:HAS_QUANTIFIED_MODIFIED_PROTEIN]->(modifiedprotein:Modified_protein)
+            MATCH (project:Project)-[:HAS_ENROLLED]->(subject:Subject)-[:BELONGS_TO_SUBJECT]-(:Biological_sample)-[:SPLITTED_INTO]->(a:Analytical_sample)-[r:HAS_QUANTIFIED_MODIFIED_PROTEIN]->(modifiedprotein:Modified_protein)<-[:HAS_MODIFIED_SITE]-(protein:Protein)
             WHERE project.id="PROJECTID" AND toBoolean(r.is_razor)
-            RETURN subject.id as subject, a.id AS sample, modifiedprotein.id AS identifier, a.group AS group, toFloat(r.value) as Intensity, modifiedprotein.id AS name ORDER BY name, group;
+            RETURN subject.id as subject, a.id AS sample, modifiedprotein.id AS identifier, a.group AS group, toFloat(r.value) as Intensity, protein.name AS name ORDER BY name, group;
     SUBSTRATE_ASSOCIATIONS:
         name: 'get regulators associated with the provided list of modified protein sites'
         description: 'Get all the articles mentioning the relevant proteins together with the studied tissue or disease'

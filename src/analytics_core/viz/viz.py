@@ -617,7 +617,7 @@ def get_volcanoplot(results, args):
                                 }
                         )]
         shapes = []
-        if ('samr' in args and not args['is_samr']) or 'samr' not in args:
+        if ('is_samr' in result and not result['is_samr']) or 'is_samr' not in result:
             shapes = [{'type': 'line',
                       'x0': np.log2(args['fc']),
                       'y0': 0,
@@ -1340,8 +1340,8 @@ def get_pca_plot(data, identifier, args):
     figure['layout'] = sct['layout']
     figure['layout'].template='plotly_white'
     for index in list(loadings.index)[0:args['loadings']]:
-        x = loadings.loc[index,'x'] * 30.
-        y = loadings.loc[index, 'y'] * 30.
+        x = loadings.loc[index,'x'] * 50.
+        y = loadings.loc[index, 'y'] * 50.
         value = loadings.loc[index, 'value']
 
         trace = go.Scattergl(x= [0,x],

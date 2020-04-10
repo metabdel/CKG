@@ -112,10 +112,10 @@ class ProjectApp(basicApp.BasicApp):
                                 className="button_link"
                                 )]),
                             html.Div([html.A("Regenerate Project Report", 
-                                id='regenerate', 
+                                id='regenerate',
                                 title=self.id,
-                                href='', 
-                                target='', 
+                                href='',
+                                target='',
                                 n_clicks=0,
                                 className="button_link")]),
                             html.Div([html.H3("Change Analysis' Configuration: "),
@@ -124,6 +124,8 @@ class ProjectApp(basicApp.BasicApp):
                                 options=[
                                     {'label': '', 'value': self.id+'/defaults'},
                                     {'label': 'Proteomics configuration', 'value': self.id+'/proteomics'},
+                                    {'label': 'Interactomics configuration', 'value': self.id+'/interactomics'},
+                                    {'label': 'Phosphoproteomics configuration', 'value': self.id+'/phosphoproteomics'},
                                     {'label': 'Clinical data configuration', 'value': self.id+'/clinical'},
                                     {'label': 'Multiomics configuration', 'value': self.id+'/multiomics'},
                                     {'label': 'Reset to defaults', 'value': self.id + '/reset'}],
@@ -152,6 +154,7 @@ class ProjectApp(basicApp.BasicApp):
             directory = os.path.join('../../data/tmp', self.id)
             if os.path.exists(directory):
                 config_files = {f.split('.')[0]: os.path.join(directory, f) for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))}
+                print(config_files)
 
         result = generate_project_report.apply_async(args=[self.project_id, config_files, self.force], task_id='generate_report'+self.session_id, queue='compute')
         result_output = result.get()

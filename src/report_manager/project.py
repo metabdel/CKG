@@ -46,7 +46,7 @@ class Project:
         self._num_subjects = None
         self._similar_projects = None
         self._overlap = None
-        
+
     @property
     def identifier(self):
         return self._identifier
@@ -54,7 +54,7 @@ class Project:
     @identifier.setter
     def identifier(self, identifier):
         self._identifier = identifier
-    
+
     @property
     def configuration_files(self):
         return self._configuration_files
@@ -212,7 +212,7 @@ class Project:
         if "attributes" in project_info:
             attributes = project_info["attributes"].to_dict('r')[0]
             self.from_dict(attributes)
-                
+
     def from_dict(self, attributes):
         if "name" in attributes:
             self.name = attributes["name"]
@@ -294,11 +294,11 @@ class Project:
             driver = connector.getGraphDatabaseConnectionConfiguration()
             replace = [("PROJECTID", self.identifier)]
             for query_name in project_cypher:
-                title = query_name.lower().replace('_',' ')
+                title = query_name.lower().replace('_', ' ')
                 query = project_cypher[query_name]['query']
                 query_type = project_cypher[query_name]['query_type']
-                for r,by in replace:
-                    query = query.replace(r,by)
+                for r, by in replace:
+                    query = query.replace(r, by)
                 if query_type == "pre":
                     data[title] = connector.getCursorData(driver, query)
         except Exception as err:
@@ -648,7 +648,7 @@ class Project:
             elif dataset == "Knowledge Graph":
                 report = self.knowledge.report
                 app_plots[dataset.upper()] = report.visualize_report(environment)
-        
+
         return app_plots
 
     def download_project(self):
@@ -656,7 +656,7 @@ class Project:
         self.download_project_report()
         self.download_project_datasets()
         utils.compress_directory(directory, directory, compression_format='zip')
-        
+
 
     def download_project_report(self):
         directory = self.get_downloads_directory()
@@ -673,7 +673,7 @@ class Project:
                 if not os.path.exists(dataset_dir):
                     os.makedirs(dataset_dir)
                 report.download_report(dataset_dir)
-        
+
         self.download_knowledge(os.path.join(directory, "Knowledge"))
         
     def download_knowledge(self, directory):
