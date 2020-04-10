@@ -19,7 +19,6 @@ def parser(ontology, files):
                         the relationship type between them.
         - definitions: Dictionary with ontology identifiers as keys (*str*), and definition of the terms as values (*str*).
     """
-    entity = {}
     terms = defaultdict(list)
     relationships = defaultdict(set)
     definitions = defaultdict()

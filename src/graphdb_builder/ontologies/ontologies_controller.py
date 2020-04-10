@@ -176,7 +176,6 @@ def generate_graphFiles(import_directory, ontologies=None, download=True):
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             logger.error("Ontology {}: {}, file: {},line: {}".format(ontology, sys.exc_info(), fname, exc_tb.tb_lineno))
-            raise Exception("Error when importing ontology {}.\n {}".format(ontology, err))
     return stats
 
 if __name__ == "__main__":
