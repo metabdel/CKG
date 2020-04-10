@@ -1,8 +1,11 @@
 import os
+from datetime import datetime
+from uuid import uuid4
 from apps import basicApp
 from report_manager import project
 import dash_html_components as html
 import dash_core_components as dcc
+from worker import generate_project_report
 
 
 class ProjectApp(basicApp.BasicApp):
@@ -14,6 +17,7 @@ class ProjectApp(basicApp.BasicApp):
         self._id = id
         self._project_id = projectId
         self._page_type = "projectPage"
+        self._session_id = projectId + datetime.now().strftime('%Y%m-%d%H-%M%S-') + str(uuid4())
         self._force = force
         self._configuration_files = {}
         basicApp.BasicApp.__init__(self, title, subtitle, description, self.page_type, layout, logo, footer)
@@ -34,6 +38,22 @@ class ProjectApp(basicApp.BasicApp):
         :param str id: page identifier.
         """
         self._id = id
+        
+    @property
+    def session_id(self):
+        """
+        Retrieves session identifier.
+        """
+        return self._session_id
+
+    @session_id.setter
+    def id(self, session_id):
+        """
+        Sets 'session_id' input value as id property of the class.
+
+        :param str session_id: session identifier.
+        """
+        self._session_id = session_id
 
     @property
     def project_id(self):
@@ -133,9 +153,14 @@ class ProjectApp(basicApp.BasicApp):
             if os.path.exists(directory):
                 config_files = {f.split('.')[0]: os.path.join(directory, f) for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))}
 
+        result = generate_project_report.apply_async(args=[self.project_id, config_files, self.force], task_id='generate_report'+self.session_id, queue='compute')
+        result_output = result.get()
+        print(result_output)
+
         p = project.Project(self.project_id, datasets={}, knowledge=None, report={}, configuration_files=config_files)
-        p.build_project(self.force)
+        p.build_project(False)
         p.generate_report()
+
         if p.name is not None:
             self.title = "Project: {}".format(p.name)
         else:
@@ -154,4 +179,3 @@ class ProjectApp(basicApp.BasicApp):
                 tabs.append(tab)
         lc = dcc.Tabs(tabs)
         self.add_to_layout(lc)
-        

@@ -2,6 +2,7 @@ import pandas as pd
 from celery import Celery
 from report_manager.apps import projectCreation, dataUpload
 from graphdb_connector import connector
+from report_manager import project
 
 
 celery_app = Celery('create_new_project')
@@ -28,3 +29,12 @@ def create_new_identifiers(project_id, data, directory, filename):
     res_n = dataUpload.check_samples_in_project(driver, project_id)
 
     return {str(project_id): str(upload_result), 'res_n': res_n.to_dict()}
+
+
+@celery_app.task
+def generate_project_report(project_id, config_files, force):
+    p = project.Project(project_id, datasets={}, knowledge=None, report={}, configuration_files=config_files)
+    p.build_project(force)
+    p.generate_report()
+
+    return {str(p.identifier): "Done"}

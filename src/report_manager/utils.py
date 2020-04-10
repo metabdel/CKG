@@ -1,7 +1,7 @@
 import os
 import dash_html_components as html
 import dash_core_components as dcc
-from datetime import date
+from datetime import datetime
 import bs4 as bs
 import random
 import numpy as np
@@ -63,8 +63,8 @@ def compress_directory(name, directory, compression_format='zip'):
 
 
 def get_markdown_date(extra_text):
-    today = date.today()
-    current_date = today.strftime("%B %d, %Y")
+    now = datetime.now()
+    current_date = now.strftime("%B %d, %Y (%H:%M:%S)")
     markdown = html.Div([dcc.Markdown('### *{} {}* ###'.format(extra_text, current_date))], style={'color': '#6a51a3'})
     return markdown
 

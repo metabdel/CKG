@@ -375,7 +375,7 @@ def create_project(n_clicks, name, acronym, responsible, participant, datatype, 
         if any(not arguments[n] for n, i in enumerate(arguments)):
             response = "Insufficient information to create project. Fill in all fields with '*'."
             return response, None, {'display': 'none'}, {'display': 'none'}
-        
+
         # Get project data from filled-in fields
         projectData = pd.DataFrame([name, acronym, description, related_to, number_subjects, datatype, timepoints, disease, tissue, intervention, responsible, participant, start_date, end_date]).T
         projectData.columns = ['name', 'acronym', 'description', 'related_to', 'subjects', 'datatypes', 'timepoints', 'disease', 'tissue', 'intervention', 'responsible', 'participant', 'start_date', 'end_date']
