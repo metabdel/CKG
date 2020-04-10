@@ -138,7 +138,6 @@ pytest==4.6.3
 pytest-mock==1.10.4
 pytest-sugar==0.9.2
 python-dateutil==2.8.0
-python-igraph==0.7.1.post6
 python-louvain==0.13
 pytz==2019.1
 pyvis==0.1.7.0
@@ -205,3 +204,4 @@ watchdog>=0.8.3
 sphinx-rtd-theme>=0.4.3
 recommonmark>=0.6.0
 eventlet=0.25.1
+lifelines=0.23.1
