@@ -140,12 +140,15 @@ def generate_graphFiles(import_directory, ontologies=None, download=True):
                     with open(entity_outputfile, 'w', encoding='utf-8') as csvfile:
                         writer = csv.writer(csvfile, delimiter='\t', escapechar='\\', quotechar='"', quoting=csv.QUOTE_ALL)
                         writer.writerow(['ID', ':LABEL', 'name', 'description', 'type', 'synonyms'])
+                        num_terms = 0
                         for term in terms[namespace]:
                             writer.writerow([term, entity, list(terms[namespace][term])[0], definitions[term], ontologyType, ",".join(terms[namespace][term])])
+                            num_terms += 1
                         for extra_entity in extra_entities:
                             writer.writerow(list(extra_entity))
-                    logger.info("Ontology {} - Number of {} entities: {}".format(ontology, name, len(terms[namespace])+len(list(extra_entities))))
-                    stats.add(builder_utils.buildStats(len(terms[namespace])+len(list(extra_entities)), "entity", name, ontology, entity_outputfile, updated_on))
+                            num_terms += 1
+                    logger.info("Ontology {} - Number of {} entities: {}".format(ontology, name, num_terms))
+                    stats.add(builder_utils.buildStats(num_terms, "entity", name, ontology, entity_outputfile, updated_on))
                     if namespace in relationships:
                         relationships_outputfile = os.path.join(import_directory, name+"_has_parent.tsv")
                         relationships[namespace].update(extra_rels)
