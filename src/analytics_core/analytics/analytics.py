@@ -30,7 +30,7 @@ try:
     from rpy2 import robjects as ro
     from rpy2.robjects.packages import importr
     from rpy2.robjects import pandas2ri
-    
+
     pandas2ri.activate()
     R = ro.r
     base = importr('base')
@@ -477,7 +477,7 @@ def get_proteomics_measurements_ready(df, index_cols=['group', 'sample', 'subjec
         df[index_cols] = df["index"].apply(pd.Series)
         df = df.drop(["index"], axis=1)
         aux = index_cols
-        if missing_per_group == False:
+        if not missing_per_group:
             group = None
         if missing_method == 'at_least_x':
             aux.extend(extract_number_missing(df, min_valid, drop_cols, group=group))
@@ -796,7 +796,6 @@ def apply_pvalue_permutation_fdrcorrection(df, observed_pvalues, group, alpha=0.
     i = permutations
     df_index = df.index.values
     #df_columns = df.columns.values
-    print(df_index)
     seen = [''.join(list(df_index))]
     #columns = ['identifier']
     rand_pvalues = []
@@ -1270,9 +1269,8 @@ def calculate_anova(df, column, group='group'):
     :return: Tuple with t-statistics and p-value.
     """
     aov_result = pg.anova(data=df, dv=column, between=group, detailed=True)
-    aov_result.columns = ['Source', 'SS', 'DF', 'MS', 'F', 'pvalue', 'np2']
-    t, pvalue = aov_result.loc[0, ['F', 'pvalue']].values
-
+    t, pvalue = aov_result[['F', 'p-unc']].values.tolist()[0]
+    
     return (column, t, pvalue)
 
 
@@ -1291,8 +1289,7 @@ def calculate_repeated_measures_anova(df, column, subject='subject', group='grou
         result = calculate_repeated_measures_anova(df, 'protein a', subject='subject', group='group')
     """
     aov_result = pg.rm_anova(data=df, dv=column, within=group,subject=subject, detailed=True, correction=True)
-    aov_result.columns = ['Source', 'SS', 'DF', 'MS', 'F', 'pvalue', 'padj', 'np2', 'eps', 'sphericity', 'Mauchlys sphericity', 'p-spher']
-    t, pvalue = aov_result.loc[0, ['F', 'pvalue']].values
+    t, pvalue = aov_result.loc[0, ['F', 'p-unc']].values.tolist()[0]
 
     return (column, t, pvalue)
 
@@ -1388,29 +1385,26 @@ def run_anova(df, alpha=0.05, drop_cols=["sample",'subject'], subject='subject',
         if len(df[subject].unique()) == 1:
             res = run_ttest(df, groups[0], groups[1], alpha = alpha, drop_cols=drop_cols, subject=subject, group=group, paired=True, correction='indep', permutations=permutations)
         else:
-
             res = run_repeated_measurements_anova(df, alpha=alpha, drop_cols=drop_cols, subject=subject, group=group, permutations=0)
     elif len(df[group].unique()) <= 2:
         groups = df[group].unique()
         drop_cols = [d for d in drop_cols if d != subject]
         res = run_ttest(df, groups[0], groups[1], alpha = alpha, drop_cols=drop_cols, subject=subject, group=group, paired=False, correction='indep', permutations=permutations)
     else:
-        df = df.set_index([group])
         df = df.drop(drop_cols, axis=1)
         aov_results = []
         pairwise_results = []
-        for col in df.columns:
-            aov = calculate_anova(df.reset_index(), column=col, group=group)
+        for col in df.columns.drop(group).tolist():
+            aov = calculate_anova(df[[group, col]], column=col, group=group)
             aov_results.append(aov)
-            pairwise_result = calculate_pairwise_ttest(df[col].reset_index(), column=col, subject=subject, group=group)
+            pairwise_result = calculate_pairwise_ttest(df[[group, col]], column=col, subject=subject, group=group)
             pairwise_cols = pairwise_result.columns
             pairwise_results.extend(pairwise_result.values.tolist())
-
-        max_perm = get_max_permutations(df, group=group)
-        res = format_anova_table(df, aov_results, pairwise_results, pairwise_cols, group, permutations, alpha, max_perm)
+        df = df.set_index([group])
+        res = format_anova_table(df, aov_results, pairwise_results, pairwise_cols, group, permutations, alpha)
         res['Method'] = 'One-way anova'
         res = correct_pairwise_ttest(res, alpha)
-
+    
     return res
 
 def correct_pairwise_ttest(df, alpha):
@@ -1447,26 +1441,25 @@ def run_repeated_measurements_anova(df, alpha=0.05, drop_cols=['sample'], subjec
 
         result = run_repeated_measurements_anova(df, alpha=0.05, drop_cols=['sample'], subject='subject', group='group', permutations=50)
     """
-    df = df.set_index([subject,group])
     df = df.drop(drop_cols, axis=1).dropna(axis=1)
     aov_results = []
     pairwise_results = []
-    for col in df.columns:
-        aov = calculate_repeated_measures_anova(df.reset_index(), column=col, subject=subject, group=group)
+    for col in df.columns.drop([group, subject]).tolist():
+        aov = calculate_repeated_measures_anova(df[[group, subject, col]], column=col, subject=subject, group=group)
         aov_results.append(aov)
-        pairwise_result = calculate_pairwise_ttest(df[col].reset_index(), column=col, subject=subject, group=group)
+        pairwise_result = calculate_pairwise_ttest(df[[group, subject, col]], column=col, subject=subject, group=group)
         pairwise_cols = pairwise_result.columns
         pairwise_results.extend(pairwise_result.values.tolist())
 
-    max_perm = get_max_permutations(df, group=group)
-    res = format_anova_table(df, aov_results, pairwise_results, pairwise_cols, group, permutations, alpha, max_perm)
+    df = df.set_index([subject,group])
+    res = format_anova_table(df, aov_results, pairwise_results, pairwise_cols, group, permutations, alpha)
     res['Method'] = 'Repeated measurements anova'
     res = correct_pairwise_ttest(res, alpha)
     
     return res
 
 
-def format_anova_table(df, aov_results, pairwise_results, pairwise_cols, group, permutations, alpha, max_permutations):
+def format_anova_table(df, aov_results, pairwise_results, pairwise_cols, group, permutations, alpha):
     """
     Performs p-value correction (permutation-based and FDR) and converts pandas dataframe into final format.
 
@@ -1476,25 +1469,30 @@ def format_anova_table(df, aov_results, pairwise_results, pairwise_cols, group, 
     :param str group: column with group identifiers
     :param float alpha: error rate for multiple hypothesis correction
     :param int permutations: number of permutations used to estimate false discovery rates
-    :param int max_permutations: maximum number of permutations according to number of samples
     :return: Pandas dataframe
     """
     columns = ['identifier', 'F-statistics', 'pvalue']
     scores = pd.DataFrame(aov_results, columns = columns)
     scores = scores.set_index('identifier')
 
+    corrected = False
     #FDR correction
-    if permutations > 0 and max_permutations>=10:
-        if max_permutations < permutations:
-            permutations = max_permutations
-        observed_pvalues = scores.pvalue
-        count = apply_pvalue_permutation_fdrcorrection(df, observed_pvalues, group=group, alpha=alpha, permutations=permutations)
-        scores= scores.join(count)
-        scores['correction'] = 'permutation FDR ({} perm)'.format(permutations)
-    else:
+    if permutations > 0: 
+        max_perm = get_max_permutations(df, group=group)
+        if max_permutations>=10:
+            if max_permutations < permutations:
+                permutations = max_permutations
+            observed_pvalues = scores.pvalue
+            count = apply_pvalue_permutation_fdrcorrection(df, observed_pvalues, group=group, alpha=alpha, permutations=permutations)
+            scores= scores.join(count)
+            scores['correction'] = 'permutation FDR ({} perm)'.format(permutations)
+            corrected = True
+    
+    if not corrected:
         rejected, padj = apply_pvalue_fdrcorrection(scores['pvalue'].tolist(), alpha=alpha, method='indep')
         scores['correction'] = 'FDR correction BH'
         scores['padj'] = padj
+        corrected = True
 
     res = pd.DataFrame(pairwise_results, columns=pairwise_cols).set_index("identifier")
     if not res.empty:
@@ -1545,21 +1543,26 @@ def run_ttest(df, condition1, condition2, alpha = 0.05, drop_cols=["sample"], su
     scores = df.T.apply(func = calculate_ttest, axis=1, result_type='expand', args =(condition1, condition2, paired))
     scores.columns = columns
     scores = scores.dropna(how="all")
-
-    max_perm = get_max_permutations(df, group=group)
+    
+    correction = False
     #FDR correction
-    if permutations > 0:
-        if max_perm < permutations:
-            permutations = max_perm
-        observed_pvalues = scores.pvalue
-        count = apply_pvalue_permutation_fdrcorrection(df, observed_pvalues, group=group, alpha=alpha, permutations=permutations)
-        scores= scores.join(count)
-        scores['correction'] = 'permutation FDR ({} perm)'.format(permutations)
-    else:
+    if permutations > 0: 
+        max_perm = get_max_permutations(df, group=group)
+        if max_permutations>=10:
+            if max_perm < permutations:
+                permutations = max_perm
+            observed_pvalues = scores.pvalue
+            count = apply_pvalue_permutation_fdrcorrection(df, observed_pvalues, group=group, alpha=alpha, permutations=permutations)
+            scores= scores.join(count)
+            scores['correction'] = 'permutation FDR ({} perm)'.format(permutations)
+            corrected = True
+    
+    if not corrected:
         rejected, padj = apply_pvalue_fdrcorrection(scores["pvalue"].tolist(), alpha=alpha, method = 'indep')
         scores['correction'] = 'FDR correction BH'
         scores['padj'] = padj
         scores['rejected'] = rejected
+        corrected = True
     
     scores['group1'] = condition1
     scores['group2'] = condition2
@@ -1718,8 +1721,6 @@ def calculate_discriminant_lines(result):
         
         angle = angle_between(v1, v2)
         
-        
-
 
 def run_fisher(group1, group2, alternative='two-sided'):
     '''         annotated   not-annotated

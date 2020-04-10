@@ -10,7 +10,7 @@ proteomics:
             - HAS_QUANTIFIED_PROTEIN
         query_type: pre
         query: >
-            MATCH p=(project:Project)-[]-(:Subject)-[]-(:Biological_sample)-[]-(a:Analytical_sample)-[r:HAS_QUANTIFIED_PROTEIN]->(protein:Protein) 
+            MATCH p=(project:Project)-[:HAS_ENROLLED]->(:Subject)-[:BELONGS_TO_SUBJECT]-(:Biological_sample)-[:SPLITTED_INTO]->(a:Analytical_sample)-[r:HAS_QUANTIFIED_PROTEIN]->(protein:Protein) 
             WHERE project.id="PROJECTID"  AND toBoolean(r.is_razor)
             RETURN a.id AS name, a.id AS x,COUNT(DISTINCT(protein.id)) AS y, a.group AS group ORDER BY group;
     NUMBER_OF_PEPTIDES:
@@ -24,7 +24,7 @@ proteomics:
             - HAS_QUANTIFIED_PEPTIDE
         query_type: pre
         query: >
-            MATCH p=(project:Project)-[]-(:Subject)-[]-(:Biological_sample)-[]-(a:Analytical_sample)-[r:HAS_QUANTIFIED_PEPTIDE]->(peptide:Peptide) 
+            MATCH p=(project:Project)-[:HAS_ENROLLED]->(:Subject)-[:BELONGS_TO_SUBJECT]-(:Biological_sample)-[:SPLITTED_INTO]->(a:Analytical_sample)-[r:HAS_QUANTIFIED_PEPTIDE]->(peptide:Peptide) 
             WHERE project.id="PROJECTID" 
             RETURN a.id AS name, a.id AS x, a.group AS group,COUNT(DISTINCT(peptide.id)) AS y ORDER BY group;
     NUMBER_OF_MODIFIED_PROTEINS:
@@ -38,7 +38,7 @@ proteomics:
             - HAS_QUANTIFIED_MODIFIED_PROTEIN
         query_type: pre
         query: >
-            MATCH p=(project:Project)-[]-(:Subject)-[]-(:Biological_sample)-[]-(a:Analytical_sample)-[r:HAS_QUANTIFIED_MODIFIED_PROTEIN]->(modifiedprotein:Modified_protein)-[:HAS_MODIFICATION]->(modification:Modification) 
+            MATCH p=(project:Project)-[:HAS_ENROLLED]->(:Subject)-[:BELONGS_TO_SUBJECT]-(:Biological_sample)-[:SPLITTED_INTO]->(a:Analytical_sample)-[r:HAS_QUANTIFIED_MODIFIED_PROTEIN]->(modifiedprotein:Modified_protein)-[:HAS_MODIFICATION]->(modification:Modification) 
             WHERE project.id="PROJECTID" 
             RETURN a.id AS name, a.id AS x,a.group AS group,COUNT(DISTINCT(modifiedprotein.id)) AS y,modification.name AS type ORDER BY group;
     PROTEIN_BIOMARKERS:
@@ -76,7 +76,7 @@ proteomics:
             - ANNOTATED_IN_PATHWAY
         query_type: pre
         query: >
-            MATCH (project:Project)-[]-(:Subject)-[]-(:Biological_sample)-[]-(a:Analytical_sample)-[r:HAS_QUANTIFIED_PROTEIN]->(protein:Protein)-[rp:ANNOTATED_IN_PATHWAY]->(pathway:Pathway) 
+            MATCH (project:Project)-[:HAS_ENROLLED]->(:Subject)-[:BELONGS_TO_SUBJECT]-(:Biological_sample)-[:SPLITTED_INTO]->(a:Analytical_sample)-[r:HAS_QUANTIFIED_PROTEIN]->(protein:Protein)-[rp:ANNOTATED_IN_PATHWAY]->(pathway:Pathway) 
             WHERE toBoolean(r.is_razor) AND toLower(rp.source) IN ["reactome"]
             RETURN DISTINCT protein.name+"~"+protein.id AS identifier,pathway.name AS annotation,rp.source AS source
     GO_ANNOTATION:
@@ -91,7 +91,7 @@ proteomics:
             - ASSOCIATED_WITH
         query_type: pre
         query: >
-            MATCH (project:Project)-[]-(:Subject)-[]-(:Biological_sample)-[]-(a:Analytical_sample)-[r:HAS_QUANTIFIED_PROTEIN]->(protein:Protein)-[rp:ASSOCIATED_WITH]->(go:Biological_process) 
+            MATCH (project:Project)-[:HAS_ENROLLED]->(subject:Subject)-[:BELONGS_TO_SUBJECT]-(:Biological_sample)-[:SPLITTED_INTO]->(a:Analytical_sample)-[r:HAS_QUANTIFIED_PROTEIN]->(protein:Protein)-[rp:ASSOCIATED_WITH]->(go:Biological_process) 
             WHERE toBoolean(r.is_razor)
             RETURN DISTINCT protein.name+"~"+protein.id AS identifier,go.name AS annotation,rp.source AS source
     ORIGINAL:
@@ -105,7 +105,7 @@ proteomics:
             - HAS_QUANTIFIED_PROTEIN
         query_type: pre
         query: >
-            MATCH (project:Project)-[]-(subject:Subject)-[]-(:Biological_sample)-[]-(a:Analytical_sample)-[r:HAS_QUANTIFIED_PROTEIN]->(protein:Protein) 
+            MATCH (project:Project)-[:HAS_ENROLLED]->(subject:Subject)-[:BELONGS_TO_SUBJECT]-(:Biological_sample)-[:SPLITTED_INTO]->(a:Analytical_sample)-[r:HAS_QUANTIFIED_PROTEIN]->(protein:Protein) 
             WHERE project.id="PROJECTID" AND toBoolean(r.is_razor)
             RETURN subject.id as subject, a.id AS sample, protein.id AS identifier, a.group AS group, toFloat(r.value) as LFQ_intensity, protein.name AS name ORDER BY name, group;
     INTERACTION_NETWORK:
@@ -119,7 +119,7 @@ proteomics:
             - ACTS_ON
         query_type: post
         query: >
-            MATCH (protein1:Protein)-[r:CURATED_INTERACTS_WITH|:COMPILED_INTERACTS_WITH|:ACTS_ON]->(protein2:Protein) 
+            MATCH (protein1:Protein)-[r:CURATED_INTERACTS_WITH|:COMPILED_INTERACTS_WITH|:ACTS_ON]-(protein2:Protein) 
             WHERE ((protein1.name+"~"+protein1.id) IN [IDENTIFIERS]) AND ((protein2.name+"~"+protein2.id) IN [IDENTIFIERS]) AND (r.score>=0.4 OR TYPE(r)="CURATED_INTERACTS_WITH")
             RETURN protein1.name+"~"+protein1.id AS node1,protein2.name+"~"+protein2.id AS node2,r.score AS score, r.source AS source,r.action AS action,r.interaction_type AS interaction_type
     DRUG_ASSOCIATIONS:
@@ -146,7 +146,7 @@ proteomics:
             - IS_SUBUNIT_OF
         query_type: post
         query: >
-            MATCH (complex:Complex)-[r:IS_SUBUNIT_OF]-(protein:Protein) 
+            MATCH (complex:Complex)<-[r:IS_SUBUNIT_OF]-(protein:Protein) 
             WHERE ((protein.name+"~"+protein.id) IN [IDENTIFIERS])
             WITH complex.name AS Complex, r.source AS source, collect(DISTINCT protein.name+"~"+protein.id) AS Proteins
             WHERE SIZE(Proteins)>1
@@ -183,6 +183,120 @@ proteomics:
             WHERE d IN diseases AND (protein.name+"~"+protein.id) IN [IDENTIFIERS]
             WITH publication, protein, count(r) AS r_count WHERE r_count>3
             RETURN DISTINCT collect(DISTINCT protein.name+"~"+protein.id) AS Proteins, publication.id AS publication, publication.linkout AS linkout;
+ptm:
+    NUMBER_OF_MODIFIED_PROTEINS:
+        name: number of modified proteins
+        description: 'Extracts the number of modified proteins identified in a given Project. Requires: Project.id'
+        involved_nodes:
+            - Project
+            - Analytical_sample
+            - Modified_protein
+        involved_rels:
+            - HAS_QUANTIFIED_MODIFIED_PROTEIN
+        query_type: pre
+        query: >
+            MATCH p=(project:Project)-[:HAS_ENROLLED]->(subject:Subject)-[:BELONGS_TO_SUBJECT]-(:Biological_sample)-[:SPLITTED_INTO]->(a:Analytical_sample)-[r:HAS_QUANTIFIED_MODIFIED_PROTEIN]->(modifiedprotein:Modified_protein)-[:HAS_MODIFICATION]->(modification:Modification) 
+            WHERE project.id="PROJECTID" AND toBoolean(r.is_razor)
+            RETURN a.id AS name, a.id AS x,a.group AS group,COUNT(DISTINCT(modifiedprotein.id)) AS y,modification.name AS type ORDER BY group;
+    ORIGINAL:
+        name: 'get dataset from project'
+        description: 'Extracts the dataset matrix of quantified protein modifications in a given Project. Requires: Project.id'
+        involved_nodes:
+            - Project
+            - Analytical_sample
+            - Modified_protein
+        involved_rels:
+            - HAS_QUANTIFIED_PROTEIN
+        query_type: pre
+        query: >
+            MATCH (project:Project)-[:HAS_ENROLLED]->(subject:Subject)-[:BELONGS_TO_SUBJECT]-(:Biological_sample)-[:SPLITTED_INTO]->(a:Analytical_sample)-[r:HAS_QUANTIFIED_MODIFIED_PROTEIN]->(modifiedprotein:Modified_protein)
+            WHERE project.id="PROJECTID" AND toBoolean(r.is_razor)
+            RETURN subject.id as subject, a.id AS sample, modifiedprotein.id AS identifier, a.group AS group, toFloat(r.value) as Intensity, modifiedprotein.id AS name ORDER BY name, group;
+    SUBSTRATE_ASSOCIATIONS:
+        name: 'get regulators associated with the provided list of modified protein sites'
+        description: 'Get all the articles mentioning the relevant proteins together with the studied tissue or disease'
+        involved_nodes:
+            - Protein
+            - Modified_protein
+        involved_relationships:
+            - IS_SUBSTRATE_OF
+        query_type: post
+        query: >
+            MATCH (modified_protein:Modified_protein)-[r:IS_SUBSTRATE_OF]->(protein:Protein)
+            WHERE modified_protein.id IN [IDENTIFIERS]
+            RETURN modified_protein.id AS node1, protein.name AS node2, r.score AS weight, r.source AS Database;
+    DISEASE_ASSOCIATIONS:
+        name: 'get diseases associated to the list of modified proteins'
+        description: 'Get all the disease-modified_protein associations for the relevant modifications'
+        involved_nodes:
+            - Modified_protein
+            - Disease
+        involved_relationships:
+            - ASSOCIATED_WITH
+        query_type: post
+        query: >
+            MATCH (modified_protein:Modified_protein)-[r:ASSOCIATED_WITH]->(disease:Disease)
+            WHERE (modified_protein.id IN [IDENTIFIERS])
+            RETURN DISTINCT collect(modified_protein.id) AS PTM, disease.name AS Disease, disease.description AS Description, r.source AS source
+    DRUG_ASSOCIATIONS:
+        name: 'get drugs targetting the list of proteins with modifications'
+        description: 'Get all the drug-protein associations for the relevant proteins'
+        involved_nodes:
+            - Protein
+            - Drug
+        involved_relationships:
+            - ACTS_ON
+            - COMPILED_INTERACTS_WITH
+        query_type: post
+        query: >
+            MATCH (modified_protein:Modified_protein)<-[:HAS_MODIFIED_SITE]-(protein:Protein)<-[r:ACTS_ON]-(drug:Drug)
+            WHERE (modified_protein.id IN [IDENTIFIERS]) AND r.score>=0.4
+            RETURN DISTINCT collect(modified_protein.id) AS Modified_protein, collect(protein.name+"~"+protein.id) AS Proteins,drug.name AS Drug,r.score AS score, r.source AS source,r.action AS action
+    GO_ANNOTATION_MOD:
+        name: 'get gene ontology annotations for the modified proteins identified'
+        description: 'Get all the gene ontology annotations for the all the modified proteins identified in a project'
+        involved_nodes:
+            - Modified_protein
+            - Biological_process
+        involved_relationships:
+            - ASSOCIATED_WITH
+        query_type: post
+        query: >
+            MATCH (modified_protein:Modified_protein)-[rp:ASSOCIATED_WITH]->(go:Biological_process) 
+            WHERE modified_protein.id IN [IDENTIFIERS]
+            RETURN DISTINCT collect(modified_protein.id) AS identifier, go.name AS annotation, rp.source AS source
+    PATHWAY_ANNOTATION:
+        name: 'get pathway annotations for the proteins identified'
+        description: 'Get all the pathway annotations for the all the proteins identified in a project'
+        involved_nodes:
+            - Project
+            - Analytical_sample
+            - Modified_protein
+            - Protein
+            - Pathway
+        involved_relationships:
+            - ANNOTATED_IN_PATHWAY
+        query_type: pre
+        query: >
+            MATCH (project:Project)-[:HAS_ENROLLED]->(:Subject)-[:BELONGS_TO_SUBJECT]-(:Biological_sample)-[:SPLITTED_INTO]->(a:Analytical_sample)-[r:HAS_QUANTIFIED_MODIFIED_PROTEIN]-(modified_protein:Modified_protein)<-[:HAS_MODIFIED_SITE]-(protein:Protein)-[rp:ANNOTATED_IN_PATHWAY]->(pathway:Pathway) 
+            WHERE toLower(rp.source) IN ["reactome"] AND toBoolean(r.is_razor)
+            RETURN DISTINCT protein.name+"~"+protein.id AS identifier,pathway.name AS annotation,rp.source AS source
+    GO_ANNOTATION:
+        name: 'get gene ontology annotations for the proteins identified'
+        description: 'Get all the gene ontology annotations for the all the proteins identified in a project'
+        involved_nodes:
+            - Project
+            - Analytical_sample
+            - Modified_protein
+            - Protein
+            - Biological_process
+        involved_relationships:
+            - ASSOCIATED_WITH
+        query_type: pre
+        query: >
+            MATCH (project:Project)-[:HAS_ENROLLED]->(:Subject)-[:BELONGS_TO_SUBJECT]-(:Biological_sample)-[:SPLITTED_INTO]->(a:Analytical_sample)-[r:HAS_QUANTIFIED_MODIFIED_PROTEIN]-(modified_protein:Modified_protein)<-[:HAS_MODIFIED_SITE]-(protein:Protein)-[rp:ASSOCIATED_WITH]->(go:Biological_process) 
+            WHERE toBoolean(r.is_razor)
+            RETURN DISTINCT protein.name+"~"+protein.id AS identifier,go.name AS annotation,rp.source AS source
 clinical:
     CLINICAL_VARIABLES:
         name: 'get clinical variables and clinical states'
@@ -200,7 +314,7 @@ clinical:
             - HAS_QUANTIFIED_CLINICAL
         query_type: pre
         query: >
-            MATCH (project:Project)-[:HAS_ENROLLED]->(subject:Subject)-[:HAS_DISEASE]-(disease:Disease)
+            MATCH (project:Project)-[:HAS_ENROLLED]->(subject:Subject)-[:HAS_DISEASE]->(disease:Disease)
             WITH subject,disease
             WHERE project.id="PROJECTID"
             MATCH (subject)<-[:BELONGS_TO_SUBJECT]-(bs:Biological_sample)-[r:HAS_QUANTIFIED_CLINICAL]->(clinvar:Clinical_variable)
@@ -237,7 +351,7 @@ wes:
             - CONTAINS_MUTATION
         query_type: pre
         query: >
-            MATCH p=(project:Project)-[]-(:Subject)-[]-(:Biological_sample)-[]-(a:Analytical_sample)-[r:CONTAINS_MUTATION]-> (s:Somatic_mutation)
+            MATCH p=(project:Project)-[:HAS_ENROLLED]->(:Subject)-[:BELONGS_TO_SUBJECT]-(:Biological_sample)-[:SPLITTED_INTO]->(a:Analytical_sample)-[r:CONTAINS_MUTATION]-> (s:Somatic_mutation)
             WHERE project.id="PROJECTID"
             RETURN a.id AS name, a.id AS x,COUNT(DISTINCT(s.id)) AS y, a.group AS group ORDER BY group;
     SOMATIC_MUTATIONS:
@@ -251,6 +365,6 @@ wes:
             - CONTAINS_MUTATION 
         query_type: pre
         query: >
-            MATCH p=(project:Project)-[]-(:Subject)-[]-(:Biological_sample)-[]-(a:Analytical_sample)-[r:CONTAINS_MUTATION]-> (s:Somatic_mutation) 
+            MATCH p=(project:Project)-[:HAS_ENROLLED]->(:Subject)-[:BELONGS_TO_SUBJECT]-(:Biological_sample)-[:SPLITTED_INTO]->(a:Analytical_sample)-[r:CONTAINS_MUTATION]-> (s:Somatic_mutation) 
             WHERE project.id="PROJECTID" 
             RETURN a.id AS analytical_sample, s.id AS somatic_mutation, s.somaticalternative_names AS alternative_names, s.function AS function, s.SNVid AS variant_id, s.region AS region, s.Xref AS external_reference, s.TFATHMM_score AS FATHMM_score, s.DLRT_score AS DLRT_score, s.MutationAssessor_score AS MutationAssessor_score, s.MutationTaster_score AS MutationTaster_score,s.PROVEAN_score AS PROVEAN_score,s.Polyphen2_HDIV_score AS Polyphen2_HDIV_score,s.Polyphen2_HVAR_score AS Polyphen2_HVAR_score,s.SIFT_score AS SIFT_score, s.VEST3_score AS VEST3_score

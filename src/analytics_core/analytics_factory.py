@@ -283,6 +283,7 @@ class Analysis:
                 if self.args['regulation_data'] in self.data and self.args['annotation'] in self.data:
                     self.analysis_type = annotation_type+"_"+self.analysis_type
                     self.result[self.analysis_type] = analytics.run_regulation_enrichment(self.data[self.args['regulation_data']], self.data[self.args['annotation']], identifier=identifier, groups=groups, annotation_col=annotation_col, reject_col=reject_col, method=method)
+            print(self.result[self.analysis_type].head())
             print('Enrichment', time.time() - start)
         elif self.analysis_type == 'long_format':
             self.result[self.analysis_type] = analytics.transform_into_long_format(self.data, drop_columns=self.args['drop_columns'], group=self.args['group'], columns=self.args['columns'])

@@ -14,7 +14,6 @@ import dash_table
 import plotly.subplots as tools
 import plotly.io as pio
 from scipy.spatial.distance import pdist, squareform
-# import dash_bio as dashbio
 from scipy.stats import zscore
 import networkx as nx
 from cyjupyter import Cytoscape
@@ -652,8 +651,8 @@ def get_volcanoplot(results, args):
                          'dash': 'dashdot'
                          },
                      }]
-            #traces.append(go.Scatter(x=result['upfc'][0], y=result['upfc'][1]))
-            #traces.append(go.Scatter(x=result['downfc'][0], y=result['downfc'][1]))
+            #traces.append(go.Scattergl(x=result['upfc'][0], y=result['upfc'][1]))
+            #traces.append(go.Scattergl(x=result['downfc'][0], y=result['downfc'][1]))
 
         figure["data"] = traces
         figure["layout"] = go.Layout(title=title,
@@ -1120,6 +1119,7 @@ def get_network(data, identifier, args):
     net = None
     if 'cutoff_abs' not in args:
         args['cutoff_abs'] = False
+    
     if not data.empty:
         if 'cutoff' in args:
             if args['cutoff_abs']:
@@ -1140,6 +1140,8 @@ def get_network(data, identifier, args):
         data['edgewidth'] = data['width'].apply(np.abs)
         min_edge_value = data['edgewidth'].min()
         max_edge_value = data['edgewidth'].max()
+        if min_edge_value == max_edge_value:
+            min_edge_value = 0.
         graph = nx.from_pandas_edgelist(data, args['source'], args['target'], edge_attr=True)
 
         degrees = dict(graph.degree())
@@ -1149,6 +1151,7 @@ def get_network(data, identifier, args):
         if data.shape[0] < 150 and data.shape[0] > 5:
             betweenness = nx.betweenness_centrality(graph, weight='width')
             ev_centrality = nx.eigenvector_centrality_numpy(graph)
+            ev_centrality = {k:"%.3f" % round(v, 3) for k,v in ev_centrality.items()}
             nx.set_node_attributes(graph, betweenness, 'betweenness')
             nx.set_node_attributes(graph, ev_centrality, 'eigenvector')
 
@@ -1207,7 +1210,6 @@ def get_network(data, identifier, args):
         cy_elements, mouseover_node = utils.networkx_to_cytoscape(vis_graph)
         
         app_net = get_cytoscape_network(cy_elements, identifier, args)
-        
         #args['mouseover_node'] = mouseover_node
 
         net = {"notebook":[cy_elements, stylesheet,layout], "app": app_net, "net_tables":(nodes_fig_table, edges_fig_table), "net_json":json_graph.node_link_data(graph)}
@@ -1720,7 +1722,7 @@ def get_WGCNAPlots(data, identifier):
         #plot: module-traits correlation with annotations; input: moduleTraitCor, textMatrix
         plots.append(wgcnaFigures.plot_labeled_heatmap(moduleTraitCor, textMatrix, title='Module-Clinical variable relationships', colorscale=[[0,'#67a9cf'],[0.5,'#f7f7f7'],[1,'#ef8a62']], row_annotation=True, width=1000, height=800))
 
-        #plot: FS vs. MM correlation per trait/module scatter matrix; input: MM, FS, Features_per_Module
+        #plot: FS vs. MM correlation per trait/module Scattergl matrix; input: MM, FS, Features_per_Module
         #plots.append(wgcnaFigures.plot_intramodular_correlation(MM, FS, Features_per_Module, title='Intramodular analysis: Feature Significance vs. Module Membership', width=1000, height=2000))
 
         #input: METDiss, METcor

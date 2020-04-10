@@ -125,15 +125,16 @@ class Dataset:
             self.configuration = ckg_utils.get_configuration(os.path.join(cwd, config_path))
         except Exception as err:
             logger.error("Error: {} reading configuration file: {}.".format(err, config_path))
-    
+
     def update_configuration_from_file(self, configuration_file):
         try:
             cwd = os.path.abspath(os.path.dirname(__file__))
             config_path = os.path.join("config/", configuration_file)
-            self.configuration.update(ckg_utils.get_configuration(os.path.join(cwd, config_path)))
+            if os.path.exists(os.path.join(cwd, config_path)):
+                self.configuration.update(ckg_utils.get_configuration(os.path.join(cwd, config_path)))
         except Exception as err:
             logger.error("Error: {} reading configuration file: {}.".format(err, config_path))
-        
+
     def get_dataset_data_directory(self, directory="../../../data/reports"):
         ckg_utils.checkDirectory(directory)
         id_directory = os.path.join(directory, self.identifier)
@@ -166,13 +167,13 @@ class Dataset:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             logger.error("Reading queries from file {}: {}, file: {},line: {}, err: {}".format(queries_path, sys.exc_info(), fname, exc_tb.tb_lineno, err))
-        
+
         return data
 
     def send_query(self, query):
         driver = connector.getGraphDatabaseConnectionConfiguration()
         data = connector.getCursorData(driver, query)
-
+        
         return data
 
     def extract_configuration(self, configuration):
@@ -395,7 +396,7 @@ class ProteomicsDataset(Dataset):
     def processing(self):
         processed_data = None
         data = self.get_dataframe("original")
-        
+
         if data is not None:
             if not data.empty:
                 imputation = True
@@ -404,8 +405,9 @@ class ProteomicsDataset(Dataset):
                 missing_per_group = True
                 missing_max = 0.3
                 min_valid = 1
-                value_col = 'LFQ intensity'
+                value_col = 'LFQ_intensity'
                 index = ['group', 'sample', 'subject']
+                extra_identifier = None
                 shift = 1.8
                 nstd = 0.3
                 args = {}
@@ -413,6 +415,8 @@ class ProteomicsDataset(Dataset):
                     args = self.configuration["args"]
                     if "imputation" in args:
                         imputation = args["imputation"]
+                    if "extra_identifier" in args:
+                        extra_identifier = args["extra_identifier"]
                     if "imputation_method" in args:
                         method = args["imputation_method"]
                     if "missing_method" in args:
@@ -430,17 +434,30 @@ class ProteomicsDataset(Dataset):
                     if "missing_shift" in args:
                         shift = args["missing_shift"]
 
-                processed_data = analytics.get_proteomics_measurements_ready(data, index_cols=index, imputation=imputation, 
-                                                                             method=method, missing_method=missing_method, 
-                                                                             missing_per_group=missing_per_group, missing_max=missing_max, 
-                                                                             min_valid=min_valid, shift=shift, nstd=nstd)
+                processed_data = analytics.get_proteomics_measurements_ready(data, index_cols=index, imputation=imputation,
+                                                                             method=method, missing_method=missing_method, extra_identifier=extra_identifier,
+                                                                             missing_per_group=missing_per_group, missing_max=missing_max,
+                                                                             min_valid=min_valid, shift=shift, nstd=nstd, value_col=value_col)
         return processed_data
 
     def generate_knowledge(self):
         kn = knowledge.ProteomicsKnowledge(self.identifier, self.data, nodes={}, relationships={}, colors={}, graph=None, report={})
-        kn.generate_knowledge()        
+        kn.generate_knowledge()
 
         return kn
+
+
+class PTMDataset(ProteomicsDataset):
+    def __init__(self, identifier, data={}, configuration=None, analyses={}, analysis_queries={}, report=None):
+        ProteomicsDataset.__init__(self, identifier, dataset_type="ptm", data=data, configuration=configuration, analyses=analyses, analysis_queries=analysis_queries, report=report)
+
+
+class PhosphoproteomicsDataset(PTMDataset):
+    def __init__(self, identifier, data={}, configuration=None, analyses={}, analysis_queries={}, report=None):
+        PTMDataset.__init__(self, identifier, data=data, configuration=configuration, analyses=analyses, analysis_queries=analysis_queries, report=report)
+        if configuration is None:
+            config_file = "phosphoproteomics.yml"
+            self.update_configuration_from_file(config_file)
 
 
 class InteractomicsDataset(ProteomicsDataset):
@@ -510,7 +527,7 @@ class ClinicalDataset(Dataset):
                                                                            group_id=group_id, columns=columns, values=values, 
                                                                            extra=extra, imputation=imputation, imputation_method=imputation_method)
         return processed_data
-    
+
     def generate_knowledge(self):
         kn = knowledge.ClinicalKnowledge(self.identifier, self.data, nodes={}, relationships={}, colors={}, graph=None, report={})
         kn.generate_knowledge()        

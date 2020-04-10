@@ -8,7 +8,7 @@ from json import dumps
 import pandas as pd
 import ckg_utils
 import config.ckg_config as ckg_config
-from report_manager.dataset import Dataset, DNAseqDataset, ProteomicsDataset, InteractomicsDataset, ClinicalDataset, LongitudinalProteomicsDataset, MultiOmicsDataset
+from report_manager.dataset import Dataset, DNAseqDataset, ProteomicsDataset, InteractomicsDataset, PhosphoproteomicsDataset, ClinicalDataset, LongitudinalProteomicsDataset, MultiOmicsDataset
 from analytics_core.viz import viz
 from analytics_core import utils as acore_utils
 from report_manager import report as rp, utils, knowledge
@@ -356,6 +356,8 @@ class Project:
                     dataset = DNAseqDataset(self.identifier, dataset_type=data_type, data={}, analyses={}, analysis_queries={}, report=None)
                 elif data_type == "interactomics":
                     dataset = InteractomicsDataset(self.identifier, data={}, analyses={}, analysis_queries={}, report=None)
+                elif data_type == "phosphoproteomics":
+                    dataset = PhosphoproteomicsDataset(self.identifier, data={}, analyses={}, analysis_queries={}, report=None)
                 elif data_type == "longitudinal_proteomics":
                     dataset = LongitudinalProteomicsDataset(self.identifier, data={}, analyses={}, analysis_queries={}, report=None)
                 elif data_type == "multiomics":
@@ -399,6 +401,10 @@ class Project:
                         if "interactomics" in self.configuration_files:
                             configuration = ckg_utils.get_configuration(self.configuration_files["interactomics"])
                         dataset = InteractomicsDataset(self.identifier, data={}, configuration=configuration, analyses={}, analysis_queries={}, report=None)
+                    elif data_type == "phosphoproteomics":
+                        if "phosphoproteomics" in self.configuration_files:
+                            configuration = ckg_utils.get_configuration(self.configuration_files["phosphoproteomics"])
+                        dataset = PhosphoproteomicsDataset(self.identifier, data={}, configuration=configuration, analyses={}, analysis_queries={}, report=None)
                     elif data_type == "longitudinal_proteomics":
                         if "longitudinal_proteomics" in self.configuration_files:
                             configuration = ckg_utils.get_configuration(self.configuration_files["longitudinal_proteomics"])
@@ -502,12 +508,13 @@ class Project:
             query_path = os.path.join(cwd, self.queries_file)
             project_cypher = query_utils.read_queries(query_path)
             query = query_utils.get_query(project_cypher, query_id="projects_subgraph")
-
+            list_projects = []
             driver = connector.getGraphDatabaseConnectionConfiguration()
-            list_projects = self.similar_projects["other_id"].values.tolist()
+            if "other_id" in self.similar_projects:
+                list_projects = self.similar_projects["other_id"].values.tolist()
             list_projects.append(self.identifier)
             list_projects = ",".join(['"{}"'.format(i) for i in list_projects])
-            query = query.replace("LIST_PROJECTS",list_projects)
+            query = query.replace("LIST_PROJECTS", list_projects)
             path = connector.sendQuery(driver, query, parameters={}).data()
             G = acore_utils.neo4j_path_to_networkx(path, key='path')
             args = {}
@@ -517,32 +524,31 @@ class Project:
             args['title'] = "Projects subgraph"
             net, mouseover = acore_utils.networkx_to_cytoscape(G)
             plot = viz.get_cytoscape_network(net, "projects_subgraph", args)
-        
         except Exception as err:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            logger.error("Reading queries from file {}: {}, file: {},line: {}".format(query_path, sys.exc_info(), fname, exc_tb.tb_lineno))
+            logger.error("Error: {}. Reading queries from file {}: {}, file: {},line: {}".format(err, query_path, sys.exc_info(), fname, exc_tb.tb_lineno))
 
         return plot
-    
+
     def generate_knowledge(self):
         nodes = {}
         relationships = {}
-        kn = knowledge.ProjectKnowledge(identifier=self.identifier, data=self.to_dict(), nodes={self.name:{'id':'#0', 'type':'Project'}}, relationships={}, colors={}, graph=None, report={})
+        kn = knowledge.ProjectKnowledge(identifier=self.identifier, data=self.to_dict(), nodes={self.name: {'id': '#0', 'type': 'Project'}}, relationships={}, colors={}, graph=None, report={})
         kn.generate_knowledge()
         nodes.update(kn.nodes)
         relationships.update(kn.relationships)
-        types = ["clinical", "proteomics", "interactomics","longitudinal_proteomics", "wes", "wgs", "rnaseq", "multiomics"]
+        types = ["clinical", "proteomics", "interactomics", "phosphoproteomics", "longitudinal_proteomics", "wes", "wgs", "rnaseq", "multiomics"]
         for dataset_type in types:
             if dataset_type in self.datasets:
                 dataset = self.datasets[dataset_type]
                 kn = dataset.generate_knowledge()
-                if dataset_type ==  "multiomics":
+                if dataset_type == "multiomics":
                     kn.reduce_to_subgraph(nodes.keys())
                 nodes.update(kn.nodes)
                 relationships.update(kn.relationships)
         
-        self.knowledge = knowledge.Knowledge(self.identifier, {'name':self.name}, nodes=nodes, relationships=relationships)
+        self.knowledge = knowledge.Knowledge(self.identifier, {'name': self.name}, nodes=nodes, relationships=relationships)
 
     def generate_project_info_report(self):
         
@@ -552,22 +558,20 @@ class Project:
         plots.extend(self.generate_project_similarity_plots())
         plots.extend(self.generate_overlap_plots())       
                
-        report.plots = {("Project info","Project Information"): plots}
+        report.plots = {("Project info", "Project Information"): plots}
 
         return report
 
     def generate_report(self):
         if len(self.report) == 0:
             project_report = self.generate_project_info_report()
-            self.update_report({"Project information":project_report})            
+            self.update_report({"Project information": project_report})
             for dataset_type in self.data_types:
                 dataset = self.get_dataset(dataset_type)
                 if dataset is not None:
                     dataset.generate_report()
-                    #self.update_report({dataset.dataset_type:dataset.report})            
             self.generate_knowledge()
             self.knowledge.generate_report()
-            
             self.save_project_report()
             self.save_project()
             self.save_project_datasets_data()
@@ -632,7 +636,7 @@ class Project:
         print('save datasets', time.time() - start)
 
     def show_report(self, environment):
-        types = ["Project information", "clinical", "proteomics", "interactomics","longitudinal_proteomics", "wes", "wgs", "rnaseq", "multiomics", "Knowledge Graph"]
+        types = ["Project information", "clinical", "proteomics", "interactomics", "phosphoproteomics", "longitudinal_proteomics", "wes", "wgs", "rnaseq", "multiomics", "Knowledge Graph"]
         app_plots = defaultdict(list)
         for dataset in types:
             if dataset in self.report:
