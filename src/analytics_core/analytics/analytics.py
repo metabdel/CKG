@@ -1684,7 +1684,7 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
         if method != 'Multiclass':
             res = res.drop(['posthoc Paired', 'posthoc Parametric', 
                             'posthoc T-Statistics', 'posthoc dof', 'posthoc tail', 'posthoc BF10'], axis=1)
-            res = res.rename(columns={'posthoc pvalue':'p-pvalue', 'posthoc effsize': 'effsize', 'posthoc padj':'p-padj'})
+            res = res.rename(columns={'pvalue': 'SAMR perm.pvalue','posthoc pvalue':'pvalue', 'posthoc effsize': 'effsize', 'posthoc padj':'p-padj'})
         res = res.set_index('identifier').join(qvalues.set_index('identifier'))
         if nperms_run < permutations:
             rejected, padj = apply_pvalue_fdrcorrection(res["pvalue"].tolist(), alpha=alpha, method = 'indep')
@@ -2231,3 +2231,24 @@ def run_km(df, group_col, time, event):
     
     summary_= multivariate_logrank_test(times, groups, events, alpha=99)
     return kmf
+
+def aggregate_for_polar(data, group_by, value_col, aggregate_func='mean'):
+    aggr_df = pd.DataFrame()
+    df = data.groupby(group_by)
+    list_cols = []
+    for group in df.groups:
+        if aggregate_func == 'mean':
+            aggr = df.get_group(group).mean()[value_col]
+        elif aggregate_func == 'median':
+            aggr = df.get_group(group).median()[value_col]
+        elif aggregate_func == 'sum':
+            aggr = df.get_group(group).sum()[value_col]
+        else:
+            break
+        taxid, function = group
+        list_cols.append([taxid, function, aggr])
+    
+    if len(list_cols) > 0:
+        aggr_df = pd.DataFrame(list_cols, columns=group_by+'aggr '+value_col)
+    
+    return aggr_df

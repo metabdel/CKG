@@ -165,6 +165,26 @@ data associations:
             color_weight: False
             node_size: 'degree'
             communities_algorithm: louvain
+    modifier_values:
+        data: regulated
+        analyses: []
+        plots:
+            - polar
+        store_analysis: False
+        args:
+            use:
+                columns: identifiers
+            width: 900
+            height: 800
+            group_by: 
+                - modifier
+                - group 
+            value_col: intensity
+            aggregate_func: mean
+            group_col: modifier 
+            color_col: group
+            type: line
+            title: 'Intensities by Kinase'
     drug_associations:
         data: regulated
         analyses: []

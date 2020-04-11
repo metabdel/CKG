@@ -534,6 +534,10 @@ class Analysis:
                         figure_title = self.args['title']
                     self.args["title"] = figure_title
                     plot.extend(viz.get_violinplot(self.result[id], identifier, self.args))
+            elif name == "polar":
+                for id in self.result:
+                    figure_title = self.args['title']
+                    plot.append(viz.get_polar_plot(self.result[id], identifier, self.args))
             elif name == "wgcnaplots":
                 start = time.time()
                 data = {}

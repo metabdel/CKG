@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import plotly.tools as tls
 import plotly.graph_objs as go
 import plotly.figure_factory as FF
+import plotly.express as px
 import math
 import dash_table
 import plotly.subplots as tools
@@ -2133,3 +2134,55 @@ def mpl_to_plotly(fig, ci=True, legend=True):
         
     # Send updated figure object to Plotly, show result in notebook
     return py_fig
+
+def get_polar_plot(df, identifier, args):
+    """
+    This function creates a Polar plot with data aggregated for a given group.
+
+    :param dataframe df: dataframe with the data to plot
+    :param str identifier: identifier to be used in the app
+    :param dict args: dictionary containing the arguments needed to plot the figure (value_col (value to aggregate), group_col (group by), color_col (color by))
+    :return: Dash Graph
+
+    Example::
+        figure = get_polar_plot(df, identifier='polar', args={'value_col':'intensity', 'group_col':'modifier', 'color_col':'group'})
+    """
+    figure = {}
+    line_close = True
+    ptype = 'line'
+    title = 'Polar plot'
+    width = 800
+    height = 700
+    value = None
+    group = None
+    colors = None
+    if not df.empty:
+        if 'value_col' in args:
+            value = args['value_col']
+        if 'group_col' in args:
+            group = args['group_col']
+        if 'color_col' in args:
+            colors = args['color_col']
+        if 'line_close' in args:
+            line_close = args['line_close']
+        if 'title' in args:
+            title = args['title']
+        if 'width' in args:
+            width = args['width']
+        if 'height' in args:
+            height = args['height']
+        if 'type' in args:
+            ptype = args['type']
+        
+        if value is not None and group is not None and colors is not None:  
+            min_value = df[value].min()
+            max_value = df[value].max()
+            if ptype == 'line':
+                figure = px.line_polar(df, r=value, theta=group, color=colors, line_close=line_close, title=title, template="plotly_white", width=width, height=height)
+            elif ptype == 'bar':
+                figure = px.bar_polar(df, r=value, theta=group, color=colors, title=title, template="plotly_white", width=width, height=height)
+            else:
+                print("Type {} not available. Try with 'line' or 'bar' types.".format(ptype))
+            layout = figure.update_layout(polar = dict(radialaxis=dict(range=[min_value-1, max_value+1])))
+        
+    return dcc.Graph(id=identifier, figure=figure)
