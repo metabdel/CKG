@@ -486,10 +486,16 @@ class ClinicalDataset(Dataset):
     def generate_dataset(self):
         self._data = self.query_data()
         self.process_dataset()
+        self.widen_original_dataset()
 
     def process_dataset(self):
         processed_data = self.processing()
         self.update_data({"processed": processed_data})
+
+    def widen_original_dataset(self):
+        data = self.get_dataframe("original")
+        wdata = analytics.transform_into_wide_format(data, index='subject', columns='clinical_variable', values='value', extra=['group'])
+        self.update_data({"original": wdata})
 
     def processing(self):
         processed_data = None

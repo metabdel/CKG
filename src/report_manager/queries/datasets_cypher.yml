@@ -222,9 +222,9 @@ ptm:
             - IS_SUBSTRATE_OF
         query_type: post
         query: >
-            MATCH (modified_protein:Modified_protein)-[r:IS_SUBSTRATE_OF]->(protein:Protein)
-            WHERE modified_protein.id IN [IDENTIFIERS]
-            RETURN modified_protein.id AS node1, protein.name AS node2, r.score AS weight, r.source AS Database;
+            MATCH (sprotein:Protein)-[:HAS_MODIFIED_SITE]->(modified_protein:Modified_protein)-[r:IS_SUBSTRATE_OF]->(protein:Protein)
+            WHERE (sprotein.name+"~"+modified_protein.id) IN [IDENTIFIERS]
+            RETURN (sprotein.name+"~"+modified_protein.id) AS node1, protein.name AS node2, r.score AS weight, r.source AS Database;
     DISEASE_ASSOCIATIONS:
         name: 'get diseases associated to the list of modified proteins'
         description: 'Get all the disease-modified_protein associations for the relevant modifications'
@@ -235,9 +235,9 @@ ptm:
             - ASSOCIATED_WITH
         query_type: post
         query: >
-            MATCH (modified_protein:Modified_protein)-[r:ASSOCIATED_WITH]->(disease:Disease)
-            WHERE (modified_protein.id IN [IDENTIFIERS])
-            RETURN DISTINCT collect(modified_protein.id) AS PTM, disease.name AS Disease, disease.description AS Description, r.source AS source
+            MATCH (sprotein:Protein)-[:HAS_MODIFIED_SITE]->(modified_protein:Modified_protein)-[r:ASSOCIATED_WITH]->(disease:Disease)
+            WHERE (sprotein.name+"~"+modified_protein.id) IN [IDENTIFIERS]
+            RETURN DISTINCT collect(sprotein.name+"~"+modified_protein.id) AS PTM, disease.name AS Disease, disease.description AS Description, r.source AS source;
     DRUG_ASSOCIATIONS:
         name: 'get drugs targetting the list of proteins with modifications'
         description: 'Get all the drug-protein associations for the relevant proteins'
@@ -249,9 +249,9 @@ ptm:
             - COMPILED_INTERACTS_WITH
         query_type: post
         query: >
-            MATCH (modified_protein:Modified_protein)<-[:HAS_MODIFIED_SITE]-(protein:Protein)<-[r:ACTS_ON]-(drug:Drug)
-            WHERE (modified_protein.id IN [IDENTIFIERS]) AND r.score>=0.4
-            RETURN DISTINCT collect(modified_protein.id) AS Modified_protein, collect(protein.name+"~"+protein.id) AS Proteins,drug.name AS Drug,r.score AS score, r.source AS source,r.action AS action
+            MATCH (sprotein:Protein)-[:HAS_MODIFIED_SITE]->(modified_protein:Modified_protein)<-[:HAS_MODIFIED_SITE]-(protein:Protein)<-[r:ACTS_ON]-(drug:Drug)
+            WHERE (sprotein.name+"~"+modified_protein.id) IN [IDENTIFIERS] AND r.score>=0.4
+            RETURN DISTINCT collect(sprotein.name+"~"+modified_protein.id) AS Modified_protein, collect(protein.name+"~"+protein.id) AS Proteins,drug.name AS Drug,r.score AS score, r.source AS source,r.action AS action
     GO_ANNOTATION_MOD:
         name: 'get gene ontology annotations for the modified proteins identified'
         description: 'Get all the gene ontology annotations for the all the modified proteins identified in a project'
@@ -262,9 +262,29 @@ ptm:
             - ASSOCIATED_WITH
         query_type: post
         query: >
-            MATCH (modified_protein:Modified_protein)-[rp:ASSOCIATED_WITH]->(go:Biological_process) 
-            WHERE modified_protein.id IN [IDENTIFIERS]
-            RETURN DISTINCT collect(modified_protein.id) AS identifier, go.name AS annotation, rp.source AS source
+            MATCH (sprotein:Protein)-[:HAS_MODIFIED_SITE]->(modified_protein:Modified_protein)-[rp:ASSOCIATED_WITH]->(go:Biological_process) 
+            WHERE (sprotein.name+"~"+modified_protein.id) IN [IDENTIFIERS]
+            RETURN DISTINCT collect(sprotein.name+"~"+modified_protein.id) AS identifier, go.name AS annotation, rp.source AS source
+    MODIFIER_VALUES:
+        name: 'get regulators associated with the provided list of modified protein sites and their quantifications'
+        description: 'Get all the proteins known to modify the sites provided and return their quantifications'
+        involved_nodes:
+            - Protein
+            - Modified_protein
+            - Project
+            - Subject
+            - Biological_sample
+            - Analytical_sample
+        involved_relationships:
+            - HAS_QUANTIFIED_MODIFIED_PROTEIN
+            - IS_SUBSTRATE_OF
+        query_type: post
+        query: >
+            MATCH (sprotein:Protein)-[:HAS_MODIFIED_SITE]->(modified_protein:Modified_protein)
+            WHERE (sprotein.name+"~"+modified_protein.id) IN [IDENTIFIERS]
+            WITH modified_protein
+            MATCH (project:Project)-[:HAS_ENROLLED]->(:Subject)-[:BELONGS_TO_SUBJECT]-(:Biological_sample)-[:SPLITTED_INTO]->(a:Analytical_sample)-[r:HAS_QUANTIFIED_MODIFIED_PROTEIN]-(modified_protein)-[:IS_SUBSTRATE_OF]->(protein:Protein)
+            RETURN modified_protein.id AS site, protein.name AS modifier, r.value AS intensity, a.group AS group ORDER BY group;
     PATHWAY_ANNOTATION:
         name: 'get pathway annotations for the proteins identified'
         description: 'Get all the pathway annotations for the all the proteins identified in a project'
@@ -317,8 +337,10 @@ clinical:
             MATCH (project:Project)-[:HAS_ENROLLED]->(subject:Subject)-[:HAS_DISEASE]->(disease:Disease)
             WITH subject,disease
             WHERE project.id="PROJECTID"
-            MATCH (subject)<-[:BELONGS_TO_SUBJECT]-(bs:Biological_sample)-[r:HAS_QUANTIFIED_CLINICAL]->(clinvar:Clinical_variable)
-            RETURN subject.id AS subject, disease.id AS disease_id, disease.name AS disease_name, disease.description AS disease_description, clinvar.id AS clinvar_id, clinvar.name AS clinical_variable, clinvar.description AS clinical_variable_description ORDER BY subject    
+            MATCH (subject)<-[:BELONGS_TO_SUBJECT]-(bs:Biological_sample)-[r]->(clinvar:Clinical_variable)
+            WITH subject, disease, bs, r, clinvar
+            MATCH (bs)-[:SPLITTED_INTO]->(as:Analytical_sample)
+            RETURN subject.id AS subject, as.group AS group, disease.id AS disease_id, disease.name AS disease_name, disease.description AS disease_description, clinvar.id AS clinvar_id, clinvar.name AS clinical_variable, clinvar.description AS clinical_variable_description, r.value AS value ORDER BY subject    
     ORIGINAL:
         name: 'get all the measurements for clinical variables'
         description: 'Extracts the list of clinical variables measured in a project. Requires: Project.id'
@@ -334,7 +356,7 @@ clinical:
             - HAS_QUANTIFIED_CLINICAL
         query_type: pre
         query: >
-            MATCH (project:Project)-[:HAS_ENROLLED]->(subject:Subject)<-[:BELONGS_TO_SUBJECT]-(bs:Biological_sample)-[r1:HAS_QUANTIFIED_CLINICAL]->(clinvar:Clinical_variable)
+            MATCH (project:Project)-[:HAS_ENROLLED]->(subject:Subject)<-[:BELONGS_TO_SUBJECT]-(bs:Biological_sample)-[r1]->(clinvar:Clinical_variable)
             WITH subject, bs, clinvar, r1
             WHERE project.id="PROJECTID"
             MATCH (bs)-[r2:SPLITTED_INTO]-(an:Analytical_sample)

@@ -59,7 +59,7 @@ class Analysis:
 
     def generate_result(self):
         if self.analysis_type == "wide_format":
-            r = analytics.transform_into_wide_format(self.data, self.args['index'], self.args['x'], self.args['y'], extra=[self.args['group']])
+            r = analytics.transform_into_wide_format(self.data, self.args['index'], self.args['columns'], self.args['values'], extra=[self.args['extra']])
             self.result[self.analysis_type] = r
         if self.analysis_type == "summary":
             value_cols = None
@@ -141,6 +141,7 @@ class Analysis:
             group = 'group'
             subject = 'subject'
             permutations = 50
+            is_logged = True
             if "alpha" in self.args:
                 alpha = self.args["alpha"]
             if "drop_cols" in self.args:
@@ -151,7 +152,9 @@ class Analysis:
                 group = self.args["group"]
             if "permutations" in self.args:
                 permutations = self.args["permutations"]
-            anova_result = analytics.run_anova(self.data, drop_cols=drop_cols, subject=subject, group=group, alpha=alpha, permutations=permutations)
+            if "is_logged" in self.args:
+                is_logged = self.args['is_logged']
+            anova_result = analytics.run_anova(self.data, drop_cols=drop_cols, subject=subject, group=group, alpha=alpha, permutations=permutations, is_logged=is_logged)
             self.result[self.analysis_type] = anova_result
         elif self.analysis_type == 'samr':
             start = time.time()
@@ -162,6 +165,7 @@ class Analysis:
             subject = 'subject'
             permutations = 250
             fc = 0
+            is_logged = True
             if "alpha" in self.args:
                 alpha = self.args["alpha"]
             if "drop_cols" in self.args:
@@ -176,7 +180,9 @@ class Analysis:
                 permutations = self.args["permutations"]
             if "fc" in self.args:
                 fc = self.args['fc']
-            anova_result = analytics.run_samr(self.data, drop_cols=drop_cols, subject=subject, group=group, alpha=alpha, s0=s0, permutations=permutations, fc=fc)
+            if "is_logged" in self.args:
+                is_logged = self.args['is_logged']
+            anova_result = analytics.run_samr(self.data, drop_cols=drop_cols, subject=subject, group=group, alpha=alpha, s0=s0, permutations=permutations, fc=fc, is_logged=is_logged)
             self.result[self.analysis_type] = anova_result
         elif self.analysis_type == '2-way anova':
             drop_cols = []
@@ -350,6 +356,17 @@ class Analysis:
             self.result[self.analysis_type] = analytics.run_WGCNA(self.data, drop_cols_exp, drop_cols_cli, RsquaredCut=RsquaredCut, networkType=networkType, 
                                                             minModuleSize=minModuleSize, deepSplit=deepSplit, pamRespectsDendro=pamRespectsDendro, merge_modules=merge_modules,
                                                             MEDissThres=MEDissThres, verbose=verbose)
+        elif self.analysis_type == 'kaplan_meier':
+            time_col = None
+            event_col = None
+            group_col = 'group'
+            if 'time_col' in self.args:
+                time_col = self.args['time_col']
+            if 'event_col' in self.args:
+                event_col = self.args['event_col']
+            if 'group_col' in self.args:
+                group_col = self.args['group_col']
+            self.result[self.analysis_type] = analytics.run_km(self.data, time_col, event_col, group_col, self.args)
         elif self.analysis_type == 'multi_correlation':
             start = time.time()
             alpha = 0.05
@@ -538,6 +555,9 @@ class Analysis:
                 for id in self.result:
                     figure_title = self.args['title']
                     plot.append(viz.get_polar_plot(self.result[id], identifier, self.args))
+            elif name == "km":
+                for id in self.result:
+                    plot.append(viz.get_km_plot(self.result[id], identifier, self.args))
             elif name == "wgcnaplots":
                 start = time.time()
                 data = {}

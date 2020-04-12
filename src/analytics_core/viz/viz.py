@@ -67,6 +67,7 @@ def getPlotTraces(data, key='full', type='lines', div_factor=float(10^10000), ho
 
     return traces
 
+
 def get_markdown(text, args={}):
     """
     Converts a given text into a Dash Markdown component. It includes a syntax for things like bold text and italics, links, inline code snippets, lists, quotes, and more.
@@ -79,6 +80,7 @@ def get_markdown(text, args={}):
     mkdown = dcc.Markdown(text)
 
     return mkdown
+
 
 def get_pieplot(data, identifier, args):
     """
@@ -2092,48 +2094,54 @@ def save_DASH_plot(plot, name, plot_format='svg', directory='.'):
         else:
             pio.write_image(plot, plot_file)
             
-def km_plot(kmf, identifier, args):
-    title = ''
-    if 'title' in args:
-        title = args['title']
-    
-    p = kmf.plot(title=title)
-    kmf1 = plt.gcf()
-    figure = mpl_to_plotly(kmf1, legend=True)
-    
-    return dcc.Graph(id = identifier, figure=figure)
-    
             
 def mpl_to_plotly(fig, ci=True, legend=True):
+    ##ToDo Test how it works for multiple groups
+    ##ToDo Allow visualization of CI
     # Convert mpl fig obj to plotly fig obj, resize to plotly's default
     py_fig = tls.mpl_to_plotly(fig, resize=True)
-    
     # Add fill property to lower limit line
     if ci == True:
         style1 = dict(fill='tonexty')
         # apply style
         py_fig['data'][2].update(style1)
         
-        # Change color scheme to black
-        py_fig['data'].update(dict(line=Line(color='black')))
-    
     # change the default line type to 'step'
-    py_fig['data'].update(dict(line=Line(shape='hv')))
+    py_fig.update_traces(dict(line=go.Line(shape='hv')))
+    py_fig['data'] = py_fig['data'][0:2]
     # Delete misplaced legend annotations 
     py_fig['layout'].pop('annotations', None)
     
-    if legend == True:
+    if legend:
         # Add legend, place it at the top right corner of the plot
         py_fig['layout'].update(
+            font=dict(size=14),
             showlegend=True,
-            legend=Legend(
+            height=400,
+            width=1000,
+            template='plotly_white',
+            legend=go.Legend(
                 x=1.05,
                 y=1
             )
         )
-        
     # Send updated figure object to Plotly, show result in notebook
     return py_fig
+
+def get_km_plot(data, identifier, args):
+    figure = {}
+    if len(data) ==2:
+        kmfit, summary = data
+        if kmfit is not None:
+            title = 'Kaplan-meier plot'
+            if 'title' in args:
+                title = args['title'] + "--" + summary
+            p = kmfit.plot(ci_force_lines=True, title=title, show_censors=True)
+            
+            kmf1 = plt.gcf()
+            figure = mpl_to_plotly(kmf1, legend=True)
+            
+    return dcc.Graph(id=identifier, figure=figure)
 
 def get_polar_plot(df, identifier, args):
     """

@@ -38,6 +38,13 @@ def generate_html(network):
                                    widget=network.widget, bgcolor=network.bgcolor, conf=network.conf, tooltip_link=use_link_template)
 
 
+def append_to_list(mylist, myappend):
+    if isinstance(myappend, list):
+        mylist.extend(myappend)
+    else:
+        mylist.append(myappend)
+
+
 def neo4j_path_to_networkx(paths, key='path'):
     regex = r"\(?(.+)\)\<?\-\>?\[\:(.+)\s\{.*\}\]\<?\-\>?\((.+)\)?"
     nodes = set()

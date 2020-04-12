@@ -15,14 +15,13 @@ import pingouin as pg
 import numpy as np
 import networkx as nx
 import community
-from lifelines import KaplanMeierFitter
-from lifelines.statistics import multivariate_logrank_test
 import snf
 import math
 from fancyimpute import KNN
 import kmapper as km
 from analytics_core import utils
 from analytics_core.analytics import wgcnaAnalysis as wgcna
+from analytics_core.analytics import kaplan_meierAnalysis
 import statsmodels.api as sm
 from statsmodels.formula.api import ols
 
@@ -88,13 +87,21 @@ def transform_into_wide_format(data, index, columns, values, extra=[]):
     if data is not None:
         df = data.copy()
         if not df.empty:
-            cols = [columns, values]
-            cols.extend(index)
+            if index is None:
+                df = df.reset_index()
+                index = 'index'
+            cols = []
+            utils.append_to_list(cols, columns)
+            utils.append_to_list(cols, values)
+            utils.append_to_list(cols, index)
             if len(extra) > 0:
-                extra.extend(index)
+                utils.append_to_list(extra, index)
                 extra_cols = df[extra].set_index(index)
             df = df[cols]
-            df = df.pivot_table(index=index, columns=columns, values=values)
+            if isinstance(index, list):
+                df = df.pivot_table(index=index, columns=columns, values=values)
+            else:
+                df = df.pivot(index=index, columns=columns, values=values)
             df = df.join(extra_cols)
             df = df.drop_duplicates()
             df = df.reset_index()
@@ -521,7 +528,9 @@ def get_clinical_measurements_ready(df, subject_id='subject', sample_id='biologi
     drop_cols = [subject_id, sample_id]
     drop_cols.append(group_id)
 
-    processed_df = transform_into_wide_format(df, index=index, columns=columns, values=values, extra=extra)
+    processed_df = df.loc[pd.to_numeric(df[values], errors='coerce').dropna().index]
+    processed_df[values] = processed_df[values].astype('float')
+    processed_df = transform_into_wide_format(processed_df, index=index, columns=columns, values=values, extra=extra)             
     if imputation:
         if imputation_method.lower() == "knn":
             df = imputation_KNN(processed_df, drop_cols=drop_cols, group=group_id)
@@ -1074,19 +1083,20 @@ def calculate_ttest_samr(df, labels, n=2, s0=0, paired=False):
     else:
         ttest_res = samr.ttest_func(df.values, base.unlist(labels), s0=s0)
 
-    pvalues = [2*stats_r.pt(-base.abs(i), df=n-1)[0] for i in ttest_res[0]]
+    pvalues = [2 * stats_r.pt(-base.abs(i), df=n-1)[0] for i in ttest_res[0]]
 
     result = pd.DataFrame([df.index, mean1, mean2, ttest_res[1], ttest_res[0], pvalues]).T
     result.columns = ['identifier', 'mean(group1)', 'mean(group2)', 'log2FC', 't-statistics', 'pvalue']
     result['group1'] = conditions[0]
     result['group2'] = conditions[1]
+    cols = ['identifier', 'group1', 'group2', 'mean(group1)', 'mean(group2)', 'log2FC', 'FC', 't-statistics', 'pvalue']
     result['FC'] = [np.power(2,np.abs(x)) * -1 if x < 0 else np.power(2,np.abs(x)) for x in result['log2FC'].values]
-    result = result[['identifier', 'group1', 'group2', 'mean(group1)', 'mean(group2)', 'log2FC', 'FC', 't-statistics', 'pvalue']]
+    result = result[cols]
 
     return result
 
 
-def calculate_ttest(df, condition1, condition2, paired=False, tail='two-sided',  correction='auto', r=0.707):
+def calculate_ttest(df, condition1, condition2, paired=False, is_logged=True, tail='two-sided',  correction='auto', r=0.707):
     """
     Calculates the t-test for the means of independent samples belonging to two different groups. For more information visit https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.ttest_ind.html.
 
@@ -1106,18 +1116,22 @@ def calculate_ttest(df, condition1, condition2, paired=False, tail='two-sided', 
 
     mean1 = group1.mean()
     mean2 = group2.mean()
-    log2fc = mean1 - mean2
-    result = pg.ttest(group1,group2, paired, tail, correction, r)
+    if is_logged:
+        fc = mean1 - mean2
+    else:
+        fc = mean1/mean2
+        
+    result = pg.ttest(group1, group2, paired, tail, correction, r)
     
     if 'T' in result.columns:
         t = result['T'].values[0]
     if 'p-val' in result.columns:
         pvalue = result['p-val'].values[0]
     
-    return (t, pvalue, mean1, mean2, log2fc)
+    return (t, pvalue, mean1, mean2, fc)
 
 
-def calculate_THSD(df, group='group', alpha=0.05):
+def calculate_THSD(df, group='group', alpha=0.05, is_logged=True):
     """
     Pairwise Tukey-HSD posthoc test using pingouin stats. For more information visit https://pingouin-stats.org/generated/pingouin.pairwise_tukey.html
 
@@ -1138,13 +1152,16 @@ def calculate_THSD(df, group='group', alpha=0.05):
         df_results['efftype'] = 'hedges'
         df_results['identifier'] = col
         df_results = df_results.set_index('identifier')
-        df_results['FC'] = df_results['log2FC'].apply(lambda x: np.power(2,np.abs(x)) * -1 if x < 0 else np.power(2,np.abs(x)))
+        if is_logged:
+            df_results['FC'] = df_results['log2FC'].apply(lambda x: np.power(2,np.abs(x)) * -1 if x < 0 else np.power(2,np.abs(x)))
+        else:
+            df_results.columns = ['group1', 'group2', 'mean(group1)', 'mean(group2)', 'FC', 'std_error', 'tail', 't-statistics', 'posthoc pvalue', 'effsize']
         df_results['rejected'] = df_results['posthoc pvalue'].apply(lambda x: True if x < alpha else False)
 
     return df_results
 
 
-def calculate_pairwise_ttest(df, column, subject='subject', group='group', correction='none'):
+def calculate_pairwise_ttest(df, column, subject='subject', group='group', correction='none', is_logged=True):
     """
     Performs pairwise t-test using pingouin, as a posthoc test, and calculates fold-changes. For more information visit https://pingouin-stats.org/generated/pingouin.pairwise_ttests.html.
 
@@ -1167,14 +1184,14 @@ def calculate_pairwise_ttest(df, column, subject='subject', group='group', corre
 
     posthoc.columns =  posthoc_columns
     posthoc = posthoc[valid_cols]
-    posthoc = complement_posthoc(posthoc, column)
+    posthoc = complement_posthoc(posthoc, column, is_logged)
     #posthoc = posthoc.set_index('identifier')
     posthoc['efftype'] = 'hedges'
     
     return posthoc
 
 
-def complement_posthoc(posthoc, identifier):
+def complement_posthoc(posthoc, identifier, is_logged):
     """
     Calculates fold-changes after posthoc test.
 
@@ -1183,8 +1200,11 @@ def complement_posthoc(posthoc, identifier):
     :return: Pandas dataframe with additional columns 'identifier', 'log2FC' and 'FC'.
     """
     posthoc['identifier'] = identifier
-    posthoc['log2FC'] = posthoc['mean(group1)'] -posthoc['mean(group2)']
-    posthoc['FC'] = posthoc['log2FC'].apply(lambda x: np.power(2,np.abs(x)) * -1 if x < 0 else np.power(2,np.abs(x)))
+    if is_logged:
+        posthoc['log2FC'] = posthoc['mean(group1)'] - posthoc['mean(group2)']
+        posthoc['FC'] = posthoc['log2FC'].apply(lambda x: np.power(2,np.abs(x)) * -1 if x < 0 else np.power(2,np.abs(x)))
+    else:
+        posthoc['FC'] = posthoc['mean(group1)']/posthoc['mean(group2)']
 
     return posthoc
 
@@ -1351,7 +1371,7 @@ def run_dabest(df, drop_cols=['sample'], subject='subject', group='group', test=
     return scores
 
 
-def run_anova(df, alpha=0.05, drop_cols=["sample",'subject'], subject='subject', group='group', permutations=50):
+def run_anova(df, alpha=0.05, drop_cols=["sample",'subject'], subject='subject', group='group', permutations=50, is_logged=True):
     """
     Performs statistical test for each protein in a dataset.
     Checks what type of data is the input (paired, unpaired or repeated measurements) and performs posthoc tests for multiclass data.
@@ -1373,13 +1393,13 @@ def run_anova(df, alpha=0.05, drop_cols=["sample",'subject'], subject='subject',
         groups = df[group].unique()
         drop_cols = [d for d in drop_cols if d != subject]
         if len(df[subject].unique()) == 1:
-            res = run_ttest(df, groups[0], groups[1], alpha = alpha, drop_cols=drop_cols, subject=subject, group=group, paired=True, correction='indep', permutations=permutations)
+            res = run_ttest(df, groups[0], groups[1], alpha = alpha, drop_cols=drop_cols, subject=subject, group=group, paired=True, correction='indep', permutations=permutations, is_logged=is_logged)
         else:
-            res = run_repeated_measurements_anova(df, alpha=alpha, drop_cols=drop_cols, subject=subject, group=group, permutations=0)
+            res = run_repeated_measurements_anova(df, alpha=alpha, drop_cols=drop_cols, subject=subject, group=group, permutations=0, is_logged=is_logged)
     elif len(df[group].unique()) <= 2:
         groups = df[group].unique()
         drop_cols = [d for d in drop_cols if d != subject]
-        res = run_ttest(df, groups[0], groups[1], alpha = alpha, drop_cols=drop_cols, subject=subject, group=group, paired=False, correction='indep', permutations=permutations)
+        res = run_ttest(df, groups[0], groups[1], alpha = alpha, drop_cols=drop_cols, subject=subject, group=group, paired=False, correction='indep', permutations=permutations, is_logged=is_logged)
     else:
         df = df.drop(drop_cols, axis=1)
         aov_results = []
@@ -1387,7 +1407,7 @@ def run_anova(df, alpha=0.05, drop_cols=["sample",'subject'], subject='subject',
         for col in df.columns.drop(group).tolist():
             aov = calculate_anova(df[[group, col]], column=col, group=group)
             aov_results.append(aov)
-            pairwise_result = calculate_pairwise_ttest(df[[group, col]], column=col, subject=subject, group=group)
+            pairwise_result = calculate_pairwise_ttest(df[[group, col]], column=col, subject=subject, group=group, is_logged=is_logged)
             pairwise_cols = pairwise_result.columns
             pairwise_results.extend(pairwise_result.values.tolist())
         df = df.set_index([group])
@@ -1415,7 +1435,7 @@ def correct_pairwise_ttest(df, alpha):
     
     return df
 
-def run_repeated_measurements_anova(df, alpha=0.05, drop_cols=['sample'], subject='subject', group='group', permutations=50):
+def run_repeated_measurements_anova(df, alpha=0.05, drop_cols=['sample'], subject='subject', group='group', permutations=50, is_logged=True):
     """
     Performs repeated measurements anova and pairwise posthoc tests for each protein in dataframe.
 
@@ -1437,7 +1457,7 @@ def run_repeated_measurements_anova(df, alpha=0.05, drop_cols=['sample'], subjec
     for col in df.columns.drop([group, subject]).tolist():
         aov = calculate_repeated_measures_anova(df[[group, subject, col]], column=col, subject=subject, group=group)
         aov_results.append(aov)
-        pairwise_result = calculate_pairwise_ttest(df[[group, subject, col]], column=col, subject=subject, group=group)
+        pairwise_result = calculate_pairwise_ttest(df[[group, subject, col]], column=col, subject=subject, group=group, is_logged=is_logged)
         pairwise_cols = pairwise_result.columns
         pairwise_results.extend(pairwise_result.values.tolist())
 
@@ -1503,7 +1523,7 @@ def format_anova_table(df, aov_results, pairwise_results, pairwise_cols, group, 
     return res
 
 
-def run_ttest(df, condition1, condition2, alpha = 0.05, drop_cols=["sample"], subject='subject', group='group', paired=False, correction='indep', permutations=50):
+def run_ttest(df, condition1, condition2, alpha = 0.05, drop_cols=["sample"], subject='subject', group='group', paired=False, correction='indep', permutations=50, is_logged=True):
     """
     Runs t-test (paired/unpaired) for each protein in dataset and performs permutation-based (if permutations>0) or Benjamini/Hochberg (if permutations=0) multiple hypothesis correction.
 
@@ -1533,7 +1553,7 @@ def run_ttest(df, condition1, condition2, alpha = 0.05, drop_cols=["sample"], su
     else:
         df = df.drop([subject], axis = 1)
         
-    scores = df.T.apply(func = calculate_ttest, axis=1, result_type='expand', args =(condition1, condition2, paired))
+    scores = df.T.apply(func = calculate_ttest, axis=1, result_type='expand', args =(condition1, condition2, paired, is_logged))
     scores.columns = columns
     scores = scores.dropna(how="all")
     
@@ -1559,7 +1579,11 @@ def run_ttest(df, condition1, condition2, alpha = 0.05, drop_cols=["sample"], su
     
     scores['group1'] = condition1
     scores['group2'] = condition2
-    scores['FC'] = [np.power(2,np.abs(x)) * -1 if x < 0 else np.power(2,np.abs(x)) for x in scores['log2FC'].values]
+    if is_logged:
+        scores['FC'] = [np.power(2,np.abs(x)) * -1 if x < 0 else np.power(2,np.abs(x)) for x in scores['log2FC'].values]
+    else:
+        scores = scores.rename(columns={'log2FC':'FC'})
+
     scores['-log10 pvalue'] = [-np.log10(x) for x in scores['pvalue'].values]
     scores['Method'] = method
     scores.index.name = 'identifier'
@@ -1607,7 +1631,7 @@ def define_samr_method(df, subject, group, drop_cols):
             method = 'Multiclass'
     return method, labels
 
-def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample'], alpha=0.05, s0=1, permutations=250, fc=0):
+def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample'], alpha=0.05, s0=1, permutations=250, fc=0, is_logged=True):
     """
     Python adaptation of the 'samr' R package for statistical tests with permutation-based correction and s0 parameter.
     For more information visit https://cran.r-project.org/web/packages/samr/samr.pdf.
@@ -1635,12 +1659,13 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
         groups = df[group].unique() 
         df = df.set_index(group).drop(drop_cols, axis=1).T
         delta = 0.68
-        data = base.list(x=base.as_matrix(df.values), y=base.unlist(labels), geneid=base.unlist(df.index), logged2=True)
+        data = base.list(x=base.as_matrix(df.values), y=base.unlist(labels), geneid=base.unlist(df.index), logged2=is_logged)
         if s0 is None or s0 == "null":
             s0 = ro.r("NULL")
-        lfc = np.log2(fc)
+        if is_logged:
+            fc = np.log2(fc)
         samr_res = R_function(data=data, res_type=method, s0=s0, nperms=permutations)
-        delta_table = samr.samr_compute_delta_table(samr_res, lfc)
+        delta_table = samr.samr_compute_delta_table(samr_res, fc)
         siggenes_table = samr.samr_compute_siggenes_table(samr_res, delta, data, delta_table, all_genes=True)
         nperms_run = samr_res[8][0]
         s0_used = samr_res[13][0]
@@ -1668,7 +1693,7 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
         pairwise_results = []
         for col in df.T.columns:
             rows = df.T[col]
-            pairwise_result = calculate_pairwise_ttest(rows.reset_index(), column=col, subject=subject, group=group)
+            pairwise_result = calculate_pairwise_ttest(rows.reset_index(), column=col, subject=subject, group=group, is_logged=is_logged)
             pairwise_cols = pairwise_result.columns
             pairwise_results.extend(pairwise_result.values.tolist())
         
@@ -2213,24 +2238,6 @@ def run_snf(df_dict, clusters, distance_metric, K_affinity, mu_affinity):
     """
     pass
 
-def run_km(df, group_col, time, event):
-    import matplotlib.pyplot as plt
-    kmf = KaplanMeierFitter()
-    ax = plt.subplot(111)
-    times = []
-    events = []
-    groups = []
-    for name, grouped_df in df.groupby(group_col):
-        t = grouped_df[time]
-        e = grouped_df[event]
-        kmf.fit(t, event_observed=e)
-        kmf.survival_function_.plot(ax=ax)
-        times.extend(t)
-        events.extend(e)
-        groups.extend(name)
-    
-    summary_= multivariate_logrank_test(times, groups, events, alpha=99)
-    return kmf
 
 def aggregate_for_polar(data, group_by, value_col, aggregate_func='mean'):
     aggr_df = pd.DataFrame()
@@ -2252,3 +2259,8 @@ def aggregate_for_polar(data, group_by, value_col, aggregate_func='mean'):
         aggr_df = pd.DataFrame(list_cols, columns=group_by+'aggr '+value_col)
     
     return aggr_df
+
+def run_km(data, time_col, event_col, group_col, args={}):
+    kmfit, summary = kaplan_meierAnalysis.run_km(data, time_col, event_col, group_col, args)
+    
+    return kmfit, summary
