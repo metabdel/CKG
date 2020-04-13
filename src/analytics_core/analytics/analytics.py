@@ -274,7 +274,7 @@ def imputation_mixed_norm_KNN(data, index_cols=['group', 'sample', 'subject'], s
 
         result = imputation_mixed_norm_KNN(data, index_cols=['group', 'sample', 'subject'], shift = 1.8, nstd = 0.3, group='group', cutoff=0.6)
     """
-    df = imputation_KNN(data, drop_cols=index_cols, group=group, cutoff=cutoff, alone = False)
+    df = imputation_KNN(data, drop_cols=index_cols, group=group, cutoff=cutoff, alone=False)
     df = imputation_normal_distribution(df, index_cols=index_cols, shift=shift, nstd=nstd)
 
     return df
@@ -528,9 +528,10 @@ def get_clinical_measurements_ready(df, subject_id='subject', sample_id='biologi
     drop_cols = [subject_id, sample_id]
     drop_cols.append(group_id)
 
-    processed_df = df.loc[pd.to_numeric(df[values], errors='coerce').dropna().index]
+    processed_df = df[df['rel_type'] == 'HAS_QUANTIFIED_CLINICAL']
     processed_df[values] = processed_df[values].astype('float')
-    processed_df = transform_into_wide_format(processed_df, index=index, columns=columns, values=values, extra=extra)             
+    processed_df = transform_into_wide_format(processed_df, index=index, columns=columns, values=values, extra=extra)
+    
     if imputation:
         if imputation_method.lower() == "knn":
             df = imputation_KNN(processed_df, drop_cols=drop_cols, group=group_id)
@@ -539,7 +540,7 @@ def get_clinical_measurements_ready(df, subject_id='subject', sample_id='biologi
         elif imputation_method.lower() == 'mixed':
             df = imputation_mixed_norm_KNN(processed_df,index_cols=index, group=group_id)
 
-    #df = df.set_index(index)
+
     return df
 
 
@@ -892,17 +893,17 @@ def run_correlation(df, alpha=0.05, subject='subject', group='group', method='pe
             pdf = pd.DataFrame(p, index=df.columns, columns=df.columns)
             correlation = convertToEdgeList(rdf, ["node1", "node2", "weight"])
             pvalues = convertToEdgeList(pdf, ["node1", "node2", "pvalue"])
-            correlation = pd.merge(correlation,pvalues,on=['node1','node2'])
-
+            correlation = pd.merge(correlation, pvalues, on=['node1','node2'])
+            
             if correction[0] == 'fdr':
                 rejected, padj = apply_pvalue_fdrcorrection(correlation["pvalue"].tolist(), alpha=alpha, method=correction[1])
             elif correction[0] == '2fdr':
                 rejected, padj = apply_pvalue_twostage_fdrcorrection(correlation["pvalue"].tolist(), alpha=alpha, method=correction[1])
-            correlation["pvalue"] = [str(round(i, 8)) for i in correlation['pvalue']] #limit number of decimals to 8 and avoid scientific notation
-            correlation["padj"] = [str(round(i, 8)) for i in padj] #limit number of decimals to 8 and avoid scientific notation
+            correlation["pvalue"] = [str(round(i, 8)) for i in correlation['pvalue']]
+            correlation["padj"] = [str(round(i, 8)) for i in padj]
             correlation["rejected"] = rejected
             correlation = correlation[correlation.rejected]
-
+    
     return correlation
 
 
@@ -933,7 +934,7 @@ def run_multi_correlation(df_dict, alpha=0.05, subject='subject', on=['subject',
             if isinstance(df_dict[dtype], pd.DataFrame):
                 multidf = pd.merge(multidf, df_dict[dtype], how='inner', on=on)
     if not multidf.empty:
-        correlation = run_correlation(multidf, alpha=0.05, subject=subject, group=group, method=method, correction=correction)
+        correlation = run_correlation(multidf, alpha=alpha, subject=subject, group=group, method=method, correction=correction)
     
     return correlation
 
@@ -1032,7 +1033,7 @@ def run_efficient_correlation(data, method='pearson'):
     elif method == 'spearman':
         r, p = stats.spearmanr(matrix, axis=0)
 
-    diagonal = np.triu_indices(r.shape[0],1)
+    diagonal = np.triu_indices(r.shape[0], 1)
     rf = r[diagonal]
     df = matrix.shape[1] - 2
     ts = rf * rf * (df / (1 - rf * rf))

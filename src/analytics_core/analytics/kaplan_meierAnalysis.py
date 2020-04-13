@@ -9,16 +9,12 @@ matplotlib.use("Agg")
 
 def get_data_ready_for_km(dfs_dict, args):
     kmdf = None
-    print(args)
     for df_key in dfs_dict:
-        print(df_key)
         if df_key == 'clinical':
             kmdf = dfs_dict[df_key]
         else:
             df = dfs_dict[df_key]
-            print(df.head())
             if 'marker' in args and 'index_col' in args:
-                print("IN")
                 how = 'half'
                 value = None
                 if 'how' in args:
@@ -88,7 +84,7 @@ def get_km_results(df, group_col, time_col, event_col):
         for name, grouped_df in df.groupby(group_col):
             t = grouped_df[time_col]
             e = grouped_df[event_col]
-            kmf.fit(t, event_observed=e, label=name+" (N="+str(len(t.tolist()))+")")
+            kmf.fit(t, event_observed=e, label=name + " (N=" + str(len(t.tolist())) + ")")
             kmf.survival_function_.plot(ax=ax)
 
         summary_ = multivariate_logrank_test(df[time_col].tolist(), df[group_col].tolist(), df[event_col].tolist(), alpha=99)
