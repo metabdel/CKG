@@ -1126,9 +1126,9 @@ def get_network(data, identifier, args):
     if not data.empty:
         if 'cutoff' in args:
             if args['cutoff_abs']:
-                data = data[np.abs(data[args['values']]) > args['cutoff']]
+                data = data[np.abs(data[args['values']]) >= args['cutoff']]
             else:
-                data = data > args['cutoff']
+                data = data >= args['cutoff']
                
         data[args["source"]] = [str(n).replace("'","") for n in data[args["source"]]]
         data[args["target"]] = [str(n).replace("'","") for n in data[args["target"]]]
@@ -1204,7 +1204,7 @@ def get_network(data, identifier, args):
 
         stylesheet, layout = get_network_style(colors, args['color_weight'])
         stylesheet.append({'selector':'edge','style':{'width':'mapData(edgewidth,'+ str(min_edge_value) +','+ str(max_edge_value) +', .5, 8)'}})
-        if min_node_size > 0 and max_node_size >0:
+        if min_node_size > 0 and max_node_size > 0:
             mapper = 'mapData(radius,'+ str(min_node_size) +','+ str(max_node_size) +', 15, 50)'
             stylesheet.append({'selector':'node','style':{'width':mapper, 'height':mapper}})
         args['stylesheet'] = stylesheet
@@ -1416,7 +1416,7 @@ def get_sankey_plot(data, identifier, args={'source':'source', 'target':'target'
         if 'source_colors' in args:
             node_colors = dict(zip(data[args['source']],data[args['source_colors']]))
         else:
-            scolors = ['#045a8d']*len(data[args['source']].tolist())
+            scolors = ['#045a8d'] * len(data[args['source']].tolist())
             node_colors = dict(zip(data[args['source']],scolors))
             args['source_colors'] = 'source_colors'
             data['source_colors'] = scolors
@@ -1430,7 +1430,6 @@ def get_sankey_plot(data, identifier, args={'source':'source', 'target':'target'
         else:
             node_colors.update(dict(zip(data[args['target']],['#a6bddb']*len(data[args['target']].tolist()))))
         data_trace = dict(type='sankey',
-                            #domain = dict(x =  [0,1], y =  [0,1]),
                             orientation = 'h' if 'orientation' not in args else args['orientation'],
                             valueformat = ".0f" if 'valueformat' not in args else args['valueformat'],
                             arrangement = 'freeform',

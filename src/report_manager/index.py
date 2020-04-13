@@ -86,6 +86,7 @@ def display_page(pathname):
                                             'position': 'absolute',
                                             'right': '50px'}, error)
             else:
+                print("session_id",session_id)
                 project = projectApp.ProjectApp(session_id, project_id, project_id, "", "", layout=[], logo=None, footer=None, force=force)
                 return (project.layout, {'display': 'block',
                                          'position': 'absolute',
@@ -325,8 +326,8 @@ def image_formatter(im):
 
 
 @app.callback([Output('project-creation', 'children'),
-               Output('update_project_id','children'),
-               Output('update_project_id','style'),
+               Output('update_project_id', 'children'),
+               Output('update_project_id', 'style'),
                Output('download_button', 'style')],
               [Input('project_button', 'n_clicks')],
               [State('project name', 'value'),

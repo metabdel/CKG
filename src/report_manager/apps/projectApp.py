@@ -15,6 +15,7 @@ class ProjectApp(basicApp.BasicApp):
     """
     def __init__(self, id, projectId, title, subtitle, description, layout=[], logo=None, footer=None, force=False):
         self._id = id
+        print("Project id", self._id)
         self._project_id = projectId
         self._page_type = "projectPage"
         self._session_id = projectId + datetime.now().strftime('%Y%m-%d%H-%M%S-') + str(uuid4())
@@ -38,7 +39,7 @@ class ProjectApp(basicApp.BasicApp):
         :param str id: page identifier.
         """
         self._id = id
-        
+
     @property
     def session_id(self):
         """
@@ -47,7 +48,7 @@ class ProjectApp(basicApp.BasicApp):
         return self._session_id
 
     @session_id.setter
-    def id(self, session_id):
+    def session_id(self, session_id):
         """
         Sets 'session_id' input value as id property of the class.
 
@@ -154,7 +155,6 @@ class ProjectApp(basicApp.BasicApp):
             directory = os.path.join('../../data/tmp', self.id)
             if os.path.exists(directory):
                 config_files = {f.split('.')[0]: os.path.join(directory, f) for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))}
-                print(config_files)
 
         result = generate_project_report.apply_async(args=[self.project_id, config_files, self.force], task_id='generate_report'+self.session_id, queue='compute')
         result_output = result.get()
