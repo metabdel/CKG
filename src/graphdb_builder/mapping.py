@@ -1,6 +1,4 @@
 from graphdb_builder import builder_utils
-import config.ckg_config as ckg_config
-import ckg_utils
 import os.path
 import time
 from collections import defaultdict
@@ -87,7 +85,7 @@ def getMappingForEntity(entity):
         while not os.path.isfile(mapping_file) and max_wait < 5000:
             time.sleep(5)
             max_wait += 1
-        
+
         try:
             with open(mapping_file, 'r', encoding='utf-8') as mf:
                 for line in mf:
@@ -117,7 +115,7 @@ def getMultipleMappingForEntity(entity):
         while not os.path.isfile(mapping_file) and max_wait < 5000:
             time.sleep(5)
             max_wait += 1
-        
+
         try:
             with open(mapping_file, 'r') as mf:
                 for line in mf:
@@ -128,7 +126,7 @@ def getMultipleMappingForEntity(entity):
                         mapping[alias].add(ident)
         except Exception:
             raise Exception("mapping - No mapping file {} for entity {}".format(mapping, entity))
-    
+
     return mapping
 
 
@@ -141,13 +139,13 @@ def get_STRING_mapping_url(db="STRING"):
     """
     url = None
     config = builder_utils.get_config(config_name="stringConfig.yml", data_type='databases')
-    if db.upper() == "STRING":        
+    if db.upper() == "STRING":
         url = config['STRING_mapping_url']
     elif db.upper() == "STITCH":
         url = config['STITCH_mapping_url']
-        
+
     return url
-        
+
 
 def getSTRINGMapping(source="BLAST_UniProt_AC", download=True, db="STRING"):
     """
@@ -167,7 +165,7 @@ def getSTRINGMapping(source="BLAST_UniProt_AC", download=True, db="STRING"):
 
     if download:
         builder_utils.downloadDB(url, directory)
-    
+
     f = os.path.join(directory, file_name)
     first = True
     with gzip.open(f, 'rb') as mf:
@@ -186,10 +184,10 @@ def getSTRINGMapping(source="BLAST_UniProt_AC", download=True, db="STRING"):
                 sources = data[3].split(' ')
                 if not alias.startswith('DB'):
                     continue
-            
+
             if source in sources:
                 mapping[stringID].add(alias)
-        
+
     return mapping
 
 
@@ -248,7 +246,7 @@ def map_experimental_data(data, mapping):
 
     if not data.empty:
         for column in data.columns:
-            ids = re.search('_([a-zA-Z0-9|\-,.<>\/?]*)', column)
+            ids = re.search('_([a-zA-Z0-9|\-,<>\/?]*)', column)
             if ids is not None:
                 ids = ids.group(0)
                 if ids.split('_', 1)[-1] in mapping:
