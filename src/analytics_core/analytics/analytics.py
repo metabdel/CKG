@@ -331,13 +331,12 @@ def polish_median_normalization(data, max_iter=10):
     """
     mediandf = data.copy()
     for i in range(max_iter):
-        col_median = mediandf.median(axis=0)
         row_median = mediandf.median(axis=1)
-        if row_median.mean() == 0 and col_median.mean() == 0:
-            break
-
         mediandf = mediandf.sub(row_median, axis=0)
+        col_median = mediandf.median(axis=0)
         mediandf = mediandf.sub(col_median, axis=1)
+        if (mediandf.median(axis=0) == 0).all() and (mediandf.median(axis=1) == 0).all():
+            break
 
     normData = data - mediandf
 
