@@ -217,14 +217,11 @@
 <span class="kn">from</span> <span class="nn">joblib</span> <span class="k">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
 <span class="kn">from</span> <span class="nn">uuid</span> <span class="k">import</span> <span class="n">uuid4</span>
 <span class="kn">import</span> <span class="nn">config.ckg_config</span> <span class="k">as</span> <span class="nn">ckg_config</span>
-<span class="kn">import</span> <span class="nn">ckg_utils</span>
 <span class="kn">from</span> <span class="nn">graphdb_builder.ontologies</span> <span class="k">import</span> <span class="n">ontologies_controller</span> <span class="k">as</span> <span class="n">oh</span>
 <span class="kn">from</span> <span class="nn">graphdb_builder.databases</span> <span class="k">import</span> <span class="n">databases_controller</span> <span class="k">as</span> <span class="n">dh</span>
 <span class="kn">from</span> <span class="nn">graphdb_builder.experiments</span> <span class="k">import</span> <span class="n">experiments_controller</span> <span class="k">as</span> <span class="n">eh</span>
 <span class="kn">from</span> <span class="nn">graphdb_builder.users</span> <span class="k">import</span> <span class="n">users_controller</span> <span class="k">as</span> <span class="n">uh</span>
 <span class="kn">from</span> <span class="nn">graphdb_builder</span> <span class="k">import</span> <span class="n">builder_utils</span>
-<span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">logging.config</span>
 
 <span class="n">log_config</span> <span class="o">=</span> <span class="n">ckg_config</span><span class="o">.</span><span class="n">graphdb_builder_log</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">builder_utils</span><span class="o">.</span><span class="n">setup_logging</span><span class="p">(</span><span class="n">log_config</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;importer&quot;</span><span class="p">)</span>
@@ -239,10 +236,10 @@
     <span class="n">econfig</span> <span class="o">=</span> <span class="n">builder_utils</span><span class="o">.</span><span class="n">setup_config</span><span class="p">(</span><span class="s1">&#39;experiments&#39;</span><span class="p">)</span>
     <span class="n">uconfig</span> <span class="o">=</span> <span class="n">builder_utils</span><span class="o">.</span><span class="n">setup_config</span><span class="p">(</span><span class="s1">&#39;users&#39;</span><span class="p">)</span>
 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error&quot;</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;importer - Reading configuration &gt; </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
 
 <span class="n">START_TIME</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+
 
 <div class="viewcode-block" id="ontologiesImport"><a class="viewcode-back" href="../../../_autosummary/graphdb_builder.builder.html#graphdb_builder.builder.importer.ontologiesImport">[docs]</a><span class="k">def</span> <span class="nf">ontologiesImport</span><span class="p">(</span><span class="n">importDirectory</span><span class="p">,</span> <span class="n">ontologies</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">import_type</span><span class="o">=</span><span class="s2">&quot;partial&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -290,12 +287,14 @@
 <span class="sd">    :param int n_jobs: number of jobs to run in parallel. 1 by default when updating one project.</span>
 <span class="sd">    :param str import_type: type of import (´full´ or ´partial´).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">experiments_import_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directories</span><span class="p">[</span><span class="s1">&#39;importDirectory&#39;</span><span class="p">],</span><span class="n">econfig</span><span class="p">[</span><span class="s2">&quot;import_directory&quot;</span><span class="p">])</span>
+    <span class="n">experiments_import_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directories</span><span class="p">[</span><span class="s1">&#39;importDirectory&#39;</span><span class="p">],</span> <span class="n">econfig</span><span class="p">[</span><span class="s2">&quot;import_directory&quot;</span><span class="p">])</span>
     <span class="n">builder_utils</span><span class="o">.</span><span class="n">checkDirectory</span><span class="p">(</span><span class="n">experiments_import_directory</span><span class="p">)</span>
-    <span class="n">experiments_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directories</span><span class="p">[</span><span class="s1">&#39;dataDirectory&#39;</span><span class="p">],</span><span class="n">econfig</span><span class="p">[</span><span class="s2">&quot;experiments_directory&quot;</span><span class="p">])</span>
+    <span class="n">experiments_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directories</span><span class="p">[</span><span class="s1">&#39;dataDirectory&#39;</span><span class="p">],</span> <span class="n">econfig</span><span class="p">[</span><span class="s2">&quot;experiments_directory&quot;</span><span class="p">])</span>
     <span class="k">if</span> <span class="n">projects</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">projects</span> <span class="o">=</span> <span class="n">builder_utils</span><span class="o">.</span><span class="n">listDirectoryFolders</span><span class="p">(</span><span class="n">experiments_directory</span><span class="p">)</span>
-    <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">)(</span><span class="n">delayed</span><span class="p">(</span><span class="n">experimentImport</span><span class="p">)(</span><span class="n">experiments_import_directory</span><span class="p">,</span> <span class="n">experiments_directory</span><span class="p">,</span> <span class="n">project</span><span class="p">)</span> <span class="k">for</span> <span class="n">project</span> <span class="ow">in</span> <span class="n">projects</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">projects</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">)(</span><span class="n">delayed</span><span class="p">(</span><span class="n">experimentImport</span><span class="p">)(</span><span class="n">experiments_import_directory</span><span class="p">,</span> <span class="n">experiments_directory</span><span class="p">,</span> <span class="n">project</span><span class="p">)</span> <span class="k">for</span> <span class="n">project</span> <span class="ow">in</span> <span class="n">projects</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="experimentImport"><a class="viewcode-back" href="../../../_autosummary/graphdb_builder.builder.html#graphdb_builder.builder.importer.experimentImport">[docs]</a><span class="k">def</span> <span class="nf">experimentImport</span><span class="p">(</span><span class="n">importDirectory</span><span class="p">,</span> <span class="n">experimentsDirectory</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -315,6 +314,7 @@
             <span class="n">builder_utils</span><span class="o">.</span><span class="n">checkDirectory</span><span class="p">(</span><span class="n">datasetPath</span><span class="p">)</span>
             <span class="n">eh</span><span class="o">.</span><span class="n">generate_dataset_imports</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">datasetPath</span><span class="p">)</span></div>
 
+
 <div class="viewcode-block" id="usersImport"><a class="viewcode-back" href="../../../_autosummary/graphdb_builder.builder.html#graphdb_builder.builder.importer.usersImport">[docs]</a><span class="k">def</span> <span class="nf">usersImport</span><span class="p">(</span><span class="n">importDirectory</span><span class="p">,</span> <span class="n">import_type</span><span class="o">=</span><span class="s1">&#39;partial&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates User entities from excel file and grants access of new users to the database.</span>
@@ -327,6 +327,7 @@
     <span class="n">usersImportDirectory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">importDirectory</span><span class="p">,</span> <span class="n">uconfig</span><span class="p">[</span><span class="s1">&#39;usersImportDirectory&#39;</span><span class="p">])</span>
     <span class="n">builder_utils</span><span class="o">.</span><span class="n">checkDirectory</span><span class="p">(</span><span class="n">usersImportDirectory</span><span class="p">)</span>
     <span class="n">uh</span><span class="o">.</span><span class="n">parseUsersFile</span><span class="p">(</span><span class="n">usersImportDirectory</span><span class="p">,</span> <span class="n">expiration</span><span class="o">=</span><span class="mi">365</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="fullImport"><a class="viewcode-back" href="../../../_autosummary/graphdb_builder.builder.html#graphdb_builder.builder.importer.fullImport">[docs]</a><span class="k">def</span> <span class="nf">fullImport</span><span class="p">(</span><span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -357,7 +358,7 @@
     <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Full import &gt; </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
     <span class="k">except</span> <span class="ne">IndexError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Full import &gt; </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">err</span><span class="p">))</span> 
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Full import &gt; </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
     <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Full import &gt; </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
     <span class="k">except</span> <span class="ne">MemoryError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
@@ -365,17 +366,19 @@
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Full import &gt; </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">err</span><span class="p">))</span></div>
 
+
 <div class="viewcode-block" id="generateStatsDataFrame"><a class="viewcode-back" href="../../../_autosummary/graphdb_builder.builder.html#graphdb_builder.builder.importer.generateStatsDataFrame">[docs]</a><span class="k">def</span> <span class="nf">generateStatsDataFrame</span><span class="p">(</span><span class="n">stats</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates a dataframe with the stats from each import.</span>
-<span class="sd">    </span>
 <span class="sd">    :param list stats: a list with statistics collected from each importer function.</span>
 <span class="sd">    :return: Pandas dataframe with the collected statistics.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">statsDf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_records</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">stats</span><span class="p">),</span> <span class="n">columns</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;statsCols&quot;</span><span class="p">])</span>
     <span class="n">statsDf</span><span class="p">[</span><span class="s1">&#39;import_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">import_id</span>
-    
+    <span class="n">statsDf</span><span class="p">[</span><span class="s1">&#39;import_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">statsDf</span><span class="p">[</span><span class="s1">&#39;import_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;str&#39;</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">statsDf</span></div>
+
 
 <div class="viewcode-block" id="setupStats"><a class="viewcode-back" href="../../../_autosummary/graphdb_builder.builder.html#graphdb_builder.builder.importer.setupStats">[docs]</a><span class="k">def</span> <span class="nf">setupStats</span><span class="p">(</span><span class="n">import_type</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -396,6 +399,7 @@
             <span class="k">pass</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Setting up Stats object </span><span class="si">{}</span><span class="s2"> in file:</span><span class="si">{}</span><span class="s2"> &gt; </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">statsName</span><span class="p">,</span> <span class="n">statsFile</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span></div>
+
 
 <div class="viewcode-block" id="createEmptyStats"><a class="viewcode-back" href="../../../_autosummary/graphdb_builder.builder.html#graphdb_builder.builder.importer.createEmptyStats">[docs]</a><span class="k">def</span> <span class="nf">createEmptyStats</span><span class="p">(</span><span class="n">statsCols</span><span class="p">,</span> <span class="n">statsFile</span><span class="p">,</span> <span class="n">statsName</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -430,23 +434,23 @@
 
 <span class="c1">#     return hdf</span>
 
+
 <div class="viewcode-block" id="writeStats"><a class="viewcode-back" href="../../../_autosummary/graphdb_builder.builder.html#graphdb_builder.builder.importer.writeStats">[docs]</a><span class="k">def</span> <span class="nf">writeStats</span><span class="p">(</span><span class="n">statsDf</span><span class="p">,</span> <span class="n">import_type</span><span class="p">,</span> <span class="n">stats_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Appends the new collected statistics to the existing stats object.</span>
-<span class="sd">    </span>
 <span class="sd">    :param statsDf: a pandas dataframe with the new statistics from the importing.</span>
 <span class="sd">    :param str statsName: If the statistics should be stored with a specific name.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">stats_directory</span> <span class="o">=</span> <span class="n">directories</span><span class="p">[</span><span class="s2">&quot;statsDirectory&quot;</span><span class="p">]</span>
     <span class="n">stats_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">stats_directory</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;statsFile&quot;</span><span class="p">])</span>
-    <span class="k">try</span><span class="p">:</span> 
+    <span class="k">try</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">stats_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">stats_name</span> <span class="o">=</span> <span class="n">getStatsName</span><span class="p">(</span><span class="n">import_type</span><span class="p">)</span>
         <span class="k">with</span> <span class="n">pd</span><span class="o">.</span><span class="n">HDFStore</span><span class="p">(</span><span class="n">stats_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">hdf</span><span class="p">:</span>
-            <span class="n">hdf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stats_name</span><span class="p">,</span> <span class="n">statsDf</span><span class="p">,</span> <span class="n">data_columns</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">min_itemsize</span><span class="o">=</span><span class="mi">2000</span><span class="p">)</span>
-            <span class="n">hdf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">hdf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stats_name</span><span class="p">,</span> <span class="n">statsDf</span><span class="p">,</span> <span class="n">data_columns</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Writing Stats object </span><span class="si">{}</span><span class="s2"> in file:</span><span class="si">{}</span><span class="s2"> &gt; </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">stats_name</span><span class="p">,</span> <span class="n">stats_file</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span></div>
+
 
 <div class="viewcode-block" id="getStatsName"><a class="viewcode-back" href="../../../_autosummary/graphdb_builder.builder.html#graphdb_builder.builder.importer.getStatsName">[docs]</a><span class="k">def</span> <span class="nf">getStatsName</span><span class="p">(</span><span class="n">import_type</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -457,16 +461,13 @@
 <span class="sd">    :rtype: str</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">version</span> <span class="o">=</span> <span class="n">ckg_config</span><span class="o">.</span><span class="n">version</span>
-    <span class="n">statsName</span> <span class="o">=</span> <span class="n">import_type</span><span class="o">+</span><span class="s1">&#39;_stats_&#39;</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">version</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span>
+    <span class="n">statsName</span> <span class="o">=</span> <span class="n">import_type</span><span class="o">+</span><span class="s1">&#39;_stats_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">version</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">statsName</span></div>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">fullImport</span><span class="p">()</span>
-    <span class="c1">#databasesImport(importDirectory=&#39;../../../data/imports&#39;, databases=[&#39;CancerGenomeInterpreter&#39;], n_jobs=1, download=False, import_type=&quot;partial&quot;)</span>
-    <span class="c1">#experimentsImport(projects=[&quot;P0000001&quot;, &quot;P0000002&quot;, &quot;P0000003&quot;, &quot;P0000004&quot;], n_jobs=1)</span>
-    <span class="c1">#ontologiesImport(importDirectory=&#39;../../../data/imports&#39;)</span>
 </pre></div>
 
            </div>

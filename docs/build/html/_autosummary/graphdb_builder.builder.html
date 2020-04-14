@@ -141,9 +141,9 @@
 <li class="toctree-l3"><a class="reference internal" href="graphdb_builder.users.html">User Creation</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">CKG Builder</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#module-graphdb_builder.builder.create_user">User Creation Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#importer-module">Importer Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-graphdb_builder.builder.importer">Importer Module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-graphdb_builder.builder.loader">Loader Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#builder-module">Builder Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-graphdb_builder.builder.builder">Builder Module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="graphdb_builder.html#module-graphdb_builder.builder_utils">builder_utils.py</a></li>
@@ -319,8 +319,148 @@
 </dd></dl>
 
 </div>
-<div class="section" id="importer-module">
-<h2>Importer Module<a class="headerlink" href="#importer-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-graphdb_builder.builder.importer">
+<span id="importer-module"></span><h2>Importer Module<a class="headerlink" href="#module-graphdb_builder.builder.importer" title="Permalink to this headline">¶</a></h2>
+<p>Generates all the import files: Ontologies, Databases and Experiments.
+The module is reponsible for generating all the csv files that will
+be loaded into the Graph database and also updates a stats object
+(hdf table) with the number of entities and relationships from each
+dataset imported. A new stats object is created the first time a
+full import is run.</p>
+<dl class="function">
+<dt id="graphdb_builder.builder.importer.ontologiesImport">
+<code class="sig-prename descclassname">graphdb_builder.builder.importer.</code><code class="sig-name descname">ontologiesImport</code><span class="sig-paren">(</span><em class="sig-param">importDirectory</em>, <em class="sig-param">ontologies=None</em>, <em class="sig-param">download=True</em>, <em class="sig-param">import_type='partial'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/builder/importer.html#ontologiesImport"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.builder.importer.ontologiesImport" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates all the entities and relationships from the provided ontologies. If the ontologies list is    not provided, then all the ontologies listed in the configuration will be imported (full_import).     This function also updates the stats object with numbers from the imported ontologies.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>importDirectory</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – path of the import directory where files will be created.</p></li>
+<li><p><strong>ontologies</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#list" title="(in Python v3.5)"><em>list</em></a>) – a list of ontology names to be imported.</p></li>
+<li><p><strong>download</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/functions.html#bool" title="(in Python v3.5)"><em>bool</em></a>) – wether database is to be downloaded.</p></li>
+<li><p><strong>import_type</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – type of import (´full´ or ´partial´).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="graphdb_builder.builder.importer.databasesImport">
+<code class="sig-prename descclassname">graphdb_builder.builder.importer.</code><code class="sig-name descname">databasesImport</code><span class="sig-paren">(</span><em class="sig-param">importDirectory</em>, <em class="sig-param">databases=None</em>, <em class="sig-param">n_jobs=1</em>, <em class="sig-param">download=True</em>, <em class="sig-param">import_type='partial'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/builder/importer.html#databasesImport"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.builder.importer.databasesImport" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates all the entities and relationships from the provided databases. If the databases list is    not provided, then all the databases listed in the configuration will be imported (full_import).    This function also updates the stats object with numbers from the imported databases.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>importDirectory</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – path of the import directory where files will be created.</p></li>
+<li><p><strong>databases</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#list" title="(in Python v3.5)"><em>list</em></a>) – a list of database names to be imported.</p></li>
+<li><p><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/functions.html#int" title="(in Python v3.5)"><em>int</em></a>) – number of jobs to run in parallel. 1 by default when updating one database.</p></li>
+<li><p><strong>import_type</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – type of import (´full´ or ´partial´).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="graphdb_builder.builder.importer.experimentsImport">
+<code class="sig-prename descclassname">graphdb_builder.builder.importer.</code><code class="sig-name descname">experimentsImport</code><span class="sig-paren">(</span><em class="sig-param">projects=None</em>, <em class="sig-param">n_jobs=1</em>, <em class="sig-param">import_type='partial'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/builder/importer.html#experimentsImport"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.builder.importer.experimentsImport" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates all the entities and relationships from the specified Projects. If the projects list is    not provided, then all the projects the experiments directory will be imported (full_import).     Calls function experimentImport.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>projects</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#list" title="(in Python v3.5)"><em>list</em></a>) – list of project identifiers to be imported.</p></li>
+<li><p><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/functions.html#int" title="(in Python v3.5)"><em>int</em></a>) – number of jobs to run in parallel. 1 by default when updating one project.</p></li>
+<li><p><strong>import_type</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – type of import (´full´ or ´partial´).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="graphdb_builder.builder.importer.experimentImport">
+<code class="sig-prename descclassname">graphdb_builder.builder.importer.</code><code class="sig-name descname">experimentImport</code><span class="sig-paren">(</span><em class="sig-param">importDirectory</em>, <em class="sig-param">experimentsDirectory</em>, <em class="sig-param">project</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/builder/importer.html#experimentImport"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.builder.importer.experimentImport" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates all the entities and relationships from the specified Project. Called from function experimentsImport.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>importDirectory</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – path to the directory where all the import files are generated.</p></li>
+<li><p><strong>experimentDirectory</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – path to the directory where all the experiments are located.</p></li>
+<li><p><strong>project</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – identifier of the project to be imported.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="graphdb_builder.builder.importer.usersImport">
+<code class="sig-prename descclassname">graphdb_builder.builder.importer.</code><code class="sig-name descname">usersImport</code><span class="sig-paren">(</span><em class="sig-param">importDirectory</em>, <em class="sig-param">import_type='partial'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/builder/importer.html#usersImport"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.builder.importer.usersImport" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates User entities from excel file and grants access of new users to the database.
+This function also writes the relevant information to a tab-delimited file in the import     directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>importDirectory</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – path to the directory where all the import files are generated.</p></li>
+<li><p><strong>import_type</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – type of import (´full´ or ´partial).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="graphdb_builder.builder.importer.fullImport">
+<code class="sig-prename descclassname">graphdb_builder.builder.importer.</code><code class="sig-name descname">fullImport</code><span class="sig-paren">(</span><em class="sig-param">download=True</em>, <em class="sig-param">n_jobs=4</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/builder/importer.html#fullImport"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.builder.importer.fullImport" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calls the different importer functions: Ontologies, databases,     experiments. The first step is to check if the stats object exists     and create it otherwise. Calls setupStats.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="graphdb_builder.builder.importer.generateStatsDataFrame">
+<code class="sig-prename descclassname">graphdb_builder.builder.importer.</code><code class="sig-name descname">generateStatsDataFrame</code><span class="sig-paren">(</span><em class="sig-param">stats</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/builder/importer.html#generateStatsDataFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.builder.importer.generateStatsDataFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a dataframe with the stats from each import.
+:param list stats: a list with statistics collected from each importer function.
+:return: Pandas dataframe with the collected statistics.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="graphdb_builder.builder.importer.setupStats">
+<code class="sig-prename descclassname">graphdb_builder.builder.importer.</code><code class="sig-name descname">setupStats</code><span class="sig-paren">(</span><em class="sig-param">import_type</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/builder/importer.html#setupStats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.builder.importer.setupStats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a stats object that will collect all the statistics collected from each import.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="graphdb_builder.builder.importer.createEmptyStats">
+<code class="sig-prename descclassname">graphdb_builder.builder.importer.</code><code class="sig-name descname">createEmptyStats</code><span class="sig-paren">(</span><em class="sig-param">statsCols</em>, <em class="sig-param">statsFile</em>, <em class="sig-param">statsName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/builder/importer.html#createEmptyStats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.builder.importer.createEmptyStats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a HDFStore object with a empty dataframe with the collected stats columns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>statsCols</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#list" title="(in Python v3.5)"><em>list</em></a>) – a list of columns with the fields collected from the import statistics.</p></li>
+<li><p><strong>statsFile</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – path where the object should be stored.</p></li>
+<li><p><strong>statsName</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – name if the file containing the stats object.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="graphdb_builder.builder.importer.writeStats">
+<code class="sig-prename descclassname">graphdb_builder.builder.importer.</code><code class="sig-name descname">writeStats</code><span class="sig-paren">(</span><em class="sig-param">statsDf</em>, <em class="sig-param">import_type</em>, <em class="sig-param">stats_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/builder/importer.html#writeStats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.builder.importer.writeStats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Appends the new collected statistics to the existing stats object.
+:param statsDf: a pandas dataframe with the new statistics from the importing.
+:param str statsName: If the statistics should be stored with a specific name.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="graphdb_builder.builder.importer.getStatsName">
+<code class="sig-prename descclassname">graphdb_builder.builder.importer.</code><code class="sig-name descname">getStatsName</code><span class="sig-paren">(</span><em class="sig-param">import_type</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/builder/importer.html#getStatsName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.builder.importer.getStatsName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates the stats object name where to store the importing statistics from the CKG version,     which is defined in the configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>statsName: key used to store in the stats object.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="module-graphdb_builder.builder.loader">
 <span id="loader-module"></span><h2>Loader Module<a class="headerlink" href="#module-graphdb_builder.builder.loader" title="Permalink to this headline">¶</a></h2>
@@ -395,8 +535,22 @@ in data/.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="builder-module">
-<h2>Builder Module<a class="headerlink" href="#builder-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-graphdb_builder.builder.builder">
+<span id="builder-module"></span><h2>Builder Module<a class="headerlink" href="#module-graphdb_builder.builder.builder" title="Permalink to this headline">¶</a></h2>
+<p>Builds the database in two main steps:</p>
+<ol class="arabic simple">
+<li><p>Imports all the data from ontologies, databases and experiments</p></li>
+<li><p>Loads these data into the database</p></li>
+</ol>
+<p>The module can perform full updates, executing both steps for all the ontologies,
+databases and experiments or a partial update. Partial updates can execute step 1 or
+step 2 for specific data.</p>
+<dl class="function">
+<dt id="graphdb_builder.builder.builder.set_arguments">
+<code class="sig-prename descclassname">graphdb_builder.builder.builder.</code><code class="sig-name descname">set_arguments</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/builder/builder.html#set_arguments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.builder.builder.set_arguments" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function sets the arguments to be used as input for <strong>builder.py</strong> in the command line.</p>
+</dd></dl>
+
 </div>
 </div>
 

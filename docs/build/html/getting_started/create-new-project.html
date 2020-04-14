@@ -237,22 +237,27 @@ To create a project, please follow the steps below.</p>
 <p>If redis-server is not found, install with <code class="docutils literal notranslate"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">redis</span></code> (Mac) or <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt-get</span> <span class="pre">install</span> <span class="pre">redis-server</span></code> (Linux)</p>
 </div>
 <ol class="arabic simple" start="2">
-<li><p>In a separate terminal window:</p></li>
+<li><p>In two separate terminal windows:</p></li>
 </ol>
 <ul class="simple">
-<li><p>Navigate to <code class="docutils literal notranslate"><span class="pre">report_manager</span></code></p></li>
+<li><p>Navigate to <code class="docutils literal notranslate"><span class="pre">report_manager</span></code> in both of them</p></li>
 </ul>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ <span class="nb">cd</span> CKG/src/report_manager
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>Start a celery queue from the report_manager directory:</p></li>
+<li><p>Start a celery queue from the report_manager directory, in each window:</p></li>
 </ul>
+<p><strong>Default queue</strong></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ celery -A worker worker -l debug
 </pre></div>
 </div>
+<p><strong>Compute queue - Report generation</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ celery -A worker worker --loglevel<span class="o">=</span>DEBUG --concurrency<span class="o">=</span><span class="m">3</span> -E -Q compute
+</pre></div>
+</div>
 <ol class="arabic simple" start="3">
-<li><p>In third terminal window:</p></li>
+<li><p>In a fourth terminal window:</p></li>
 </ol>
 <ul class="simple">
 <li><p>Run the report manager index app:</p></li>

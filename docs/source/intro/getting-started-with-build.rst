@@ -8,13 +8,13 @@ To check which Python version is currently installed:
 
 .. code-block:: bash
 	
-	$ python3 --version
+	$ python3.6 --version
 
 And where this Python version is:
 
 .. code-block:: bash
 
-	$ which python3
+	$ which python3.6
 
 If this does not correspond to the correct Python version you want to run, you can create a shell alias in the bash file:
 
@@ -28,7 +28,7 @@ If this does not correspond to the correct Python version you want to run, you c
 
 .. code-block:: bash
 	
-	alias python3="/path/to/correct/python3.6"
+	alias python3.6="/path/to/correct/python3.6"
 
 #. Save and close the bash file
 
@@ -88,14 +88,15 @@ Setting up the Clinical Knowledge Graph
 The first step in setting up the CKG, is to obtain the complete code by clone the GitHub repository:
 
 .. code-block:: bash
-
+	
 	$ git clone https://github.com/MannLabs/CKG.git
 
 Once this is finished, you can find all the Python modules neccessary to run the Clinical Knowledge graph in ``requirements.txt``.
 To install all the packages required, simply run:
 
 .. code-block:: bash
-
+	
+	$ cd CKG/
 	$ pip install -r requirements.txt
 
 .. warning:: Make sure the virtual environment previously created is active before installing ``requirements.txt``.
@@ -104,7 +105,6 @@ Now that all the packages are correctly installed, you will have to create the a
 
 .. code-block:: bash
 
-	$ cd CKG/
 	$ python setup_CKG.py
 	$ python setup_config_files.py
 

@@ -1185,14 +1185,36 @@ This method is suitable for use in Jupyter notebooks. For more information visit
 </dd></dl>
 
 <dl class="function">
-<dt id="analytics_core.viz.viz.km_plot">
-<code class="sig-prename descclassname">analytics_core.viz.viz.</code><code class="sig-name descname">km_plot</code><span class="sig-paren">(</span><em class="sig-param">kmf</em>, <em class="sig-param">identifier</em>, <em class="sig-param">args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/viz/viz.html#km_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.viz.viz.km_plot" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
 <dt id="analytics_core.viz.viz.mpl_to_plotly">
 <code class="sig-prename descclassname">analytics_core.viz.viz.</code><code class="sig-name descname">mpl_to_plotly</code><span class="sig-paren">(</span><em class="sig-param">fig</em>, <em class="sig-param">ci=True</em>, <em class="sig-param">legend=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/viz/viz.html#mpl_to_plotly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.viz.viz.mpl_to_plotly" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="function">
+<dt id="analytics_core.viz.viz.get_km_plot">
+<code class="sig-prename descclassname">analytics_core.viz.viz.</code><code class="sig-name descname">get_km_plot</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">identifier</em>, <em class="sig-param">args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/viz/viz.html#get_km_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.viz.viz.get_km_plot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="analytics_core.viz.viz.get_polar_plot">
+<code class="sig-prename descclassname">analytics_core.viz.viz.</code><code class="sig-name descname">get_polar_plot</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">identifier</em>, <em class="sig-param">args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/viz/viz.html#get_polar_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.viz.viz.get_polar_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates a Polar plot with data aggregated for a given group.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>dataframe</em>) – dataframe with the data to plot</p></li>
+<li><p><strong>identifier</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – identifier to be used in the app</p></li>
+<li><p><strong>args</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#dict" title="(in Python v3.5)"><em>dict</em></a>) – dictionary containing the arguments needed to plot the figure (value_col (value to aggregate), group_col (group by), color_col (color by))</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dash Graph</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Example::</dt><dd><p>figure = get_polar_plot(df, identifier=’polar’, args={‘value_col’:’intensity’, ‘group_col’:’modifier’, ‘color_col’:’group’})</p>
+</dd>
+</dl>
+</dd></dl>
 
 </div>
 <div class="section" id="module-analytics_core.viz.wgcnaFigures">

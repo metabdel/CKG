@@ -234,7 +234,7 @@
 <li class="toctree-l3"><a class="reference internal" href="graphdb_builder.ontologies.parsers.html#module-graphdb_builder.ontologies.parsers.snomedParser">snomedParser.py</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="graphdb_builder.ontologies.html#ontologies-controller">Ontologies Controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graphdb_builder.ontologies.html#module-graphdb_builder.ontologies.ontologies_controller">Ontologies Controller</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="graphdb_builder.databases.html">Biomedical Databases</a><ul>
@@ -286,9 +286,9 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="graphdb_builder.builder.html">CKG Builder</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="graphdb_builder.builder.html#module-graphdb_builder.builder.create_user">User Creation Module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="graphdb_builder.builder.html#importer-module">Importer Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graphdb_builder.builder.html#module-graphdb_builder.builder.importer">Importer Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="graphdb_builder.builder.html#module-graphdb_builder.builder.loader">Loader Module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="graphdb_builder.builder.html#builder-module">Builder Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="graphdb_builder.builder.html#module-graphdb_builder.builder.builder">Builder Module</a></li>
 </ul>
 </li>
 </ul>
@@ -317,6 +317,11 @@
 <code class="sig-prename descclassname">graphdb_builder.builder_utils.</code><code class="sig-name descname">readDataFromExcel</code><span class="sig-paren">(</span><em class="sig-param">uri</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/builder_utils.html#readDataFromExcel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.builder_utils.readDataFromExcel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read the data from Excel file</p>
 </dd></dl>
+
+<dl class="function">
+<dt id="graphdb_builder.builder_utils.get_files_by_pattern">
+<code class="sig-prename descclassname">graphdb_builder.builder_utils.</code><code class="sig-name descname">get_files_by_pattern</code><span class="sig-paren">(</span><em class="sig-param">regex_path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/builder_utils.html#get_files_by_pattern"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.builder_utils.get_files_by_pattern" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="function">
 <dt id="graphdb_builder.builder_utils.get_extra_pairs">
@@ -574,7 +579,7 @@
 <dd><p>Code from: <a class="reference external" href="https://gist.github.com/shaxbee/0ada767debf9eefbdb6e">https://gist.github.com/shaxbee/0ada767debf9eefbdb6e</a>
 Acknowledgements: Zbigniew Mandziejewicz (shaxbee)
 Generator flattening the structure</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">flatten</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="mi">4</span><span class="p">]],</span> <span class="mi">6</span><span class="p">)]]))</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">flatten</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="mi">4</span><span class="p">]],</span> <span class="mi">6</span><span class="p">)]]))</span>
 <span class="go">[2, 2, 4, 5, 7, 2, 6, 2, 6, 6, 4, 6]</span>
 </pre></div>
 </div>

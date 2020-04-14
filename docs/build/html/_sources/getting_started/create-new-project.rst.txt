@@ -29,21 +29,31 @@ To create a project, please follow the steps below.
 
 .. warning:: If redis-server is not found, install with ``brew install redis`` (Mac) or ``sudo apt-get install redis-server`` (Linux)
 
-2. In a separate terminal window:
+2. In two separate terminal windows:
 
-* Navigate to ``report_manager``
+* Navigate to ``report_manager`` in both of them
 
 .. code-block:: bash
 
 	$ cd CKG/src/report_manager
 
-* Start a celery queue from the report_manager directory:
+* Start a celery queue from the report_manager directory, in each window:
+
+**Default queue**
 
 .. code-block:: bash
 
 	$ celery -A worker worker -l debug
 
-3. In third terminal window:
+
+**Compute queue - Report generation**
+
+.. code-block:: bash
+
+	$ celery -A worker worker --loglevel=DEBUG --concurrency=3 -E -Q compute
+
+
+3. In a fourth terminal window:
 
 * Run the report manager index app:
 

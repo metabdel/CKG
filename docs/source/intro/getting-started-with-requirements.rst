@@ -7,15 +7,24 @@ Java
 
 Before starting setting up Neo4j and, later on, the Clinical Knowledge Graph, it is very important that you have *Java* installed in your machine.
 
-To check if you already have **Java SE Development Kit 1.8** installed, run ``/usr/libexec/java_home -v 1.8`` in the terminal. This should print out
-a path like ``/Library/Java/JavaVirtualMachines/jdk1.8.0_171.jdk/Contents/Home``. If you got this message ``Unable to find any JVMs matching version "1.8".``, 
-please follow the steps below:
+Different versions of a Neo4j database can have different requirements. For example, Neo4j 3.5 versions require Oracle Java 8, while Neo4j 4.0 versions already require Oracle Java 11.
+When using a new versionof Neo4j, always remember to read the respective Operations Manual, and check for the software requirements.
 
-1. Go to ``https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html`` and download the version that fits your OS.
+To check if you already have **Java SE Development Kit** installed, run ``java -version`` in your terminal window. This should print out three lines similar to the following, with possible variation in the version:
+
+.. code-block:: python
+	
+	java version "1.8.0_171"
+	Java(TM) SE Runtime Environment (build 1.8.0_171-b11)
+	Java HotSpot(TM) 64-Bit Server VM (build 25.171-b11, mixed mode)
+
+Running ``/usr/libexec/java_home`` in the terminal should print out a path like ``/Library/Java/JavaVirtualMachines/jdk1.8.0_171.jdk/Contents/Home``. Otherwise, please follow the steps below:
+
+1. Go to ``https://www.oracle.com/java/technologies/javase-downloads.html`` and download the version that fits your Neo4j version and OS requirements.
 
 #. Install the package.
 
-#. Run ``/usr/libexec/java_home -v 1.8`` in the terminal to make sure the *Java* package has been installed in ``/Library/Java/JavaVirtualMachines/``.
+#. Run ``/usr/libexec/java_home`` in the terminal to make sure the *Java* package has been installed in ``/Library/Java/JavaVirtualMachines/``.
 
 
 R 
