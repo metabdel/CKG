@@ -219,11 +219,11 @@
 <p>Setting up the Clinical Knowledge Graph is straightforward.
 Assuming you have <strong>Python 3.6</strong> already installed and added to <code class="docutils literal notranslate"><span class="pre">PATH</span></code>, you can choose to create a virtual environment where all the packages with the specific versions will be installed. To do so, use Virtualenv.</p>
 <p>To check which Python version is currently installed:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ python3 --version
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ python3.6 --version
 </pre></div>
 </div>
 <p>And where this Python version is:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ which python3
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ which python3.6
 </pre></div>
 </div>
 <p>If this does not correspond to the correct Python version you want to run, you can create a shell alias in the bash file:</p>
@@ -236,7 +236,7 @@ Assuming you have <strong>Python 3.6</strong> already installed and added to <co
 <ol class="arabic simple">
 <li><p>Add at the end of the file:</p></li>
 </ol>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">alias</span> <span class="nv">python3</span><span class="o">=</span><span class="s2">&quot;/path/to/correct/python3.6&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">alias</span> python3.6<span class="o">=</span><span class="s2">&quot;/path/to/correct/python3.6&quot;</span>
 </pre></div>
 </div>
 <ol class="arabic simple">
@@ -288,7 +288,8 @@ Assuming you have <strong>Python 3.6</strong> already installed and added to <co
 </div>
 <p>Once this is finished, you can find all the Python modules neccessary to run the Clinical Knowledge graph in <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code>.
 To install all the packages required, simply run:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ pip install -r requirements.txt
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ <span class="nb">cd</span> CKG/
+$ pip install -r requirements.txt
 </pre></div>
 </div>
 <div class="admonition warning">
@@ -296,8 +297,7 @@ To install all the packages required, simply run:</p>
 <p>Make sure the virtual environment previously created is active before installing <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code>.</p>
 </div>
 <p>Now that all the packages are correctly installed, you will have to create the appropriate directory architecture within the local copy of the cloned repository:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ <span class="nb">cd</span> CKG/
-$ python setup_CKG.py
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ python setup_CKG.py
 $ python setup_config_files.py
 </pre></div>
 </div>

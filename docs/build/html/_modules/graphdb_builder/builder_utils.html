@@ -208,6 +208,7 @@
 <span class="kn">import</span> <span class="nn">urllib</span>
 <span class="kn">import</span> <span class="nn">wget</span>
 <span class="kn">import</span> <span class="nn">base64</span>
+<span class="kn">import</span> <span class="nn">glob</span>
 <span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">import</span> <span class="nn">ftplib</span>
@@ -267,6 +268,12 @@
     <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">na_values</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;NA&#39;</span><span class="p">],</span> <span class="n">convert_float</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="get_files_by_pattern"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.get_files_by_pattern">[docs]</a><span class="k">def</span> <span class="nf">get_files_by_pattern</span><span class="p">(</span><span class="n">regex_path</span><span class="p">):</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">regex_path</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">files</span></div>
 
 
 <div class="viewcode-block" id="get_extra_pairs"><a class="viewcode-back" href="../../_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.get_extra_pairs">[docs]</a><span class="k">def</span> <span class="nf">get_extra_pairs</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">extra_file</span><span class="p">):</span>

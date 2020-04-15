@@ -213,13 +213,19 @@
 <div class="section" id="java">
 <h2>Java<a class="headerlink" href="#java" title="Permalink to this headline">¶</a></h2>
 <p>Before starting setting up Neo4j and, later on, the Clinical Knowledge Graph, it is very important that you have <em>Java</em> installed in your machine.</p>
-<p>To check if you already have <strong>Java SE Development Kit 1.8</strong> installed, run <code class="docutils literal notranslate"><span class="pre">/usr/libexec/java_home</span> <span class="pre">-v</span> <span class="pre">1.8</span></code> in the terminal. This should print out
-a path like <code class="docutils literal notranslate"><span class="pre">/Library/Java/JavaVirtualMachines/jdk1.8.0_171.jdk/Contents/Home</span></code>. If you got this message <code class="docutils literal notranslate"><span class="pre">Unable</span> <span class="pre">to</span> <span class="pre">find</span> <span class="pre">any</span> <span class="pre">JVMs</span> <span class="pre">matching</span> <span class="pre">version</span> <span class="pre">&quot;1.8&quot;.</span></code>,
-please follow the steps below:</p>
+<p>Different versions of a Neo4j database can have different requirements. For example, Neo4j 3.5 versions require Oracle Java 8, while Neo4j 4.0 versions already require Oracle Java 11.
+When using a new versionof Neo4j, always remember to read the respective Operations Manual, and check for the software requirements.</p>
+<p>To check if you already have <strong>Java SE Development Kit</strong> installed, run <code class="docutils literal notranslate"><span class="pre">java</span> <span class="pre">-version</span></code> in your terminal window. This should print out three lines similar to the following, with possible variation in the version:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">java</span> <span class="n">version</span> <span class="s2">&quot;1.8.0_171&quot;</span>
+<span class="n">Java</span><span class="p">(</span><span class="n">TM</span><span class="p">)</span> <span class="n">SE</span> <span class="n">Runtime</span> <span class="n">Environment</span> <span class="p">(</span><span class="n">build</span> <span class="mf">1.8</span><span class="o">.</span><span class="mi">0</span><span class="n">_171</span><span class="o">-</span><span class="n">b11</span><span class="p">)</span>
+<span class="n">Java</span> <span class="n">HotSpot</span><span class="p">(</span><span class="n">TM</span><span class="p">)</span> <span class="mi">64</span><span class="o">-</span><span class="n">Bit</span> <span class="n">Server</span> <span class="n">VM</span> <span class="p">(</span><span class="n">build</span> <span class="mf">25.171</span><span class="o">-</span><span class="n">b11</span><span class="p">,</span> <span class="n">mixed</span> <span class="n">mode</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Running <code class="docutils literal notranslate"><span class="pre">/usr/libexec/java_home</span></code> in the terminal should print out a path like <code class="docutils literal notranslate"><span class="pre">/Library/Java/JavaVirtualMachines/jdk1.8.0_171.jdk/Contents/Home</span></code>. Otherwise, please follow the steps below:</p>
 <ol class="arabic simple">
-<li><p>Go to <code class="docutils literal notranslate"><span class="pre">https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html</span></code> and download the version that fits your OS.</p></li>
+<li><p>Go to <code class="docutils literal notranslate"><span class="pre">https://www.oracle.com/java/technologies/javase-downloads.html</span></code> and download the version that fits your Neo4j version and OS requirements.</p></li>
 <li><p>Install the package.</p></li>
-<li><p>Run <code class="docutils literal notranslate"><span class="pre">/usr/libexec/java_home</span> <span class="pre">-v</span> <span class="pre">1.8</span></code> in the terminal to make sure the <em>Java</em> package has been installed in <code class="docutils literal notranslate"><span class="pre">/Library/Java/JavaVirtualMachines/</span></code>.</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">/usr/libexec/java_home</span></code> in the terminal to make sure the <em>Java</em> package has been installed in <code class="docutils literal notranslate"><span class="pre">/Library/Java/JavaVirtualMachines/</span></code>.</p></li>
 </ol>
 </div>
 <div class="section" id="r">
