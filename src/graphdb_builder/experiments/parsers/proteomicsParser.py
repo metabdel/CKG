@@ -124,8 +124,10 @@ def load_dataset(uri, configuration):
         for regex in regexCols:
             r = re.compile(regex)
             columns.update(set(filter(r.match, data.columns)))
-        data = data[list(columns)].replace('Filtered', np.nan)
 
+        data = data[list(columns)].replace('Filtered', np.nan)
+        value_cols = [c for c in data.columns if configuration['valueCol'] in c]
+        data[value_cols] = data[value_cols].apply(lambda x: pd.to_numeric(x,errors='coerce')) 
         data = data.dropna(how='all', axis=0)
     else:
         raise Exception("Error when importing proteomics experiment.\n Missing columns: {}".format(",".join(missing_cols)))

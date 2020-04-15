@@ -1548,7 +1548,7 @@ def run_ttest(df, condition1, condition2, alpha = 0.05, drop_cols=["sample"], su
     df = df.drop(drop_cols, axis = 1)
     method = 'Unpaired t-test'
     if paired:
-        df = df.set_index([group, subject])
+        df = df.reset_index().set_index([group, subject])
         method = 'Paired t-test'
     else:
         df = df.drop([subject], axis = 1)
@@ -2239,8 +2239,11 @@ def run_snf(df_dict, clusters, distance_metric, K_affinity, mu_affinity):
     pass
 
 
-def aggregate_for_polar(data, group_by, value_col, aggregate_func='mean'):
+def aggregate_for_polar(data, group_by, value_col, aggregate_func='mean', normalize=True):
     aggr_df = pd.DataFrame()
+    if normalize:
+        data = data.set_index(group).apply(zscore)
+        data = data.reset_index()
     df = data.groupby(group_by)
     list_cols = []
     for group in df.groups:
