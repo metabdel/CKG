@@ -30,7 +30,7 @@ try:
     from rpy2.robjects.packages import importr
     from rpy2.robjects import pandas2ri
 
-    pandas2ri.activate()
+    # pandas2ri.activate()
     R = ro.r
     base = importr('base')
     stats_r = importr('stats')
@@ -633,6 +633,7 @@ def run_pca(data, drop_cols=['sample', 'subject'], group='group', components=2, 
             cols = []
             if components>3:
                 cols = resultDf.columns[4:]
+                cols = [str(i) for i in cols]
             resultDf.columns = ["name", "x", "y", "z"] + cols
 
         result['pca'] = (resultDf, loadings)
@@ -1631,7 +1632,7 @@ def define_samr_method(df, subject, group, drop_cols):
             method = 'Multiclass'
     return method, labels
 
-def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample'], alpha=0.05, s0=1, permutations=250, fc=0, is_logged=True):
+def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample'], alpha=0.05, s0='null', permutations=250, fc=0, is_logged=True):
     """
     Python adaptation of the 'samr' R package for statistical tests with permutation-based correction and s0 parameter.
     For more information visit https://cran.r-project.org/web/packages/samr/samr.pdf.
@@ -1651,56 +1652,63 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
 
         result = run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample'], alpha=0.05, s0=1, permutations=250, fc=0)
     """
-    R_function = R('''result <- function(data, res_type, s0, nperms) {
-                                    samr(data=data, resp.type=res_type, s0=s0, nperms=nperms, random.seed = 12345, s0.perc=NULL)
-                                    }''')
+    R_dataprep_function = R('''result <- function(x, y, genenames) {
+                                list(x=as.matrix(x), y=y, genenames=genenames,logged2=TRUE)
+                                }''')
+
+    R_samr_function = R('''result <- function(data, res_type, s0, nperms) {
+                                samr(data=data, resp.type=res_type, s0=s0, nperms=nperms, random.seed = 12345, s0.perc=NULL)
+                                }''')
+
     if permutations > 0 and r_installation:
         method, labels = define_samr_method(df, subject, group, drop_cols)
-        groups = df[group].unique() 
-        df = df.set_index(group).drop(drop_cols, axis=1).T
-        delta = 0.68
-        data = base.list(x=base.as_matrix(df.values), y=base.unlist(labels), geneid=base.unlist(df.index), logged2=is_logged)
+        groups = df[group].unique()
+        df_py = df.set_index('group').drop(drop_cols, axis=1).astype(float)
+        df_r = df.set_index('sample').drop(['group', 'subject'], axis=1).T.astype(float)
+        data = R_dataprep_function(pandas2ri.py2rpy(df_r), np.array(labels), np.array(df_r.index))
+        
         if s0 is None or s0 == "null":
             s0 = ro.r("NULL")
-        if is_logged:
-            fc = np.log2(fc)
-        samr_res = R_function(data=data, res_type=method, s0=s0, nperms=permutations)
+
+        samr_res = R_samr_function(data=data, res_type=method, s0=s0, nperms=permutations)
         delta_table = samr.samr_compute_delta_table(samr_res, fc)
-        siggenes_table = samr.samr_compute_siggenes_table(samr_res, delta, data, delta_table, all_genes=True)
-        nperms_run = samr_res[8][0]
-        s0_used = samr_res[13][0]
-        s = samr_res[11] - s0_used
-        denom = samr_res[11]
-        f_stats = samr_res[9]
-        pvalues = samr.samr_pvalues_from_perms(samr_res[9], samr_res[21])
+        delta_table_df = pd.DataFrame(delta_table, columns=['delta', '#med false pos', '90th perc false pos', '#called', 'median FDR', '90th perc FDR', 'cutlo', 'cuthi'])
+        delta = delta_table_df[delta_table_df['median FDR'] < alpha].iloc[0,0]
+        siggenes_table = samr.samr_compute_siggenes_table(samr_res, delta, data, delta_table, all_genes=ro.r("TRUE"))
+        nperms_run = samr_res.rx2('nperms.act')[0]
+        s0_used = samr_res.rx2('s0')[0]
+        denom = samr_res.rx2('sd')
+        s = denom - s0_used
+        f_stats = samr_res.rx2('tt')
+        pvalues = samr.samr_pvalues_from_perms(samr_res.rx2('tt'), samr_res.rx2('ttstar'))
         
-        
-        if isinstance(siggenes_table[0], np.ndarray):
-            up = pd.DataFrame(np.reshape(siggenes_table[0], (-1, siggenes_table[3][0]))).T
+        if isinstance(siggenes_table.rx2('genes.up'), np.ndarray):
+            up = pd.DataFrame(np.reshape(siggenes_table.rx2('genes.up'), (-1, siggenes_table.rx2('ngenes.up')[0]))).T
         else:
             up = pd.DataFrame()
-        if isinstance(siggenes_table[1], np.ndarray):
-            down = pd.DataFrame(np.reshape(siggenes_table[1], (-1, siggenes_table[4][0]))).T
+        if isinstance(siggenes_table.rx2('genes.lo'), np.ndarray):
+            down = pd.DataFrame(np.reshape(siggenes_table.rx2('genes.lo'), (-1, siggenes_table.rx2('ngenes.lo')[0]))).T
         else:
             down = pd.DataFrame()
-
+            
         total = pd.concat([up, down])
         total.iloc[:,-1] = total.iloc[:,-1].astype(float)/100
-        qvalues = total.iloc[:,[2,-1]]
+        qvalues = total.iloc[:,[1,-1]]
         qvalues.columns = ['identifier', 'padj']
         qvalues = qvalues.sort_values(["identifier"])
+    
         
         pairwise_results = []
-        for col in df.T.columns:
-            rows = df.T[col]
+        for col in df_py.columns:
+            rows = df_py[col]
             pairwise_result = calculate_pairwise_ttest(rows.reset_index(), column=col, subject=subject, group=group, is_logged=is_logged)
             pairwise_cols = pairwise_result.columns
             pairwise_results.extend(pairwise_result.values.tolist())
         
         pairwise = pd.DataFrame(pairwise_results, columns=pairwise_cols).set_index("identifier")
-        res = pd.DataFrame([df.index, f_stats, pvalues]).T
+        res = pd.DataFrame([df_py.columns, f_stats, pvalues]).T
         res.columns = ['identifier', 'SAMR test statistics', 'pvalue']
-        
+
         res = pairwise.join(res.set_index('identifier')).reset_index()
         res = correct_pairwise_ttest(res, alpha)
 
