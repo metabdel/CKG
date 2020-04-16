@@ -90,16 +90,18 @@ def parse_contents(contents, filename):
     """
     Reads binary string files and returns a Pandas DataFrame.
     """
+    df = None
     content_type, content_string = contents.split(',')
     decoded = base64.b64decode(content_string)
-    file = filename.split('.')[-1]
+    file_format = filename.split('.')[-1]
 
-    if file == 'txt':
-        df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), sep='\t', low_memory=False)
-    elif file == 'csv':
-        df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), low_memory=False)
-    elif file == 'xlsx' or file == 'xls':
+    if file_format == 'txt':
+        df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), sep='\t', low_memory=True)
+    elif file_format == 'csv':
+        df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), low_memory=True)
+    elif file_format == 'xlsx' or file_format == 'xls':
         df = pd.read_excel(io.BytesIO(decoded))
+    
     return df
 
 

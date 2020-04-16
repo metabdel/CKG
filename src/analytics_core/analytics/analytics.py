@@ -475,6 +475,8 @@ def get_proteomics_measurements_ready(df, index_cols=['group', 'sample', 'subjec
         result = get_proteomics_measurements_ready(df, index_cols=['group', 'sample', 'subject'], drop_cols=['sample'], group='group', identifier='identifier', extra_identifier='name', imputation = True, method = 'mixed', missing_method = 'at_least_x', missing_per_group=False, min_valid=5, value_col='LFQ_intensity')
     """
     if df.columns.isin(index_cols).sum() == len(index_cols):
+        df = df[df[group].notna()]
+        df[group] = df[group].astype(str)
         df = df.set_index(index_cols)
         if extra_identifier is not None and extra_identifier in df.columns:
             df[identifier] = df[extra_identifier].map(str) + "~" + df[identifier].map(str)
@@ -1549,7 +1551,7 @@ def run_ttest(df, condition1, condition2, alpha = 0.05, drop_cols=["sample"], su
     df = df.drop(drop_cols, axis = 1)
     method = 'Unpaired t-test'
     if paired:
-        df = df.set_index([group, subject])
+        df = df.reset_index().set_index([group, subject])
         method = 'Paired t-test'
     else:
         df = df.drop([subject], axis = 1)
@@ -2247,8 +2249,11 @@ def run_snf(df_dict, clusters, distance_metric, K_affinity, mu_affinity):
     pass
 
 
-def aggregate_for_polar(data, group_by, value_col, aggregate_func='mean'):
+def aggregate_for_polar(data, group_by, value_col, aggregate_func='mean', normalize=True):
     aggr_df = pd.DataFrame()
+    if normalize:
+        data = data.set_index(group).apply(zscore)
+        data = data.reset_index()
     df = data.groupby(group_by)
     list_cols = []
     for group in df.groups:
