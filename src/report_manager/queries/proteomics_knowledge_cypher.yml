@@ -28,7 +28,7 @@ Drug:
           WHERE ((protein.name+"~"+protein.id) IN [PROTEINIDS]) AND toFloat(r.score)>=0.9
           WITH drug, count(protein) AS r_count
           WHERE r_count>=LIMIT_COUNT
-          MATCH (protein:Protein)-[r:ACTS_ON]-(drug)
+          MATCH (protein:Protein)<-[r:ACTS_ON]-(drug)
           WHERE ((protein.name+"~"+protein.id) IN [PROTEINIDS]) AND toFloat(r.score)>=0.9
           RETURN (protein.name+"~"+protein.id) AS node1, drug.name AS node2, r.score AS weight, r.action AS type
 Complex:
@@ -41,9 +41,12 @@ Complex:
   involved_rels:
     - IS_SUBUNIT_OF
   query: >
-          MATCH (complex:Complex)-[r:IS_SUBUNIT_OF]-(protein:Protein)
-          WHERE ((protein.name+"~"+protein.id) IN [PROTEINIDS])
-          RETURN (protein.name+"~"+protein.id) as node1, complex.name AS node2, r.score AS weight, type(r) as type
+          MATCH (complex:Complex)<-[:IS_SUBUNIT_OF]-(protein:Protein) 
+          WHERE ((protein.name+"~"+protein.id) IN [PROTEINIDS]) 
+          WITH complex, collect(protein) as Proteins WHERE size(Proteins)>=LIMIT_COUNT
+          MATCH (complex)<-[r:IS_SUBUNIT_OF]-(p:Protein)
+          WHERE ((p.name+"~"+p.id) IN [PROTEINIDS])
+          RETURN (p.name+"~"+p.id) as node1, complex.name AS node2, r.score AS weight, type(r) as type
 Pathway:
   name: associated pathways
   description: get relationships to pathways. Limit the result to pathways associated to at least two proteins.
