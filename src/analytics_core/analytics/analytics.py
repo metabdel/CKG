@@ -1,4 +1,5 @@
 import pandas as pd
+import re
 import itertools
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
@@ -1757,7 +1758,41 @@ def run_fisher(group1, group2, alternative='two-sided'):
 
     return (odds, pvalue)
 
+def run_site_regulation_enrichment(regulation_data, annotation, identifier='identifier', groups=['group1', 'group2'], annotation_col='annotation', reject_col='rejected', group_col='group', method='fisher', regex="(\w+~.+)_\w\d+\-\w+"):
+    """
+    This function runs a simple enrichment analysis for significantly regulated protein sites in a dataset.
 
+    :param regulation_data: pandas dataframe resulting from differential regulation analysis.
+    :param annotation: pandas dataframe with annotations for features (columns: 'annotation', 'identifier' (feature identifiers), and 'source').
+    :param str identifier: name of the column from annotation containing feature identifiers.
+    :param list groups: column names from regulation_data containing group identifiers.
+    :param str annotation_col: name of the column from annotation containing annotation terms.
+    :param str reject_col: name of the column from regulatio_data containing boolean for rejected null hypothesis.
+    :param str group_col: column name for new column in annotation dataframe determining if feature belongs to foreground or background.
+    :param str method: method used to compute enrichment (only 'fisher' is supported currently).
+    :param str regex: how to extract the annotated identifier from the site identifier
+    :return: Pandas dataframe with columns: 'terms', 'identifiers', 'foreground', 'background', 'pvalue', 'padj' and 'rejected'.
+
+    Example::
+
+        result = run_site_regulation_enrichment(regulation_data, annotation, identifier='identifier', groups=['group1', 'group2'], annotation_col='annotation', reject_col='rejected', group_col='group', method='fisher', match="(\w+~.+)_\w\d+\-\w+")
+    """
+    result = pd.DataFrame()
+    if regulation_data is not None:
+        if not regulation_data.empty:
+            new_ids = []
+            for ident in regulation_data[identifier].tolist():
+                match = re.search(regex, ident)
+                if match is not None:
+                    new_ids.append(match.group(1))
+                else:
+                    new_ids.append(ident)
+            regulation_data[identifier] = new_ids
+            regulation_data = regulation_data.drop_duplicates()
+            result = run_regulation_enrichment(regulation_data, annotation, identifier, groups, annotation_col, reject_col, group_col, method)
+    
+    return result
+    
 def run_regulation_enrichment(regulation_data, annotation, identifier='identifier', groups=['group1', 'group2'], annotation_col='annotation', reject_col='rejected', group_col='group', method='fisher'):
     """
     This function runs a simple enrichment analysis for significantly regulated features in a dataset.
@@ -2240,30 +2275,6 @@ def run_snf(df_dict, clusters, distance_metric, K_affinity, mu_affinity):
     """
     pass
 
-
-def aggregate_for_polar(data, group_by, value_col, aggregate_func='mean', normalize=True):
-    aggr_df = pd.DataFrame()
-    if normalize:
-        data = data.set_index(group).apply(zscore)
-        data = data.reset_index()
-    df = data.groupby(group_by)
-    list_cols = []
-    for group in df.groups:
-        if aggregate_func == 'mean':
-            aggr = df.get_group(group).mean()[value_col]
-        elif aggregate_func == 'median':
-            aggr = df.get_group(group).median()[value_col]
-        elif aggregate_func == 'sum':
-            aggr = df.get_group(group).sum()[value_col]
-        else:
-            break
-        taxid, function = group
-        list_cols.append([taxid, function, aggr])
-    
-    if len(list_cols) > 0:
-        aggr_df = pd.DataFrame(list_cols, columns=group_by+'aggr '+value_col)
-    
-    return aggr_df
 
 def run_km(data, time_col, event_col, group_col, args={}):
     kmfit, summary = kaplan_meierAnalysis.run_km(data, time_col, event_col, group_col, args)

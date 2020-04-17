@@ -293,6 +293,34 @@ class Analysis:
                     self.analysis_type = annotation_type+"_"+self.analysis_type
                     self.result[self.analysis_type] = analytics.run_regulation_enrichment(self.data[self.args['regulation_data']], self.data[self.args['annotation']], identifier=identifier, groups=groups, annotation_col=annotation_col, reject_col=reject_col, method=method)
             print('Enrichment', time.time() - start)
+        elif self.analysis_type == "regulation_site_enrichment":
+            start = time.time()
+            identifier = 'identifier'
+            groups = ['group1', 'group2']
+            annotation_col = 'annotation'
+            reject_col = 'rejected'
+            method = 'fisher'
+            annotation_type = 'functional'
+            regex = "(\w+~.+)_\w\d+\-\w+"
+            if 'identifier' in self.args:
+                identifier = self.args['identifier']
+            if 'groups' in self.args:
+                groups = self.args['groups']
+            if 'annotation_col' in self.args:
+                annotation_col = self.args['annotation_col']
+            if 'reject_col' in self.args:
+                reject_col = self.args['reject_col']
+            if 'method' in self.args:
+                method = self.args['method']
+            if 'annotation_type' in self.args:
+                annotation_type = self.args['annotation_type']
+            if 'regex' in self.args:
+                regex = self.args['regex']
+
+            if 'regulation_data' in self.args and 'annotation' in self.args:
+                if self.args['regulation_data'] in self.data and self.args['annotation'] in self.data:
+                    self.analysis_type = annotation_type+"_"+self.analysis_type
+                    self.result[self.analysis_type] = analytics.run_site_regulation_enrichment(self.data[self.args['regulation_data']], self.data[self.args['annotation']], identifier=identifier, groups=groups, annotation_col=annotation_col, reject_col=reject_col, method=method, regex=regex)
         elif self.analysis_type == 'long_format':
             self.result[self.analysis_type] = analytics.transform_into_long_format(self.data, drop_columns=self.args['drop_columns'], group=self.args['group'], columns=self.args['columns'])
         elif self.analysis_type == 'ranking_with_markers':
