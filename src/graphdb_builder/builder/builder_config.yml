@@ -28,6 +28,12 @@ separator: '|'
 file_clinical: 'ClinicalData_PROJECTID.xlsx'
 file_project: 'ProjectData_PROJECTID.xlsx'
 file_design: 'ExperimentalDesign_PROJECTID.xlsx'
+file_proteomics:
+    maxquant-protein groups: proteinGroups.txt
+    maxquant-peptides: peptides.txt
+    maxquant-oxidation: Oxidation (M)Sites.txt
+    maxquant-glycation: GlycationSites.txt
+    maxquant-phospho sty sites: Phospho (STY)Sites.txt
 
 download: True
 

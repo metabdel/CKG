@@ -1,7 +1,6 @@
 import os.path
 import re
 from collections import defaultdict
-import ckg_utils
 from graphdb_builder import mapping as mp, builder_utils
 
 #########################
@@ -36,9 +35,12 @@ def parser(databases_directory, download=True):
                 relationships[(dataset, "annotated_to_pathway")] = parsePathwayRelationships(config, rf, metabolite_mapping)
             #elif dataset == "drug":
                 #relationships[(dataset, "annotated_to_pathway")] = set()
-    
+
+    builder_utils.remove_directory(directory)
+
     return entities, relationships, entities_header, relationships_headers
-        
+
+
 def parsePathways(config, databases_directory, fhandler):
     entities = set()
     organisms = config['organisms']
@@ -58,10 +60,11 @@ def parsePathways(config, databases_directory, fhandler):
                 organism = organisms[organism]
                 entities.add((identifier, "Pathway", name, name, organism, linkout, "Reactome"))
                 mf.write(identifier+"\t"+name+"\n")
-    
+
     mp.mark_complete_mapping(entity="Pathway")
 
     return entities
+
 
 def parsePathwayHierarchy(fhandler):
     relationships = set()

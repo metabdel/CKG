@@ -1,5 +1,4 @@
 import os.path
-import ckg_utils
 from graphdb_builder import mapping as mp, builder_utils
 
 ############################################
@@ -39,5 +38,7 @@ def parser(databases_directory, download=True):
                 if drug in drugmapping:
                     drug = drugmapping[drug]
                     relationships.add((drug, gene, "TARGETS", "NA", "NA", "NA", interactionType, "DGIdb: "+source))
-
+    
+    builder_utils.remove_directory(directory)
+    
     return (relationships, header, output_file)

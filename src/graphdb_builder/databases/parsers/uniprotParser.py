@@ -1,10 +1,7 @@
 import os.path
-import gzip
 from collections import defaultdict
 import pandas as pd
 import re
-import time
-import ckg_utils
 from graphdb_builder import mapping as mp, builder_utils
 
 #########################
@@ -26,34 +23,39 @@ def parser(databases_directory, import_directory, download=True, updated_on=None
 
     #Variants
     stats.update(parseUniProtVariants(config, databases_directory, import_directory, download))
-    
+
     #Gene ontology annotation
     relationships = parseUniProtAnnotations(config, databases_directory, download)
     relationships_header = config['go_header']
     stats.update(print_multiple_relationships_files(relationships, relationships_header, import_directory, is_first=True, updated_on=updated_on))
 
-    return stats 
+    directory = os.path.join(databases_directory, "UniProt")
+    builder_utils.remove_directory(directory)
+    
+    return stats
+
 
 def parse_release_notes(databases_directory, config, download=True):
     release_notes_url = config['release_notes']
-    directory = os.path.join(databases_directory,"UniProt")
+    directory = os.path.join(databases_directory, "UniProt")
     builder_utils.checkDirectory(directory)
     if download:
         builder_utils.downloadDB(release_notes_url, directory)
-        
+
+
 def parse_fasta(databases_directory, config, import_directory, download=True, updated_on=None):
     stats = set()
     url = config['uniprot_fasta_file']
     entities_output_file = os.path.join(import_directory, "Amino_acid_sequence.tsv")
     rel_output_file = os.path.join(import_directory, "Protein_HAS_Sequence_Amino_acid_sequence.tsv")
-    
-    directory = os.path.join(databases_directory,"UniProt")
+
+    directory = os.path.join(databases_directory, "UniProt")
     builder_utils.checkDirectory(directory)
     file_name = os.path.join(directory, url.split('/')[-1])
-    
+
     if download:
         builder_utils.downloadDB(url, directory)
-        
+
     ff = builder_utils.read_gzipped_file(file_name)
     records = builder_utils.parse_fasta(ff)
     num_entities = 0
@@ -70,12 +72,13 @@ def parse_fasta(databases_directory, config, import_directory, download=True, up
                     ef.write(identifier+"\t"+header+'\t'+sequence+'\t'+str(sequence_len)+'\tUniProt\n')
                     rf.write(identifier+'\t'+identifier+'\tHAS_SEQUENCE\tUniProt\n')
                     num_entities += 1
-    
+
     stats.add(builder_utils.buildStats(num_entities, "entity", "Amino_acid_sequence", "UniProt", entities_output_file, updated_on))
     stats.add(builder_utils.buildStats(num_entities, "relationships", "HAS_SEQUENCE", "UniProt", rel_output_file, updated_on))
-    
+
     return stats
-    
+
+
 def parse_idmapping_file(databases_directory, config, import_directory, download=True, updated_on=None):
     regex_transcript = r"(-\d+$)"
     taxids = config['species']
@@ -85,7 +88,7 @@ def parse_idmapping_file(databases_directory, config, import_directory, download
     proteins = {}
 
     url = config['uniprot_id_url']
-    directory = os.path.join(databases_directory,"UniProt")
+    directory = os.path.join(databases_directory, "UniProt")
     builder_utils.checkDirectory(directory)
     file_name = os.path.join(directory, url.split('/')[-1])
     mapping_file = os.path.join(directory, 'mapping.tsv')
@@ -108,7 +111,7 @@ def parse_idmapping_file(databases_directory, config, import_directory, download
             data = line.rstrip("\r\n").split("\t")
             iid = data[0]
             if 'UniParc' in data:
-                if re.search(regex_transcript,iid):
+                if re.search(regex_transcript, iid):
                     transcripts.add(iid)
                 continue
             # data = line.decode('utf-8').rstrip("\r\n").split("\t")
@@ -118,7 +121,7 @@ def parse_idmapping_file(databases_directory, config, import_directory, download
             
             if iid not in skip:
                 skip = set()
-                if re.search(regex_transcript,iid):
+                if re.search(regex_transcript, iid):
                     transcripts.add(iid)
                 if iid not in aux and iid.split('-')[0] not in aux:
                     if identifier is not None:
@@ -133,7 +136,7 @@ def parse_idmapping_file(databases_directory, config, import_directory, download
                                 for synonym in synonyms:
                                     out.write(t+"\t"+synonym+"\n")
                             if len(transcripts) > 0:
-                                proteins[identifier].update({"isoforms":transcripts})
+                                proteins[identifier].update({"isoforms": transcripts})
                                 transcripts = set()
                             aux.pop(identifier, None)
                             if len(proteins) >= 1000:
@@ -161,12 +164,12 @@ def parse_idmapping_file(databases_directory, config, import_directory, download
 
         uf.close()
 
-    if len(proteins)>0:
+    if len(proteins) > 0:
         entities, relationships, pdb_entities = format_output(proteins)
         stats.update(print_single_file(entities, config['proteins_header'], proteins_output_file, "entity", "Protein", is_first, updated_on))
         stats.update(print_single_file(pdb_entities, config['pdb_header'], pdbs_output_file, "entity", "Protein_structure", is_first, updated_on))
         stats.update(print_multiple_relationships_files(relationships, config['relationships_header'], import_directory, is_first, updated_on))
-    
+
     mp.mark_complete_mapping(entity="Protein")
 
     return stats
@@ -248,6 +251,7 @@ def addUniProtTexts(textsFile, proteins):
             if protein in proteins:
                 proteins[protein].update({"description": function})
 
+
 def parseUniProtVariants(config, databases_directory, import_directory, download=True, updated_on=None):
     data = defaultdict()
     variant_regex = r"(g\.\w+>\w)"
@@ -256,7 +260,7 @@ def parseUniProtVariants(config, databases_directory, import_directory, download
     aa = config['amino_acids']
     entities = set()
     relationships = defaultdict(set)
-    directory = os.path.join(databases_directory,"UniProt")
+    directory = os.path.join(databases_directory, "UniProt")
     builder_utils.checkDirectory(directory)
     fileName = os.path.join(directory, url.split('/')[-1])
     if download:
@@ -271,7 +275,7 @@ def parseUniProtVariants(config, databases_directory, import_directory, download
         line = line
         if not line.startswith('#') and not din:
             continue
-        elif i<=2:
+        elif i <= 2:
             din = True
             i += 1
             continue
@@ -294,14 +298,13 @@ def parseUniProtVariants(config, databases_directory, import_directory, download
             if var_matches and chr_matches:
                 chromosome = 'chr'+chr_matches.group(1)
                 ident = chromosome+":"+var_matches.group(1)
-                #consequence = data[4]
                 altName = [externalID, data[5], pvariant, chromosome_coord]
                 if ref in aa and alt in aa:
                     altName.append(aa[ref]+pos+aa[alt])
                 pvariant = protein+"_"+pvariant
-                entities.add((ident, "Known_variant", pvariant, ",".join(altName), impact, clin_relevance, disease, original_source, "UniProt"))
+                entities.add((ident, "Known_variant", pvariant, externalID, ",".join(altName), impact, clin_relevance, disease, original_source, "UniProt"))
                 if chromosome != 'chr-':
-                    relationships[('Chromosome','known_variant_found_in_chromosome')].add((ident, chromosome.replace('chr',''), "VARIANT_FOUND_IN_CHROMOSOME","UniProt"))
+                    relationships[('Chromosome', 'known_variant_found_in_chromosome')].add((ident, chromosome.replace('chr',''), "VARIANT_FOUND_IN_CHROMOSOME","UniProt"))
                 if gene != "":
                     relationships[('Gene','known_variant_found_in_gene')].add((ident, gene, "VARIANT_FOUND_IN_GENE", "UniProt"))
                 if protein !="":

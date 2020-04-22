@@ -2,7 +2,6 @@ import os.path
 from collections import defaultdict
 from lxml import etree
 import zipfile
-import ckg_utils
 from graphdb_builder import mapping as mp, builder_utils
 
 #################################
@@ -10,23 +9,25 @@ from graphdb_builder import mapping as mp, builder_utils
 #################################
 def parser(databases_directory, download=True):
     config = builder_utils.get_config(config_name="hmdbConfig.yml", data_type='databases')
-    metabolites = extract_metabolites(config, databases_directory, download)
+    directory = os.path.join(databases_directory, "HMDB")
+    builder_utils.checkDirectory(directory)
+    metabolites = extract_metabolites(config, directory, download)
     mapping = mp.getMappingFromOntology(ontology="Disease", source=config['HMDB_DO_source'])
     mapping.update(mp.getMappingFromOntology(ontology="Tissue", source=None))
-    entities, attributes = build_metabolite_entity(config, databases_directory, metabolites)
+    entities, attributes = build_metabolite_entity(config, directory, metabolites)
     relationships = build_relationships_from_HMDB(config, metabolites, mapping)
     entities_header = ['ID'] + attributes
     relationships_header = config['relationships_header']
 
+    builder_utils.remove_directory(directory)
+
     return (entities, relationships, entities_header, relationships_header)
 
 
-def extract_metabolites(config, databases_directory, download=True):
+def extract_metabolites(config, directory, download=True):
     metabolites = defaultdict()
     prefix = "{http://www.hmdb.ca}"
     url = config['HMDB_url']
-    directory = os.path.join(databases_directory, "HMDB")
-    builder_utils.checkDirectory(directory)
     fileName = os.path.join(directory, url.split('/')[-1])
     if download:
         builder_utils.downloadDB(url, directory)
@@ -63,7 +64,7 @@ def extract_metabolites(config, databases_directory, download=True):
     return metabolites
 
 
-def build_metabolite_entity(config, databases_directory, metabolites):
+def build_metabolite_entity(config, directory, metabolites):
     entities = set()
     attributes = config['HMDB_attributes']
     for metid in metabolites:
@@ -79,11 +80,11 @@ def build_metabolite_entity(config, databases_directory, metabolites):
             else:
                 entity.append('')
         entities.add(tuple(entity))
-    
-    build_HMDB_dictionary(databases_directory, metabolites)
-    
+
+    build_HMDB_dictionary(directory, metabolites)
+
     return entities, attributes
-    
+
 
 def build_relationships_from_HMDB(config, metabolites, mapping):
     relationships = defaultdict(list)
@@ -104,12 +105,11 @@ def build_relationships_from_HMDB(config, metabolites, mapping):
                     if metabolites[metid][ass].lower() in mapping:
                         partner = mapping[metabolites[metid][ass].lower()]
                     relationships[ident].append((metid, partner, associations[ass][0], "HMDB"))
-        
+
     return relationships
 
 
-def build_HMDB_dictionary(databases_directory, metabolites):
-    directory = os.path.join(databases_directory, "HMDB")
+def build_HMDB_dictionary(directory, metabolites):
     filename = "mapping.tsv"
     outputfile = os.path.join(directory, filename)
     mp.reset_mapping(entity="Metabolite")

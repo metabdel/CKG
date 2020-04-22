@@ -43,7 +43,7 @@ def ontologiesImport(importDirectory, ontologies=None, download=True, import_typ
     Generates all the entities and relationships from the provided ontologies. If the ontologies list is\
     not provided, then all the ontologies listed in the configuration will be imported (full_import). \
     This function also updates the stats object with numbers from the imported ontologies.
-    
+
     :param str importDirectory: path of the import directory where files will be created.
     :param list ontologies: a list of ontology names to be imported.
     :param bool download: wether database is to be downloaded.
@@ -55,6 +55,7 @@ def ontologiesImport(importDirectory, ontologies=None, download=True, import_typ
     statsDf = generateStatsDataFrame(stats)
     setupStats(import_type=import_type)
     writeStats(statsDf, import_type)
+
 
 def databasesImport(importDirectory, databases=None, n_jobs=1, download=True, import_type="partial"):
     """
@@ -74,12 +75,13 @@ def databasesImport(importDirectory, databases=None, n_jobs=1, download=True, im
     setupStats(import_type=import_type)
     writeStats(statsDf, import_type)
 
+
 def experimentsImport(projects=None, n_jobs=1, import_type="partial"):
     """
     Generates all the entities and relationships from the specified Projects. If the projects list is\
     not provided, then all the projects the experiments directory will be imported (full_import). \
     Calls function experimentImport.
-    
+
     :param list projects:  list of project identifiers to be imported.
     :param int n_jobs: number of jobs to run in parallel. 1 by default when updating one project.
     :param str import_type: type of import (´full´ or ´partial´).
@@ -96,7 +98,7 @@ def experimentsImport(projects=None, n_jobs=1, import_type="partial"):
 def experimentImport(importDirectory, experimentsDirectory, project):
     """
     Generates all the entities and relationships from the specified Project. Called from function experimentsImport.
-    
+
     :param str importDirectory: path to the directory where all the import files are generated.
     :param str experimentDirectory: path to the directory where all the experiments are located.
     :param str project: identifier of the project to be imported.
@@ -117,7 +119,7 @@ def usersImport(importDirectory, import_type='partial'):
     Generates User entities from excel file and grants access of new users to the database.
     This function also writes the relevant information to a tab-delimited file in the import \
     directory.
-    
+
     :param str importDirectory: path to the directory where all the import files are generated.
     :param str import_type: type of import (´full´ or ´partial).
     """
@@ -201,7 +203,7 @@ def setupStats(import_type):
 def createEmptyStats(statsCols, statsFile, statsName):
     """
     Creates a HDFStore object with a empty dataframe with the collected stats columns.
-    
+
     :param list statsCols: a list of columns with the fields collected from the import statistics.
     :param str statsFile: path where the object should be stored.
     :param str statsName: name if the file containing the stats object.
@@ -209,7 +211,7 @@ def createEmptyStats(statsCols, statsFile, statsName):
     try:
         statsDf = pd.DataFrame(columns=statsCols)
         with pd.HDFStore(statsFile) as hdf:
-            hdf.put(statsName, statsDf, format='table', data_columns=True, min_itemsize=2000)
+            hdf.put(statsName, statsDf, format='table', data_columns=True)
             hdf.close()
     except Exception as err:
         logger.error("Creating empty Stats object {} in file:{} > {}.".format(statsName, statsFile, err))
@@ -244,7 +246,7 @@ def writeStats(statsDf, import_type, stats_name=None):
         if stats_name is None:
             stats_name = getStatsName(import_type)
         with pd.HDFStore(stats_file) as hdf:
-            hdf.append(stats_name, statsDf, data_columns=True)
+            hdf.append(stats_name, statsDf, data_columns=True, min_itemsize={'time': 15})
     except Exception as err:
         logger.error("Writing Stats object {} in file:{} > {}.".format(stats_name, stats_file, err))
 
@@ -253,7 +255,7 @@ def getStatsName(import_type):
     """
     Generates the stats object name where to store the importing statistics from the CKG version, \
     which is defined in the configuration.
-    
+
     :return: statsName: key used to store in the stats object.
     :rtype: str
     """

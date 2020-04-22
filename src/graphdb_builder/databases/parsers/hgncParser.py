@@ -1,5 +1,4 @@
 import os.path
-import ckg_utils
 from graphdb_builder import builder_utils
 
 #########################################
@@ -14,10 +13,10 @@ def parser(databases_directory, download=True):
     fileName = os.path.join(directory, url.split('/')[-1])
     taxid = 9606
     entities_header = config['header']
-    
+
     if download:
         builder_utils.downloadDB(url, directory)
-    
+
     with open(fileName, 'r', encoding="utf-8") as df:
         first = True
         for line in df:
@@ -36,5 +35,7 @@ def parser(databases_directory, download=True):
 
             entities.add((geneSymbol, "Gene", geneName, geneFamily, ",".join(synonyms), taxid))
             #relationships.add((geneSymbol, transcript, "TRANSCRIBED_INTO"))
+
+    builder_utils.remove_directory(directory)
 
     return entities, entities_header

@@ -52,12 +52,12 @@ def parser(databases_directory, import_directory, download=True, updated_on=None
                             print_files(entities, entity_header, outputfile=os.path.join(import_directory, 'Functional_region.tsv'), is_first=is_first)
                             num_entities += len(entities)
                             if 'mentioned_in_publication' in relationships:
-                                print_files(relationships['mentioned_in_publication'], relationship_headers['mentioned_in_publication'], outputfile=os.path.join(import_directory,'Functional_region_mentioned_in_publication.tsv'), is_first=is_first)
+                                print_files(relationships['mentioned_in_publication'], relationship_headers['mentioned_in_publication'], outputfile=os.path.join(import_directory, 'Functional_region_mentioned_in_publication.tsv'), is_first=is_first)
                                 if 'mentioned_in_publication' not in num_relationships:
                                     num_relationships['mentioned_in_publication'] = 0
                                 num_relationships['mentioned_in_publication'] += len(relationships['mentioned_in_publication'])
                             if 'found_in_protein' in relationships:
-                                print_files(relationships['found_in_protein'], relationship_headers['found_in_protein'], outputfile=os.path.join(import_directory,'Functional_region_found_in_protein.tsv'), is_first=is_first, filter_for=('END_ID',valid_proteins))
+                                print_files(relationships['found_in_protein'], relationship_headers['found_in_protein'], outputfile=os.path.join(import_directory, 'Functional_region_found_in_protein.tsv'), is_first=is_first, filter_for=('END_ID', valid_proteins))
                                 if 'found_in_protein' not in num_relationships:
                                     num_relationships['found_in_protein'] = 0
                                 num_relationships['found_in_protein'] += len(relationships['found_in_protein'])
@@ -104,6 +104,8 @@ def parser(databases_directory, import_directory, download=True, updated_on=None
         for rel in num_relationships:
             stats.add(builder_utils.buildStats(num_relationships[rel], "relationship", rel.upper(), "Pfam", 'Functional_region_'+rel+'.tsv', updated_on))
 
+    builder_utils.remove_directory(directory)
+
     return stats
 
 
@@ -114,7 +116,7 @@ def print_files(data, header, outputfile, is_first, filter_for=None):
     if not df.empty:
         with open(outputfile, 'a', encoding='utf-8') as f:
             df.to_csv(path_or_buf=f, sep='\t',
-                    header=is_first, index=False, quotechar='"', 
+                    header=is_first, index=False, quotechar='"',
                     line_terminator='\n', escapechar='\\')
 
 

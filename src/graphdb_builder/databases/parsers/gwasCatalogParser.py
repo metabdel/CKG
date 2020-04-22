@@ -3,7 +3,7 @@ from collections import defaultdict
 from graphdb_builder import builder_utils
 
 
-def parser(databases_directory, download= True):
+def parser(databases_directory, download=True):
     config = builder_utils.get_config(config_name="gwasCatalogConfig.yml", data_type='databases')
     url = config['GWASCat_url']
     entities_header = config['entities_header']
@@ -34,7 +34,7 @@ def parser(databases_directory, download= True):
                 trait = data[34]
                 exp_factor = data[35]
                 study = data[36]
-                
+
                 entities.add((study, "GWAS_study", title, date, sample_size, replication_size, trait))
                 if pubmedid != "":
                     relationships["published_in_publication"].add((study, pubmedid, "PUBLISHED_IN", "GWAS Catalog"))
@@ -43,5 +43,7 @@ def parser(databases_directory, download= True):
                 if exp_factor != "":
                     exp_factor = exp_factor.split('/')[-1].replace('_', ':')
                     relationships["studies_trait"].add((study, exp_factor, "STUDIES_TRAIT", "GWAS Catalog"))
-        
+
+    builder_utils.remove_directory(directory)
+
     return (entities, relationships, entities_header, relationships_header)

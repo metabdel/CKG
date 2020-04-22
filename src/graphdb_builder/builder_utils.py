@@ -101,7 +101,7 @@ def parse_contents(contents, filename):
         df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), low_memory=True)
     elif file_format == 'xlsx' or file_format == 'xls':
         df = pd.read_excel(io.BytesIO(decoded))
-    
+
     return df
 
 
@@ -116,7 +116,7 @@ def export_contents(data, dataDir, filename):
     elif file == 'csv':
         csv_string = data.to_csv(os.path.join(dataDir, filename), sep=',', index=False, encoding='utf-8')
     elif file == 'xlsx' or file == 'xls':
-        csv_string = data.to_excel(os.path.join(dataDir, filename), index=False, encoding='utf-8')   
+        csv_string = data.to_excel(os.path.join(dataDir, filename), index=False, encoding='utf-8')
     return csv_string
 
 

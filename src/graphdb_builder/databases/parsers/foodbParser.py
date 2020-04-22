@@ -52,6 +52,8 @@ def parser(databases_directory, download=True):
         mp.mark_complete_mapping(entity="Food")
     except tarfile.ReadError as err:
         raise "Error importing database FooDB.\n {}".format(err)
+    
+    builder_utils.remove_directory(directory)
 
     return food, relationships, entities_header, relationships_headers
 

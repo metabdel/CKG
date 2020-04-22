@@ -1,38 +1,37 @@
 import os.path
-import gzip
-import re
-import pandas as pd
 from collections import defaultdict
-import ckg_utils
-from graphdb_builder import mapping as mp, builder_utils
+from graphdb_builder import builder_utils
 
 #############################
 #       PhosphoSitePlus     # 
 #############################
 def parser(databases_directory, download=True):
     config = builder_utils.get_config(config_name="signorConfig.yml", data_type='databases')
-    
-    directory = os.path.join(databases_directory,"SIGNOR")
+
+    directory = os.path.join(databases_directory, "SIGNOR")
     builder_utils.checkDirectory(directory)
-    
+
     url = config['url']
     modifications = config['modifications']
     amino_acids = config['amino_acids']
     accronyms = config['accronyms']
     entities_header = config['entities_header']
     relationships_headers = config['rel_headers']
-    
+
     entities = set()
     relationships = defaultdict(set)
-    
+
     filename = os.path.join(directory, url.split('/')[-1])
     if download:
         builder_utils.downloadDB(url, directory)
-        
+
     entities, relationships = parse_substrates(filename, modifications, accronyms, amino_acids)
-    
+
+    builder_utils.remove_directory(directory)
+
     return entities, relationships, entities_header, relationships_headers
-    
+
+
 def parse_substrates(filename, modifications, accronyms, amino_acids):
     entities = set()
     relationships = defaultdict(set)
@@ -42,7 +41,7 @@ def parse_substrates(filename, modifications, accronyms, amino_acids):
             if first:
                 first = False
                 continue
-            
+
             data = line.rstrip("\r\n").split("\t")
             source = data[2]
             target = data[6]
@@ -68,9 +67,9 @@ def parse_substrates(filename, modifications, accronyms, amino_acids):
                         relationships[('Substrate', 'is_substrate_of')].add((modified_protein_id, source,"IS_SUBSTRATE_OF", regulation,"CURATED", 5, "SIGNOR"))
                         if pubmedid != '':
                             relationships['Modified_protein_Publication', 'mentioned_in_publication'].add((pubmedid, modified_protein_id, "MENTIONED_IN_PUBLICATION"))
-        
+
     return entities, relationships
-    
+
 
 if __name__ == "__main__":
     pass
