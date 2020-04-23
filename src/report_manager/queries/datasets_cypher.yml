@@ -77,7 +77,7 @@ proteomics:
         query_type: pre
         query: >
             MATCH (project:Project)-[:HAS_ENROLLED]->(:Subject)-[:BELONGS_TO_SUBJECT]-(:Biological_sample)-[:SPLITTED_INTO]->(a:Analytical_sample)-[r:HAS_QUANTIFIED_PROTEIN]->(protein:Protein)-[rp:ANNOTATED_IN_PATHWAY]->(pathway:Pathway) 
-            WHERE toBoolean(r.is_razor) AND toLower(rp.source) IN ["reactome"]
+            WHERE project.id="PROJECTID" AND toBoolean(r.is_razor) AND toLower(rp.source) IN ["reactome"]
             RETURN DISTINCT protein.name+"~"+protein.id AS identifier,pathway.name AS annotation,rp.source AS source
     GO_ANNOTATION:
         name: 'get gene ontology annotations for the proteins identified'
@@ -92,7 +92,7 @@ proteomics:
         query_type: pre
         query: >
             MATCH (project:Project)-[:HAS_ENROLLED]->(subject:Subject)-[:BELONGS_TO_SUBJECT]-(:Biological_sample)-[:SPLITTED_INTO]->(a:Analytical_sample)-[r:HAS_QUANTIFIED_PROTEIN]->(protein:Protein)-[rp:ASSOCIATED_WITH]->(go:Biological_process) 
-            WHERE toBoolean(r.is_razor)
+            WHERE project.id="PROJECTID" AND toBoolean(r.is_razor)
             RETURN DISTINCT protein.name+"~"+protein.id AS identifier,go.name AS annotation,rp.source AS source
     ORIGINAL:
         name: 'get dataset from project'
@@ -278,13 +278,28 @@ ptm:
         involved_relationships:
             - HAS_QUANTIFIED_MODIFIED_PROTEIN
             - IS_SUBSTRATE_OF
+        query_type: pre
+        query: >
+            MATCH (project:Project)-[:HAS_ENROLLED]->(:Subject)-[:BELONGS_TO_SUBJECT]-(:Biological_sample)-[:SPLITTED_INTO]->(a:Analytical_sample)-[r:HAS_QUANTIFIED_MODIFIED_PROTEIN]-(modified_protein:Modified_protein)<-[:HAS_MODIFIED_SITE]-(protein:Protein)
+            WHERE project.id="PROJECTID" AND toBoolean(r.is_razor)
+            WITH modified_protein, protein
+            MATCH (modified_protein)-[:IS_SUBSTRATE_OF]->(sprotein:Protein)
+            RETURN DISTINCT (protein.name+"~"+modified_protein.id) AS identifier, sprotein.name AS modifier;
+    REG_GO_ANNOTATION:
+        name: 'get biological processes associated to the proteins regulating the modified sites'
+        description: 'Biological processes annotated to the proteins regulating the specified sites'
+        involved_nodes:
+            - Protein
+            - Modified_protein
+            - Biological_process
+        involved_relationships:
+            - IS_SUBSTRATE_OF
+            - ASSOCIATED_WITH
         query_type: post
         query: >
-            MATCH (sprotein:Protein)-[:HAS_MODIFIED_SITE]->(modified_protein:Modified_protein)
+            MATCH (sprotein:Protein)-[:HAS_MODIFIED_SITE]->(modified_protein:Modified_protein)-[:IS_SUBSTRATE_OF]->(k:Protein)-[r:ASSOCIATED_WITH]->(go:Biological_process)
             WHERE (sprotein.name+"~"+modified_protein.id) IN [IDENTIFIERS]
-            WITH modified_protein
-            MATCH (project:Project)-[:HAS_ENROLLED]->(:Subject)-[:BELONGS_TO_SUBJECT]-(:Biological_sample)-[:SPLITTED_INTO]->(a:Analytical_sample)-[r:HAS_QUANTIFIED_MODIFIED_PROTEIN]-(modified_protein)-[:IS_SUBSTRATE_OF]->(protein:Protein)
-            RETURN modified_protein.id AS site, protein.name AS modifier, r.value AS intensity, a.group AS group ORDER BY group;
+            RETURN DISTINCT collect(DISTINCT k.name+"~"+k.id) AS identifier, go.name AS annotation, r.source AS source;
     PATHWAY_ANNOTATION:
         name: 'get pathway annotations for the proteins identified'
         description: 'Get all the pathway annotations for the all the proteins identified in a project'
@@ -298,8 +313,8 @@ ptm:
             - ANNOTATED_IN_PATHWAY
         query_type: pre
         query: >
-            MATCH (project:Project)-[:HAS_ENROLLED]->(:Subject)-[:BELONGS_TO_SUBJECT]-(:Biological_sample)-[:SPLITTED_INTO]->(a:Analytical_sample)-[r:HAS_QUANTIFIED_MODIFIED_PROTEIN]-(modified_protein:Modified_protein)<-[:HAS_MODIFIED_SITE]-(protein:Protein)-[rp:ANNOTATED_IN_PATHWAY]->(pathway:Pathway) 
-            WHERE toLower(rp.source) IN ["reactome"] AND toBoolean(r.is_razor)
+            MATCH (project:Project)-[:HAS_ENROLLED]->(:Subject)-[:BELONGS_TO_SUBJECT]-(:Biological_sample)-[:SPLITTED_INTO]->(a:Analytical_sample)-[r:HAS_QUANTIFIED_MODIFIED_PROTEIN]-(modified_protein:Modified_protein)<-[:HAS_MODIFIED_SITE]-(protein:Protein)-[rp:ANNOTATED_IN_PATHWAY]->(pathway:Pathway)
+            WHERE project.id="PROJECTID" AND toLower(rp.source) IN ["reactome"] AND toBoolean(r.is_razor)
             RETURN DISTINCT protein.name+"~"+protein.id AS identifier,pathway.name AS annotation,rp.source AS source
     GO_ANNOTATION:
         name: 'get gene ontology annotations for the proteins identified'
@@ -315,7 +330,7 @@ ptm:
         query_type: pre
         query: >
             MATCH (project:Project)-[:HAS_ENROLLED]->(:Subject)-[:BELONGS_TO_SUBJECT]-(:Biological_sample)-[:SPLITTED_INTO]->(a:Analytical_sample)-[r:HAS_QUANTIFIED_MODIFIED_PROTEIN]-(modified_protein:Modified_protein)<-[:HAS_MODIFIED_SITE]-(protein:Protein)-[rp:ASSOCIATED_WITH]->(go:Biological_process) 
-            WHERE toBoolean(r.is_razor)
+            WHERE project.id="PROJECTID" AND toBoolean(r.is_razor)
             RETURN DISTINCT protein.name+"~"+protein.id AS identifier,go.name AS annotation,rp.source AS source
 clinical:
     CLINICAL_VARIABLES:

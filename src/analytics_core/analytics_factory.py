@@ -65,6 +65,11 @@ class Analysis:
             value_cols = None
             r = analytics.get_summary_data_matrix(self.data)
             self.result[self.analysis_type] = r
+        if self.analysis_type == "normalization":
+            method = 'median_polish'
+            if 'method' in self.args:
+                method = self.args['method']
+            self.result[self.analysis_type] = analytics.normalize_data(self.data, method=method)
         if self.analysis_type == "pca":
             components = 2
             drop_cols = []
@@ -267,6 +272,26 @@ class Analysis:
             if "cutoff" in self.args:
                 cutoff = self.args['cutoff']
             self.result[self.analysis_type] = analytics.run_rm_correlation(self.data, alpha=alpha, subject=subject, correction=correction)
+        elif self.analysis_type == "merge_for_polar":
+            print(self.data)
+            theta_col = 'modifier'
+            group_col = 'group'
+            identifier_col = 'identifier'
+            normalize = True
+            aggr_func = 'mean'
+            if 'group_col' in self.args:
+                group_col = self.args['group_col']
+            if 'theta_col' in self.args:
+                theta_col = self.args['theta_col']
+            if 'identifier_col' in self.args:
+                identifier_col = self.args['identifier_col']
+            if 'aggr_func' in self.args:
+                aggr_func = self.args['aggr_func']
+            if 'normalize' in self.args:
+                normalize = self.args['normalize']
+            if 'regulation_data' in self.args and 'regulators' in self.args:
+                if self.args['regulation_data'] in self.data and self.args['regulators'] in self.data:
+                    self.result[self.analysis_type] = analytics.merge_for_polar(self.data[self.args['regulation_data']], self.data[self.args['regulators']], identifier_col=identifier_col, group_col=group_col, theta_col=theta_col, aggr_func=aggr_func, normalize=normalize)
         elif self.analysis_type == "regulation_enrichment":
             start = time.time()
             identifier = 'identifier'

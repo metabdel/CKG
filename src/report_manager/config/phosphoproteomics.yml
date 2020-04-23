@@ -82,6 +82,14 @@ overview: #section
             height: 900
             width: 1500
             title: Modified proteins ranking
+    preparation:
+        data: processed
+        analyses:
+            - normalization
+        plots: []
+        store_analysis: True
+        args:
+            method: median
 data exploration:
     stratification:
         description: '# Principal Component Analysis
@@ -92,7 +100,7 @@ data exploration:
                          (that is, accounts for as much of the variability in the data as possible), and each succeeding component in turn has the highest variance possible under 
                          the constraint that it is orthogonal to the preceding components. The resulting vectors (each being a linear combination of the variables and containing n observations) 
                          are an uncorrelated orthogonal basis set. PCA is sensitive to the relative scaling of the original variables. [Wikipedia](https://en.wikipedia.org/wiki/Principal_component_analysis)'
-        data: processed
+        data: preparation_normalization
         analyses:
             - pca
             #- tsne
@@ -117,7 +125,7 @@ data exploration:
                         used to analyze the differences among group means in a sample. ANOVA was developed by statistician and evolutionary biologist Ronald Fisher. The ANOVA is based on the law of 
                         total variance, where the observed variance in a particular variable is partitioned into components attributable to different sources of variation. In its simplest form, 
                         ANOVA provides a statistical test of whether two or more population means are equal, and therefore generalizes the t-test beyond two means.[Wikipedia](https://en.wikipedia.org/wiki/Analysis_of_variance)'
-        data: processed
+        data: preparation_normalization
         analyses:
             - anova
         plots:
@@ -165,26 +173,44 @@ data associations:
             color_weight: False
             node_size: 'degree'
             communities_algorithm: louvain
-    modifier_values:
-        data: regulated
-        analyses: []
+    kinase_regulation:
+        data: 
+            - regulated
+            - modifier values
+        analyses: 
+            - merge_for_polar
         plots:
             - polar
-        store_analysis: False
+        store_analysis: True
         args:
-            use:
-                columns: identifiers
+            regulation_data: regulated
+            regulators: modifier values
+            group_col: 'group'
+            identifier_col: 'identifier'
+            normalize: True
+            aggr_func: 'mean'
             width: 900
             height: 800
             group_by: 
                 - modifier
                 - group 
-            value_col: intensity
-            aggregate_func: mean
-            group_col: modifier 
+            value_col: value
+            theta_col: modifier
             color_col: group
             type: line
             title: 'Intensities by Kinase'
+    reg_go_annotation:
+        data: regulated
+        analyses: []
+        plots:
+            - basicTable
+        store_analysis: True
+        args:
+            use:
+                columns: identifiers
+            height: 700
+            width: 900
+            title: 'GO biological processes associated to regulating Kinases'
     drug_associations:
         data: regulated
         analyses: []
@@ -196,7 +222,7 @@ data associations:
                 columns: identifiers
             height: 700
             width: 900
-            title: 'List of drugs targetting proteins with differentially regulated modifications'
+            title: 'Drugs targetting proteins with differentially regulated modifications'
     disease_associations:
         data: regulated
         analyses: []
@@ -208,7 +234,7 @@ data associations:
                 columns: identifiers
             height: 700
             width: 900
-            title: 'List of diseases associated with the differentially regulated modified proteins'
+            title: 'Diseases associated with the differentially regulated modified proteins'
     go_annotation_mod:
         data: regulated
         analyses: []
@@ -220,14 +246,14 @@ data associations:
                 columns: identifiers
             height: 700
             width: 900
-            title: 'List of gene ontology biological processes associated with the differentially regulated modified proteins'
+            title: 'GO biological processes associated with the differentially regulated modified proteins'
 enrichment:
     go_enrichment:
         data: 
             - regulation table
             - go annotation
         analyses:
-            - regulation_enrichment
+            - regulation_site_enrichment
         plots:
             - basicTable
         store_analysis: True
@@ -248,7 +274,7 @@ enrichment:
             - regulation table
             - pathway annotation
         analyses:
-            - regulation_enrichment
+            - regulation_site_enrichment
         plots:
             - basicTable
         store_analysis: True

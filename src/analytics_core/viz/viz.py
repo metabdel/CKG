@@ -2143,7 +2143,7 @@ def get_km_plot(data, identifier, args):
             
     return dcc.Graph(id=identifier, figure=figure)
 
-def get_polar_plot(df, identifier, args):
+def get_polar_plot_old(df, identifier, args):
     """
     This function creates a Polar plot with data aggregated for a given group.
 
@@ -2156,8 +2156,8 @@ def get_polar_plot(df, identifier, args):
         figure = get_polar_plot(df, identifier='polar', args={'value_col':'intensity', 'group_col':'modifier', 'color_col':'group'})
     """
     figure = {}
-    line_close = False
-    ptype = 'line'
+    line_close = True
+    ptype = 'bar'
     title = 'Polar plot'
     width = 800
     height = 700
@@ -2188,54 +2188,77 @@ def get_polar_plot(df, identifier, args):
         
         if value is not None and group is not None and colors is not None:  
             if not df.empty:
-                df = aggregate_for_polar(df, group_by=group, value_col=value, aggregate_func=aggr_func, normalize=normalize)
-                print(df.head())
+                df = aggregate_for_polar(df, group_by=[group, colors], value_col=value, aggregate_func=aggr_func, normalize=normalize)
+                df = df.sort_values(by=group)
+                print(df[df[value].isnull()])
+                print(df[df[group]=='PRKACA'])
                 min_value = df[value].min()
                 max_value = df[value].max()
                 if ptype == 'line':
-                    figure = px.line_polar(df, r=value, theta=group, color=colors, line_close=line_close, title=title, template="plotly_white", width=width, height=height)
+                    figure = px.line_polar(df, r=value, theta=group, color=colors, line_close=line_close, title=title, template="plotly_white", width=width, height=height, render_mode='svg')
                 elif ptype == 'bar':
-                    figure = px.bar_polar(df, r=value, theta=group, color=colors, title=title, template="plotly_white", width=width, height=height)
+                    figure = px.bar_polar(df, r=value, theta=group, color=colors, title=title, template="plotly_white", width=width, height=height, barnorm='fraction')
                 else:
                     print("Type {} not available. Try with 'line' or 'bar' types.".format(ptype))
-                layout = figure.update_layout(polar = dict(radialaxis=dict(range=[min_value-1, max_value+1])))
+                layout = figure.update_layout(polar = dict(radialaxis=dict(range=[min_value, max_value])))
             
     return dcc.Graph(id=identifier, figure=figure)
 
+def get_polar_plot(df, identifier, args):
+    """
+    This function creates a Polar plot with data aggregated for a given group.
 
-def aggregate_for_polar(data, group_by, value_col, aggregate_func='mean', normalize=False):
-    print(data.head())
-    aggr_df = pd.DataFrame()
-    cols = []   
-    utils.append_to_list(cols, group_by)
-    utils.append_to_list(cols, value_col)
-    extra_cols = [c for c in data.columns if c != value_col]
-    print(extra_cols)
-    if normalize:
-        data = data.set_index(group_by).apply(zscore)
-        data = data.reset_index()
-    
-    
-    df = data.groupby(group_by)
-    list_cols = []
-    for i, group in df:
-        if aggregate_func == 'mean':
-            value = group[value_col].mean()
-        elif aggregate_func == 'median':
-            value = group[value_col].median()
-        elif aggregate_func == 'sum':
-            value = group[value_col].sum()
-        else:
-            break
-        if isinstance(i, tuple) > 1:
-            list_cols.append((*i, value))
-        else:
-            list_cols.append((i, value))
-    
-    if len(list_cols) > 0:
-        aggr_df = pd.DataFrame(list_cols, columns=cols)
-        print(aggr_df.head())
-        aggr_df = aggr_df.set_index(group_by).join(data[extra_cols].drop_duplicates().set_index(group_by)).reset_index()
-        print(aggr_df.head())        
-    
-    return aggr_df
+    :param dataframe df: dataframe with the data to plot
+    :param str identifier: identifier to be used in the app
+    :param dict args: dictionary containing the arguments needed to plot the figure (value_col (value to aggregate), group_col (group by), color_col (color by))
+    :return: Dash Graph
+
+    Example::
+        figure = get_polar_plot(df, identifier='polar', args={'value_col':'intensity', 'group_col':'modifier', 'color_col':'group'})
+    """
+    figure = {}
+    line_close = True
+    ptype = 'bar'
+    title = 'Polar plot'
+    width = 800
+    height = 700
+    value = 'value'
+    group = None
+    colors = None
+    if not df.empty:
+        if 'value_col' in args:
+            value = args['value_col']
+        if 'theta_col' in args:
+            group = args['theta_col']
+        if 'color_col' in args:
+            colors = args['color_col']
+        if 'line_close' in args:
+            line_close = args['line_close']
+        if 'title' in args:
+            title = args['title']
+        if 'width' in args:
+            width = args['width']
+        if 'height' in args:
+            height = args['height']
+        if 'type' in args:
+            ptype = args['type']
+        
+        figure = go.Figure()
+        if value is not None and group is not None and colors is not None:  
+            if not df.empty:
+                min_value = df[value].min()
+                max_value = df[value].max()
+                if ptype == 'line':
+                    for color in df[colors].unique():
+                        cdf = df[df[colors] == color]
+                        figure.add_trace(go.Scatterpolar(r = cdf[value],
+                                                         theta = cdf[group],
+                                                         mode = 'lines',
+                                                         name = color,
+                                                         fill='toself'))
+                else:
+                    print("Type {} not available. Try with 'line' or 'bar' types.".format(ptype))
+                
+                layout = figure.update_layout(width=width, height=height, polar = dict(radialaxis=dict(range=[min_value, max_value])))
+            
+    return dcc.Graph(id=identifier, figure=figure)

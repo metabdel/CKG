@@ -317,6 +317,55 @@ def imputation_normal_distribution(data, index_cols=['group', 'sample', 'subject
     return data_imputed.T
 
 
+def normalize_data(data, method='median_polish'):
+    """
+    This function normalizes the data using the selected method
+
+    :param data: DataFrame with the data to be normalized (samples x features)
+    :param string method: normalization method to choose among: median_polish, median,
+                        quantile, linear
+    :return: Pandas dataframe.
+
+    Example::
+
+        result = normalize_data(data, method='median_polish')
+    """
+    normData = None
+    numeric_cols = data.select_dtypes(include=['float64'])
+    non_numeric_cols = data.select_dtypes(exclude=['float64'])
+    if not numeric_cols.empty:
+        if method == 'median_polish':
+            normData = polish_median_normalization(numeric_cols, max_iter=50)
+        elif method == 'median':
+            normData = median_normalization(numeric_cols)
+        elif method == 'quantile':
+            normData = quantile_normalization(numeric_cols)
+        elif method == 'linear':
+            normData = linear_normalization(numeric_cols, method="l1", axis=0)
+
+    if not non_numeric_cols.empty:
+        normData = normData.join(non_numeric_cols)
+
+    return normData
+
+
+def median_normalization(data):
+    """
+    This function normalizes each sample by using its median.
+
+    :param data:
+    :return: Pandas dataframe.
+
+    Example::
+
+        result = median_normalization(data)
+    """
+    
+    normData = data.sub(data.mean(axis=1), axis=0)
+
+    return normData
+
+
 def polish_median_normalization(data, max_iter=10):
     """
     This function iteratively normalizes each sample and each feature to its 
@@ -752,6 +801,34 @@ def calculate_correlations(x, y, method='pearson'):
         coefficient, pvalue = stats.spearmanr(x, y)
 
     return (coefficient, pvalue)
+
+def apply_pvalue_correction(pvalues, alpha=0.05, method='bonferroni'):
+    """
+    Performs p-value correction using the specified method. For more information visit https://www.statsmodels.org/dev/generated/statsmodels.stats.multitest.multipletests.html.
+
+    :param ndarray pvalues: et of p-values of the individual tests.
+    :param float alpha: error rate.
+    :param str method: method of p-value correction:
+        - bonferroni : one-step correction
+        - sidak : one-step correction
+        - holm-sidak : step down method using Sidak adjustments
+        - holm : step-down method using Bonferroni adjustments
+        - simes-hochberg : step-up method (independent)
+        - hommel : closed method based on Simes tests (non-negative)
+        - fdr_bh : Benjamini/Hochberg (non-negative)
+        - fdr_by : Benjamini/Yekutieli (negative)
+        - fdr_tsbh : two stage fdr correction (non-negative)
+        - fdr_tsbky : two stage fdr correction (non-negative)
+    :return: Tuple with two arrays, boolen for rejecting H0 hypothesis and float for adjusted p-value.
+
+    Exmaple::
+
+        result = apply_pvalue_correction(pvalues, alpha=0.05, method='bonferroni')
+    """
+    
+    rejected, padj = multitest.multipletests(pvalues, alpha, method)
+
+    return (rejected, padj)
 
 
 def apply_pvalue_fdrcorrection(pvalues, alpha=0.05, method='indep'):
@@ -1885,7 +1962,7 @@ def run_enrichment(data, foreground, background, foreground_pop, background_pop,
         ids.append(",".join(df.loc[(df[annotation_col]==annotation) & (df[group_col] == foreground), identifier_col].tolist()))
     if len(pvalues) > 1:
         rejected, padj = apply_pvalue_fdrcorrection(pvalues, alpha=0.05, method='indep')
-        result = pd.DataFrame({'terms':terms, 'identifiers':ids, 'foreground':fnum, 'background':bnum, 'pvalue':pvalues, 'padj':padj, 'rejected':rejected})
+        result = pd.DataFrame({'terms':terms, 'identifiers':ids, 'foreground':fnum, 'background':bnum, 'foreground_pop':foreground_pop, 'background_pop':background_pop,'pvalue':pvalues, 'padj':padj, 'rejected':rejected})
         result = result.sort_values(by='padj',ascending=True)
 
     return result
@@ -2271,6 +2348,48 @@ def run_two_way_anova(df, drop_cols=['sample'], subject='subject', group=['group
     anova_df = anova_df.dropna(how="all")
 
     return anova_df, residuals
+
+def merge_for_polar(regulation_data, regulators, identifier_col='identifier', group_col='group', theta_col='modifier', aggr_func='mean', normalize=True):
+    aggr_df = pd.DataFrame()
+    if normalize:
+        regulation_data = regulation_data.set_index(group_col).apply(scipy.stats.zscore)
+        regulation_data = regulation_data.reset_index()
+    
+    df = regulation_data.groupby(group_col)
+    list_cols = []
+    for i, group in df:
+        if aggr_func == 'mean':
+            list_cols.append(group.mean())
+        elif aggr_func == 'median':
+            list_cols.append(group.median())
+        elif aggr_func == 'sum':
+            list_cols.append(group.sum())
+        else:
+            break
+        
+    if len(list_cols) > 0:
+        aggr_df = pd.DataFrame(list_cols, index=regulation_data[group_col].unique(), columns=regulation_data.set_index(group_col).columns).stack().reset_index()
+        aggr_df.columns = [group_col, identifier_col, 'value']
+        aggr_df = pd.merge(aggr_df, regulators, on=identifier_col)
+        
+    if not aggr_df.empty:
+        list_cols = []
+        for i, group in aggr_df.groupby([group_col, theta_col]):
+            if aggr_func == 'mean':
+                value = group['value'].mean()
+            elif aggr_func == 'median':
+                value = group['value'].median()
+            elif aggr_func == 'sum':
+                value = group['value'].sum()
+            else:
+                break
+            
+            list_cols.append((*i, value))
+            
+        if len(list_cols) > 0:
+            aggr_df = pd.DataFrame(list_cols, columns=[group_col, theta_col, 'value'])
+            
+    return aggr_df    
 
 
 def run_snf(df_dict, clusters, distance_metric, K_affinity, mu_affinity):
