@@ -944,13 +944,13 @@ CREATE_BIOSAMPLES: &create_bio
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/PROJECTID_biosamples_info.tsv" AS line
         FIELDTERMINATOR '\t'
-        MATCH (:Project {id:'PROJECTID'})-[:HAS_ENROLLED]-(:Subject)-[:BELONGS_TO_SUBJECT]-(s:Biological_sample {external_id:line.ID})
+        MATCH (:Project {id:'PROJECTID'})-[:HAS_ENROLLED]-(:Subject)-[:BELONGS_TO_SUBJECT]-(s:Biological_sample {external_id:toString(line.ID)})
         SET s.quantity=line.quantity,s.quantity_units=line.quantity_units,s.source=line.source,s.collection_date=line.collection_date,s.conservation_conditions=line.conservation_conditions,s.storage=line.storage,s.status=line.status
         RETURN COUNT(s) AS PROJECTID_biosamples_updated;
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/PROJECTID_biosample_tissue.tsv" AS line 
         FIELDTERMINATOR '\t'
-        MATCH (:Project {id:'PROJECTID'})-[:HAS_ENROLLED]-(:Subject)-[:BELONGS_TO_SUBJECT]-(b:Biological_sample {external_id:line.START_ID})
+        MATCH (:Project {id:'PROJECTID'})-[:HAS_ENROLLED]->(:Subject)<-[:BELONGS_TO_SUBJECT]-(b:Biological_sample {external_id:line.START_ID})
         MATCH (t:Tissue {id:line.END_ID})
         MERGE (b)-[r:FROM_TISSUE]->(t)
         RETURN COUNT(r) AS PROJECTID_biological_samples_come_from_tissue;
@@ -983,7 +983,7 @@ CREATE_ANALYTICALSAMPLES: &create_ana
         USING PERIODIC COMMIT 10000
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/PROJECTID_analytical_samples_info.tsv" AS line
         FIELDTERMINATOR '\t'
-        MATCH (:Project {id:'PROJECTID'})-[:HAS_ENROLLED]-(:Subject)-[:BELONGS_TO_SUBJECT]-(:Biological_sample)-[:SPLITTED_INTO]-(s:Analytical_sample {external_id:line.ID})
+        MATCH (:Project {id:'PROJECTID'})-[:HAS_ENROLLED]-(:Subject)-[:BELONGS_TO_SUBJECT]-(:Biological_sample)-[:SPLITTED_INTO]-(s:Analytical_sample {external_id:toString(line.ID)})
         SET s.quantity=line.quantity,s.quantity_units=line.quantity_units,s.source=line.source,s.collection_date=line.collection_date,s.conservation_conditions=line.conservation_conditions,s.storage=line.storage,s.status=line.status,s.group=line.group,s.secondary_group=line.secondary_group
         RETURN COUNT(s) AS PROJECTID_analytical_samples_updated; 
 

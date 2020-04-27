@@ -439,8 +439,8 @@ def serve_static(value):
 
 ###Callbacks for data upload app
 @app.callback([Output('existing-project', 'children'),
-               Output('upload-form','style')],
-               [Input('project_id', 'value')])
+               Output('upload-form', 'style')],
+              [Input('project_id', 'value')])
 def activate_upload_form(projectid):
     m = ''
     style = {'pointer-events': 'none', 'opacity': 0.5}
@@ -450,76 +450,98 @@ def activate_upload_form(projectid):
             m = 'ERROR: Project "{}" does not exist in the database.'.format(projectid)
         else:
             style = {}
-    
+
     return m, style
 
-@app.callback([Output('proteomics-tool', 'style'),
-               Output('upload-data','disabled')],
+
+@app.callback(Output('proteomics-tool', 'style'),
               [Input('upload-data-type-picker', 'value'),
                Input('prot-tool', 'value')])
 def show_proteomics_options(datatype, prot_tool):
-    display = ({'display': 'none'}, False)
-    if datatype in ['proteomics', 'longitudinal_proteomics', 'interactomics']:
+    display = {'display': 'none'}
+    if datatype in ['proteomics', 'interactomics', 'phosphoproteomics']:
         if prot_tool == '':
-            display = ({'display': 'block'}, True)
+            display = {'display': 'block'}
         else:
-            display = ({'display': 'block'}, False)
-    
+            display = {'display': 'block'}
+
     return display
 
+
+@app.callback([Output('proteomics-file', 'style'),
+               Output('upload-data', 'disabled')],
+              [Input('upload-data-type-picker', 'value'),
+               Input('prot-tool', 'value'),
+               Input('prot-file', 'value')])
+def show_proteomics_file_options(datatype, prot_tool, prot_file):
+    display = ({'display': 'none'}, False)
+    if datatype in ['proteomics', 'interactomics', 'phosphoproteomics']:
+        if prot_tool is not None and prot_tool != '':
+            if prot_file == '':
+                display = ({'display': 'block'}, True)
+            else:
+                display = ({'display': 'block'}, False)
+        else:
+            display = ({'display': 'block'}, True)
+
+    return display
+
+
 @app.callback([Output('uploaded-files', 'children'),
-               Output('upload-data', 'filename')],
+               Output('upload-data', 'filename'),
+               Output('prot-tool', 'value'),
+               Output('prot-file', 'value')],
               [Input('upload-data', 'contents')],
-               [State('upload-data-type-picker', 'value'),
-                State('prot-tool', 'value'),
-                State('project_id', 'value'),
+              [State('upload-data-type-picker', 'value'),
+               State('prot-tool', 'value'),
+               State('prot-file', 'value'),
+               State('project_id', 'value'),
                State('upload-data', 'filename')])
-def save_files_in_tmp(contents, dataset, prot_tool, projectid, uploaded_files):
+def save_files_in_tmp(content, dataset, prot_tool, prot_file, projectid, uploaded_file):
     if dataset is not None:
         session_cookie = flask.request.cookies.get('custom-auth-session')
-        temporaryDirectory = os.path.join(tmpDirectory, session_cookie+"upload")
+        temporaryDirectory = os.path.join(tmpDirectory, session_cookie + "upload")
         if not os.path.exists(tmpDirectory):
             os.makedirs(tmpDirectory)
         elif not os.path.exists(temporaryDirectory):
             os.makedirs(temporaryDirectory)
-            
+
         directory = os.path.join(temporaryDirectory, dataset)
-        if os.path.exists(directory) and len(uploaded_files) > 0:
-            shutil.rmtree(directory)
-        
+        if os.path.exists(directory) and uploaded_file is not None:
+            if os.path.exists(os.path.join(directory, uploaded_file)):
+                shutil.rmtree(directory)
+
         builder_utils.checkDirectory(directory)
-        if dataset in ['proteomics', 'interactomics'] and prot_tool !='':
+        if dataset in ['proteomics', 'interactomics', 'phosphoproteomics'] and prot_tool != '' and prot_file != '':
+            selected_file = prot_tool.lower() + "-" + prot_file.lower()
+            if selected_file in config['file_proteomics']:
+                filename = config['file_proteomics'][selected_file]
+            else:
+                filename = uploaded_file
             directory = os.path.join(directory, prot_tool.lower())
+            if os.path.exists(directory):
+                if os.path.exists(os.path.join(directory, filename)):
+                    os.remove(os.path.join(directory, filename))
             builder_utils.checkDirectory(directory)
-            filenames = uploaded_files
         elif dataset == 'experimental_design':
-            if len(uploaded_files) > 1:
-                return 'ERROR: Provide only one file with the Experimental design', []
-            elif len(uploaded_files) > 0:
-                filename = config['file_design'].split('_')[0]+'_'+projectid+'.'+uploaded_files[0].split('.')[-1]
-                filenames = [filename]
+            filename = config['file_design'].split('_')[0]+'_'+projectid+'.'+uploaded_file.split('.')[-1]
         elif dataset == 'clinical':
-            if len(uploaded_files) > 1:
-                return 'ERROR: Provide only one file with the Clinical data', []
-            elif len(uploaded_files) > 0:
-                filename = config['file_clinical'].split('_')[0]+'_'+projectid+'.'+uploaded_files[0].split('.')[-1]
-                filenames = [filename]
+            filename = config['file_clinical'].split('_')[0]+'_'+projectid+'.'+uploaded_file.split('.')[-1]
         
-        if len(uploaded_files) == 0:
-            contents = None
-        if contents is not None:
-            for file in zip(filenames, contents):
-                data = builder_utils.parse_contents(file[1], file[0])
-                builder_utils.export_contents(data, directory, file[0])
+        if uploaded_file is None:
+            content = None
+        if content is not None:
+            data = builder_utils.parse_contents(content, filename)
+            builder_utils.export_contents(data, directory, filename)
             
-            uploaded = '   \n'.join(uploaded_files)
-            uploaded_files = []
-            #Two or more spaces before '\n' will create a new line in Markdown
-            return uploaded, uploaded_files
+            uploaded = uploaded_file
+            uploaded_file = None
+            return uploaded, uploaded_file, '', ''
         else:
             raise PreventUpdate
     
-    return '', []
+    return '', None, '', ''
+
     
 @app.callback([Output('upload-result', 'children'),
                Output('data_download_link', 'style')],

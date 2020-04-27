@@ -72,11 +72,16 @@ def get_relationships(query):
 
 
 def map_node_name_to_id(driver, node, value):
+    identifier = None
     query_name = 'map_node_name'
     cwd = os.path.abspath(os.path.dirname(__file__))
     queries_path = "queries.yml"
     cypher = read_queries(os.path.join(cwd, queries_path))
     query = cypher[query_name]['query'].replace('NODE', node)
-    identifier = connector.getCursorData(driver, query, parameters={
-                                         'name': str(value)}).values[0][0]
+    result = connector.getCursorData(driver, query, parameters={
+                                         'name': str(value).lower()})
+
+    if result is not None and not result.empty:
+        identifier = result.values[0][0]
+
     return identifier

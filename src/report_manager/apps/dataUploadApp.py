@@ -4,7 +4,7 @@ from apps import basicApp
 from graphdb_connector import connector
 
 driver = connector.getGraphDatabaseConnectionConfiguration()
-DataTypes = ['experimental_design', 'clinical', 'proteomics', 'interactomics']
+DataTypes = ['experimental_design', 'clinical', 'proteomics', 'interactomics', 'phosphoproteomics']
 
 
 class DataUploadApp(basicApp.BasicApp):
@@ -30,14 +30,16 @@ class DataUploadApp(basicApp.BasicApp):
                                       dcc.Markdown(id='existing-project')], 
                                      style={'width': '20%'}),
                             html.Br(),
-                            html.Div(id='upload-form',children=[
+                            html.Div(id='upload-form', children=[
                                 html.Div(children=[html.Label('Select upload data type:', style={'marginTop': 10})],
                                                style={'width': '49%', 'marginLeft': '0%', 'verticalAlign': 'top', 'fontSize': '18px'}),
                                 html.Div(children=[dcc.RadioItems(id='upload-data-type-picker', options=[{'label': i, 'value': i} for i in DataTypes], value=None, labelStyle={'display': 'inline-block', 'margin-right': 20},
                                                               inputStyle={"margin-right": "5px"}, style={'display': 'block', 'fontSize': '16px'})]),
                                 html.Div(children=[html.H5('Proteomics tool:'), dcc.RadioItems(id='prot-tool', options=[{'label': i, 'value': i} for i in ['MaxQuant', 'Spectronaut']], value='', labelStyle={'display': 'inline-block', 'margin-right': 20},
                                                               inputStyle={"margin-right": "5px"}, style={'display': 'block', 'fontSize': '16px'})], id='proteomics-tool', style={'padding-top': 20}),
-                                html.Div([html.H4('Upload Experiment file', style={'marginTop': 30, 'marginBottom': 20}),
+                                html.Div(children=[html.H5('Select the type of file uploaded:'), dcc.Dropdown(id='prot-file', options=[{'label': i, 'value': i} for i in ['Protein groups', 'Peptides', 'Phospho STY sites']], value='',
+                                                              style={'display': 'block', 'fontSize': '14px', 'width': '250px'})], id='proteomics-file', style={'padding-top': 20}),
+                                html.Div([html.H4('Upload file (max. 100Mb)', style={'marginTop': 30, 'marginBottom': 20}),
                                       dcc.Upload(id='upload-data', children=html.Div(['Drag and Drop or ', html.A('Select Files')]),
                                                  style={'width': '100%',
                                                         'height': '60px',
@@ -47,7 +49,7 @@ class DataUploadApp(basicApp.BasicApp):
                                                         'borderRadius': '5px',
                                                         'textAlign': 'center',
                                                         'margin': '0px'},
-                                                 multiple=True)]),
+                                                 multiple=False, max_size=1024 * 1024 * 1000)]),
                                 html.Br(),
                                 html.Div(children=[dcc.Markdown('**Uploaded Files:**', id='markdown-title'), dcc.Markdown(id='uploaded-files')]),
                                 html.Div([html.Button("Upload Data to CKG",
