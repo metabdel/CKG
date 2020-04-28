@@ -7,7 +7,7 @@ The creation of a new user includes two steps:
 
 #. Each user is added in the graph database as a new ``User`` node, with attributes: id, username, name, acronym, email, secondary email, phone number, affiliation, rolename and expiration date.
 
-There are multiple ways to create a new user:
+There are multiple ways to create a new user, in any of the cases, make sure the virtual environment is active before proceeding:
 
 **From the command line:** *(one user at a time)*
 

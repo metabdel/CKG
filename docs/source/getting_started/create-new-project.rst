@@ -27,7 +27,7 @@ To create a project, please follow the steps below.
 	$ redis-server
 
 
-.. warning:: If redis-server is not found, install with ``brew install redis`` (Mac) or ``sudo apt-get install redis-server`` (Linux)
+.. warning:: If redis-server is not found, install with ``brew install redis`` (Mac) or ``sudo apt-get install redis-server`` (Linux). This command in Mac OS, requires Homebrew to be installed.
 
 2. In two separate terminal windows:
 

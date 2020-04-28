@@ -14,7 +14,7 @@ def parser(databases_directory, download=True):
     directory = os.path.join(databases_directory, "FooDB")
     builder_utils.checkDirectory(directory)
     config = builder_utils.get_config(config_name="foodbConfig.yml", data_type='databases')
-
+    
     database_url = config['database_url']
     entities_header = config['entities_header']
     relationships_headers = config['relationships_headers']
@@ -52,7 +52,7 @@ def parser(databases_directory, download=True):
         mp.mark_complete_mapping(entity="Food")
     except tarfile.ReadError as err:
         raise "Error importing database FooDB.\n {}".format(err)
-    
+
     builder_utils.remove_directory(directory)
 
     return food, relationships, entities_header, relationships_headers

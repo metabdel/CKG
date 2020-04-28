@@ -3,9 +3,10 @@ args:
     imputation_method: distribution
     missing_shift: 1.8
     missing_nstd: 0.3
-    missing_method: percentage
+    missing_method: at_least_x
     missing_per_group: True
     missing_max: 0.3
+    min_valid: 5
     value_col: LFQ_intensity
     extra_identifier: name
     index:
