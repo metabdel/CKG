@@ -1,3 +1,4 @@
+from graphdb_connector import connector
 from graphdb_builder import builder_utils
 import os.path
 import time
@@ -66,6 +67,16 @@ def getMappingFromOntology(ontology, source=None):
                     mapping[data[2].lower()] = data[0]
     except Exception:
         raise Exception("mapping - No mapping file {} for entity {}".format(mapping_file, ontology))
+
+    return mapping
+
+
+def getMappingFromDatabase(id_list, node, attribute_from='id', attribute_to='name'):
+    id_list = ["'{}'".format(i) for i in id_list]
+    driver = connector.getGraphDatabaseConnectionConfiguration()
+    mapping_query = "MATCH (n:{}) WHERE n.{} IN [{}] RETURN n.{} AS from, n.{} AS to"
+    mapping = connector.getCursorData(driver, mapping_query.format(node, attribute_from, ','.join(id_list), attribute_from, attribute_to))
+    mapping = dict(zip(mapping['from'], mapping['to']))
 
     return mapping
 
