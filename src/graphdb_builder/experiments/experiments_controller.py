@@ -16,8 +16,8 @@ def generate_dataset_imports(projectId, dataType, dataset_import_dir):
             data = clinicalParser.parser(projectId)
             for dtype, ot in data:
                 generate_graph_files(data[(dtype, ot)], dtype, projectId, stats, ot, dataset_import_dir)
-        elif dataType == "proteomics" or dataType == "interactomics":
-            data = proteomicsParser.parser(projectId, dataType)
+        elif dataType == "proteomics" or dataType == "interactomics" or dataType == "phosphoproteomics":
+            data = proteomicsParser.parser(projectId)
             for dtype, ot in data:
                 generate_graph_files(data[(dtype, ot)], dtype, projectId, stats, ot, dataset_import_dir)
         elif dataType == "wes":
@@ -38,12 +38,12 @@ def generate_graph_files(data, dataType, projectId, stats, ot='w', dataset_impor
         outputfile = os.path.join(dataset_import_dir, projectId+".tsv")
     else:
         outputfile = os.path.join(dataset_import_dir, projectId+"_"+dataType.lower()+".tsv")
-   
+
     with open(outputfile, ot) as f:
         data.to_csv(path_or_buf=f, sep='\t',
-            header=True, index=False, quotechar='"',
-            line_terminator='\n', escapechar='\\')
-   
+                    header=True, index=False, quotechar='"',
+                    line_terminator='\n', escapechar='\\')
+
     logger.info("Experiment {} - Number of {} relationships: {}".format(projectId, dataType, data.shape[0]))
     stats.add(builder_utils.buildStats(data.shape[0], "relationships", dataType, "Experiment", outputfile))
 

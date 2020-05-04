@@ -19,7 +19,7 @@ except Exception as err:
 def entries_to_remove(entries, the_dict):
     """
     This function removes pairs from a given dictionary, based on a list of provided keys.
-    
+
     :param list entries: list of keys to be deleted from dictionary.
     :param dict the_dict: dictionary.
     :return: The original dictionary minus the key,value pairs from the provided entries list.
@@ -35,7 +35,7 @@ def get_extra_entities_rels(ontology_directory):
     extra_rels_file = 'extra_rels.tsv'
     extra_rels = builder_utils.get_extra_pairs(ontology_directory, extra_rels_file)
 
-    return extra_entities, extra_rels   
+    return extra_entities, extra_rels
 
 
 def parse_ontology(ontology, download=True):
@@ -95,7 +95,7 @@ def parse_ontology(ontology, download=True):
             logger.info("WARNING: SNOMED-CT terminology needs to be downloaded manually since it requires UMLS License. More information available here: https://www.nlm.nih.gov/databases/umls.html")
         else:
             logger.info("WARNING: Ontology {} could not be downloaded. Check that the link in configuration works.".format(ontology))
-    
+
     return ontologyData, mappings, extra_entities, extra_rels
 
 
@@ -119,7 +119,7 @@ def generate_graphFiles(import_directory, ontologies=None, download=True):
             ontology = ontology.capitalize()
             if ontology.capitalize() in config["ontologies"]:
                 entities.update({ontology: config["ontologies"][ontology]})
-    
+
     updated_on = "None"
     if download:
         updated_on = str(date.today())
@@ -178,8 +178,9 @@ def generate_graphFiles(import_directory, ontologies=None, download=True):
         except Exception as err:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            logger.error("Ontology {}: {}, file: {},line: {}".format(ontology, sys.exc_info(), fname, exc_tb.tb_lineno))
+            logger.error("Error: {}. Ontology {}: {}, file: {},line: {}".format(err, ontology, sys.exc_info(), fname, exc_tb.tb_lineno))
     return stats
+
 
 if __name__ == "__main__":
     generate_graphFiles(import_directory='../../../data/imports', download=True)
