@@ -50,8 +50,8 @@ def parser(databases_directory, download=True):
                     out.write(str(food_id)+"\t"+str(alias)+"\n")
 
         mp.mark_complete_mapping(entity="Food")
-    except Exception as err:
-        raise "Error importing database FooDB.\n {}".format(err)
+    except tarfile.ReadError as err:
+        raise Exception("Error importing database FooDB.\n {}".format(err))
 
     builder_utils.remove_directory(directory)
 
