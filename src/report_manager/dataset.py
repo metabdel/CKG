@@ -2,7 +2,6 @@ import os
 import sys
 import pandas as pd
 import h5py as h5
-import numpy as np
 import ckg_utils
 import config.ckg_config as ckg_config
 from report_manager import report as rp, knowledge
@@ -255,7 +254,7 @@ class Dataset:
                                         if analysis_type.lower() == "anova" or analysis_type.lower() == "samr" or analysis_type.lower() == "ttest":
                                             reg_data = result.result[analysis_type]
                                             if not reg_data.empty:
-                                                sig_hits = list(set(reg_data.loc[reg_data.rejected,"identifier"]))
+                                                sig_hits = list(set(reg_data.loc[reg_data.rejected,"identifier"])) + ['group']
                                                 sig_data = data[sig_hits]
                                                 self.update_data({"regulated": sig_data, "regulation table": reg_data})
                                         else:
@@ -536,13 +535,14 @@ class ClinicalDataset(Dataset):
 
     def generate_knowledge(self):
         kn = knowledge.ClinicalKnowledge(self.identifier, self.data, nodes={}, relationships={}, colors={}, graph=None, report={})
-        kn.generate_knowledge()        
-        
+        kn.generate_knowledge()
+
         return kn
+
 
 class DNAseqDataset(Dataset):
     def __init__(self, identifier, dataset_type, data={}, configuration=None, analyses={}, analysis_queries={}, report=None):
-        
+
         Dataset.__init__(self, identifier, dataset_type=dataset_type, data=data, configuration=configuration, analyses=analyses, analysis_queries=analysis_queries, report=report)
         if configuration is None:
             config_file = "DNAseq.yml"
@@ -551,9 +551,10 @@ class DNAseqDataset(Dataset):
     def generate_dataset(self):
         self._data = self.query_data()
 
+
 class RNAseqDataset(Dataset):
     def __init__(self, identifier, data={}, configuration=None, analyses={}, analysis_queries={}, report=None):
-        
+
         Dataset.__init__(self, identifier, "RNAseq", data=data, configuration=configuration, analyses=analyses, analysis_queries=analysis_queries, report=report)
         if configuration is None:
             config_file = "RNAseq.yml"
