@@ -606,6 +606,18 @@ IMPORT_BIOMARKERS:
         MATCH (d:Disease{id:line.END_ID}) 
         MERGE (p)-[r:IS_BIOMARKER_OF_DISEASE{is_used_in_clinic:toBoolean(line.used_in_clinic),assay:line.assay,is_routine:toBoolean(line.is_routine),reference:(line.reference),source:line.source,age_range:line.age_range,age_units:line.age_units,sex:line.sex,normal_range:line.normal_range,units:line.units,notes:line.notes}]->(d)
         RETURN COUNT(r) AS protein_is_biomarker_of_disease;
+
+IMPORT_QCMARKERS:
+    'name': 'import proteins used as quality marker in tissue'
+    'description': 'Creates relationships is_qcmarker_in Tissue'
+    'query': >
+        USING PERIODIC COMMIT 10000
+        LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/protein_is_qcmarker_in_tissue.tsv" AS line
+        FIELDTERMINATOR '\t'
+        MATCH (p:Protein{id:line.START_ID})
+        MATCH (t:Tissue{id:line.END_ID}) 
+        MERGE (p)-[r:IS_QCMARKER_IN_TISSUE{class:line.class}]->(t)
+        RETURN COUNT(r) AS protein_is_qcmarker_in_tissue;
         
 IMPORT_KNOWN_VARIANT_DATA: 
     'name': 'import known variant data'

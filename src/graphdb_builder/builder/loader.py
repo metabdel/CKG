@@ -118,6 +118,10 @@ def updateDB(driver, imports=None, specific=[]):
                 code = cypher_queries['IMPORT_BIOMARKERS']['query']
                 import_dir = os.path.join(cwd, directories["curatedDirectory"]).replace('\\', '/')
                 queries = code.replace("IMPORTDIR", import_dir).split(';')[0:-1]
+            elif i == "qcmarkers":
+                code = cypher_queries['IMPORT_QCMARKERS']['query']
+                import_dir = os.path.join(cwd, directories["curatedDirectory"]).replace('\\', '/')
+                queries = code.replace("IMPORTDIR", import_dir).split(';')[0:-1]
             elif i == "chromosomes":
                 code = cypher_queries['IMPORT_CHROMOSOME_DATA']['query']
                 queries = code.replace("IMPORTDIR", import_dir).split(';')[0:-1]

@@ -66,6 +66,7 @@ graph:
     - ppi
     - diseases
     - biomarkers
+    - qcmarkers
     - drugs
     - known_variants
     - clinical variants
