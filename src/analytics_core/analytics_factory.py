@@ -134,10 +134,13 @@ class Analysis:
             self.result[self.analysis_type] = r
         elif self.analysis_type == 'ttest':
             alpha = 0.05
+            correction = 'fdr_bh'
             if "alpha" in self.args:
                 alpha = self.args["alpha"]
-            for pair in itertools.combinations(self.data.group.unique(),2):
-                ttest_result = analytics.run_ttest(self.data, pair[0], pair[1], alpha=0.05)
+            if 'correction_method' in self.args:
+                correction = self.args['correction_method']
+            for pair in itertools.combinations(self.data.group.unique(), 2):
+                ttest_result = analytics.run_ttest(self.data, pair[0], pair[1], alpha=0.05, correction=correction)
                 self.result[pair] = ttest_result
         elif self.analysis_type == 'anova':
             start = time.time()
@@ -147,6 +150,7 @@ class Analysis:
             subject = 'subject'
             permutations = 50
             is_logged = True
+            correction = 'fdr_bh'
             if "alpha" in self.args:
                 alpha = self.args["alpha"]
             if "drop_cols" in self.args:
@@ -159,8 +163,33 @@ class Analysis:
                 permutations = self.args["permutations"]
             if "is_logged" in self.args:
                 is_logged = self.args['is_logged']
-            anova_result = analytics.run_anova(self.data, drop_cols=drop_cols, subject=subject, group=group, alpha=alpha, permutations=permutations, is_logged=is_logged)
+            if 'correction_method' in self.args:
+                correction = self.args['correction_method']
+            anova_result = analytics.run_anova(self.data, drop_cols=drop_cols, subject=subject, group=group, alpha=alpha, permutations=permutations, is_logged=is_logged, correction=correction)
             self.result[self.analysis_type] = anova_result
+        elif self.analysis_type == 'qcmarkers':
+            sample_col = 'sample'
+            group_col = 'group'
+            identifier_col = 'identifier'
+            qcidentifier_col = 'identifier'
+            qcclass_col = 'class'
+            drop_cols = ['subject']
+            if 'drop_cols' in self.args:
+                drop_cols = self.args['drop_cols']
+            if 'sample_col' in self.args:
+                sample_col = self.args['sample_col']
+            if 'group_col' in self.args:
+                group_col = self.args['group_col']
+            if 'identifier_col' in self.args:
+                identifier_col = self.args['identifier_col']
+            if 'qcidentifier_col' in self.args:
+                qcidentifier_col = self.args['qcidentifier_col']
+            if 'qcclass_col' in self.args:
+                qcclass_col = self.args['qcclass_col']
+            if 'processed' in self.data and 'tissue qcmarkers' in self.data:
+                processed_data = self.data['processed']
+                qcmarkers = self.data['tissue qcmarkers']
+                self.result[self.analysis_type] = analytics.run_qc_markers_analysis(processed_data, qcmarkers, sample_col, group_col, drop_cols, identifier_col, qcidentifier_col, qcclass_col)
         elif self.analysis_type == 'samr':
             start = time.time()
             alpha = 0.05
@@ -208,6 +237,7 @@ class Analysis:
             group = 'group'
             subject = 'subject'
             permutations = 50
+            correction = 'fdr_bh'
             if "alpha" in self.args:
                 alpha = self.args["alpha"]
             if "drop_cols" in self.args:
@@ -218,7 +248,9 @@ class Analysis:
                 subject = self.args["subject"]
             if "permutations" in self.args:
                 permutations = self.args["permutations"]
-            anova_result = analytics.run_repeated_measurements_anova(self.data, drop_cols=drop_cols, subject=subject, group=group, alpha=alpha, permutations=permutations)
+            if 'correction_method' in self.args:
+                correction = self.args['correction_method']
+            anova_result = analytics.run_repeated_measurements_anova(self.data, drop_cols=drop_cols, subject=subject, group=group, alpha=alpha, permutations=permutations, correction=correction)
             self.result[self.analysis_type] = anova_result
             print('repeated-ANOVA', time.time() - start)
         elif self.analysis_type == "dabest":
@@ -240,7 +272,7 @@ class Analysis:
             start = time.time()
             alpha = 0.05
             method = 'pearson'
-            correction = ('fdr', 'indep')
+            correction = 'fdr_bh'
             subject = 'subject'
             group = 'group'
             if 'group' in self.args:
@@ -258,7 +290,7 @@ class Analysis:
             start = time.time()
             alpha = 0.05
             method = 'pearson'
-            correction = ('fdr', 'indep')
+            correction = 'fdr_bh'
             cutoff = 0.5
             subject = 'subject'
             if 'subject' in self.args:
@@ -269,11 +301,8 @@ class Analysis:
                 method = self.args["method"]
             if "correction" in self.args:
                 correction = self.args["correction"]
-            if "cutoff" in self.args:
-                cutoff = self.args['cutoff']
             self.result[self.analysis_type] = analytics.run_rm_correlation(self.data, alpha=alpha, subject=subject, correction=correction)
         elif self.analysis_type == "merge_for_polar":
-            print(self.data)
             theta_col = 'modifier'
             group_col = 'group'
             identifier_col = 'identifier'
@@ -300,6 +329,7 @@ class Analysis:
             reject_col = 'rejected'
             method = 'fisher'
             annotation_type = 'functional'
+            correction = 'fdr_bh'
             if 'identifier' in self.args:
                 identifier = self.args['identifier']
             if 'groups' in self.args:
@@ -312,11 +342,14 @@ class Analysis:
                 method = self.args['method']
             if 'annotation_type' in self.args:
                 annotation_type = self.args['annotation_type']
-
+            if 'correction_method' in self.args:
+                correction = self.args['correction_method']
             if 'regulation_data' in self.args and 'annotation' in self.args:
                 if self.args['regulation_data'] in self.data and self.args['annotation'] in self.data:
                     self.analysis_type = annotation_type+"_"+self.analysis_type
-                    self.result[self.analysis_type] = analytics.run_regulation_enrichment(self.data[self.args['regulation_data']], self.data[self.args['annotation']], identifier=identifier, groups=groups, annotation_col=annotation_col, reject_col=reject_col, method=method)
+                    self.result[self.analysis_type] = analytics.run_regulation_enrichment(self.data[self.args['regulation_data']], self.data[self.args['annotation']], 
+                                                                                          identifier=identifier, groups=groups, annotation_col=annotation_col, reject_col=reject_col, 
+                                                                                          method=method, correction=correction)
             print('Enrichment', time.time() - start)
         elif self.analysis_type == "regulation_site_enrichment":
             start = time.time()
@@ -327,6 +360,7 @@ class Analysis:
             method = 'fisher'
             annotation_type = 'functional'
             regex = "(\w+~.+)_\w\d+\-\w+"
+            correction = 'fdr_bh'
             if 'identifier' in self.args:
                 identifier = self.args['identifier']
             if 'groups' in self.args:
@@ -341,11 +375,15 @@ class Analysis:
                 annotation_type = self.args['annotation_type']
             if 'regex' in self.args:
                 regex = self.args['regex']
-
+            if 'correction_method' in self.args:
+                correction = self.args['correction_method']
             if 'regulation_data' in self.args and 'annotation' in self.args:
                 if self.args['regulation_data'] in self.data and self.args['annotation'] in self.data:
                     self.analysis_type = annotation_type+"_"+self.analysis_type
-                    self.result[self.analysis_type] = analytics.run_site_regulation_enrichment(self.data[self.args['regulation_data']], self.data[self.args['annotation']], identifier=identifier, groups=groups, annotation_col=annotation_col, reject_col=reject_col, method=method, regex=regex)
+                    self.result[self.analysis_type] = analytics.run_site_regulation_enrichment(self.data[self.args['regulation_data']],
+                                                                                               self.data[self.args['annotation']], identifier=identifier,
+                                                                                               groups=groups, annotation_col=annotation_col, reject_col=reject_col,
+                                                                                               method=method, regex=regex, correction=correction)
         elif self.analysis_type == 'long_format':
             self.result[self.analysis_type] = analytics.transform_into_long_format(self.data, drop_columns=self.args['drop_columns'], group=self.args['group'], columns=self.args['columns'])
         elif self.analysis_type == 'ranking_with_markers':
@@ -385,6 +423,7 @@ class Analysis:
             merge_modules = True
             MEDissThres = 0.25
             verbose = 0
+            sd_cutoff = 0
             if "drop_cols_exp" in self.args:
                 drop_cols_exp = self.args['drop_cols_exp']
             if "drop_cols_cli" in self.args:
@@ -405,9 +444,11 @@ class Analysis:
                 MEDissThres = self.args["MEDissThres"]
             if "verbose" in self.args:
                 verbose = self.args["verbose"]
+            if "sd_cutoff" in self.args:
+                sd_cutoff = self.args["sd_cutoff"]
             self.result[self.analysis_type] = analytics.run_WGCNA(self.data, drop_cols_exp, drop_cols_cli, RsquaredCut=RsquaredCut, networkType=networkType, 
                                                             minModuleSize=minModuleSize, deepSplit=deepSplit, pamRespectsDendro=pamRespectsDendro, merge_modules=merge_modules,
-                                                            MEDissThres=MEDissThres, verbose=verbose)
+                                                            MEDissThres=MEDissThres, verbose=verbose, sd_cutoff=sd_cutoff)
         elif self.analysis_type == 'kaplan_meier':
             time_col = None
             event_col = None
@@ -423,7 +464,7 @@ class Analysis:
             start = time.time()
             alpha = 0.05
             method = 'pearson'
-            correction = ('fdr', 'indep')
+            correction = 'fdr_bh'
             subject = 'subject'
             group = 'group'
             on = ['subject', 'group']
@@ -439,7 +480,7 @@ class Analysis:
                 method = self.args["method"]
             if "correction" in self.args:
                 correction = self.args["correction"]
-            self.result[self.analysis_type] = analytics.run_multi_correlation(self.data, alpha=alpha, subject=subject, group=group, on=on, method=method, correction=correction)         
+            self.result[self.analysis_type] = analytics.run_multi_correlation(self.data, alpha=alpha, subject=subject, group=group, on=on, method=method, correction=correction)
 
     def get_plot(self, name, identifier):
         plot = []
@@ -613,17 +654,24 @@ class Analysis:
             elif name == "wgcnaplots":
                 start = time.time()
                 data = {}
+                sd_cutoff = 0
                 input_data = self.data
                 wgcna_data = self.result
-                dfs = wgcna.get_data(input_data, drop_cols_exp=self.args['drop_cols_exp'], drop_cols_cli=self.args['drop_cols_cli'])
-                if 'wgcna' in wgcna_data and wgcna_data['wgcna'] is not None and dfs is not None:
-                    for dtype in wgcna_data['wgcna']:
-                        data = {**dfs, **wgcna_data['wgcna'][dtype]}
-                        plot.extend(viz.get_WGCNAPlots(data, identifier+"-"+dtype))
+                if 'sd_cutoff' in self.args:
+                    sd_cutoff = self.args['sd_cutoff']
+                if 'drop_cols_exp' in self.args and 'drop_cols_cli' in self.args:
+                    dfs = wgcna.get_data(input_data, drop_cols_exp=self.args['drop_cols_exp'], drop_cols_cli=self.args['drop_cols_cli'], sd_cutoff=sd_cutoff)
+                    if 'wgcna' in wgcna_data and wgcna_data['wgcna'] is not None and dfs is not None:
+                        for dtype in wgcna_data['wgcna']:
+                            data = {**dfs, **wgcna_data['wgcna'][dtype]}
+                            plot.extend(viz.get_WGCNAPlots(data, identifier + "-" + dtype))
                 print('WGCNA-plot', time.time() - start)
             elif name == 'ranking':
                 for id in self.result:
                     plot.append(viz.get_ranking_plot(self.result[id], identifier, self.args))
+            elif name == 'qcmarkers_boxplot':
+                for id in self.result:
+                    plot.append(viz.get_boxplot_grid(self.result[id], identifier, self.args))
             elif name == 'clustergrammer':
                 for id in self.result:
                     plot.append(viz.get_clustergrammer_plot(self.result[id], identifier, self.args))

@@ -99,12 +99,13 @@ def get_pieplot(data, identifier, args):
     figure = {}
     figure['data'] = []
     figure['data'].append(go.Pie(labels=data.index, values=data[args['valueCol']], hovertext=data[args['textCol']], hoverinfo='label+text+percent'))
-    figure["layout"] = go.Layout(height = args['height'],
-                            width = args['width'],
-                            annotations = [dict(xref='paper', yref='paper', showarrow=False, text='')],
-                            template='plotly_white')
+    figure["layout"] = go.Layout(height=args['height'],
+                                 width=args['width'],
+                                 annotations=[dict(xref='paper', yref='paper', showarrow=False, text='')],
+                                 template='plotly_white')
 
-    return dcc.Graph(id = identifier, figure = figure)
+    return dcc.Graph(id=identifier, figure=figure)
+
 
 def get_distplot(data, identifier, args):
     """
@@ -126,14 +127,58 @@ def get_distplot(data, identifier, args):
     for i in df.index.unique():
         hist_data = []
         for c in df.columns.unique():
-            hist_data.append(df.loc[i,c].values.tolist())
+            hist_data.append(df.loc[i, c].values.tolist())
         group_labels = df.columns.unique().tolist()
         # Create distplot with custom bin_size
         fig = FF.create_distplot(hist_data, group_labels, bin_size=.5, curve_type='normal')
-        fig['layout'].update(height=600, width=1000, title='Distribution plot '+i, annotations = [dict(xref='paper', yref='paper', showarrow=False, text='')], template='plotly_white')
+        fig['layout'].update(height=600, width=1000, title='Distribution plot ' + i, annotations=[dict(xref='paper', yref='paper', showarrow=False, text='')], template='plotly_white')
         graphs.append(dcc.Graph(id=identifier+"_"+i, figure=fig))
 
     return graphs
+
+
+def get_boxplot_grid(data, identifier, args):
+    """
+    This function plots a boxplot in a grid based on column values.
+
+    :param data: pandas DataFrame with columns: 'x' values and 'y' values to plot, 'color' and 'facet' (color and facet can be the same).
+    :param str identifier: id used to identify the div where the figure will be generated.
+    :param dict args: see below.
+    :Arguments:
+        * **title** (str) -- plot title.
+        * **x** (str) -- name of column with x values.
+        * **y** (str) -- name of column with y values.
+        * **color** (str) -- name of column with colors
+        * **facet** (str) -- name of column specifying grouping
+        * **height** (str) -- plot height.
+        * **width** (str) -- plot width.
+    :return: boxplot figure within the <div id="_dash-app-content">.
+
+    Example::
+
+        result = get_boxplot_grid(data, identifier='Boxplot', args:{"Title":"Boxplot", 'x':'sample', 'y':'identifier', 'color':'group', 'facet':'qc_class', 'axis':'cols'})
+    """
+    fig = {}
+    if 'x' in args and 'y' in args and 'color' in args and 'facet' in args:
+        if 'axis' not in args:
+            args['axis'] = 'cols'
+        if 'width' not in args:
+            args['width'] = 2500
+        if 'height' not in args:
+            args['height'] = None
+        if 'title' not in args:
+            args['title'] = 'Boxplot'
+
+        if args['axis'] == 'rows':
+            fig = px.box(data, x=args["x"], y=args["y"], color=args['color'], points="all", facet_row=args["facet"], width=args['width'])
+        else:
+            fig = px.box(data, x=args["x"], y=args["y"], color=args['color'], points="all", facet_col=args["facet"], width=args['width'])
+        fig.update_layout(annotations=[dict(xref='paper', yref='paper', showarrow=False)], template='plotly_white')
+    else:
+        fig = get_markdown(text='Missing arguments. Please, provide: x, y, color, facet, axis')
+
+    return dcc.Graph(id=identifier, figure=fig)
+
 
 def get_barplot(data, identifier, args):
     """
@@ -166,52 +211,52 @@ def get_barplot(data, identifier, args):
             errors = []
             if 'errors' in args:
                 errors = data.loc[data[args["group"]] == g, args['errors']]
-            #errors = data.groupby(args["group"]).agg({args['y']:'std'})
+
             if 'orientation' in args:
                 trace = go.Bar(
-                            x = data.loc[data[args["group"]] == g,args['x']], 
-                            y = data.loc[data[args["group"]] == g, args['y']],
-                            error_y = dict(type='data',array=errors),
-                            name = g,
-                            marker = dict(color=color),
-                            orientation = args['orientation']
+                            x=data.loc[data[args["group"]] == g, args['x']], 
+                            y=data.loc[data[args["group"]] == g, args['y']],
+                            error_y=dict(type='data', array=errors),
+                            name=g,
+                            marker=dict(color=color),
+                            orientation=args['orientation']
                             )
             else:
                 trace = go.Bar(
-                            x = data.loc[data[args["group"]] == g,args['x']], # assign x as the dataframe column 'x'
-                            y = data.loc[data[args["group"]] == g, args['y']],
-                            error_y = dict(type='data',array=errors),
-                            name = g,
-                            marker = dict(color=color),
+                            x=data.loc[data[args["group"]] == g, args['x']], # assign x as the dataframe column 'x'
+                            y=data.loc[data[args["group"]] == g, args['y']],
+                            error_y=dict(type='data', array=errors),
+                            name=g,
+                            marker=dict(color=color),
                             )
             figure["data"].append(trace)
     else:
         if 'orientation' in args:
             figure["data"].append(
                           go.Bar(
-                                x = data[args['x']],
-                                y = data[args['y']],
-                                orientation = args['orientation']
+                                x=data[args['x']],
+                                y=data[args['y']],
+                                orientation=args['orientation']
                             )
                         )
         else:
             figure["data"].append(
                           go.Bar(
-                                x = data[args['x']], # assign x as the dataframe column 'x'
-                                y = data[args['y']],
+                                x=data[args['x']],
+                                y=data[args['y']],
                             )
                         )
     figure["layout"] = go.Layout(
-                            title = args['title'],
-                            xaxis={"title":args["x_title"]},
-                            yaxis={"title":args["y_title"]},
-                            height = args['height'],
-                            width = args['width'],
-                            annotations = [dict(xref='paper', yref='paper', showarrow=False, text='')],
+                            title=args['title'],
+                            xaxis={"title": args["x_title"]},
+                            yaxis={"title": args["y_title"]},
+                            height=args['height'],
+                            width=args['width'],
+                            annotations=[dict(xref='paper', yref='paper', showarrow=False, text='')],
                             template='plotly_white'
                         )
 
-    return dcc.Graph(id= identifier, figure = figure)
+    return dcc.Graph(id=identifier, figure=figure)
 
 ##ToDo
 def get_facet_grid_plot(data, identifier, args):
@@ -236,21 +281,21 @@ def get_facet_grid_plot(data, identifier, args):
         result = get_facet_grid_plot(data, identifier='facet_grid', args={'x':'a', 'y':'b', 'group':'group', 'class':'type', 'plot_type':'bar', 'title':'Facet Grid Plot'})
     """
     figure = FF.create_facet_grid(data,
-                                x=args['x'],
-                                y=args['y'],
-                                marker={'opacity':1.},
-                                facet_col=args['class'],
-                                color_name=args['group'],
-                                color_is_cat=True,
-                                trace_type=args['plot_type'],
-                                )
-    figure['layout'] = dict(title = args['title'].title(),
-                            paper_bgcolor = None,
-                            legend = None,
-                            annotations = [dict(xref='paper', yref='paper', showarrow=False, text='')],
+                                  x=args['x'],
+                                  y=args['y'],
+                                  marker={'opacity': 1.},
+                                  facet_col=args['class'],
+                                  color_name=args['group'],
+                                  color_is_cat=True,
+                                  trace_type=args['plot_type'])
+    figure['layout'] = dict(title=args['title'].title(),
+                            paper_bgcolor=None,
+                            legend=None,
+                            annotations=[dict(xref='paper', yref='paper', showarrow=False, text='')],
                             template='plotly_white')
 
-    return dcc.Graph(id= identifier, figure = figure)
+    return dcc.Graph(id=identifier, figure=figure)
+
 
 def get_ranking_plot(data, identifier, args):
     """
@@ -284,10 +329,9 @@ def get_ranking_plot(data, identifier, args):
     num_groups = len(data.index.unique())
     num_rows = math.ceil(num_groups/num_cols)
     if 'group' in args:
-        group=args['group']
-    #subplot_title = "Ranking of proteins in {} samples"
-    #subplot_titles = [subplot_title.format(index.title()) for index in data.index.unique()]
-    fig = tools.make_subplots(rows=num_rows, cols=num_cols, shared_yaxes=True,print_grid=False)
+        group = args['group']
+
+    fig = tools.make_subplots(rows=num_rows, cols=num_cols, shared_yaxes=True, print_grid=False)
     if 'index' in args and args['index']:
         r = 1
         c = 1
@@ -397,60 +441,7 @@ def get_scatterplot_matrix(data, identifier, args):
 
     return dcc.Graph(id=identifier, figure=fig)
 
-def get_scatterplot_matrix_old(data, identifier, args):
-    df = data.copy()
-    if "format" in args:
-        if args["format"] == "long":
-            columns = [args["variables"], args["values"]]
-            groups = df[args["group"]]
-            df = df[columns]
-            df = df.pivot(columns=args["variables"], values=args["values"])
-            df['group'] = groups
-    classes=np.unique(df[args["group"]].values).tolist()
-    class_code={classes[k]: k for k in range(len(classes))}
-    color_vals=[class_code[cl] for cl in df[args["group"]]]
-    if 'name' in data.columns:
-        text = data.name
-    else:
-        text= data[args['group']]
 
-    figure = {}
-    figure["data"] = []
-    dimensions = []
-    for col in df.columns:
-        if col != args["group"]:
-            dimensions.append(dict(label=col, values=df[col]))
-
-
-
-    figure["data"].append(go.Splom(dimensions=dimensions,
-                    text=text,
-                    marker=dict(color=color_vals,
-                                size=7,
-                                showscale=False,
-                                line=dict(width=0.5,
-                                        color='rgb(230,230,230)'))
-                    ))
-
-    axis = dict(showline=True,
-                zeroline=False,
-                gridcolor='#fff',
-                ticklen=4)
-
-    figure["layout"] = go.Layout(title = args["title"],
-                            xaxis = dict(axis),
-                            yaxis = dict(axis),
-                            dragmode='select',
-                            width=1500,
-                            height=1500,
-                            autosize=True,
-                            hovermode='closest',
-                            plot_bgcolor='rgba(240,240,240, 0.95)',
-                            annotations = [dict(xref='paper', yref='paper', showarrow=False, text='')],
-                            template='plotly_white'
-                            )
-
-    return dcc.Graph(id=identifier, figure=figure)
 
 def get_simple_scatterplot(data, identifier, args):
     """
@@ -740,7 +731,7 @@ def run_volcano(data, identifier, args={'alpha':0.05, 'fc':2, 'colorscale':'Blue
                                     'ax': 0,
                                     'ay': -10,
                                     'font': dict(color = "#2c7bb6", size = 10)})
-                    color.append('rgba(44, 123, 182, 0.2)')
+                    color.append('rgba(44, 123, 182, 0.4)')
                     line_colors.append('#2c7bb6')
                 elif row['FC'] >= args['fc']:
                     annotations.append({'x': row['log2FC'],
@@ -752,13 +743,13 @@ def run_volcano(data, identifier, args={'alpha':0.05, 'fc':2, 'colorscale':'Blue
                                     'ax': 0,
                                     'ay': -10,
                                     'font': dict(color = "#d7191c", size = 10)})
-                    color.append('rgba(215, 25, 28, 0.2)')
+                    color.append('rgba(215, 25, 28, 0.4)')
                     line_colors.append('#d7191c')
                 elif row['FC'] < -1.:
-                    color.append('rgba(171, 217, 233, 0.1)')
+                    color.append('rgba(171, 217, 233, 0.2)')
                     line_colors.append('#abd9e9')
                 elif row['FC'] > 1.:
-                    color.append('rgba(253, 174, 97, 0.1)')
+                    color.append('rgba(253, 174, 97, 0.2)')
                     line_colors.append('#fdae61')
                 else:
                     color.append('rgba(153, 153, 153, 0.1)')
@@ -820,26 +811,8 @@ def get_heatmapplot(data, identifier, args):
 
     return dcc.Graph(id = identifier, figure = figure)
 
-# def get_complex_heatmapplot(df, identifier, args):
-#     figure = {}
-#     if args['format'] == "edgelist":
-#         df = df.set_index(args['source'])
-#         df = df.pivot_table(values=args['values'], index=df.index, columns=args['target'], aggfunc='first')
-#         df = df.dropna(how='all', axis=1)
-#         df = df.fillna(0)
 
-#     figure = dashbio.Clustergram(width=1600,
-#                                  color_threshold={'row': 150, 'col': 700},
-#                                  color_map='BuPu',
-#                                  data=df.values,
-#                                  row_labels=list(df.index),
-#                                  column_labels=list(df.columns.values),
-#                                  hide_labels=['row'],
-#                                  height=1800)
-
-#     return dcc.Graph(id=identifier, figure=figure)
-
-def get_complex_heatmapplot_old(data, identifier, args):
+def get_complex_heatmapplot(data, identifier, args):
     df = data.copy()
 
     figure = {'data':[], 'layout':{}}
@@ -2143,66 +2116,7 @@ def get_km_plot(data, identifier, args):
             
     return dcc.Graph(id=identifier, figure=figure)
 
-def get_polar_plot_old(df, identifier, args):
-    """
-    This function creates a Polar plot with data aggregated for a given group.
 
-    :param dataframe df: dataframe with the data to plot
-    :param str identifier: identifier to be used in the app
-    :param dict args: dictionary containing the arguments needed to plot the figure (value_col (value to aggregate), group_col (group by), color_col (color by))
-    :return: Dash Graph
-
-    Example::
-        figure = get_polar_plot(df, identifier='polar', args={'value_col':'intensity', 'group_col':'modifier', 'color_col':'group'})
-    """
-    figure = {}
-    line_close = True
-    ptype = 'bar'
-    title = 'Polar plot'
-    width = 800
-    height = 700
-    value = None
-    group = None
-    colors = None
-    aggr_func = 'mean'
-    normalize = False
-    if not df.empty:
-        if 'value_col' in args:
-            value = args['value_col']
-        if 'group_col' in args:
-            group = args['group_col']
-        if 'color_col' in args:
-            colors = args['color_col']
-        if 'line_close' in args:
-            line_close = args['line_close']
-        if 'title' in args:
-            title = args['title']
-        if 'width' in args:
-            width = args['width']
-        if 'height' in args:
-            height = args['height']
-        if 'type' in args:
-            ptype = args['type']
-        if 'aggr_func' in args:
-            aggr_func = args['aggr_func']
-        
-        if value is not None and group is not None and colors is not None:  
-            if not df.empty:
-                df = aggregate_for_polar(df, group_by=[group, colors], value_col=value, aggregate_func=aggr_func, normalize=normalize)
-                df = df.sort_values(by=group)
-                print(df[df[value].isnull()])
-                print(df[df[group]=='PRKACA'])
-                min_value = df[value].min()
-                max_value = df[value].max()
-                if ptype == 'line':
-                    figure = px.line_polar(df, r=value, theta=group, color=colors, line_close=line_close, title=title, template="plotly_white", width=width, height=height, render_mode='svg')
-                elif ptype == 'bar':
-                    figure = px.bar_polar(df, r=value, theta=group, color=colors, title=title, template="plotly_white", width=width, height=height, barnorm='fraction')
-                else:
-                    print("Type {} not available. Try with 'line' or 'bar' types.".format(ptype))
-                layout = figure.update_layout(polar = dict(radialaxis=dict(range=[min_value, max_value])))
-            
-    return dcc.Graph(id=identifier, figure=figure)
 
 def get_polar_plot(df, identifier, args):
     """

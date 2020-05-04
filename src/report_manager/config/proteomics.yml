@@ -88,6 +88,27 @@ overview: #section
             height: 900
             width: 1500
             title: 'Proteins %CV'
+    quality_control:
+        data:
+            - processed
+            - tissue qcmarkers
+        analyses:
+            - qcmarkers
+        plots:
+            - qcmarkers_boxplot
+        args:
+            sample_col: sample
+            group_col : group
+            identifier_col: identifier
+            qcidentifier_col: identifier
+            qcclass_col: class
+            x: sample
+            y: z-score
+            color: group 
+            facet: class
+            height: 900
+            width: 2500
+            title: 'Quality Control markers'
     ranking:
         data: 
             - processed
