@@ -172,6 +172,23 @@ def get_config(config_name, data_type='databases'):
     return config
 
 
+def expand_cols(data, col, sep=';'):
+    """
+    Expands the rows of a dataframe by splitting the specified column
+
+    :param data: dataframe to be expanded
+    :param str col: column that contains string to be expanded (i.e. 'P02788;E7EQB2;E7ER44;P02788-2;C9JCF5')
+    :param str sep: separator (i.e. ';')
+    :return: expanded pandas dataframe
+    """
+    s = data[col].str.split(sep).apply(pd.Series, 1).stack().reset_index(level=1, drop=True)
+    del data[col]
+    pdf = s.to_frame(col)
+    data = data.join(pdf)
+
+    return data
+
+
 def setup_config(data_type="databases"):
     """
     Reads YAML configuration file and converts it into a Python dictionary.
