@@ -1521,10 +1521,10 @@ def correct_pairwise_ttest(df, alpha, correction='fdr_bh'):
                 posthoc_df = pd.DataFrame({"index":index, "posthoc padj":posthoc_padj})
             else:
                 posthoc_df = posthoc_df.append(pd.DataFrame({"index":index, "posthoc padj":posthoc_padj}))
+        posthoc_df = posthoc_df.set_index("index")
+        df = df.join(posthoc_df)
     else:
         print("No correction of posthoc pvalues")
-    posthoc_df = posthoc_df.set_index("index")
-    df = df.join(posthoc_df)
     
     return df
 
@@ -1725,7 +1725,7 @@ def define_samr_method(df, subject, group, drop_cols):
             method = 'Multiclass'
     return method, labels
 
-def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample'], alpha=0.05, s0='null', permutations=250, fc=0, is_logged=True):
+def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample'], alpha=0.05, s0='null', permutations=250, fc=0, is_logged=True, localfdr=False):
     """
     Python adaptation of the 'samr' R package for statistical tests with permutation-based correction and s0 parameter.
     For more information visit https://cran.r-project.org/web/packages/samr/samr.pdf.
@@ -1756,24 +1756,42 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
     if permutations > 0 and r_installation:
         method, labels = define_samr_method(df, subject, group, drop_cols)
         groups = df[group].unique()
-        df_py = df.set_index('group').drop(drop_cols, axis=1).astype(float)
-        df_r = df.set_index('sample').drop(['group', 'subject'], axis=1).T.astype(float)
+        df_py = df.drop(drop_cols, axis=1)
+        df_r = df.drop(drop_cols+[group], axis=1).T.astype(float)
         data = R_dataprep_function(pandas2ri.py2rpy(df_r), np.array(labels), np.array(df_r.index))
+        
+        aov_results =[]
+        pairwise_results = []
+        for col in df_py.columns.drop(group).tolist():
+            aov = calculate_anova(df_py[[group, col]], column=col, group=group)
+            aov_results.append(aov)
+            pairwise_result = calculate_pairwise_ttest(df_py[[group, col]], column=col, subject=subject, group=group, is_logged=is_logged)
+            pairwise_cols = pairwise_result.columns
+            pairwise_results.extend(pairwise_result.values.tolist())
+
+        columns = ['identifier', 'F-statistics', 'pvalue']
+        scores = pd.DataFrame(aov_results, columns = columns)
+        scores = scores.set_index('identifier')
+        pairwise_results = pd.DataFrame(pairwise_results, columns=pairwise_cols).set_index("identifier")
         
         if s0 is None or s0 == "null":
             s0 = ro.r("NULL")
 
         samr_res = R_samr_function(data=data, res_type=method, s0=s0, nperms=permutations)
+        nperms_run = samr_res.rx2('nperms.act')[0]
+        s0_used = samr_res.rx2('s0')[0]
+        samr_df = pd.DataFrame([df_py.drop(group, axis=1).columns, samr_res.rx2('tt')]).T
+        samr_df.columns = ['identifier', 'F-statistics']
+        samr_df = samr_df.set_index('identifier').astype(float)
+        
         delta_table = samr.samr_compute_delta_table(samr_res, fc)
         delta_table_df = pd.DataFrame(delta_table, columns=['delta', '#med false pos', '90th perc false pos', '#called', 'median FDR', '90th perc FDR', 'cutlo', 'cuthi'])
         delta = delta_table_df[delta_table_df['median FDR'] < alpha].iloc[0,0]
-        siggenes_table = samr.samr_compute_siggenes_table(samr_res, delta, data, delta_table, all_genes=ro.r("TRUE"))
-        nperms_run = samr_res.rx2('nperms.act')[0]
-        s0_used = samr_res.rx2('s0')[0]
-        denom = samr_res.rx2('sd')
-        s = denom - s0_used
-        f_stats = samr_res.rx2('tt')
-        pvalues = samr.samr_pvalues_from_perms(samr_res.rx2('tt'), samr_res.rx2('ttstar'))
+        
+        if localfdr:
+            siggenes_table = samr.samr_compute_siggenes_table(samr_res, delta, data, delta_table, all_genes=ro.r("TRUE"), compute_localfdr=ro.r("TRUE"))
+        else:
+            siggenes_table = samr.samr_compute_siggenes_table(samr_res, delta, data, delta_table, all_genes=ro.r("TRUE"), compute_localfdr=ro.r("FALSE"))
         
         if isinstance(siggenes_table.rx2('genes.up'), np.ndarray):
             up = pd.DataFrame(np.reshape(siggenes_table.rx2('genes.up'), (-1, siggenes_table.rx2('ngenes.up')[0]))).T
@@ -1788,46 +1806,41 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
         total.iloc[:,-1] = total.iloc[:,-1].astype(float)/100
         qvalues = total.iloc[:,[1,-1]]
         qvalues.columns = ['identifier', 'padj']
-        qvalues = qvalues.sort_values(["identifier"])
-    
+        result = scores.join(qvalues.set_index('identifier'))
+        result['F-statistics'] = result.index.map(samr_df['F-statistics'].to_dict().get)
         
-        pairwise_results = []
-        for col in df_py.columns:
-            rows = df_py[col]
-            pairwise_result = calculate_pairwise_ttest(rows.reset_index(), column=col, subject=subject, group=group, is_logged=is_logged)
-            pairwise_cols = pairwise_result.columns
-            pairwise_results.extend(pairwise_result.values.tolist())
-        
-        pairwise = pd.DataFrame(pairwise_results, columns=pairwise_cols).set_index("identifier")
-        res = pd.DataFrame([df_py.columns, f_stats, pvalues]).T
-        res.columns = ['identifier', 'SAMR test statistics', 'pvalue']
+        if not pairwise_results.empty:
+            result = pairwise_results.join(result)
 
-        res = pairwise.join(res.set_index('identifier')).reset_index()
-        res = correct_pairwise_ttest(res, alpha)
-
-        contrasts = ['diff_mean_group{}'.format(str(i+1)) for i in np.arange(len(set(labels)))]
-        res['-log10 pvalue'] = [- np.log10(x) for x in res['posthoc pvalue'].values]
         if method != 'Multiclass':
-            res = res.drop(['posthoc Paired', 'posthoc Parametric', 
-                            'posthoc T-Statistics', 'posthoc dof', 'posthoc tail', 'posthoc BF10'], axis=1)
-            res = res.rename(columns={'pvalue': 'SAMR perm.pvalue','posthoc pvalue':'pvalue', 'posthoc effsize': 'effsize', 'posthoc padj':'p-padj'})
-        res = res.set_index('identifier').join(qvalues.set_index('identifier'))
-        #if nperms_run < permutations:
-        #    rejected, padj = apply_pvalue_correction(res["pvalue"].tolist(), alpha=alpha, method='fdr_bh')
-        #    res['padj'] = padj
-        #    res['correction'] = 'FDR correction BH'
-        #    res['Note'] = 'Maximum number of permutations: {}. Corrected instead using FDR correction BH'.format(nperms_run)
-        #else:
-        res['correction'] = 'permutation FDR ({} perm)'.format(nperms_run)
-        
-        res['rejected'] = res['padj'] < alpha
-        res['Method'] = 'SAMR {}'.format(method)
-        res['s0'] = s0_used
-        res = res.reset_index()
-    else:
-        res = run_anova(df, alpha=alpha, drop_cols=drop_cols, subject=subject, group=group, permutations=permutations)
+            result = result.drop(['posthoc Paired', 'posthoc Parametric', 'posthoc T-Statistics',
+                                  'posthoc dof', 'posthoc tail', 'posthoc pvalue', 'posthoc BF10', ], axis=1)
+            result = result.rename(columns={'F-statistics': 'T-statistics', 'posthoc effsize': 'effsize'})
+            result = correct_pairwise_ttest(result, alpha)
 
-    return res
+        if 'posthoc pvalue' in result.columns:
+            result['-log10 pvalue'] = [- np.log10(x) for x in result['posthoc pvalue'].values]
+        else:
+            result['-log10 pvalue'] = [- np.log10(x) for x in result['pvalue'].values]
+        
+        if nperms_run < permutations:
+            rejected, padj = apply_pvalue_correction(result["pvalue"].tolist(), alpha=alpha, method='fdr_bh')
+            result['padj'] = padj
+            result['correction'] = 'FDR correction BH'
+            result['Note'] = 'Maximum number of permutations: {}. Corrected instead using FDR correction BH'.format(nperms_run)
+        else:
+            result['correction'] = 'permutation FDR ({} perm)'.format(nperms_run)  
+        
+        contrasts = ['diff_mean_group{}'.format(str(i+1)) for i in np.arange(len(set(labels)))]
+        result.loc[result['padj'] > 1, 'padj'] = 1.0
+        result['rejected'] = result['padj'] < alpha
+        result['Method'] = 'SAMR {}'.format(method)
+        result['s0'] = s0_used
+        result = result.reset_index()
+    else:
+        result = run_anova(df, alpha=alpha, drop_cols=drop_cols, subject=subject, group=group, permutations=permutations)
+
+    return result
 
 def calculate_discriminant_lines(result):
     for row in result.iterrows():
