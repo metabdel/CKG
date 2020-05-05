@@ -27,7 +27,7 @@ def parser(databases_directory, download=True):
     food = set()
     compounds = {}
     try:
-        tf = tarfile.open(tar_fileName, 'r:gz')
+        tf = tarfile.open(tar_fileName, 'r')
         tf.extractall(path=directory)
         tf.close()
         for file_name in config['files']:
