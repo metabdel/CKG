@@ -31,15 +31,15 @@ except ImportError:
     print("WGCNA functions will not work. Module Rpy2 not installed.")
 
 
-def get_data(data, drop_cols_exp=['subject', 'group', 'sample', 'index'], drop_cols_cli=['subject', 'group', 'biological_sample', 'index']):
-    """ 
+def get_data(data, drop_cols_exp=['subject', 'group', 'sample', 'index'], drop_cols_cli=['subject', 'group', 'biological_sample', 'index'], sd_cutoff=0):
+    """
     This function cleanes up and formats experimental and clinical data into similarly shaped dataframes.
-    
+
     :param dict data: dictionary with processed clinical and proteomics datasets.
     :param list drop_cols_exp: list of columns to drop from processed experimental (protemics/rna-seq/dna-seq) dataframe.
     :param list drop_cols_cli: list of columns to drop from processed clinical dataframe.
     :return: Dictionary with experimental and clinical dataframes (keys are the same as in the input dictionary).  
-    """   
+    """
     wgcna_data = {}
     for i in data:
         if data[i] is not None:
@@ -58,6 +58,8 @@ def get_data(data, drop_cols_exp=['subject', 'group', 'sample', 'index'], drop_c
                 df.set_index(['rows'], inplace=True)
                 df = df.reindex(index=natsorted(df.index))
                 df = df.drop(drop_cols_exp, axis=1)
+                if sd_cutoff > 0:
+                    df = df.loc[:, df.std() > sd_cutoff]
 
             wgcna_data[i] = df
 
