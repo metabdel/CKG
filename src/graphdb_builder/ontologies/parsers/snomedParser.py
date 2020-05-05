@@ -25,7 +25,11 @@ def parser(files, filters):
 
     full_path_files = []
     for f in files:
-        f = builder_utils.get_files_by_pattern(f).pop()
+        f = builder_utils.get_files_by_pattern(f)
+        if len(f) > 0:
+            f = f.pop()
+        else:
+            continue
         if "Concept" in f:
             inactive_terms = get_inactive_terms(f)
         else:

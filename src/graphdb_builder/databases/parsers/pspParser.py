@@ -36,8 +36,7 @@ def parser(databases_directory):
             elif entity == "substrate":
                 relationships[(entity, relationship_type)] = parseKinaseSubstrates(f, modifications)
 
-    builder_utils.remove_directory(directory)
-
+    
     return entities, relationships, entities_header, relationships_headers
 
 

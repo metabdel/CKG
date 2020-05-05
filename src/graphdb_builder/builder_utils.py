@@ -434,8 +434,18 @@ def getMedlineAbstracts(idList):
 
 def remove_directory(directory):
     if os.path.exists(directory):
-        shutil.rmtree(directory, ignore_errors=False, onerror=None)
-
+        files = listDirectoryFiles(directory)
+        folders = listDirectoryFolders(directory)
+        if 'complete_mapping.tsv' in files:
+            for f in files:
+                if f != 'complete_mapping.tsv':
+                    os.remove(os.path.join(directory, f))
+            for d in folders:
+                remove_directory(os.path.join(directory, d))
+        else:
+            shutil.rmtree(directory, ignore_errors=False, onerror=None)
+    else:
+        print("Done")
 
 def listDirectoryFiles(directory):
     """

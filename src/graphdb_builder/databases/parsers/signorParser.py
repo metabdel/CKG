@@ -27,8 +27,6 @@ def parser(databases_directory, download=True):
 
     entities, relationships = parse_substrates(filename, modifications, accronyms, amino_acids)
 
-    builder_utils.remove_directory(directory)
-
     return entities, relationships, entities_header, relationships_headers
 
 
