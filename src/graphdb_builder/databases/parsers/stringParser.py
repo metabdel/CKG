@@ -3,9 +3,7 @@ import gzip
 import csv
 from graphdb_builder import mapping as mp, builder_utils
 
-#########################
-#   STRING like DBs     #
-#########################
+
 def parser(databases_directory, importDirectory, drug_source=None, download=True, db="STRING"):
     config = builder_utils.get_config(config_name="stringConfig.yml", data_type='databases')
     mapping = mp.getSTRINGMapping(download=False)
@@ -68,8 +66,6 @@ def parser(databases_directory, importDirectory, drug_source=None, download=True
                                 stored.add((aliasB, aliasB))
                                 writer.writerow(row)
     associations.close()
-    
-    builder_utils.remove_directory(directory)
 
     return mapping, drugmapping
 
