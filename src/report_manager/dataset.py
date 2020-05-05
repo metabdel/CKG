@@ -194,7 +194,7 @@ class Dataset:
             store_analysis = configuration["store_analysis"]
         if "args" in configuration:
             args = configuration["args"]
-        
+
         return description, data_name, analysis_types, plot_types, store_analysis, args
 
     def add_configuration_to_report(self, report_pipeline):
@@ -363,7 +363,10 @@ class MultiOmicsDataset(Dataset):
     def get_dataframes(self, datasets):
         data = {}
         for dataset_type in datasets:
-            dataset_name = datasets[dataset_type]
+            if isinstance(datasets, dict):
+                dataset_name = datasets[dataset_type]
+            else:
+                dataset_name = dataset_type
             if dataset_type in self.data:
                 dataset = self.data[dataset_type]
                 data[dataset_type] = dataset.get_dataframe(dataset_name)

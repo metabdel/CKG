@@ -1274,7 +1274,7 @@ def calculate_pairwise_ttest(df, column, subject='subject', group='group', corre
     posthoc_columns = ['Contrast', 'group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'posthoc Paired', 'posthoc Parametric', 'posthoc T-Statistics', 'posthoc dof', 'posthoc tail', 'posthoc pvalue', 'posthoc BF10', 'posthoc effsize']
     valid_cols = ['group1', 'group2', 'mean(group1)', 'std(group1)', 'mean(group2)', 'std(group2)', 'posthoc Paired', 'posthoc Parametric', 'posthoc T-Statistics', 'posthoc dof', 'posthoc tail', 'posthoc pvalue', 'posthoc BF10', 'posthoc effsize']
     
-    posthoc = pg.pairwise_ttests(data=df, dv=column, between=group, subject=subject, effsize='hedges', return_desc=True, padjust=correction, marginal=True)
+    posthoc = pg.pairwise_ttests(data=df, dv=column, between=group, subject=subject, effsize='hedges', return_desc=True, padjust=correction)
 
     posthoc.columns =  posthoc_columns
     posthoc = posthoc[valid_cols]
@@ -1769,10 +1769,11 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
             pairwise_cols = pairwise_result.columns
             pairwise_results.extend(pairwise_result.values.tolist())
 
+        pairwise_results = pd.DataFrame(pairwise_results, columns=pairwise_cols)
         columns = ['identifier', 'F-statistics', 'pvalue']
         scores = pd.DataFrame(aov_results, columns = columns)
         scores = scores.set_index('identifier')
-        pairwise_results = pd.DataFrame(pairwise_results, columns=pairwise_cols).set_index("identifier")
+        
         
         if s0 is None or s0 == "null":
             s0 = ro.r("NULL")
@@ -1786,7 +1787,11 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
         
         delta_table = samr.samr_compute_delta_table(samr_res, fc)
         delta_table_df = pd.DataFrame(delta_table, columns=['delta', '#med false pos', '90th perc false pos', '#called', 'median FDR', '90th perc FDR', 'cutlo', 'cuthi'])
-        delta = delta_table_df[delta_table_df['median FDR'] < alpha].iloc[0,0]
+        delta_table_df = delta_table_df.sort_values(by='median FDR', ascending=True)
+        if delta_table_df[delta_table_df['median FDR'] < alpha].empty:
+            delta = delta_table_df.iloc[0,0]
+        else:
+            delta = delta_table_df[delta_table_df['median FDR'] < alpha].iloc[0,0]
         
         if localfdr:
             siggenes_table = samr.samr_compute_siggenes_table(samr_res, delta, data, delta_table, all_genes=ro.r("TRUE"), compute_localfdr=ro.r("TRUE"))
@@ -1810,13 +1815,13 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
         result['F-statistics'] = result.index.map(samr_df['F-statistics'].to_dict().get)
         
         if not pairwise_results.empty:
-            result = pairwise_results.join(result)
-
-        if method != 'Multiclass':
-            result = result.drop(['posthoc Paired', 'posthoc Parametric', 'posthoc T-Statistics',
-                                  'posthoc dof', 'posthoc tail', 'posthoc pvalue', 'posthoc BF10', ], axis=1)
-            result = result.rename(columns={'F-statistics': 'T-statistics', 'posthoc effsize': 'effsize'})
-            result = correct_pairwise_ttest(result, alpha)
+            result = pairwise_results.set_index("identifier").join(result)
+            if method != 'Multiclass':
+                result = result.drop(['posthoc Paired', 'posthoc Parametric', 'posthoc T-Statistics',
+                                    'posthoc dof', 'posthoc tail', 'posthoc pvalue', 'posthoc BF10', ], axis=1)
+                result = result.rename(columns={'F-statistics': 'T-statistics', 'posthoc effsize': 'effsize'})
+            result = correct_pairwise_ttest(result.reset_index(), alpha)
+            result = result.set_index('identifier')
 
         if 'posthoc pvalue' in result.columns:
             result['-log10 pvalue'] = [- np.log10(x) for x in result['posthoc pvalue'].values]
@@ -2420,25 +2425,27 @@ def run_qc_markers_analysis(data, qc_markers, sample_col='sample', group_col='gr
     """
     """
     bdf = None
-    cols = list(set(data.columns.tolist()).intersection(qc_markers[qcidentifier_col].tolist()))
-    
-    if len(cols) > 0:
-        nd = data.set_index([sample_col]).drop(drop_cols + [group_col], axis=1)
-        z = pd.DataFrame(normalize_data(nd, method='zscore'), index=nd.index, columns=nd.columns)
-        nd = z.unstack()
-        nd = nd.reset_index().set_index(sample_col).join(data[[sample_col, group_col]].set_index(sample_col)).reset_index()
-        bdf = pd.DataFrame()
-        for i, group in qc_markers.groupby(qcclass_col):
-            c = group[group[qcidentifier_col].isin(cols)][qcidentifier_col].tolist()
-            if bdf.empty:
-                bdf = nd.set_index(identifier_col).loc[c].reset_index()
-                bdf.columns = [identifier_col, sample_col, 'z-score', group_col]
-                bdf[qcclass_col] = i
-            else:
-                aux = nd.set_index(identifier_col).loc[c].reset_index()
-                aux.columns = [identifier_col, sample_col, 'z-score', group_col]
-                aux[qcclass_col] = i
-                bdf = bdf.append(aux)
+    if qc_markers is not None:
+        if not data.empty and not qc_markers.empty:
+            cols = list(set(data.columns.tolist()).intersection(qc_markers[qcidentifier_col].tolist()))
+            
+            if len(cols) > 0:
+                nd = data.set_index([sample_col]).drop(drop_cols + [group_col], axis=1)
+                z = pd.DataFrame(normalize_data(nd, method='zscore'), index=nd.index, columns=nd.columns)
+                nd = z.unstack()
+                nd = nd.reset_index().set_index(sample_col).join(data[[sample_col, group_col]].set_index(sample_col)).reset_index()
+                bdf = pd.DataFrame()
+                for i, group in qc_markers.groupby(qcclass_col):
+                    c = group[group[qcidentifier_col].isin(cols)][qcidentifier_col].tolist()
+                    if bdf.empty:
+                        bdf = nd.set_index(identifier_col).loc[c].reset_index()
+                        bdf.columns = [identifier_col, sample_col, 'z-score', group_col]
+                        bdf[qcclass_col] = i
+                    else:
+                        aux = nd.set_index(identifier_col).loc[c].reset_index()
+                        aux.columns = [identifier_col, sample_col, 'z-score', group_col]
+                        aux[qcclass_col] = i
+                        bdf = bdf.append(aux)
     
     return bdf
 
