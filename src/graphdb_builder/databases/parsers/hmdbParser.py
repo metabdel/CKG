@@ -19,7 +19,7 @@ def parser(databases_directory, download=True):
     entities_header = ['ID'] + attributes
     relationships_header = config['relationships_header']
 
-    builder_utils.remove_directory(directory)
+    #builder_utils.remove_directory(directory)
 
     return (entities, relationships, entities_header, relationships_header)
 

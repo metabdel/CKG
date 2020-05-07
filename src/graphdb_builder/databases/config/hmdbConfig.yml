@@ -88,6 +88,9 @@ HMDB_associations:
     'tissue_locations':
         - 'ASSOCIATED_WITH'
         - 'hmdb_associated_with_tissue'
+    'foodb_id':
+        - 'HAS_CONTENT'
+        - food_has_content
 
 HMDB_attributes: 
     - 'name'

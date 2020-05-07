@@ -19,7 +19,6 @@ def parser(databases_directory, download=True):
     entities_header = config['entities_header']
     relationships_headers = config['relationships_headers']
     tar_fileName = os.path.join(directory, database_url.split('/')[-1])
-    tar_dir = database_url.split('/')[-1].split('.')[0]
     if download:
         builder_utils.downloadDB(database_url, directory)
 
@@ -28,16 +27,18 @@ def parser(databases_directory, download=True):
     compounds = {}
     try:
         tf = tarfile.open(tar_fileName, 'r')
+        file_content = tf.getnames()
+        tar_dir = file_content[1]
         tf.extractall(path=directory)
         tf.close()
         for file_name in config['files']:
             path = os.path.join(directory, os.path.join(tar_dir, file_name))
             with open(path, 'r', encoding="utf-8", errors='replace') as f:
-                if file_name == "contents.csv":
+                if file_name == "Content.csv":
                     contents = parseContents(f)
-                elif file_name == "foods.csv":
+                elif file_name == "Food.csv":
                     food, mapping = parseFood(f)
-                elif file_name == "compounds.csv":
+                elif file_name == "Compound.csv":
                     compounds = parseCompounds(f)
         for food_id, compound_id in contents:
             if compound_id in compounds:
@@ -86,8 +87,8 @@ def parseFood(fhandler):
         if first:
             first = False
             continue
-        food_id = int(row[0])
-        name= row[1]
+        food_id = row[22]
+        name = row[1]
         sci_name = row[2]
         description = row[3]
         group = row[11]
@@ -108,6 +109,8 @@ def parseCompounds(fhandler):
         if first:
             first = False
             continue
+        print(row)
+        print(row.shape)
         compound_id = row[0]
         mapped_code = row[44]
         if str(mapped_code) != 'nan':
