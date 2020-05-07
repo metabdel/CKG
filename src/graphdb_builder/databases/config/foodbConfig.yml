@@ -1,9 +1,9 @@
     ###### FOODB Database ########
 database_url: 'https://foodb.ca/public/system/downloads/foodb_2020_4_7_csv.tar.gz'
 files: 
-    - 'contents.csv'
-    - 'foods.csv'
-    - 'compounds.csv'
+    - 'Content.csv'
+    - 'Food.csv'
+    - 'Compound.csv'
 entities_header: 
     - 'ID'
     - 'name'
