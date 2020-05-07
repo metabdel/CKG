@@ -575,6 +575,13 @@ IMPORT_METABOLITE_DATA:
         MATCH (t:Tissue{id:line.END_ID}) 
         MERGE (m)-[r:ASSOCIATED_WITH]->(t)
         RETURN COUNT(r) AS metabolite_associated_with_tissue;
+        USING PERIODIC COMMIT 10000 
+        LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/RESOURCE_food_has_content.tsv" AS line
+        FIELDTERMINATOR '\t'
+        MATCH (m:Metabolite{id:line.START_ID})
+        MATCH (f:Food{id:line.END_ID}) 
+        MERGE (f)-[r:HAS_CONTENT]->(m)
+        RETURN COUNT(r) AS food_has_content;
         
 IMPORT_FOOD_DATA:
     'name': 'import food data'
@@ -587,13 +594,6 @@ IMPORT_FOOD_DATA:
         MERGE (f:Food{id:line.ID})
         ON CREATE SET f.name=line.name,f.scientific_name=line.scientific_name,f.description=line.description,f.group=line.group,f.subgroup=line.subgroup,f.source=line.source
         RETURN COUNT(f) AS food;
-        USING PERIODIC COMMIT 10000
-        LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/RESOURCE_food_has_content.tsv" AS line
-        FIELDTERMINATOR '\t'
-        MATCH (f:Food{id:line.START_ID})
-        MATCH (m:Metabolite{id:line.END_ID}) 
-        MERGE (f)-[r:HAS_CONTENT{minimum:line.min,maximum:line.max,average:line.average,units:line.units,source:line.source}]->(m)
-        RETURN COUNT(r) AS food_has_content_metabolite;
 
 IMPORT_BIOMARKERS:
     'name': 'import protein biomarkers'
