@@ -205,8 +205,7 @@
 <span class="kn">import</span> <span class="nn">zipfile</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
-<span class="kn">import</span> <span class="nn">ckg_utils</span>
-<span class="kn">from</span> <span class="nn">graphdb_builder</span> <span class="k">import</span> <span class="n">mapping</span> <span class="k">as</span> <span class="n">mp</span><span class="p">,</span> <span class="n">builder_utils</span>
+<span class="kn">from</span> <span class="nn">graphdb_builder</span> <span class="k">import</span> <span class="n">builder_utils</span>
 
 <span class="c1">#########################</span>
 <span class="c1">#     SMPDB database    #</span>
@@ -220,7 +219,7 @@
     <span class="n">relationships_headers</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;relationships_header&#39;</span><span class="p">]</span>
     <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">databases_directory</span><span class="p">,</span> <span class="s2">&quot;SMPDB&quot;</span><span class="p">)</span>
     <span class="n">builder_utils</span><span class="o">.</span><span class="n">checkDirectory</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
-    
+
     <span class="k">for</span> <span class="n">dataset</span> <span class="ow">in</span> <span class="n">urls</span><span class="p">:</span>
         <span class="n">url</span> <span class="o">=</span> <span class="n">urls</span><span class="p">[</span><span class="n">dataset</span><span class="p">]</span>
         <span class="n">file_name</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -234,9 +233,12 @@
                 <span class="n">relationships</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">parsePathwayProteinRelationships</span><span class="p">(</span><span class="n">rf</span><span class="p">))</span>
             <span class="k">elif</span> <span class="n">dataset</span> <span class="o">==</span> <span class="s2">&quot;metabolite&quot;</span><span class="p">:</span>
                 <span class="n">relationships</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">parsePathwayMetaboliteDrugRelationships</span><span class="p">(</span><span class="n">rf</span><span class="p">))</span>
-    
+
+    <span class="n">builder_utils</span><span class="o">.</span><span class="n">remove_directory</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">entities</span><span class="p">,</span> <span class="n">relationships</span><span class="p">,</span> <span class="n">entities_header</span><span class="p">,</span> <span class="n">relationships_headers</span></div>
-        
+
+
 <div class="viewcode-block" id="parsePathways"><a class="viewcode-back" href="../../../../_autosummary/graphdb_builder.databases.parsers.html#graphdb_builder.databases.parsers.smpdbParser.parsePathways">[docs]</a><span class="k">def</span> <span class="nf">parsePathways</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">fhandler</span><span class="p">):</span>
     <span class="n">entities</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="n">url</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;linkout_url&#39;</span><span class="p">]</span>
@@ -251,8 +253,9 @@
                     <span class="n">description</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
                     <span class="n">linkout</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;PATHWAY&quot;</span><span class="p">,</span> <span class="n">identifier</span><span class="p">)</span>
                     <span class="n">entities</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">identifier</span><span class="p">,</span> <span class="s2">&quot;Pathway&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">organism</span><span class="p">,</span> <span class="n">linkout</span><span class="p">,</span> <span class="s2">&quot;SMPDB&quot;</span><span class="p">))</span>
-                
+
     <span class="k">return</span> <span class="n">entities</span></div>
+
 
 <div class="viewcode-block" id="parsePathwayProteinRelationships"><a class="viewcode-back" href="../../../../_autosummary/graphdb_builder.databases.parsers.html#graphdb_builder.databases.parsers.smpdbParser.parsePathwayProteinRelationships">[docs]</a><span class="k">def</span> <span class="nf">parsePathwayProteinRelationships</span><span class="p">(</span><span class="n">fhandler</span><span class="p">):</span>
     <span class="n">relationships</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">set</span><span class="p">)</span>
@@ -268,8 +271,9 @@
                     <span class="n">protein</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> 
                     <span class="k">if</span> <span class="n">protein</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
                         <span class="n">relationships</span><span class="p">[(</span><span class="s2">&quot;protein&quot;</span><span class="p">,</span> <span class="s2">&quot;annotated_to_pathway&quot;</span><span class="p">)]</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">protein</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="s2">&quot;ANNOTATED_TO_PATHWAY&quot;</span><span class="p">,</span> <span class="n">evidence</span><span class="p">,</span> <span class="n">organism</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="s2">&quot;SMPDB&quot;</span><span class="p">))</span>
-    
+
     <span class="k">return</span> <span class="n">relationships</span></div>
+
 
 <div class="viewcode-block" id="parsePathwayMetaboliteDrugRelationships"><a class="viewcode-back" href="../../../../_autosummary/graphdb_builder.databases.parsers.html#graphdb_builder.databases.parsers.smpdbParser.parsePathwayMetaboliteDrugRelationships">[docs]</a><span class="k">def</span> <span class="nf">parsePathwayMetaboliteDrugRelationships</span><span class="p">(</span><span class="n">fhandler</span><span class="p">):</span>
     <span class="n">relationships</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">set</span><span class="p">)</span>
@@ -288,9 +292,8 @@
                         <span class="n">relationships</span><span class="p">[(</span><span class="s2">&quot;metabolite&quot;</span><span class="p">,</span> <span class="s2">&quot;annotated_to_pathway&quot;</span><span class="p">)]</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">metabolite</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="s2">&quot;ANNOTATED_TO_PATHWAY&quot;</span><span class="p">,</span> <span class="n">evidence</span><span class="p">,</span> <span class="n">organism</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="s2">&quot;SMPDB&quot;</span><span class="p">))</span>
                     <span class="k">if</span> <span class="n">drug</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
                         <span class="n">relationships</span><span class="p">[(</span><span class="s2">&quot;drug&quot;</span><span class="p">,</span> <span class="s2">&quot;annotated_to_pathway&quot;</span><span class="p">)]</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">drug</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="s2">&quot;ANNOTATED_TO_PATHWAY&quot;</span><span class="p">,</span> <span class="n">evidence</span><span class="p">,</span> <span class="n">organism</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="s2">&quot;SMPDB&quot;</span><span class="p">))</span>
-    
-    <span class="k">return</span> <span class="n">relationships</span></div>
 
+    <span class="k">return</span> <span class="n">relationships</span></div>
 </pre></div>
 
            </div>

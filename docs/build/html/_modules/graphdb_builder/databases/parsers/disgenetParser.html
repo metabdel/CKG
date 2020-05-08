@@ -203,22 +203,20 @@
   <h1>Source code for graphdb_builder.databases.parsers.disgenetParser</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os.path</span>
 <span class="kn">import</span> <span class="nn">gzip</span>
-<span class="kn">import</span> <span class="nn">ckg_utils</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
 <span class="kn">from</span> <span class="nn">graphdb_builder</span> <span class="k">import</span> <span class="n">builder_utils</span>
 
 <span class="c1">#########################</span>
 <span class="c1">#       DisGeNet        # </span>
 <span class="c1">#########################</span>
-<div class="viewcode-block" id="parser"><a class="viewcode-back" href="../../../../_autosummary/graphdb_builder.databases.parsers.html#graphdb_builder.databases.parsers.disgenetParser.parser">[docs]</a><span class="k">def</span> <span class="nf">parser</span><span class="p">(</span><span class="n">databases_directory</span><span class="p">,</span> <span class="n">download</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="parser"><a class="viewcode-back" href="../../../../_autosummary/graphdb_builder.databases.parsers.html#graphdb_builder.databases.parsers.disgenetParser.parser">[docs]</a><span class="k">def</span> <span class="nf">parser</span><span class="p">(</span><span class="n">databases_directory</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="n">relationships</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">set</span><span class="p">)</span>
-    
     <span class="n">config</span> <span class="o">=</span> <span class="n">builder_utils</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="n">config_name</span><span class="o">=</span><span class="s2">&quot;disgenetConfig.yml&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;databases&#39;</span><span class="p">)</span>
-    
+
     <span class="n">files</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;disgenet_files&#39;</span><span class="p">]</span>
     <span class="n">mapping_files</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;disgenet_mapping_files&#39;</span><span class="p">]</span>
     <span class="n">url</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;disgenet_url&#39;</span><span class="p">]</span>
-    <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">databases_directory</span><span class="p">,</span><span class="s2">&quot;disgenet&quot;</span><span class="p">)</span>
+    <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">databases_directory</span><span class="p">,</span> <span class="s2">&quot;disgenet&quot;</span><span class="p">)</span>
     <span class="n">builder_utils</span><span class="o">.</span><span class="n">checkDirectory</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
     <span class="n">header</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;disgenet_header&#39;</span><span class="p">]</span>
     <span class="n">output_file</span> <span class="o">=</span> <span class="s1">&#39;disgenet_associated_with.tsv&#39;</span>
@@ -229,12 +227,12 @@
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">mapping_files</span><span class="p">:</span>
             <span class="n">builder_utils</span><span class="o">.</span><span class="n">downloadDB</span><span class="p">(</span><span class="n">url</span><span class="o">+</span><span class="n">mapping_files</span><span class="p">[</span><span class="n">f</span><span class="p">],</span> <span class="n">directory</span><span class="p">)</span>
 
-    <span class="n">proteinMapping</span> <span class="o">=</span> <span class="n">readDisGeNetProteinMapping</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">databases_directory</span><span class="p">)</span> 
-    <span class="n">diseaseMapping</span> <span class="o">=</span> <span class="n">readDisGeNetDiseaseMapping</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">databases_directory</span><span class="p">)</span>
+    <span class="n">proteinMapping</span> <span class="o">=</span> <span class="n">readDisGeNetProteinMapping</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">directory</span><span class="p">)</span>
+    <span class="n">diseaseMapping</span> <span class="o">=</span> <span class="n">readDisGeNetDiseaseMapping</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">directory</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
         <span class="n">first</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">associations</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span><span class="n">files</span><span class="p">[</span><span class="n">f</span><span class="p">]),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
-        <span class="n">dtype</span><span class="p">,</span> <span class="n">atype</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span> 
+        <span class="n">associations</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">files</span><span class="p">[</span><span class="n">f</span><span class="p">]),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+        <span class="n">dtype</span><span class="p">,</span> <span class="n">atype</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;gene&#39;</span><span class="p">:</span>
             <span class="n">idType</span> <span class="o">=</span> <span class="s2">&quot;Protein&quot;</span>
             <span class="n">scorePos</span> <span class="o">=</span> <span class="mi">9</span>
@@ -259,22 +257,23 @@
                         <span class="k">if</span> <span class="n">diseaseId</span> <span class="ow">in</span> <span class="n">diseaseMapping</span><span class="p">:</span>
                             <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">diseaseMapping</span><span class="p">[</span><span class="n">diseaseId</span><span class="p">]:</span>
                                 <span class="n">code</span> <span class="o">=</span> <span class="s2">&quot;DOID:&quot;</span><span class="o">+</span><span class="n">code</span>
-                                <span class="n">relationships</span><span class="p">[</span><span class="n">idType</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">identifier</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span><span class="s2">&quot;ASSOCIATED_WITH&quot;</span><span class="p">,</span> <span class="n">score</span><span class="p">,</span> <span class="n">atype</span><span class="p">,</span> <span class="s2">&quot;DisGeNet: &quot;</span><span class="o">+</span><span class="n">source</span><span class="p">,</span> <span class="n">pmids</span><span class="p">))</span>
+                                <span class="n">relationships</span><span class="p">[</span><span class="n">idType</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">identifier</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="s2">&quot;ASSOCIATED_WITH&quot;</span><span class="p">,</span> <span class="n">score</span><span class="p">,</span> <span class="n">atype</span><span class="p">,</span> <span class="s2">&quot;DisGeNet: &quot;</span><span class="o">+</span><span class="n">source</span><span class="p">,</span> <span class="n">pmids</span><span class="p">))</span>
             <span class="k">except</span> <span class="ne">UnicodeDecodeError</span><span class="p">:</span>
                 <span class="k">continue</span>
         <span class="n">associations</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-    <span class="k">return</span> <span class="p">(</span><span class="n">relationships</span><span class="p">,</span><span class="n">header</span><span class="p">,</span><span class="n">output_file</span><span class="p">)</span></div>
-    
-<div class="viewcode-block" id="readDisGeNetProteinMapping"><a class="viewcode-back" href="../../../../_autosummary/graphdb_builder.databases.parsers.html#graphdb_builder.databases.parsers.disgenetParser.readDisGeNetProteinMapping">[docs]</a><span class="k">def</span> <span class="nf">readDisGeNetProteinMapping</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">databases_directory</span><span class="p">):</span>
+    <span class="n">builder_utils</span><span class="o">.</span><span class="n">remove_directory</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">relationships</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">output_file</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="readDisGeNetProteinMapping"><a class="viewcode-back" href="../../../../_autosummary/graphdb_builder.databases.parsers.html#graphdb_builder.databases.parsers.disgenetParser.readDisGeNetProteinMapping">[docs]</a><span class="k">def</span> <span class="nf">readDisGeNetProteinMapping</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
     <span class="n">files</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;disgenet_mapping_files&#39;</span><span class="p">]</span>
-    <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">databases_directory</span><span class="p">,</span><span class="s2">&quot;disgenet&quot;</span><span class="p">)</span>
-   
     <span class="n">first</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">mapping</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">set</span><span class="p">)</span>
     <span class="k">if</span> <span class="s2">&quot;protein_mapping&quot;</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
         <span class="n">mappingFile</span> <span class="o">=</span> <span class="n">files</span><span class="p">[</span><span class="s2">&quot;protein_mapping&quot;</span><span class="p">]</span>
-        <span class="k">with</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span><span class="n">mappingFile</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">mappingFile</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">first</span><span class="p">:</span>
                     <span class="n">first</span> <span class="o">=</span> <span class="kc">False</span>
@@ -285,15 +284,14 @@
                 <span class="n">mapping</span><span class="p">[</span><span class="n">intIdentifier</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">mapping</span></div>
 
-<div class="viewcode-block" id="readDisGeNetDiseaseMapping"><a class="viewcode-back" href="../../../../_autosummary/graphdb_builder.databases.parsers.html#graphdb_builder.databases.parsers.disgenetParser.readDisGeNetDiseaseMapping">[docs]</a><span class="k">def</span> <span class="nf">readDisGeNetDiseaseMapping</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">databases_directory</span><span class="p">):</span>
-    <span class="n">files</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;disgenet_mapping_files&#39;</span><span class="p">]</span>
-    <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">databases_directory</span><span class="p">,</span><span class="s2">&quot;disgenet&quot;</span><span class="p">)</span>
 
+<div class="viewcode-block" id="readDisGeNetDiseaseMapping"><a class="viewcode-back" href="../../../../_autosummary/graphdb_builder.databases.parsers.html#graphdb_builder.databases.parsers.disgenetParser.readDisGeNetDiseaseMapping">[docs]</a><span class="k">def</span> <span class="nf">readDisGeNetDiseaseMapping</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;disgenet_mapping_files&#39;</span><span class="p">]</span>
     <span class="n">first</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">mapping</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">set</span><span class="p">)</span>
     <span class="k">if</span> <span class="s2">&quot;disease_mapping&quot;</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
         <span class="n">mappingFile</span> <span class="o">=</span> <span class="n">files</span><span class="p">[</span><span class="s2">&quot;disease_mapping&quot;</span><span class="p">]</span>
-        <span class="k">with</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span><span class="n">mappingFile</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">mappingFile</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">first</span><span class="p">:</span>
                     <span class="n">first</span> <span class="o">=</span> <span class="kc">False</span>

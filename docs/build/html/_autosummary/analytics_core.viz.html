@@ -323,6 +323,39 @@ For more information visit <a class="reference external" href="https://dash.plot
 </dd></dl>
 
 <dl class="function">
+<dt id="analytics_core.viz.viz.get_boxplot_grid">
+<code class="sig-prename descclassname">analytics_core.viz.viz.</code><code class="sig-name descname">get_boxplot_grid</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">identifier</em>, <em class="sig-param">args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/viz/viz.html#get_boxplot_grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.viz.viz.get_boxplot_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function plots a boxplot in a grid based on column values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – pandas DataFrame with columns: ‘x’ values and ‘y’ values to plot, ‘color’ and ‘facet’ (color and facet can be the same).</p></li>
+<li><p><strong>identifier</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – id used to identify the div where the figure will be generated.</p></li>
+<li><p><strong>args</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#dict" title="(in Python v3.5)"><em>dict</em></a>) – see below.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Arguments</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>title</strong> (str) – plot title.</p></li>
+<li><p><strong>x</strong> (str) – name of column with x values.</p></li>
+<li><p><strong>y</strong> (str) – name of column with y values.</p></li>
+<li><p><strong>color</strong> (str) – name of column with colors</p></li>
+<li><p><strong>facet</strong> (str) – name of column specifying grouping</p></li>
+<li><p><strong>height</strong> (str) – plot height.</p></li>
+<li><p><strong>width</strong> (str) – plot width.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>boxplot figure within the &lt;div id=”_dash-app-content”&gt;.</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">get_boxplot_grid</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">identifier</span><span class="o">=</span><span class="s1">&#39;Boxplot&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">:{</span><span class="s2">&quot;Title&quot;</span><span class="p">:</span><span class="s2">&quot;Boxplot&quot;</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span><span class="s1">&#39;sample&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="s1">&#39;identifier&#39;</span><span class="p">,</span> <span class="s1">&#39;color&#39;</span><span class="p">:</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="s1">&#39;facet&#39;</span><span class="p">:</span><span class="s1">&#39;qc_class&#39;</span><span class="p">,</span> <span class="s1">&#39;axis&#39;</span><span class="p">:</span><span class="s1">&#39;cols&#39;</span><span class="p">})</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
 <dt id="analytics_core.viz.viz.get_barplot">
 <code class="sig-prename descclassname">analytics_core.viz.viz.</code><code class="sig-name descname">get_barplot</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">identifier</em>, <em class="sig-param">args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/viz/viz.html#get_barplot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.viz.viz.get_barplot" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function plots a simple barplot.</p>
@@ -452,11 +485,6 @@ to form panels along the columns to segment the data even further, forming a bun
 </pre></div>
 </div>
 </dd></dl>
-
-<dl class="function">
-<dt id="analytics_core.viz.viz.get_scatterplot_matrix_old">
-<code class="sig-prename descclassname">analytics_core.viz.viz.</code><code class="sig-name descname">get_scatterplot_matrix_old</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">identifier</em>, <em class="sig-param">args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/viz/viz.html#get_scatterplot_matrix_old"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.viz.viz.get_scatterplot_matrix_old" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="function">
 <dt id="analytics_core.viz.viz.get_simple_scatterplot">
@@ -620,8 +648,8 @@ to form panels along the columns to segment the data even further, forming a bun
 </dd></dl>
 
 <dl class="function">
-<dt id="analytics_core.viz.viz.get_complex_heatmapplot_old">
-<code class="sig-prename descclassname">analytics_core.viz.viz.</code><code class="sig-name descname">get_complex_heatmapplot_old</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">identifier</em>, <em class="sig-param">args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/viz/viz.html#get_complex_heatmapplot_old"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.viz.viz.get_complex_heatmapplot_old" title="Permalink to this definition">¶</a></dt>
+<dt id="analytics_core.viz.viz.get_complex_heatmapplot">
+<code class="sig-prename descclassname">analytics_core.viz.viz.</code><code class="sig-name descname">get_complex_heatmapplot</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">identifier</em>, <em class="sig-param">args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/viz/viz.html#get_complex_heatmapplot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.viz.viz.get_complex_heatmapplot" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">

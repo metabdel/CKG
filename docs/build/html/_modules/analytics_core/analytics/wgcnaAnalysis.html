@@ -234,15 +234,15 @@
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WGCNA functions will not work. Module Rpy2 not installed.&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="get_data"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.wgcnaAnalysis.get_data">[docs]</a><span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">drop_cols_exp</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="s1">&#39;sample&#39;</span><span class="p">,</span> <span class="s1">&#39;index&#39;</span><span class="p">],</span> <span class="n">drop_cols_cli</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="s1">&#39;biological_sample&#39;</span><span class="p">,</span> <span class="s1">&#39;index&#39;</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot; </span>
+<div class="viewcode-block" id="get_data"><a class="viewcode-back" href="../../../_autosummary/analytics_core.analytics.html#analytics_core.analytics.wgcnaAnalysis.get_data">[docs]</a><span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">drop_cols_exp</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="s1">&#39;sample&#39;</span><span class="p">,</span> <span class="s1">&#39;index&#39;</span><span class="p">],</span> <span class="n">drop_cols_cli</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="s1">&#39;biological_sample&#39;</span><span class="p">,</span> <span class="s1">&#39;index&#39;</span><span class="p">],</span> <span class="n">sd_cutoff</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function cleanes up and formats experimental and clinical data into similarly shaped dataframes.</span>
-<span class="sd">    </span>
+
 <span class="sd">    :param dict data: dictionary with processed clinical and proteomics datasets.</span>
 <span class="sd">    :param list drop_cols_exp: list of columns to drop from processed experimental (protemics/rna-seq/dna-seq) dataframe.</span>
 <span class="sd">    :param list drop_cols_cli: list of columns to drop from processed clinical dataframe.</span>
 <span class="sd">    :return: Dictionary with experimental and clinical dataframes (keys are the same as in the input dictionary).  </span>
-<span class="sd">    &quot;&quot;&quot;</span>   
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">wgcna_data</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -261,6 +261,8 @@
                 <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;rows&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">natsorted</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">))</span>
                 <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">drop_cols_exp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">sd_cutoff</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">df</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">sd_cutoff</span><span class="p">]</span>
 
             <span class="n">wgcna_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span>
 

@@ -202,13 +202,12 @@
             
   <h1>Source code for graphdb_builder.databases.parsers.jensenlabParser</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os.path</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">ckg_utils</span>
 <span class="kn">from</span> <span class="nn">graphdb_builder</span> <span class="k">import</span> <span class="n">mapping</span> <span class="k">as</span> <span class="n">mp</span><span class="p">,</span> <span class="n">builder_utils</span>
 
 <span class="c1">######################################</span>
 <span class="c1">#   Databases at jensenLab.org)      # </span>
 <span class="c1">######################################</span>
+
 
 <div class="viewcode-block" id="parser"><a class="viewcode-back" href="../../../../_autosummary/graphdb_builder.databases.parsers.html#graphdb_builder.databases.parsers.jensenlabParser.parser">[docs]</a><span class="k">def</span> <span class="nf">parser</span><span class="p">(</span><span class="n">databases_directory</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
@@ -218,25 +217,26 @@
     <span class="k">for</span> <span class="n">qtype</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;db_types&#39;</span><span class="p">]:</span>
         <span class="n">relationships</span> <span class="o">=</span> <span class="n">parsePairs</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">databases_directory</span><span class="p">,</span> <span class="n">qtype</span><span class="p">,</span> <span class="n">string_mapping</span><span class="p">)</span>
         <span class="n">entity1</span><span class="p">,</span> <span class="n">entity2</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;db_types&#39;</span><span class="p">][</span><span class="n">qtype</span><span class="p">]</span>
-        <span class="n">outputfileName</span> <span class="o">=</span>  <span class="n">entity1</span><span class="o">+</span><span class="s2">&quot;_&quot;</span><span class="o">+</span><span class="n">entity2</span><span class="o">+</span><span class="s2">&quot;_associated_with_integrated.tsv&quot;</span>
+        <span class="n">outputfileName</span> <span class="o">=</span> <span class="n">entity1</span><span class="o">+</span><span class="s2">&quot;_&quot;</span><span class="o">+</span><span class="n">entity2</span><span class="o">+</span><span class="s2">&quot;_associated_with_integrated.tsv&quot;</span>
         <span class="n">header</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;header&#39;</span><span class="p">]</span>
         <span class="n">result</span><span class="p">[</span><span class="n">qtype</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">relationships</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">outputfileName</span><span class="p">)</span>
-    
+
     <span class="k">return</span> <span class="n">result</span></div>
+
 
 <div class="viewcode-block" id="parsePairs"><a class="viewcode-back" href="../../../../_autosummary/graphdb_builder.databases.parsers.html#graphdb_builder.databases.parsers.jensenlabParser.parsePairs">[docs]</a><span class="k">def</span> <span class="nf">parsePairs</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">databases_directory</span><span class="p">,</span> <span class="n">qtype</span><span class="p">,</span> <span class="n">mapping</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="n">url</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;db_url&#39;</span><span class="p">]</span>
     <span class="n">ifile</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;db_files&#39;</span><span class="p">][</span><span class="n">qtype</span><span class="p">]</span>
     <span class="n">source</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;db_sources&#39;</span><span class="p">][</span><span class="n">qtype</span><span class="p">]</span>
     <span class="n">relationships</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-    
+
     <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">databases_directory</span><span class="p">,</span> <span class="s2">&quot;Jensenlab&quot;</span><span class="p">)</span>
-    <span class="n">builder_utils</span><span class="o">.</span><span class="n">checkDirectory</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span><span class="s2">&quot;integration&quot;</span><span class="p">))</span>
-    
+    <span class="n">builder_utils</span><span class="o">.</span><span class="n">checkDirectory</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;integration&quot;</span><span class="p">))</span>
+
     <span class="k">if</span> <span class="n">download</span><span class="p">:</span>
-        <span class="n">builder_utils</span><span class="o">.</span><span class="n">downloadDB</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;FILE&quot;</span><span class="p">,</span> <span class="n">ifile</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span><span class="s2">&quot;integration&quot;</span><span class="p">))</span>
-    <span class="n">ifile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;integration&quot;</span><span class="p">,</span><span class="n">ifile</span><span class="p">))</span>
-    
+        <span class="n">builder_utils</span><span class="o">.</span><span class="n">downloadDB</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;FILE&quot;</span><span class="p">,</span> <span class="n">ifile</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;integration&quot;</span><span class="p">))</span>
+    <span class="n">ifile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;integration&quot;</span><span class="p">,</span> <span class="n">ifile</span><span class="p">))</span>
+
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">ifile</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">idbf</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">idbf</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -249,11 +249,8 @@
                     <span class="n">relationships</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">ident</span><span class="p">,</span> <span class="n">id2</span><span class="p">,</span> <span class="s2">&quot;ASSOCIATED_WITH_INTEGRATED&quot;</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">score</span><span class="p">,</span> <span class="s2">&quot;compiled&quot;</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">continue</span>
-                
+
     <span class="k">return</span> <span class="n">relationships</span></div>
-
-
-
 </pre></div>
 
            </div>

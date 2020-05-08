@@ -54,7 +54,7 @@ To install the neccessary R packages, simply initiate R (terminal or shell) and 
 	install.packages(c('flashClust','WGCNA', 'samr'), dependencies=TRUE, repos='http://cran.rstudio.com/')
 
 
-.. note:: If you need to install R, follow `these <https://web.stanford.edu/~kjytay/courses/stats32-aut2018/Session%201/Installation%20for%20Mac.html>`_ tutorial.
+.. note:: If you need to install R, follow `these <https://web.stanford.edu/~kjytay/courses/stats32-aut2018/Session%201/Installation%20for%20Mac.html>`__ tutorial.
 
 .. warning:: In Mac OS, make sure you have **XQuartz** installed.
 

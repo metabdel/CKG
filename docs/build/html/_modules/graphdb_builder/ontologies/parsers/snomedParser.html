@@ -228,7 +228,11 @@
 
     <span class="n">full_path_files</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
-        <span class="n">f</span> <span class="o">=</span> <span class="n">builder_utils</span><span class="o">.</span><span class="n">get_files_by_pattern</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">builder_utils</span><span class="o">.</span><span class="n">get_files_by_pattern</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">continue</span>
         <span class="k">if</span> <span class="s2">&quot;Concept&quot;</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">inactive_terms</span> <span class="o">=</span> <span class="n">get_inactive_terms</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>

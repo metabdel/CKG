@@ -3,7 +3,7 @@ Getting Started with Neo4j
 
 Getting started with Neo4j is easy.
 
-First download a copy of the Neo4j desktop version from the `Neo4j download page <https://neo4j.com/download/>`_.
+First download a copy of the Neo4j desktop version from the `Neo4j download page <https://neo4j.com/download/>`__.
 The Community Edition of the software is free but a sign up is required.
 Once the file has downloaded, you can install Neo4j by following the instructions automatically opened in the browser.
 

@@ -38,7 +38,7 @@ If this does not correspond to the correct Python version you want to run, you c
 	
 	$ source ~/.bash_profile
 
-.. note:: If you don't have **Python 3.6** installed, `download <https://www.python.org/>`_ the Python 3.6 version appropriate for your machine, and run the installer package. Python should be installed in ``/Library/Frameworks/Python.framework/Versions/3.6/bin/python3.6`` and also found in ``/usr/local/bin/python3.6``.
+.. note:: If you don't have **Python 3.6** installed, `download <https://www.python.org/>`__ the Python 3.6 version appropriate for your machine, and run the installer package. Python should be installed in ``/Library/Frameworks/Python.framework/Versions/3.6/bin/python3.6`` and also found in ``/usr/local/bin/python3.6``.
 
 
 
@@ -138,22 +138,40 @@ Notice that the path should always finish with "/CKG/src/".
 	$ source path/to/env_name/bin/activate
 
 
+.. _Build Neo4j graph database:
+
+
+.. figure:: ../_static/images/snomed_folder.png
+    :width: 240px
+    :align: right
+
+    SNOMED-CT ontology folder.
+
 Build Neo4j graph database
 ---------------------------
 
-The building of the CKG database is thoroughly automated. most of the biomedical databases and ontology files will automatically be downloaded during building
-of the database. However, the following have to be downloaded manually.
-
-- `PhosphoSitePlus <https://www.phosphosite.org/staticDownloads>`_: *Acetylation_site_dataset.gz*, *Disease-associated_sites.gz*, *Kinase_Substrate_Dataset.gz*, *Methylation_site_dataset.gz*, *O-GalNAc_site_dataset.gz*, *O-GlcNAc_site_dataset.gz*, *Phosphorylation_site_dataset.gz*, *Regulatory_sites.gz*, *Sumoylation_site_dataset.gz* and *Ubiquitination_site_dataset.gz*.
-
-- `DrugBank <https://www.drugbank.ca/releases/latest>`_: *All drugs* (under *COMPLETE DATABASE*) and *DrugBank Vocabulary* (under *OPEN DATA*).
-
-- `SNOMED-CT <https://www.nlm.nih.gov/healthit/snomedct/international.html>`_: *Download RF2 Files Now!*.
+The building of the CKG database is thoroughly automated. Most of the biomedical databases and ontology files will automatically be downloaded during building of the database. However, the following licensed databases have to be downloaded manually.
 
 
-.. warning:: These three databases require login and authentication. To sign up go to `PSP Sign up <https://www.phosphosite.org/signUpAction>`_, `DrugBank Sign up <https://www.drugbank.ca/public_users/sign_up>`_ and `SNOMED-CT Sign up <https://uts.nlm.nih.gov/license.html>`_. In the case of SNOMED-CT, the UMLS license can take several business days.
+.. figure:: ../_static/images/drugbank_folder.png
+    :width: 240px
+    :align: right
 
-!!!ADD SCREENSHOT OF HOW THE FOLDERS SHOULD LOOK LIKE!!!
+    DrugBank database folder.
+
+
+- `PhosphoSitePlus <https://www.phosphosite.org/staticDownloads>`__: *Acetylation_site_dataset.gz*, *Disease-associated_sites.gz*, *Kinase_Substrate_Dataset.gz*, *Methylation_site_dataset.gz*, *O-GalNAc_site_dataset.gz*, *O-GlcNAc_site_dataset.gz*, *Phosphorylation_site_dataset.gz*, *Regulatory_sites.gz*, *Sumoylation_site_dataset.gz* and *Ubiquitination_site_dataset.gz*.
+
+- `DrugBank <https://www.drugbank.ca/releases/latest>`__: *All drugs* (under *COMPLETE DATABASE*) and *DrugBank Vocabulary* (under *OPEN DATA*).
+
+
+.. figure:: ../_static/images/psp_folder.png
+    :width: 240px
+    :align: right
+
+    PhosphoSitePlus database folder.
+
+- `SNOMED-CT <https://www.nlm.nih.gov/healthit/snomedct/international.html>`__: *Download RF2 Files Now!*.
 
 After download, move the files to their respective folders:
 
@@ -161,7 +179,11 @@ After download, move the files to their respective folders:
 - DrugBank: ``CKG/data/databases/DrugBank``
 - SNOMED-CT: ``CKG/data/ontologies/SNOMED-CT``
 
+
 In the case of SNOMED-CT, unzip the downloaded file and copy all the subfolders and files to the ``SNOMED-CT`` folder.
+
+
+.. warning:: These three databases require login and authentication. To sign up go to `PSP Sign up <https://www.phosphosite.org/signUpAction>`__, `DrugBank Sign up <https://www.drugbank.ca/public_users/sign_up>`__ and `SNOMED-CT Sign up <https://uts.nlm.nih.gov/license.html>`__. In the case of SNOMED-CT, the UMLS license can take several business days.
 
 .. note:: If the respective database folder is not created, please do it manually.
 
@@ -186,7 +208,7 @@ This action will take aproximately 6 hours but depending on a multitude of facto
 From a backup dump file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Alternatively, you can use the available dump file and load the graph database contained in it:
+A dump file of the database is also made available in `add link to the dump file!!` and alternatively, you can use it to load the graph database contained in it:
 
 .. code-block:: bash
 
@@ -210,6 +232,28 @@ In some systems you might have to run this as root:
 	$ sudo bin/neo4j-admin load --from=backups/graph.db/2019-11-04.dump --database=graph.db --force
 	$ sudo chown -R username data/databases/graph.db/
 
+
+Once you are done, start the database and you will have a functional graph database.
+
+However, be aware the database contained in the dump file :underline:`does NOT` include the licensed databases (**PhosphoSitePlus**, **DrugBank** and **SNOMED-CT**).
+
+To add the missing ontology and databases, as well as their dependencies (relationships to other nodes), please manually download the files as explained in :ref:`Build Neo4j graph database:`, and run the following commands:
+
+.. code-block:: bash
+	
+	$ cd CKG/src/graphdb_builder/builder
+	$ python builder.py -b import -i ontologies -d Clinical_variable -w False -u username
+	$ python builder.py -b import -i databases -d phosphositeplus drugbank -n 2 -w False -u username
+	$ python builder.py -b load -l ontologies -s SNOMED_CT -u username
+	$ python builder.py -b load -l modified_proteins drugs mentions side effects pathway project experiment -u username
+
+
+.. note:: Remember of replace the ``username`` in each command, with your own neo4j username.
+
+
+More on the dump file
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
 Another great use for the dump file, is to generate backups of the database (e.g. different versions of the imported biomedical databases).
 To generate a dump file of a specific Neo4j database, simply run:
 
@@ -218,9 +262,8 @@ To generate a dump file of a specific Neo4j database, simply run:
 	$ cd /path/to/neo4jDatabases/database-identifier/installation-x.x.x/
 	$ bin/neo4j-admin dump --database=neo4j --to=backups/graph.db/name_of_the_file.dump
 
-Remember to replace "name_of_the_file" with the name of the dump file you want to create.
 
-Once you are done, start the database and you are good to go!
+.. warning:: Remember to replace ``name_of_the_file`` with the name of the dump file you want to create.
 
 
 

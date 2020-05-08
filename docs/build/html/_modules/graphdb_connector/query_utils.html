@@ -275,13 +275,18 @@
 
 
 <div class="viewcode-block" id="map_node_name_to_id"><a class="viewcode-back" href="../../_autosummary/graphdb_connector.html#graphdb_connector.query_utils.map_node_name_to_id">[docs]</a><span class="k">def</span> <span class="nf">map_node_name_to_id</span><span class="p">(</span><span class="n">driver</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">identifier</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">query_name</span> <span class="o">=</span> <span class="s1">&#39;map_node_name&#39;</span>
     <span class="n">cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
     <span class="n">queries_path</span> <span class="o">=</span> <span class="s2">&quot;queries.yml&quot;</span>
     <span class="n">cypher</span> <span class="o">=</span> <span class="n">read_queries</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cwd</span><span class="p">,</span> <span class="n">queries_path</span><span class="p">))</span>
     <span class="n">query</span> <span class="o">=</span> <span class="n">cypher</span><span class="p">[</span><span class="n">query_name</span><span class="p">][</span><span class="s1">&#39;query&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;NODE&#39;</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
-    <span class="n">identifier</span> <span class="o">=</span> <span class="n">connector</span><span class="o">.</span><span class="n">getCursorData</span><span class="p">(</span><span class="n">driver</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="p">{</span>
-                                         <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)})</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">connector</span><span class="o">.</span><span class="n">getCursorData</span><span class="p">(</span><span class="n">driver</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="p">{</span>
+                                         <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()})</span>
+
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="n">identifier</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
     <span class="k">return</span> <span class="n">identifier</span></div>
 </pre></div>
 

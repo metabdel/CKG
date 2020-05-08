@@ -61,7 +61,7 @@ Be aware that the following columns are mandatory to fill in:
 
 Additional clinical information about your study subjects can be added in the subsequent columns (i.e. columns after "grouping2").
 Please use SNOWMED terms as headers for every new column you add. This will be used to gather existing information about the type of data you have.
-To find an adequate SNOMED term for your clinical variables, please visit the `SNOMED browser <https://browser.ihtsdotools.org/?perspective=full&conceptId1=734000001&edition=MAIN/2019-07-31&release=&languages=en>`_.
+To find an adequate SNOMED term for your clinical variables, please visit the `SNOMED browser <https://browser.ihtsdotools.org/?perspective=full&conceptId1=734000001&edition=MAIN/2019-07-31&release=&languages=en>`__.
 
 .. note:: Be aware, the two-independent-variable statistics is not yet implemented in the default analysis pipeline.
 
@@ -132,7 +132,7 @@ Upload data
 
 In order to make data uploading simple, we created an app that takes care of this in only a few steps:
 
-Go to `dataUploadApp <http://localhost:5000/apps/dataUploadApp/>`_ or use the ``Data Upload`` button in the `homepage app <http://localhost:5000/>`_, and follow the steps.
+Go to `dataUploadApp <http://localhost:5000/apps/dataUploadApp/>`__ or use the ``Data Upload`` button in the `homepage app <http://localhost:5000/>`__, and follow the steps.
 
 1. Fill in ``Project identifier`` with your project external identifier from :ref:`Project Creation` and press *Enter*. **(1)** If the project identifier does not exist in the database, you will get and error. Otherwise, the menus below will unlock.
 
