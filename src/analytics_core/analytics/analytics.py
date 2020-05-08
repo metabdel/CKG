@@ -1,4 +1,5 @@
 import pandas as pd
+import collections
 import re
 import itertools
 from sklearn.decomposition import PCA
@@ -49,6 +50,25 @@ def unit_vector(vector):
     :return tuple unit_vector: unit vector
     """
     return vector / np.linalg.norm(vector)
+
+
+def flatten(t, my_list=[]):
+    """
+    Code from: https://gist.github.com/shaxbee/0ada767debf9eefbdb6e
+    Acknowledgements: Zbigniew Mandziejewicz (shaxbee)
+    Generator flattening the structure
+
+    >>> list(flatten([2, [2, (4, 5, [7], [2, [6, 2, 6, [6], 4]], 6)]]))
+    [2, 2, 4, 5, 7, 2, 6, 2, 6, 6, 4, 6]
+    """
+    
+    for x in t:
+        if not isinstance(x, collections.Iterable) or isinstance(x, str):
+            my_list.append(x)
+        else:
+            flatten(x, my_list)
+
+    return my_list
 
 
 def angle_between(v1, v2):
@@ -522,7 +542,7 @@ def get_coefficient_variation(data, drop_columns, group, columns=['name', 'y']):
     return cvs_df
 
 
-def get_proteomics_measurements_ready(df, index_cols=['group', 'sample', 'subject'], drop_cols=['sample'], group='group', identifier='identifier', extra_identifier='name', imputation=True, method='distribution', missing_method='percentage', missing_per_group=True, missing_max=0.3, min_valid=1, value_col='LFQ_intensity', shift=1.8, nstd=0.3):
+def get_proteomics_measurements_ready(df, index_cols=['group', 'sample', 'subject'], drop_cols=['sample'], group='group', identifier='identifier', extra_identifier='name', imputation=True, method='distribution', missing_method='percentage', missing_per_group=True, missing_max=0.3, min_valid=1, value_col='LFQ_intensity', shift=1.8, nstd=0.3, knn_cutoff=0.6):
     """
     Processes proteomics data extracted from the database: 1) filter proteins with high number of missing values (> missing_max or min_valid), 2) impute missing values.
     For more information on imputation method visit http://www.coxdocs.org/doku.php?id=perseus:user:activities:matrixprocessing:filterrows:filtervalidvaluesrows.
@@ -540,6 +560,9 @@ def get_proteomics_measurements_ready(df, index_cols=['group', 'sample', 'subjec
     :param float missing_max: maximum ratio of missing/valid values to be filtered.
     :param int min_valid: minimum number of valid values to be filtered.
     :param str value_col: column label containing expression values.
+    :param float shift: when using distribution imputation, the down-shift
+    :param float nstd: when using distribution imputation, the width of the distribution
+    :param float knn_cutoff: when using KNN imputation, the minimum percentage of valid values for which to use KNN imputation (i.e. 0.6 -> if 60% valid values use KNN, otherwise MinProb)
     :return: Pandas dataframe with samples as rows and protein identifiers (UniprotID~GeneName) as columns (with additional columns 'group', 'sample' and 'subject').
 
     Example 1::
@@ -572,11 +595,11 @@ def get_proteomics_measurements_ready(df, index_cols=['group', 'sample', 'subjec
         df = df[list(set(aux))]
         if imputation:
             if method == "KNN":
-                df = imputation_KNN(df)
+                df = imputation_KNN(df, drop_cols=index_cols, group=group, cutoff=knn_cutoff, alone=True)
             elif method == "distribution":
-                df = imputation_normal_distribution(df, index_cols=index_cols, shift=1.8, nstd=0.3)
+                df = imputation_normal_distribution(df, index_cols=index_cols, shift=shift, nstd=nstd)
             elif method == 'mixed':
-                df = imputation_mixed_norm_KNN(df)
+                df = imputation_mixed_norm_KNN(df, index_cols=index_cols, shift=shift, nstd=nstd, group=group, cutoff=knn_cutoff)
 
             df = df.reset_index()
 
@@ -640,25 +663,28 @@ def get_summary_data_matrix(data):
     return summary
 
 
-def check_normality(data):
-    """
-    Checks whether columns (features) in the provided matrix follow a normal distribution (Requires at least 8 rows). Uses
-    Pigouin test Normality: https://pingouin-stats.org/generated/pingouin.normality.html
+def check_equal_variances(data, drop_cols=['group','sample', 'subject'], group_col='group', alpha=0.05):
+    levene_results = []
+    for c in data.columns.drop(drop_cols):
+        values = []
+        for group, g in data.groupby(group_col):
+            values.append(g[c].values)
+        levene_results.append(stats.levene(*values)+(c,))
+    levene_results = pd.DataFrame(levene_results, columns=['test', 'pvalue','identifier'])
+    levene_results['pass'] = levene_results['pvalue'] > alpha
+    
+    return levene_results
 
-    :param data: pandas dataframe.
-    :return: a pandas data frame with features as rows, test statistic, pvalue, true/false normally distributed. None if
-    number of rows below 8.
 
-    Example::
-
-        result = check_normality(data)
-    """
-    test_normality = None
-
-    if data.shape[0] >= 8:
-        test_normality = pg.normality(data, method='normaltest').reset_index()
-
-    return test_normality
+def check_normality(data, drop_cols=['group','sample', 'subject'], group_col='group', alpha=0.05):
+    shapiro_wilk_results = []
+    for group in data[group_col].unique().tolist():
+        for c in data.columns.drop(drop_cols):
+            shapiro_wilk_results.append(stats.shapiro(data.loc[data[group_col] == group, c].values)+(group, c))
+    shapiro_wilk_results = pd.DataFrame(shapiro_wilk_results, columns=['test', 'pvalue', 'group', 'identifier'])        
+    shapiro_wilk_results['pass'] = shapiro_wilk_results['pvalue'] > alpha
+    
+    return shapiro_wilk_results    
 
 
 def run_pca(data, drop_cols=['sample', 'subject'], group='group', components=2, dropna=True):
@@ -928,10 +954,14 @@ def apply_pvalue_permutation_fdrcorrection(df, observed_pvalues, group, alpha=0.
                 rand_pvalues.append(calculate_anova(df_random, column=col, group=group)[-1])
             i -= 1
     rand_pvalues = np.array(rand_pvalues)
-    count = observed_pvalues.to_frame().apply(func=get_counts_permutation_fdr, result_type='expand', axis=1, args=(rand_pvalues, observed_pvalues, permutations, alpha))
-    count.columns = ['padj', 'rejected']
+    
+    qvalues = []
+    for i, row in observed_pvalues.to_frame():
+        qvalues.append(get_counts_permutation_fdr(row['pvalue'], rand_pvalues, samr_df['pvalue'], permutations, alpha)+(i,))
+    
+    qvalues = pd.DataFrame(qvalues, columns=['padj', 'rejected', 'identifier']).set_index('identifier')
 
-    return count
+    return qvalues
 
 
 def get_counts_permutation_fdr(value, random, observed, n, alpha):
@@ -949,10 +979,10 @@ def get_counts_permutation_fdr(value, random, observed, n, alpha):
 
         result = get_counts_permutation_fdr(value, random, observed, n=250, alpha=0.05)
     """
-    a = random[random <= value.values[0]].shape[0] + 0.01 #Offset in case of a = 0.0
-    b = (observed <= value.values[0]).sum()
+    a = random[random <= value].shape[0] + 0.0000000000001 #Offset in case of a = 0.0
+    b = (observed <= value).sum()
     qvalue = (a/b/float(n))
-
+    
     return (qvalue, qvalue <= alpha)
 
 
@@ -1195,13 +1225,15 @@ def calculate_ttest_samr(df, labels, n=2, s0=0, paired=False):
     return result
 
 
-def calculate_ttest(df, condition1, condition2, paired=False, is_logged=True, tail='two-sided',  correction='auto', r=0.707):
+def calculate_ttest(df, condition1, condition2, paired=False, is_logged=True, non_par=False, tail='two-sided',  correction='auto', r=0.707):
     """
     Calculates the t-test for the means of independent samples belonging to two different groups. For more information visit https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.ttest_ind.html.
 
     :param df: pandas dataframe with groups and subjects as rows and protein identifier as column.
     :param str condition1: identifier of first group.
     :param str condition2: ientifier of second group.
+    :param bool is_logged: data is logged transformed
+    :param bool non_par: if True, normality and variance equality assumptions are checked and non-parametric test Mann Whitney U test if not passed 
     :return: Tuple with t-statistics, two-tailed p-value, mean of first group, mean of second group and logfc.
 
     Example::
@@ -1221,15 +1253,25 @@ def calculate_ttest(df, condition1, condition2, paired=False, is_logged=True, ta
         fc = mean1 - mean2
     else:
         fc = mean1/mean2
-        
-    result = pg.ttest(group1, group2, paired, tail, correction, r)
     
+    test = 't-Test'
+    if not non_par:
+        result = pg.ttest(group1, group2, paired, tail, correction, r)
+    else:
+        if stats.levene(group1,group2).pvalue < 0.05 or stats.shapiro(group1)[1] < 0.05 or stats.shapiro(group2)[1] < 0.05:
+            test = 'Mann Whitney'
+            result = pg.mwu(group1, group2, tail=tail)
+        else:
+            result = pg.ttest(group1, group2, paired, tail, correction, r)
+        
     if 'T' in result.columns:
         t = result['T'].values[0]
+    elif 'U-val' in result.columns:
+        t = result['U-val'].values[0]
     if 'p-val' in result.columns:
         pvalue = result['p-val'].values[0]
     
-    return (t, pvalue, mean1, mean2, std1, std2, fc)
+    return (t, pvalue, mean1, mean2, std1, std2, fc, test)
 
 
 def calculate_THSD(df, column, group='group', alpha=0.05, is_logged=True):
@@ -1373,8 +1415,9 @@ def calculate_anova(df, column, group='group'):
     """
     aov_result = pg.anova(data=df, dv=column, between=group, detailed=True)
     t, pvalue = aov_result[['F', 'p-unc']].values.tolist()[0]
+    df1, df2 = aov_result['DF']
     
-    return (column, t, pvalue)
+    return (column, df1, df2, t, pvalue)
 
 
 def calculate_repeated_measures_anova(df, column, subject='subject', group='group'):
@@ -1393,8 +1436,9 @@ def calculate_repeated_measures_anova(df, column, subject='subject', group='grou
     """
     aov_result = pg.rm_anova(data=df, dv=column, within=group,subject=subject, detailed=True, correction=True)
     t, pvalue = aov_result.loc[0, ['F', 'p-unc']].values.tolist()[0]
-
-    return (column, t, pvalue)
+    df1, df2 = aov_result['DF']
+    
+    return (column, df1, df2, t, pvalue)
 
 
 def get_max_permutations(df, group='group'):
@@ -1464,7 +1508,7 @@ def run_dabest(df, drop_cols=['sample'], subject='subject', group='group', test=
     return scores
 
 
-def run_anova(df, alpha=0.05, drop_cols=["sample",'subject'], subject='subject', group='group', permutations=0, correction='fdr_bh', is_logged=True):
+def run_anova(df, alpha=0.05, drop_cols=["sample",'subject'], subject='subject', group='group', permutations=0, correction='fdr_bh', is_logged=True, non_par=False):
     """
     Performs statistical test for each protein in a dataset.
     Checks what type of data is the input (paired, unpaired or repeated measurements) and performs posthoc tests for multiclass data.
@@ -1476,6 +1520,7 @@ def run_anova(df, alpha=0.05, drop_cols=["sample",'subject'], subject='subject',
     :param list drop_cols: column labels to be dropped from the dataframe
     :param float alpha: error rate for multiple hypothesis correction
     :param int permutations: number of permutations used to estimate false discovery rates.
+    :param bool non_par: if True, normality and variance equality assumptions are checked and non-parametric test Mann Whitney U test if not passed 
     :return: Pandas dataframe with columns 'identifier', 'group1', 'group2', 'mean(group1)', 'mean(group2)', 'Log2FC', 'std_error', 'tail', 't-statistics', 'posthoc pvalue', 'effsize', 'efftype', 'FC', 'rejected', 'F-statistics', 'p-value', 'correction', '-log10 p-value', and 'method'.
 
     Example::
@@ -1486,13 +1531,13 @@ def run_anova(df, alpha=0.05, drop_cols=["sample",'subject'], subject='subject',
         groups = df[group].unique()
         drop_cols = [d for d in drop_cols if d != subject]
         if len(df[subject].unique()) == 1:
-            res = run_ttest(df, groups[0], groups[1], alpha = alpha, drop_cols=drop_cols, subject=subject, group=group, paired=True, correction=correction, permutations=permutations, is_logged=is_logged)
+            res = run_ttest(df, groups[0], groups[1], alpha = alpha, drop_cols=drop_cols, subject=subject, group=group, paired=True, correction=correction, permutations=permutations, is_logged=is_logged, non_par=non_par)
         else:
             res = run_repeated_measurements_anova(df, alpha=alpha, drop_cols=drop_cols, subject=subject, group=group, permutations=0, is_logged=is_logged)
     elif len(df[group].unique()) <= 2:
         groups = df[group].unique()
         drop_cols = [d for d in drop_cols if d != subject]
-        res = run_ttest(df, groups[0], groups[1], alpha = alpha, drop_cols=drop_cols, subject=subject, group=group, paired=False, correction=correction, permutations=permutations, is_logged=is_logged)
+        res = run_ttest(df, groups[0], groups[1], alpha = alpha, drop_cols=drop_cols, subject=subject, group=group, paired=False, correction=correction, permutations=permutations, is_logged=is_logged, non_par=non_par)
     else:
         df = df.drop(drop_cols, axis=1)
         aov_results = []
@@ -1574,7 +1619,7 @@ def format_anova_table(df, aov_results, pairwise_results, pairwise_cols, group, 
     :param int permutations: number of permutations used to estimate false discovery rates
     :return: Pandas dataframe
     """
-    columns = ['identifier', 'F-statistics', 'pvalue']
+    columns = ['identifier', 'dfk', 'dfn', 'F-statistics', 'pvalue']
     scores = pd.DataFrame(aov_results, columns = columns)
     scores = scores.set_index('identifier')
 
@@ -1616,7 +1661,7 @@ def format_anova_table(df, aov_results, pairwise_results, pairwise_cols, group, 
     return res
 
 
-def run_ttest(df, condition1, condition2, alpha = 0.05, drop_cols=["sample"], subject='subject', group='group', paired=False, correction='fdr_bh', permutations=50, is_logged=True):
+def run_ttest(df, condition1, condition2, alpha = 0.05, drop_cols=["sample"], subject='subject', group='group', paired=False, correction='fdr_bh', permutations=50, is_logged=True, non_par=False):
     """
     Runs t-test (paired/unpaired) for each protein in dataset and performs permutation-based (if permutations>0) or Benjamini/Hochberg (if permutations=0) multiple hypothesis correction.
 
@@ -1630,16 +1675,21 @@ def run_ttest(df, condition1, condition2, alpha = 0.05, drop_cols=["sample"], su
     :param str correction: method of pvalue correction see apply_pvalue_correction for methods
     :param float alpha: error rate for multiple hypothesis correction
     :param int permutations: number of permutations used to estimate false discovery rates.
+    :param bool is_logged: data is log-transformed
+    :param bool non_par: if True, normality and variance equality assumptions are checked and non-parametric test Mann Whitney U test if not passed 
     :return: Pandas dataframe with columns 'identifier', 'group1', 'group2', 'mean(group1)', 'mean(group2)', 'std(group1)', 'std(group2)', 'Log2FC', 'FC', 'rejected', 'T-statistics', 'p-value', 'correction', '-log10 p-value', and 'method'.
 
     Example::
 
         result = run_ttest(df, condition1='group1', condition2='group2', alpha = 0.05, drop_cols=['sample'], subject='subject', group='group', paired=False, correction='fdr_bh', permutations=50)
     """
-    columns = ['T-statistics', 'pvalue', 'mean_group1', 'mean_group2', 'std(group1)', 'std(group2)', 'log2FC']
+    columns = ['T-statistics', 'pvalue', 'mean_group1', 'mean_group2', 'std(group1)', 'std(group2)', 'log2FC', 'test']
     df = df.set_index(group)
     df = df.drop(drop_cols, axis = 1)
     method = 'Unpaired t-test'
+    if non_par:
+        method = 'Unpaired t-Test and Mann-Whitney U test'
+
     if paired:
         df = df.reset_index().set_index([group, subject])
         method = 'Paired t-test'
@@ -1647,7 +1697,7 @@ def run_ttest(df, condition1, condition2, alpha = 0.05, drop_cols=["sample"], su
         if subject is not None:
             df = df.drop([subject], axis = 1)
         
-    scores = df.T.apply(func = calculate_ttest, axis=1, result_type='expand', args =(condition1, condition2, paired, is_logged))
+    scores = df.T.apply(func = calculate_ttest, axis=1, result_type='expand', args =(condition1, condition2, paired, is_logged, non_par))
     scores.columns = columns
     scores = scores.dropna(how="all")
     
@@ -1705,11 +1755,15 @@ def define_samr_method(df, subject, group, drop_cols):
     conditions = set(df.columns)
     d = {v:k+1 for k, v in enumerate(conditions)}
     labels = [d.get(item,item)  for item in df.columns]
-    method = 'Multiclass'
+    
+    if len(groups) == 1:
+        method = 'One class'
+    elif len(groups) == 2:
+        method = 'Two class unpaired'
+    else:
+        method = 'Multiclass'
     if subject is not None:
-        if len(groups) == 1:
-            method = 'One class'
-        elif len(groups) == 2:
+        if len(groups) == 2:
             if paired:
                 method = 'Two class paired'
                 labels = []
@@ -1719,11 +1773,22 @@ def define_samr_method(df, subject, group, drop_cols):
                     cur_count = counts.get(col, 0)
                     labels.append([(cur_count+1)*-1 if col == conditions[0] else (cur_count+1)][0])
                     counts[col] = cur_count + 1
-            else:
-                method = 'Two class unpaired'
-        else:
-            method = 'Multiclass'
+
     return method, labels
+
+
+def calculate_pvalue_from_tstats(tstat, dfn, dfk):
+    """
+    Calculate two-tailed p-values from T- or F-statistics.
+    
+    tstat: T/F distribution
+    dfn: degrees of freedrom *n* (values) per protein (keys), i.e. number of obervations - number of groups (dict)
+    dfk: degrees of freedrom *n* (values) per protein (keys), i.e. number of groups - 1 (dict)
+    """
+    pval = scipy.stats.t.sf(np.abs(tstat), dfn)*2
+    
+    return pval
+
 
 def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample'], alpha=0.05, s0='null', permutations=250, fc=0, is_logged=True, localfdr=False):
     """
@@ -1750,7 +1815,7 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
                                 }''')
 
     R_samr_function = R('''result <- function(data, res_type, s0, nperms) {
-                                samr(data=data, resp.type=res_type, s0=s0, nperms=nperms, random.seed = 12345, s0.perc=NULL)
+                                samr(data=data, resp.type=res_type, assay.type="array", s0=s0, nperms=nperms, random.seed = 12345, s0.perc=NULL)
                                 }''')
 
     if permutations > 0 and r_installation:
@@ -1770,47 +1835,31 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
             pairwise_results.extend(pairwise_result.values.tolist())
 
         pairwise_results = pd.DataFrame(pairwise_results, columns=pairwise_cols)
-        columns = ['identifier', 'F-statistics', 'pvalue']
+        columns = ['identifier', 'dfk', 'dfn', 'F-statistics', 'pvalue']
         scores = pd.DataFrame(aov_results, columns = columns)
         scores = scores.set_index('identifier')
-        
+        dfk = scores['dfk'].values[0]
+        dfn = scores['dfn'].values[0]
         
         if s0 is None or s0 == "null":
             s0 = ro.r("NULL")
 
         samr_res = R_samr_function(data=data, res_type=method, s0=s0, nperms=permutations)
+        perm_pvalues = pd.DataFrame(samr_res.rx2('ttstar'), index=df_py.columns.drop(group))
+        perm_pvalues = flatten(perm_pvalues.values.tolist(), my_list=[])
+        perm_pvalues = np.array(calculate_pvalue_from_tstats(perm_pvalues, dfn, dfk))
         nperms_run = samr_res.rx2('nperms.act')[0]
         s0_used = samr_res.rx2('s0')[0]
-        samr_df = pd.DataFrame([df_py.drop(group, axis=1).columns, samr_res.rx2('tt')]).T
+        
+        samr_df = pd.DataFrame(samr_res.rx2('tt'), index=df_py.columns.drop(group)).reset_index()
         samr_df.columns = ['identifier', 'F-statistics']
-        samr_df = samr_df.set_index('identifier').astype(float)
+        samr_df = samr_df.set_index('identifier')
+        samr_df['pvalue'] = list(calculate_pvalue_from_tstats(samr_df['F-statistics'].values, dfn, dfk))
+        qvalues = []
+        for i, row in samr_df.iterrows():
+            qvalues.append(get_counts_permutation_fdr(row['pvalue'], perm_pvalues, samr_df['pvalue'], nperms_run, alpha)+(i,))
         
-        delta_table = samr.samr_compute_delta_table(samr_res, fc)
-        delta_table_df = pd.DataFrame(delta_table, columns=['delta', '#med false pos', '90th perc false pos', '#called', 'median FDR', '90th perc FDR', 'cutlo', 'cuthi'])
-        delta_table_df = delta_table_df.sort_values(by='median FDR', ascending=True)
-        if delta_table_df[delta_table_df['median FDR'] < alpha].empty:
-            delta = delta_table_df.iloc[0,0]
-        else:
-            delta = delta_table_df[delta_table_df['median FDR'] < alpha].iloc[0,0]
-        
-        if localfdr:
-            siggenes_table = samr.samr_compute_siggenes_table(samr_res, delta, data, delta_table, all_genes=ro.r("TRUE"), compute_localfdr=ro.r("TRUE"))
-        else:
-            siggenes_table = samr.samr_compute_siggenes_table(samr_res, delta, data, delta_table, all_genes=ro.r("TRUE"), compute_localfdr=ro.r("FALSE"))
-        
-        if isinstance(siggenes_table.rx2('genes.up'), np.ndarray):
-            up = pd.DataFrame(np.reshape(siggenes_table.rx2('genes.up'), (-1, siggenes_table.rx2('ngenes.up')[0]))).T
-        else:
-            up = pd.DataFrame()
-        if isinstance(siggenes_table.rx2('genes.lo'), np.ndarray):
-            down = pd.DataFrame(np.reshape(siggenes_table.rx2('genes.lo'), (-1, siggenes_table.rx2('ngenes.lo')[0]))).T
-        else:
-            down = pd.DataFrame()
-            
-        total = pd.concat([up, down])
-        total.iloc[:,-1] = total.iloc[:,-1].astype(float)/100
-        qvalues = total.iloc[:,[1,-1]]
-        qvalues.columns = ['identifier', 'padj']
+        qvalues = pd.DataFrame(qvalues, columns=['padj', 'rejected', 'identifier'])
         result = scores.join(qvalues.set_index('identifier'))
         result['F-statistics'] = result.index.map(samr_df['F-statistics'].to_dict().get)
         
@@ -1837,7 +1886,6 @@ def run_samr(df, subject='subject', group='group', drop_cols=['subject', 'sample
             result['correction'] = 'permutation FDR ({} perm)'.format(nperms_run)  
         
         contrasts = ['diff_mean_group{}'.format(str(i+1)) for i in np.arange(len(set(labels)))]
-        result.loc[result['padj'] > 1, 'padj'] = 1.0
         result['rejected'] = result['padj'] < alpha
         result['Method'] = 'SAMR {}'.format(method)
         result['s0'] = s0_used
