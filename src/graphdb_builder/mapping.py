@@ -76,7 +76,8 @@ def getMappingFromDatabase(id_list, node, attribute_from='id', attribute_to='nam
     driver = connector.getGraphDatabaseConnectionConfiguration()
     mapping_query = "MATCH (n:{}) WHERE n.{} IN [{}] RETURN n.{} AS from, n.{} AS to"
     mapping = connector.getCursorData(driver, mapping_query.format(node, attribute_from, ','.join(id_list), attribute_from, attribute_to))
-    mapping = dict(zip(mapping['from'], mapping['to']))
+    if not mapping.empty:
+        mapping = dict(zip(mapping['from'], mapping['to']))
 
     return mapping
 
