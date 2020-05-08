@@ -90,7 +90,7 @@ def parseFood(fhandler):
         food_id = row[22]
         name = row[1]
         sci_name = row[2]
-        description = row[3]
+        description = str(row[3]).replace('"', '')
         group = row[11]
         subgroup = row[12]
         food.add((food_id, name, sci_name, description, group, subgroup, "FooDB"))
