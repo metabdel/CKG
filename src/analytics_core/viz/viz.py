@@ -731,7 +731,7 @@ def run_volcano(data, identifier, args={'alpha':0.05, 'fc':2, 'colorscale':'Blue
                                     'ax': 0,
                                     'ay': -10,
                                     'font': dict(color = "#2c7bb6", size = 10)})
-                    color.append('rgba(44, 123, 182, 0.4)')
+                    color.append('rgba(44, 123, 182, 0.7)')
                     line_colors.append('#2c7bb6')
                 elif row['FC'] >= args['fc']:
                     annotations.append({'x': row['log2FC'],
@@ -743,19 +743,19 @@ def run_volcano(data, identifier, args={'alpha':0.05, 'fc':2, 'colorscale':'Blue
                                     'ax': 0,
                                     'ay': -10,
                                     'font': dict(color = "#d7191c", size = 10)})
-                    color.append('rgba(215, 25, 28, 0.4)')
+                    color.append('rgba(215, 25, 28, 0.7)')
                     line_colors.append('#d7191c')
                 elif row['FC'] < -1.:
-                    color.append('rgba(171, 217, 233, 0.2)')
+                    color.append('rgba(171, 217, 233, 0.5)')
                     line_colors.append('#abd9e9')
                 elif row['FC'] > 1.:
-                    color.append('rgba(253, 174, 97, 0.2)')
+                    color.append('rgba(253, 174, 97, 0.5)')
                     line_colors.append('#fdae61')
                 else:
-                    color.append('rgba(153, 153, 153, 0.1)')
+                    color.append('rgba(153, 153, 153, 0.3)')
                     line_colors.append('#999999')
             else:
-                color.append('rgba(153, 153, 153, 0.1)')
+                color.append('rgba(153, 153, 153, 0.3)')
                 line_colors.append('#999999')
 
         if len(annotations) < num_annotations:
@@ -1683,29 +1683,12 @@ def get_WGCNAPlots(data, identifier):
     data = tuple(data[k] for k in data)
 
     if data is not None:
-        data_exp, data_cli, dissTOM, moduleColors, Features_per_Module, MEs,\
-        moduleTraitCor, textMatrix, MM, MMPvalue, FS, FSPvalue, METDiss, METcor = data
+        dissTOM, moduleColors, Features_per_Module, MEs,\
+        moduleTraitCor, textMatrix, METDiss, METcor = data
         plots = []
-        # plot: sample dendrogram and clinical variables heatmap; input: data_exp, data_cli
-        #plots.append(wgcnaFigures.plot_complex_dendrogram(data_exp, data_cli, title='Clinical variables variation by sample', dendro_labels=data_exp.index, distfun='euclidean', linkagefun='average', hang=40, subplot='heatmap', color_missingvals=True, width=1000, height=800))
-
-        # plot: gene tree dendrogram and module colors; input: dissTOM, moduleColors
         plots.append(wgcnaFigures.plot_complex_dendrogram(dissTOM, moduleColors, title='Co-expression: dendrogram and module colors', dendro_labels=dissTOM.columns, distfun=None, linkagefun='ward', hang=0.1, subplot='module colors', col_annotation=True, width=1000, height=800))
-
-        # plot: table with features per module; input: df
         plots.append(get_table(Features_per_Module, identifier='', title='Proteins/Genes module color', colors = ('#C2D4FF','#F5F8FF'), subset = None,  plot_attr = {'width':1500, 'height':1500, 'font':12}, subplot = False))
-
-        #plot: module-traits correlation with annotations; input: moduleTraitCor, textMatrix
         plots.append(wgcnaFigures.plot_labeled_heatmap(moduleTraitCor, textMatrix, title='Module-Clinical variable relationships', colorscale=[[0,'#67a9cf'],[0.5,'#f7f7f7'],[1,'#ef8a62']], row_annotation=True, width=1000, height=800))
-
-        #plot: FS vs. MM correlation per trait/module Scattergl matrix; input: MM, FS, Features_per_Module
-        #plots.append(wgcnaFigures.plot_intramodular_correlation(MM, FS, Features_per_Module, title='Intramodular analysis: Feature Significance vs. Module Membership', width=1000, height=2000))
-
-        #input: METDiss, METcor
-        # plots.append(wgcnaFigures.plot_complex_dendrogram(METDiss, METcor, title='Eigengene network and clinical data associations', dendro_labels=METDiss.index, distfun=None, linkagefun='ward', hang=0.9,
-        #                          subplot='heatmap', subplot_colorscale=[[0,'#67a9cf'],[0.5,'#f7f7f7'],[1,'#ef8a62']],
-        #                          color_missingvals=False, row_annotation=True, col_annotation=True, width=1000, height=800))
-
         dendro_tree = wgcnaAnalysis.get_dendrogram(METDiss, METDiss.index, distfun=None, linkagefun='ward', div_clusters=False)
         if dendro_tree is not None:
             dendrogram = Dendrogram.plot_dendrogram(dendro_tree, hang=0.9, cutoff_line=False)

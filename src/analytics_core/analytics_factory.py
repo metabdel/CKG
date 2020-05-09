@@ -660,10 +660,10 @@ class Analysis:
                 if 'sd_cutoff' in self.args:
                     sd_cutoff = self.args['sd_cutoff']
                 if 'drop_cols_exp' in self.args and 'drop_cols_cli' in self.args:
-                    dfs = wgcna.get_data(input_data, drop_cols_exp=self.args['drop_cols_exp'], drop_cols_cli=self.args['drop_cols_cli'], sd_cutoff=sd_cutoff)
-                    if 'wgcna' in wgcna_data and wgcna_data['wgcna'] is not None and dfs is not None:
+                    #dfs = wgcna.get_data(input_data, drop_cols_exp=self.args['drop_cols_exp'], drop_cols_cli=self.args['drop_cols_cli'], sd_cutoff=sd_cutoff)
+                    if 'wgcna' in wgcna_data and wgcna_data['wgcna'] is not None:
                         for dtype in wgcna_data['wgcna']:
-                            data = {**dfs, **wgcna_data['wgcna'][dtype]}
+                            data = wgcna_data['wgcna'][dtype]
                             plot.extend(viz.get_WGCNAPlots(data, identifier + "-" + dtype))
                 print('WGCNA-plot', time.time() - start)
             elif name == 'ranking':

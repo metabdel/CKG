@@ -60,7 +60,7 @@ def get_data(data, drop_cols_exp=['subject', 'group', 'sample', 'index'], drop_c
                 df = df.drop(drop_cols_exp, axis=1)
                 if sd_cutoff > 0:
                     df = df.loc[:, df.std() > sd_cutoff]
-
+                    
             wgcna_data[i] = df
 
     return wgcna_data

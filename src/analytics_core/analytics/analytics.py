@@ -61,7 +61,7 @@ def flatten(t, my_list=[]):
     >>> list(flatten([2, [2, (4, 5, [7], [2, [6, 2, 6, [6], 4]], 6)]]))
     [2, 2, 4, 5, 7, 2, 6, 2, 6, 6, 4, 6]
     """
-    
+
     for x in t:
         if not isinstance(x, collections.Iterable) or isinstance(x, str):
             my_list.append(x)
@@ -2254,9 +2254,9 @@ def run_WGCNA(data, drop_cols_exp, drop_cols_cli, RsquaredCut=0.8, networkType='
 
                     moduleTraitCor, textMatrix = wgcna.calculate_ModuleTrait_correlation(data_exp, data_cli, MEs)
 
-                    MM, MMPvalue = wgcna.calculate_ModuleMembership(data_exp, MEs)
+                    #MM, MMPvalue = wgcna.calculate_ModuleMembership(data_exp, MEs)
 
-                    FS, FSPvalue = wgcna.calculate_FeatureTraitSignificance(data_exp, data_cli)
+                    #FS, FSPvalue = wgcna.calculate_FeatureTraitSignificance(data_exp, data_cli)
 
                     METDiss, METcor = wgcna.get_EigengenesTrait_correlation(MEs, data_cli)
 
@@ -2266,10 +2266,10 @@ def run_WGCNA(data, drop_cols_exp, drop_cols_cli, RsquaredCut=0.8, networkType='
                     result[dtype]['MEs'] = MEs
                     result[dtype]['module_trait_cor'] = moduleTraitCor
                     result[dtype]['text_matrix'] = textMatrix
-                    result[dtype]['module_membership'] = MM
-                    result[dtype]['module_membership_pval'] = MMPvalue
-                    result[dtype]['feature_significance'] = FS
-                    result[dtype]['feature_significance_pval'] = FSPvalue
+                    #result[dtype]['module_membership'] = MM
+                    #result[dtype]['module_membership_pval'] = MMPvalue
+                    #result[dtype]['feature_significance'] = FS
+                    #result[dtype]['feature_significance_pval'] = FSPvalue
                     result[dtype]['ME_trait_diss'] = METDiss
                     result[dtype]['ME_trait_cor'] = METcor
 
