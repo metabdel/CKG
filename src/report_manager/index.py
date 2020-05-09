@@ -571,14 +571,12 @@ def run_processing(n_clicks, project_id):
                     if designData['analytical_sample external_id'].astype(str).str.contains('_', regex=False).any():
                         message = 'ERROR: The "analytical_sample external_id" provided are incorrect. Do not use special character "_"'
                         return message, style, table
-                    res = None
                     if (res_n > 0).any().values.sum() > 0:
                         res = dataUpload.remove_samples_nodes_db(driver, project_id)
-                    
-                    if res is None:
-                        message = 'ERROR: There is already an experimental design loaded into the database and there was an error when trying to delete it. Contact your administrator.'.format(experimental_filename, ','.join(['subject external_id','biological_sample external_id','analytical_sample external_id']))
-                        
-                        return message, style, table
+                        res_n = dataUpload.check_samples_in_project(driver, project_id)
+                        if (res_n > 0).any().values.sum() > 0:
+                            message = 'ERROR: There is already an experimental design loaded into the database and there was an error when trying to delete it. Contact your administrator.'.format(experimental_filename, ','.join(['subject external_id','biological_sample external_id','analytical_sample external_id']))
+                            return message, style, table
                                             
                     res_n = None
                     result = create_new_identifiers.apply_async(args=[project_id, designData.to_json(), directory, experimental_filename], task_id='data_upload_'+session_cookie+datetime.now().strftime('%Y%m-%d%H-%M%S-'))
