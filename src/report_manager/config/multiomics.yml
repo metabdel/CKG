@@ -51,7 +51,7 @@ data exploration:
                 - subject
                 - group
                 - biological_sample
-            RsquaredCut: 0.7
+            RsquaredCut: 0.6
             networkType: 'unsigned'
             minModuleSize: 50
             deepSplit: 2

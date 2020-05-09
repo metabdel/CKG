@@ -82,14 +82,6 @@ overview: #section
             height: 900
             width: 1500
             title: Modified proteins ranking
-    preparation:
-        data: processed
-        analyses:
-            - normalization
-        plots: []
-        store_analysis: True
-        args:
-            method: median
 data exploration:
     stratification:
         description: '# Principal Component Analysis
@@ -100,7 +92,7 @@ data exploration:
                          (that is, accounts for as much of the variability in the data as possible), and each succeeding component in turn has the highest variance possible under 
                          the constraint that it is orthogonal to the preceding components. The resulting vectors (each being a linear combination of the variables and containing n observations) 
                          are an uncorrelated orthogonal basis set. PCA is sensitive to the relative scaling of the original variables. [Wikipedia](https://en.wikipedia.org/wiki/Principal_component_analysis)'
-        data: preparation_normalization
+        data: processed
         analyses:
             - pca
             #- tsne
@@ -125,7 +117,7 @@ data exploration:
                         used to analyze the differences among group means in a sample. ANOVA was developed by statistician and evolutionary biologist Ronald Fisher. The ANOVA is based on the law of 
                         total variance, where the observed variance in a particular variable is partitioned into components attributable to different sources of variation. In its simplest form, 
                         ANOVA provides a statistical test of whether two or more population means are equal, and therefore generalizes the t-test beyond two means.[Wikipedia](https://en.wikipedia.org/wiki/Analysis_of_variance)'
-        data: preparation_normalization
+        data: processed
         analyses:
             - anova
         plots:
