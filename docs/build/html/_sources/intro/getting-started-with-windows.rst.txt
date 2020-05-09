@@ -1,0 +1,7 @@
+
+.. _Windows installation:
+
+Windows installation
+=======================
+
+In order to interface Python and R, we use the python package ``rpy2``. Unfortunately, the current release of this package for Windows 

@@ -95,7 +95,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#create-a-virtual-environment">Create a virtual environment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#setting-up-the-clinical-knowledge-graph">Setting up the Clinical Knowledge Graph</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#add-ckg-to-bashrc">Add CKG to <em>.bashrc</em></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id1">Build Neo4j graph database</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#build-neo4j-graph-database">Build Neo4j graph database</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#from-builder-py">From builder.py</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#from-a-backup-dump-file">From a backup dump file</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#more-on-the-dump-file">More on the dump file</a></li>
@@ -136,14 +136,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../advanced_features/visualization-plots.html">Visualization plots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../advanced_features/R-interface.html">Python - R interface</a></li>
 </ul>
-<p class="caption"><span class="caption-text">System Requirements</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../system_require/mac-os.html">Mac OS X requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../system_require/linux.html">Linux requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../system_require/windows.html">Windows requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../system_requirements.html">System Requirements</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../src.html">Clinical Knowledge Graph package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../src.html">CKG package API Reference</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../MANIFEST.html">Credits</a></li>
@@ -326,12 +323,12 @@ $ <span class="nb">source</span> path/to/env_name/bin/activate
 </pre></div>
 </div>
 <div class="figure align-right" id="id4">
-<span id="build-neo4j-graph-database"></span><a class="reference internal image-reference" href="../_images/snomed_folder.png"><img alt="../_images/snomed_folder.png" src="../_images/snomed_folder.png" style="width: 240px;" /></a>
+<a class="reference internal image-reference" href="../_images/snomed_folder.png"><img alt="../_images/snomed_folder.png" src="../_images/snomed_folder.png" style="width: 240px;" /></a>
 <p class="caption"><span class="caption-text">SNOMED-CT ontology folder.</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
 </div>
 </div>
-<div class="section" id="id1">
-<h2>Build Neo4j graph database<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="build-neo4j-graph-database">
+<span id="id1"></span><h2>Build Neo4j graph database<a class="headerlink" href="#build-neo4j-graph-database" title="Permalink to this headline">¶</a></h2>
 <p>The building of the CKG database is thoroughly automated. Most of the biomedical databases and ontology files will automatically be downloaded during building of the database. However, the following licensed databases have to be downloaded manually.</p>
 <div class="figure align-right" id="id5">
 <a class="reference internal image-reference" href="../_images/drugbank_folder.png"><img alt="../_images/drugbank_folder.png" src="../_images/drugbank_folder.png" style="width: 240px;" /></a>
@@ -401,7 +398,7 @@ $ sudo chown -R username data/databases/graph.db/
 </div>
 <p>Once you are done, start the database and you will have a functional graph database.</p>
 <p>However, be aware the database contained in the dump file <a href="#id2"><span class="problematic" id="id3">:underline:`does NOT`</span></a> include the licensed databases (<strong>PhosphoSitePlus</strong>, <strong>DrugBank</strong> and <strong>SNOMED-CT</strong>).</p>
-<p>To add the missing ontology and databases, as well as their dependencies (relationships to other nodes), please manually download the files as explained in <span class="xref std std-ref">Build Neo4j graph database:</span>, and run the following commands:</p>
+<p>To add the missing ontology and databases, as well as their dependencies (relationships to other nodes), please manually download the files as explained in <a class="reference internal" href="#build-neo4j-graph-database"><span class="std std-ref">Build Neo4j graph database</span></a>, and run the following commands:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ <span class="nb">cd</span> CKG/src/graphdb_builder/builder
 $ python builder.py -b import -i ontologies -d Clinical_variable -w False -u username
 $ python builder.py -b import -i databases -d phosphositeplus drugbank -n <span class="m">2</span> -w False -u username

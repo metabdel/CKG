@@ -39,3 +39,8 @@ Features
 * Docker container runs all neccessary steps to setup the CKG. 
 
 
+Disclaimer 
+---------------
+
+This resource is intended for research purposes and must not substitute a doctor’s medical judgement or healthcare professional advice.
+

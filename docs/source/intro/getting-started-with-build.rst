@@ -91,7 +91,7 @@ The first step in setting up the CKG, is to obtain the complete code by clone th
 	
 	$ git clone https://github.com/MannLabs/CKG.git
 
-Once this is finished, you can find all the Python modules neccessary to run the Clinical Knowledge graph in ``requirements.txt``.
+Once this is finished, you can find all the Python modules necessary to run the Clinical Knowledge Graph in ``requirements.txt``.
 To install all the packages required, simply run:
 
 .. code-block:: bash
@@ -108,8 +108,7 @@ Now that all the packages are correctly installed, you will have to create the a
 	$ python setup_CKG.py
 	$ python setup_config_files.py
 
-This will automatically create the ``data`` folder and all subfolders, as well as setup the configuration for the log files where
-all errors and warnings related to the code will be written to.
+This will automatically create the ``data`` folder and all subfolders, as well as setup the configuration for the log files where all errors and warnings related to the code will be written to.
 
 
 Add CKG to *.bashrc*
@@ -138,14 +137,14 @@ Notice that the path should always finish with "/CKG/src/".
 	$ source path/to/env_name/bin/activate
 
 
-.. _Build Neo4j graph database:
-
 
 .. figure:: ../_static/images/snomed_folder.png
     :width: 240px
     :align: right
 
     SNOMED-CT ontology folder.
+
+.. _Build Neo4j graph database:
 
 Build Neo4j graph database
 ---------------------------
@@ -216,6 +215,7 @@ A dump file of the database is also made available in `add link to the dump file
 	$ mkdir backups
 	$ mkdir backups/graph.db
 	$ cp 2019-11-04.dump backups/graph.db/.
+	
 
 After copying the dump file to backups/graph.db/, make sure the graph database is shutdown and run:
 
@@ -237,7 +237,7 @@ Once you are done, start the database and you will have a functional graph datab
 
 However, be aware the database contained in the dump file :underline:`does NOT` include the licensed databases (**PhosphoSitePlus**, **DrugBank** and **SNOMED-CT**).
 
-To add the missing ontology and databases, as well as their dependencies (relationships to other nodes), please manually download the files as explained in :ref:`Build Neo4j graph database:`, and run the following commands:
+To add the missing ontology and databases, as well as their dependencies (relationships to other nodes), please manually download the files as explained in :ref:`Build Neo4j graph database`, and run the following commands:
 
 .. code-block:: bash
 	

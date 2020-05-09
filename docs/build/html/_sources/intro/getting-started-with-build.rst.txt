@@ -138,14 +138,14 @@ Notice that the path should always finish with "/CKG/src/".
 	$ source path/to/env_name/bin/activate
 
 
-.. _Build Neo4j graph database:
-
 
 .. figure:: ../_static/images/snomed_folder.png
     :width: 240px
     :align: right
 
     SNOMED-CT ontology folder.
+
+.. _Build Neo4j graph database:
 
 Build Neo4j graph database
 ---------------------------
@@ -237,7 +237,7 @@ Once you are done, start the database and you will have a functional graph datab
 
 However, be aware the database contained in the dump file :underline:`does NOT` include the licensed databases (**PhosphoSitePlus**, **DrugBank** and **SNOMED-CT**).
 
-To add the missing ontology and databases, as well as their dependencies (relationships to other nodes), please manually download the files as explained in :ref:`Build Neo4j graph database:`, and run the following commands:
+To add the missing ontology and databases, as well as their dependencies (relationships to other nodes), please manually download the files as explained in :ref:`Build Neo4j graph database`, and run the following commands:
 
 .. code-block:: bash
 	

@@ -91,6 +91,7 @@
 <li class="toctree-l1"><a class="reference internal" href="intro/getting-started-with-requirements.html">Getting Started with some Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="intro/getting-started-with-neo4j.html">Getting Started with Neo4j</a></li>
 <li class="toctree-l1"><a class="reference internal" href="intro/getting-started-with-build.html">Getting Started with the CKG Build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro/getting-started-with-windows.html">Windows installation</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Getting started</span></p>
 <ul>
@@ -124,14 +125,11 @@
 <li class="toctree-l1"><a class="reference internal" href="advanced_features/visualization-plots.html">Visualization plots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="advanced_features/R-interface.html">Python - R interface</a></li>
 </ul>
-<p class="caption"><span class="caption-text">System Requirements</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="system_require/mac-os.html">Mac OS X requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="system_require/linux.html">Linux requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="system_require/windows.html">Windows requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="system_requirements.html">System Requirements</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="src.html">Clinical Knowledge Graph package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src.html">CKG package API Reference</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="MANIFEST.html">Credits</a></li>
@@ -348,6 +346,8 @@
 </li>
       <li><a href="_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.calculate_pairwise_ttest">calculate_pairwise_ttest() (in module analytics_core.analytics.analytics)</a>
 </li>
+      <li><a href="_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.calculate_pvalue_from_tstats">calculate_pvalue_from_tstats() (in module analytics_core.analytics.analytics)</a>
+</li>
       <li><a href="_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.calculate_repeated_measures_anova">calculate_repeated_measures_anova() (in module analytics_core.analytics.analytics)</a>
 </li>
       <li><a href="_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.calculate_rm_correlation">calculate_rm_correlation() (in module analytics_core.analytics.analytics)</a>
@@ -361,6 +361,8 @@
       <li><a href="_autosummary/analytics_core.html#analytics_core.R_wrapper.call_Rpackage">call_Rpackage() (in module analytics_core.R_wrapper)</a>
 </li>
       <li><a href="_autosummary/graphdb_builder.experiments.parsers.html#graphdb_builder.experiments.parsers.proteomicsParser.check_columns">check_columns() (in module graphdb_builder.experiments.parsers.proteomicsParser)</a>
+</li>
+      <li><a href="_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.check_equal_variances">check_equal_variances() (in module analytics_core.analytics.analytics)</a>
 </li>
       <li><a href="_autosummary/report_manager.apps.html#report_manager.apps.dataUpload.check_external_ids_in_db">check_external_ids_in_db() (in module report_manager.apps.dataUpload)</a>
 </li>
@@ -386,10 +388,10 @@
 </li>
       <li><a href="_autosummary/report_manager.html#report_manager.dataset.ClinicalDataset">ClinicalDataset (class in report_manager.dataset)</a>
 </li>
-      <li><a href="_autosummary/report_manager.html#report_manager.knowledge.ClinicalKnowledge">ClinicalKnowledge (class in report_manager.knowledge)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="_autosummary/report_manager.html#report_manager.knowledge.ClinicalKnowledge">ClinicalKnowledge (class in report_manager.knowledge)</a>
+</li>
       <li><a href="_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.cohen_d">cohen_d() (in module analytics_core.analytics.analytics)</a>
 </li>
       <li><a href="_autosummary/report_manager.html#report_manager.knowledge.Knowledge.colors">colors() (report_manager.knowledge.Knowledge property)</a>
@@ -646,10 +648,14 @@
 </li>
       <li><a href="_autosummary/graphdb_connector.html#graphdb_connector.query_utils.find_queries_involving_relationships">find_queries_involving_relationships() (in module graphdb_connector.query_utils)</a>
 </li>
+      <li><a href="_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.flatten">flatten() (in module analytics_core.analytics.analytics)</a>
+
+      <ul>
+        <li><a href="_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.flatten">(in module graphdb_builder.builder_utils)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="_autosummary/graphdb_builder.html#graphdb_builder.builder_utils.flatten">flatten() (in module graphdb_builder.builder_utils)</a>
-</li>
       <li><a href="_autosummary/analytics_core.analytics.html#analytics_core.analytics.analytics.format_anova_table">format_anova_table() (in module analytics_core.analytics.analytics)</a>
 </li>
       <li><a href="_autosummary/graphdb_builder.databases.parsers.html#graphdb_builder.databases.parsers.uniprotParser.format_output">format_output() (in module graphdb_builder.databases.parsers.uniprotParser)</a>

@@ -90,6 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../intro/getting-started-with-requirements.html">Getting Started with some Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../intro/getting-started-with-neo4j.html">Getting Started with Neo4j</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../intro/getting-started-with-build.html">Getting Started with the CKG Build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/getting-started-with-windows.html">Windows installation</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Getting started</span></p>
 <ul>
@@ -123,14 +124,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../advanced_features/visualization-plots.html">Visualization plots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../advanced_features/R-interface.html">Python - R interface</a></li>
 </ul>
-<p class="caption"><span class="caption-text">System Requirements</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../system_require/mac-os.html">Mac OS X requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../system_require/linux.html">Linux requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../system_require/windows.html">Windows requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../system_requirements.html">System Requirements</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../src.html">Clinical Knowledge Graph package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src.html">CKG package API Reference</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../MANIFEST.html">Credits</a></li>
@@ -449,7 +447,7 @@
         <span class="k">if</span> <span class="n">stats_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">stats_name</span> <span class="o">=</span> <span class="n">getStatsName</span><span class="p">(</span><span class="n">import_type</span><span class="p">)</span>
         <span class="k">with</span> <span class="n">pd</span><span class="o">.</span><span class="n">HDFStore</span><span class="p">(</span><span class="n">stats_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">hdf</span><span class="p">:</span>
-            <span class="n">hdf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stats_name</span><span class="p">,</span> <span class="n">statsDf</span><span class="p">,</span> <span class="n">data_columns</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">min_itemsize</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="mi">15</span><span class="p">})</span>
+            <span class="n">hdf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stats_name</span><span class="p">,</span> <span class="n">statsDf</span><span class="p">,</span> <span class="n">data_columns</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">min_itemsize</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">})</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Writing Stats object </span><span class="si">{}</span><span class="s2"> in file:</span><span class="si">{}</span><span class="s2"> &gt; </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">stats_name</span><span class="p">,</span> <span class="n">stats_file</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span></div>
 

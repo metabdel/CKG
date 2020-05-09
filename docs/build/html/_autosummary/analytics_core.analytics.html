@@ -125,14 +125,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../advanced_features/visualization-plots.html">Visualization plots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../advanced_features/R-interface.html">Python - R interface</a></li>
 </ul>
-<p class="caption"><span class="caption-text">System Requirements</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../system_require/mac-os.html">Mac OS X requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../system_require/linux.html">Linux requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../system_require/windows.html">Windows requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../system_requirements.html">Requirements</a></li>
 </ul>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../src.html">Clinical Knowledge Graph package</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../src.html">CKG package API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="graphdb_connector.html">Graph Database Connector</a></li>
 <li class="toctree-l2"><a class="reference internal" href="graphdb_builder.html">Graph Database Builder</a></li>
 <li class="toctree-l2"><a class="reference internal" href="report_manager.html">Report Manager</a></li>
@@ -203,7 +200,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-          <li><a href="../src.html">Clinical Knowledge Graph package</a> &raquo;</li>
+          <li><a href="../src.html">CKG package API Reference</a> &raquo;</li>
         
           <li><a href="analytics_core.html">Analytics Core</a> &raquo;</li>
         
@@ -236,6 +233,18 @@
 <dd><p>Returns the unit vector of the vector.
 :param tuple vector: vector
 :return tuple unit_vector: unit vector</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analytics_core.analytics.analytics.flatten">
+<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">flatten</code><span class="sig-paren">(</span><em class="sig-param">t</em>, <em class="sig-param">my_list=[]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#flatten"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.flatten" title="Permalink to this definition">¶</a></dt>
+<dd><p>Code from: <a class="reference external" href="https://gist.github.com/shaxbee/0ada767debf9eefbdb6e">https://gist.github.com/shaxbee/0ada767debf9eefbdb6e</a>
+Acknowledgements: Zbigniew Mandziejewicz (shaxbee)
+Generator flattening the structure</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">flatten</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="mi">4</span><span class="p">]],</span> <span class="mi">6</span><span class="p">)]]))</span>
+<span class="go">[2, 2, 4, 5, 7, 2, 6, 2, 6, 6, 4, 6]</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="function">
@@ -649,7 +658,7 @@ visit <a class="reference external" href="https://docs.scipy.org/doc/scipy/refer
 
 <dl class="function">
 <dt id="analytics_core.analytics.analytics.get_proteomics_measurements_ready">
-<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">get_proteomics_measurements_ready</code><span class="sig-paren">(</span><em class="sig-param">df, index_cols=['group', 'sample', 'subject'], drop_cols=['sample'], group='group', identifier='identifier', extra_identifier='name', imputation=True, method='distribution', missing_method='percentage', missing_per_group=True, missing_max=0.3, min_valid=1, value_col='LFQ_intensity', shift=1.8, nstd=0.3</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#get_proteomics_measurements_ready"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.get_proteomics_measurements_ready" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">get_proteomics_measurements_ready</code><span class="sig-paren">(</span><em class="sig-param">df, index_cols=['group', 'sample', 'subject'], drop_cols=['sample'], group='group', identifier='identifier', extra_identifier='name', imputation=True, method='distribution', missing_method='percentage', missing_per_group=True, missing_max=0.3, min_valid=1, value_col='LFQ_intensity', shift=1.8, nstd=0.3, knn_cutoff=0.6</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#get_proteomics_measurements_ready"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.get_proteomics_measurements_ready" title="Permalink to this definition">¶</a></dt>
 <dd><p>Processes proteomics data extracted from the database: 1) filter proteins with high number of missing values (&gt; missing_max or min_valid), 2) impute missing values.
 For more information on imputation method visit <a class="reference external" href="http://www.coxdocs.org/doku.php?id=perseus:user:activities:matrixprocessing:filterrows:filtervalidvaluesrows">http://www.coxdocs.org/doku.php?id=perseus:user:activities:matrixprocessing:filterrows:filtervalidvaluesrows</a>.</p>
 <dl class="field-list simple">
@@ -668,6 +677,9 @@ For more information on imputation method visit <a class="reference external" hr
 <li><p><strong>missing_max</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/functions.html#float" title="(in Python v3.5)"><em>float</em></a>) – maximum ratio of missing/valid values to be filtered.</p></li>
 <li><p><strong>min_valid</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/functions.html#int" title="(in Python v3.5)"><em>int</em></a>) – minimum number of valid values to be filtered.</p></li>
 <li><p><strong>value_col</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – column label containing expression values.</p></li>
+<li><p><strong>shift</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/functions.html#float" title="(in Python v3.5)"><em>float</em></a>) – when using distribution imputation, the down-shift</p></li>
+<li><p><strong>nstd</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/functions.html#float" title="(in Python v3.5)"><em>float</em></a>) – when using distribution imputation, the width of the distribution</p></li>
+<li><p><strong>knn_cutoff</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/functions.html#float" title="(in Python v3.5)"><em>float</em></a>) – when using KNN imputation, the minimum percentage of valid values for which to use KNN imputation (i.e. 0.6 -&gt; if 60% valid values use KNN, otherwise MinProb)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -731,24 +743,14 @@ For more information on imputation method visit <a class="reference external" hr
 </dd></dl>
 
 <dl class="function">
+<dt id="analytics_core.analytics.analytics.check_equal_variances">
+<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">check_equal_variances</code><span class="sig-paren">(</span><em class="sig-param">data, drop_cols=['group', 'sample', 'subject'], group_col='group', alpha=0.05</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#check_equal_variances"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.check_equal_variances" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="analytics_core.analytics.analytics.check_normality">
-<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">check_normality</code><span class="sig-paren">(</span><em class="sig-param">data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#check_normality"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.check_normality" title="Permalink to this definition">¶</a></dt>
-<dd><p>Checks whether columns (features) in the provided matrix follow a normal distribution (Requires at least 8 rows). Uses
-Pigouin test Normality: <a class="reference external" href="https://pingouin-stats.org/generated/pingouin.normality.html">https://pingouin-stats.org/generated/pingouin.normality.html</a></p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data</strong> – pandas dataframe.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>a pandas data frame with features as rows, test statistic, pvalue, true/false normally distributed. None if</p>
-</dd>
-</dl>
-<p>number of rows below 8.</p>
-<p>Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">check_normality</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
+<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">check_normality</code><span class="sig-paren">(</span><em class="sig-param">data, drop_cols=['group', 'sample', 'subject'], group_col='group', alpha=0.05</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#check_normality"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.check_normality" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="function">
 <dt id="analytics_core.analytics.analytics.run_pca">
@@ -1134,7 +1136,7 @@ Pigouin test Normality: <a class="reference external" href="https://pingouin-sta
 
 <dl class="function">
 <dt id="analytics_core.analytics.analytics.calculate_ttest">
-<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">calculate_ttest</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">condition1</em>, <em class="sig-param">condition2</em>, <em class="sig-param">paired=False</em>, <em class="sig-param">is_logged=True</em>, <em class="sig-param">tail='two-sided'</em>, <em class="sig-param">correction='auto'</em>, <em class="sig-param">r=0.707</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#calculate_ttest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.calculate_ttest" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">calculate_ttest</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">condition1</em>, <em class="sig-param">condition2</em>, <em class="sig-param">paired=False</em>, <em class="sig-param">is_logged=True</em>, <em class="sig-param">non_par=False</em>, <em class="sig-param">tail='two-sided'</em>, <em class="sig-param">correction='auto'</em>, <em class="sig-param">r=0.707</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#calculate_ttest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.calculate_ttest" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the t-test for the means of independent samples belonging to two different groups. For more information visit <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.ttest_ind.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.ttest_ind.html</a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1142,6 +1144,8 @@ Pigouin test Normality: <a class="reference external" href="https://pingouin-sta
 <li><p><strong>df</strong> – pandas dataframe with groups and subjects as rows and protein identifier as column.</p></li>
 <li><p><strong>condition1</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – identifier of first group.</p></li>
 <li><p><strong>condition2</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – ientifier of second group.</p></li>
+<li><p><strong>is_logged</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/functions.html#bool" title="(in Python v3.5)"><em>bool</em></a>) – data is logged transformed</p></li>
+<li><p><strong>non_par</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/functions.html#bool" title="(in Python v3.5)"><em>bool</em></a>) – if True, normality and variance equality assumptions are checked and non-parametric test Mann Whitney U test if not passed</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -1364,7 +1368,7 @@ Pigouin test Normality: <a class="reference external" href="https://pingouin-sta
 
 <dl class="function">
 <dt id="analytics_core.analytics.analytics.run_anova">
-<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">run_anova</code><span class="sig-paren">(</span><em class="sig-param">df, alpha=0.05, drop_cols=['sample', 'subject'], subject='subject', group='group', permutations=0, correction='fdr_bh', is_logged=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#run_anova"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.run_anova" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">run_anova</code><span class="sig-paren">(</span><em class="sig-param">df, alpha=0.05, drop_cols=['sample', 'subject'], subject='subject', group='group', permutations=0, correction='fdr_bh', is_logged=True, non_par=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#run_anova"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.run_anova" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs statistical test for each protein in a dataset.
 Checks what type of data is the input (paired, unpaired or repeated measurements) and performs posthoc tests for multiclass data.
 Multiple hypothesis correction uses permutation-based if permutations&gt;0 and Benjamini/Hochberg if permutations=0.</p>
@@ -1377,6 +1381,7 @@ Multiple hypothesis correction uses permutation-based if permutations&gt;0 and B
 <li><p><strong>drop_cols</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#list" title="(in Python v3.5)"><em>list</em></a>) – column labels to be dropped from the dataframe</p></li>
 <li><p><strong>alpha</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/functions.html#float" title="(in Python v3.5)"><em>float</em></a>) – error rate for multiple hypothesis correction</p></li>
 <li><p><strong>permutations</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/functions.html#int" title="(in Python v3.5)"><em>int</em></a>) – number of permutations used to estimate false discovery rates.</p></li>
+<li><p><strong>non_par</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/functions.html#bool" title="(in Python v3.5)"><em>bool</em></a>) – if True, normality and variance equality assumptions are checked and non-parametric test Mann Whitney U test if not passed</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -1442,7 +1447,7 @@ Multiple hypothesis correction uses permutation-based if permutations&gt;0 and B
 
 <dl class="function">
 <dt id="analytics_core.analytics.analytics.run_ttest">
-<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">run_ttest</code><span class="sig-paren">(</span><em class="sig-param">df, condition1, condition2, alpha=0.05, drop_cols=['sample'], subject='subject', group='group', paired=False, correction='fdr_bh', permutations=50, is_logged=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#run_ttest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.run_ttest" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">run_ttest</code><span class="sig-paren">(</span><em class="sig-param">df, condition1, condition2, alpha=0.05, drop_cols=['sample'], subject='subject', group='group', paired=False, correction='fdr_bh', permutations=50, is_logged=True, non_par=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#run_ttest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.run_ttest" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runs t-test (paired/unpaired) for each protein in dataset and performs permutation-based (if permutations&gt;0) or Benjamini/Hochberg (if permutations=0) multiple hypothesis correction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1457,6 +1462,8 @@ Multiple hypothesis correction uses permutation-based if permutations&gt;0 and B
 <li><p><strong>correction</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – method of pvalue correction see apply_pvalue_correction for methods</p></li>
 <li><p><strong>alpha</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/functions.html#float" title="(in Python v3.5)"><em>float</em></a>) – error rate for multiple hypothesis correction</p></li>
 <li><p><strong>permutations</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/functions.html#int" title="(in Python v3.5)"><em>int</em></a>) – number of permutations used to estimate false discovery rates.</p></li>
+<li><p><strong>is_logged</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/functions.html#bool" title="(in Python v3.5)"><em>bool</em></a>) – data is log-transformed</p></li>
+<li><p><strong>non_par</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/functions.html#bool" title="(in Python v3.5)"><em>bool</em></a>) – if True, normality and variance equality assumptions are checked and non-parametric test Mann Whitney U test if not passed</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -1490,6 +1497,15 @@ Multiple hypothesis correction uses permutation-based if permutations&gt;0 and B
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">method</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">define_samr_method</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">subject</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="function">
+<dt id="analytics_core.analytics.analytics.calculate_pvalue_from_tstats">
+<code class="sig-prename descclassname">analytics_core.analytics.analytics.</code><code class="sig-name descname">calculate_pvalue_from_tstats</code><span class="sig-paren">(</span><em class="sig-param">tstat</em>, <em class="sig-param">dfn</em>, <em class="sig-param">dfk</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/analytics/analytics.html#calculate_pvalue_from_tstats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.analytics.analytics.calculate_pvalue_from_tstats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate two-tailed p-values from T- or F-statistics.</p>
+<p>tstat: T/F distribution
+dfn: degrees of freedrom <em>n</em> (values) per protein (keys), i.e. number of obervations - number of groups (dict)
+dfk: degrees of freedrom <em>n</em> (values) per protein (keys), i.e. number of groups - 1 (dict)</p>
 </dd></dl>
 
 <dl class="function">

@@ -27,7 +27,12 @@ To create a project, please follow the steps below.
 	$ redis-server
 
 
-.. warning:: If redis-server is not found, install with ``brew install redis`` (Mac) or ``sudo apt-get install redis-server`` (Linux)
+.. warning:: If redis-server is not found, install with ``brew install redis`` (Mac) or ``sudo apt-get install redis-server`` (Linux). 
+
+.. warnning:: On Windows, redis-server should be installed by default (to check, go to start menu > services.msc > Redis). If that is not the case, go to ``https://github.com/microsoftarchive/redis/releases``, download the latest release installer (.msi file), and follow the installation instructions. Let all options as default but remember to select **Add the Redis installation folder to the PATH environment variable.**. To start a redis-server, make sure it is **not running in ``services.msc``**, and run in the command prompt: C:\"Program Files"\Redis\redis-server
+
+.. note:: ``C:\"Program Files"`` can be replaced with the correct path where you installed Redis from the installer (.msi file).
+
 
 2. In two separate terminal windows:
 

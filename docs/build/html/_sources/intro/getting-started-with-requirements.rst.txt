@@ -2,6 +2,9 @@
 Getting Started with some Requirements
 ========================================
 
+The following instructions on installation of software requirements and setting up the Clinical Knowledge graph, are optimized for operating systems MacOS and Linux. For more detailed instructions on how to set up the CKG in Windows, pleaso go to :ref:`Windows installation`.
+
+
 Java
 -------
 
