@@ -2,9 +2,7 @@ import os.path
 from collections import defaultdict
 from graphdb_builder import builder_utils
 
-#############################
-#       PhosphoSitePlus     # 
-#############################
+
 def parser(databases_directory, download=True):
     config = builder_utils.get_config(config_name="signorConfig.yml", data_type='databases')
 

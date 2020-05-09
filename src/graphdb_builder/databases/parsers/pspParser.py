@@ -3,9 +3,7 @@ import gzip
 from collections import defaultdict
 from graphdb_builder import mapping as mp, builder_utils
 
-#############################
-#       PhosphoSitePlus     # 
-#############################
+
 def parser(databases_directory):
     directory = os.path.join(databases_directory, "PhosphoSitePlus")
     builder_utils.checkDirectory(directory)
@@ -36,7 +34,6 @@ def parser(databases_directory):
             elif entity == "substrate":
                 relationships[(entity, relationship_type)] = parseKinaseSubstrates(f, modifications)
 
-    
     return entities, relationships, entities_header, relationships_headers
 
 
