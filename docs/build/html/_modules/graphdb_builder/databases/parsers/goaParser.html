@@ -90,6 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../intro/getting-started-with-requirements.html">Getting Started with some Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../intro/getting-started-with-neo4j.html">Getting Started with Neo4j</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../intro/getting-started-with-build.html">Getting Started with the CKG Build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/getting-started-with-windows.html">Getting started with Windows</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Getting started</span></p>
 <ul>
@@ -123,14 +124,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../advanced_features/visualization-plots.html">Visualization plots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../advanced_features/R-interface.html">Python - R interface</a></li>
 </ul>
-<p class="caption"><span class="caption-text">System Requirements</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../system_require/mac-os.html">Mac OS X requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../system_require/linux.html">Linux requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../system_require/windows.html">Windows requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../system_requirements.html">System Requirements</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../src.html">Clinical Knowledge Graph package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../src.html">CKG package API Reference</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../MANIFEST.html">Credits</a></li>
@@ -203,19 +201,19 @@
   <h1>Source code for graphdb_builder.databases.parsers.goaParser</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">gzip</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
 <span class="kn">from</span> <span class="nn">graphdb_builder</span> <span class="k">import</span> <span class="n">mapping</span> <span class="k">as</span> <span class="n">mp</span><span class="p">,</span> <span class="n">builder_utils</span>
+
 
 <div class="viewcode-block" id="parser"><a class="viewcode-back" href="../../../../_autosummary/graphdb_builder.databases.parsers.html#graphdb_builder.databases.parsers.goaParser.parser">[docs]</a><span class="k">def</span> <span class="nf">parser</span><span class="p">(</span><span class="n">databases_dir</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="n">config</span> <span class="o">=</span> <span class="n">builder_utils</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="n">config_name</span><span class="o">=</span><span class="s2">&quot;goaConfig.yml&quot;</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;databases&#39;</span><span class="p">)</span>
     <span class="n">url</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span>
     <span class="n">rel_header</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;header&#39;</span><span class="p">]</span>
-    
+
     <span class="n">protein_mapping</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">getMappingForEntity</span><span class="p">(</span><span class="n">entity</span><span class="o">=</span><span class="s2">&quot;Protein&quot;</span><span class="p">)</span>    
     <span class="n">valid_proteins</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">protein_mapping</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
 
-    <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">databases_dir</span><span class="p">,</span><span class="s2">&quot;GOA&quot;</span><span class="p">)</span>
+    <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">databases_dir</span><span class="p">,</span> <span class="s2">&quot;GOA&quot;</span><span class="p">)</span>
     <span class="n">builder_utils</span><span class="o">.</span><span class="n">checkDirectory</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
     <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
     <span class="k">if</span> <span class="n">download</span><span class="p">:</span>
@@ -223,10 +221,13 @@
 
     <span class="n">annotations</span> <span class="o">=</span> <span class="n">parse_annotations_with_pandas</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">valid_proteins</span><span class="p">)</span>
 
+    <span class="n">builder_utils</span><span class="o">.</span><span class="n">remove_directory</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">annotations</span><span class="p">,</span> <span class="n">rel_header</span></div>
 
+
 <div class="viewcode-block" id="parse_annotations_with_pandas"><a class="viewcode-back" href="../../../../_autosummary/graphdb_builder.databases.parsers.html#graphdb_builder.databases.parsers.goaParser.parse_annotations_with_pandas">[docs]</a><span class="k">def</span> <span class="nf">parse_annotations_with_pandas</span><span class="p">(</span><span class="n">annotation_file</span><span class="p">,</span> <span class="n">valid_proteins</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="n">roots</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;F&#39;</span><span class="p">:</span><span class="s1">&#39;Molecular_function&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span><span class="s1">&#39;Cellular_component&#39;</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">:</span><span class="s1">&#39;Biological_process&#39;</span><span class="p">}</span>
+    <span class="n">roots</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;F&#39;</span><span class="p">:</span> <span class="s1">&#39;Molecular_function&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="s1">&#39;Cellular_component&#39;</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">:</span> <span class="s1">&#39;Biological_process&#39;</span><span class="p">}</span>
     <span class="n">selected_columns</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">14</span><span class="p">]</span>
     <span class="n">new_columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">,</span> <span class="s1">&#39;START_ID&#39;</span><span class="p">,</span> <span class="s1">&#39;END_ID&#39;</span><span class="p">,</span> <span class="s1">&#39;evidence&#39;</span><span class="p">,</span> <span class="s1">&#39;root&#39;</span><span class="p">,</span> <span class="s1">&#39;original_source&#39;</span><span class="p">]</span>
     <span class="n">annotations</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">set</span><span class="p">)</span>
@@ -244,13 +245,13 @@
             <span class="n">annotations_df</span> <span class="o">=</span> <span class="n">annotations_df</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(),</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">annotations_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;root&#39;</span><span class="p">):</span>
         <span class="n">group</span><span class="p">[</span><span class="s1">&#39;TYPE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;ASSOCIATED_WITH&quot;</span>
-        <span class="n">group</span> <span class="o">=</span> <span class="n">group</span><span class="p">[[</span><span class="s1">&#39;START_ID&#39;</span><span class="p">,</span> <span class="s1">&#39;END_ID&#39;</span><span class="p">,</span> <span class="s1">&#39;TYPE&#39;</span><span class="p">,</span> <span class="s1">&#39;evidence&#39;</span><span class="p">,</span><span class="s1">&#39;source&#39;</span><span class="p">]]</span>
+        <span class="n">group</span> <span class="o">=</span> <span class="n">group</span><span class="p">[[</span><span class="s1">&#39;START_ID&#39;</span><span class="p">,</span> <span class="s1">&#39;END_ID&#39;</span><span class="p">,</span> <span class="s1">&#39;TYPE&#39;</span><span class="p">,</span> <span class="s1">&#39;evidence&#39;</span><span class="p">,</span> <span class="s1">&#39;source&#39;</span><span class="p">]]</span>
         <span class="n">annotations</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">to_records</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">annotations</span></div>
-            
+
+
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="n">parser</span><span class="p">(</span><span class="n">databases_dir</span><span class="o">=</span><span class="s1">&#39;../../data/databases&#39;</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
 </pre></div>
 
            </div>

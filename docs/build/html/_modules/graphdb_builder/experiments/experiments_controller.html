@@ -90,6 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../intro/getting-started-with-requirements.html">Getting Started with some Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../intro/getting-started-with-neo4j.html">Getting Started with Neo4j</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../intro/getting-started-with-build.html">Getting Started with the CKG Build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/getting-started-with-windows.html">Getting started with Windows</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Getting started</span></p>
 <ul>
@@ -123,14 +124,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../advanced_features/visualization-plots.html">Visualization plots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../advanced_features/R-interface.html">Python - R interface</a></li>
 </ul>
-<p class="caption"><span class="caption-text">System Requirements</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../system_require/mac-os.html">Mac OS X requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../system_require/linux.html">Linux requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../system_require/windows.html">Windows requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../system_requirements.html">System Requirements</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../src.html">Clinical Knowledge Graph package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src.html">CKG package API Reference</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../MANIFEST.html">Credits</a></li>
@@ -219,8 +217,8 @@
             <span class="n">data</span> <span class="o">=</span> <span class="n">clinicalParser</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="n">projectId</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">ot</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
                 <span class="n">generate_graph_files</span><span class="p">(</span><span class="n">data</span><span class="p">[(</span><span class="n">dtype</span><span class="p">,</span> <span class="n">ot</span><span class="p">)],</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">projectId</span><span class="p">,</span> <span class="n">stats</span><span class="p">,</span> <span class="n">ot</span><span class="p">,</span> <span class="n">dataset_import_dir</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s2">&quot;proteomics&quot;</span> <span class="ow">or</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s2">&quot;interactomics&quot;</span><span class="p">:</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">proteomicsParser</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="n">projectId</span><span class="p">,</span> <span class="n">dataType</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s2">&quot;proteomics&quot;</span> <span class="ow">or</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s2">&quot;interactomics&quot;</span> <span class="ow">or</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s2">&quot;phosphoproteomics&quot;</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">proteomicsParser</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="n">projectId</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">ot</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
                 <span class="n">generate_graph_files</span><span class="p">(</span><span class="n">data</span><span class="p">[(</span><span class="n">dtype</span><span class="p">,</span> <span class="n">ot</span><span class="p">)],</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">projectId</span><span class="p">,</span> <span class="n">stats</span><span class="p">,</span> <span class="n">ot</span><span class="p">,</span> <span class="n">dataset_import_dir</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s2">&quot;wes&quot;</span><span class="p">:</span>
@@ -241,12 +239,12 @@
         <span class="n">outputfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dataset_import_dir</span><span class="p">,</span> <span class="n">projectId</span><span class="o">+</span><span class="s2">&quot;.tsv&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">outputfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dataset_import_dir</span><span class="p">,</span> <span class="n">projectId</span><span class="o">+</span><span class="s2">&quot;_&quot;</span><span class="o">+</span><span class="n">dataType</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">+</span><span class="s2">&quot;.tsv&quot;</span><span class="p">)</span>
-   
+
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outputfile</span><span class="p">,</span> <span class="n">ot</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">data</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path_or_buf</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span>
-            <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">quotechar</span><span class="o">=</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span>
-            <span class="n">line_terminator</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">escapechar</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">)</span>
-   
+                    <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">quotechar</span><span class="o">=</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span>
+                    <span class="n">line_terminator</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">escapechar</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">)</span>
+
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Experiment </span><span class="si">{}</span><span class="s2"> - Number of </span><span class="si">{}</span><span class="s2"> relationships: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">projectId</span><span class="p">,</span> <span class="n">dataType</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
     <span class="n">stats</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">builder_utils</span><span class="o">.</span><span class="n">buildStats</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;relationships&quot;</span><span class="p">,</span> <span class="n">dataType</span><span class="p">,</span> <span class="s2">&quot;Experiment&quot;</span><span class="p">,</span> <span class="n">outputfile</span><span class="p">))</span></div>
 

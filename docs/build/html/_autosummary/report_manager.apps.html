@@ -92,6 +92,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../intro/getting-started-with-requirements.html">Getting Started with some Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../intro/getting-started-with-neo4j.html">Getting Started with Neo4j</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../intro/getting-started-with-build.html">Getting Started with the CKG Build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/getting-started-with-windows.html">Getting started with Windows</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Getting started</span></p>
 <ul>
@@ -125,21 +126,18 @@
 <li class="toctree-l1"><a class="reference internal" href="../advanced_features/visualization-plots.html">Visualization plots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../advanced_features/R-interface.html">Python - R interface</a></li>
 </ul>
-<p class="caption"><span class="caption-text">System Requirements</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../system_require/mac-os.html">Mac OS X requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../system_require/linux.html">Linux requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../system_require/windows.html">Windows requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../system_requirements.html">System Requirements</a></li>
 </ul>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../src.html">Clinical Knowledge Graph package</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../src.html">CKG package API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="graphdb_connector.html">Graph Database Connector</a></li>
 <li class="toctree-l2"><a class="reference internal" href="graphdb_builder.html">Graph Database Builder</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="report_manager.html">Report Manager</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Report Dash Apps</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#basic-app">Basic App</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#data-upload-app">Data Upload App</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#data-upload">Data Upload</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-report_manager.apps.dataUpload">Data Upload</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#homepage-stats-app">HomePage Stats App</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-report_manager.apps.homepageStats">HomePage Stats</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#db-imports-stats-app">DB Imports Stats App</a></li>
@@ -159,7 +157,7 @@
 <li class="toctree-l3"><a class="reference internal" href="report_manager.html#module-report_manager.report">report.py</a></li>
 <li class="toctree-l3"><a class="reference internal" href="report_manager.html#module-report_manager.user">user.py</a></li>
 <li class="toctree-l3"><a class="reference internal" href="report_manager.html#module-report_manager.utils">utils.py</a></li>
-<li class="toctree-l3"><a class="reference internal" href="report_manager.html#worker-py">worker.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="report_manager.html#module-report_manager.worker">worker.py</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="analytics_core.html">Analytics Core</a></li>
@@ -218,7 +216,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-          <li><a href="../src.html">Clinical Knowledge Graph package</a> &raquo;</li>
+          <li><a href="../src.html">CKG package API Reference</a> &raquo;</li>
         
           <li><a href="report_manager.html">Report Manager</a> &raquo;</li>
         
@@ -249,8 +247,171 @@
 <div class="section" id="data-upload-app">
 <h2>Data Upload App<a class="headerlink" href="#data-upload-app" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="data-upload">
-<h2>Data Upload<a class="headerlink" href="#data-upload" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-report_manager.apps.dataUpload">
+<span id="data-upload"></span><h2>Data Upload<a class="headerlink" href="#module-report_manager.apps.dataUpload" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="report_manager.apps.dataUpload.get_data_upload_queries">
+<code class="sig-prename descclassname">report_manager.apps.dataUpload.</code><code class="sig-name descname">get_data_upload_queries</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/report_manager/apps/dataUpload.html#get_data_upload_queries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#report_manager.apps.dataUpload.get_data_upload_queries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the YAML file containing the queries relevant to parsing of clinical data and     returns a Python object (dict[dict]).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Nested dictionary.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="report_manager.apps.dataUpload.get_new_subject_identifier">
+<code class="sig-prename descclassname">report_manager.apps.dataUpload.</code><code class="sig-name descname">get_new_subject_identifier</code><span class="sig-paren">(</span><em class="sig-param">driver</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/report_manager/apps/dataUpload.html#get_new_subject_identifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#report_manager.apps.dataUpload.get_new_subject_identifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Queries the database for the last subject identifier and returns a new sequential identifier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>driver</strong> (<em>py2neo driver</em>) – py2neo driver, which provides the connection to the neo4j graph database.</p></li>
+<li><p><strong>projectId</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – external project identifier (from the graph database).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Subject identifier.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="report_manager.apps.dataUpload.get_new_biosample_identifier">
+<code class="sig-prename descclassname">report_manager.apps.dataUpload.</code><code class="sig-name descname">get_new_biosample_identifier</code><span class="sig-paren">(</span><em class="sig-param">driver</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/report_manager/apps/dataUpload.html#get_new_biosample_identifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#report_manager.apps.dataUpload.get_new_biosample_identifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Queries the database for the last biological sample internal identifier and returns a new sequential identifier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>driver</strong> – py2neo driver, which provides the connection to the neo4j graph database.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Biological sample identifier.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="report_manager.apps.dataUpload.get_new_analytical_sample_identifier">
+<code class="sig-prename descclassname">report_manager.apps.dataUpload.</code><code class="sig-name descname">get_new_analytical_sample_identifier</code><span class="sig-paren">(</span><em class="sig-param">driver</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/report_manager/apps/dataUpload.html#get_new_analytical_sample_identifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#report_manager.apps.dataUpload.get_new_analytical_sample_identifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Queries the database for the last analytical sample internal identifier and returns a new sequential identifier.
+:param driver: py2neo driver, which provides the connection to the neo4j graph database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Analytical sample identifier.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="report_manager.apps.dataUpload.get_subjects_enrolled_in_project">
+<code class="sig-prename descclassname">report_manager.apps.dataUpload.</code><code class="sig-name descname">get_subjects_enrolled_in_project</code><span class="sig-paren">(</span><em class="sig-param">driver</em>, <em class="sig-param">projectId</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/report_manager/apps/dataUpload.html#get_subjects_enrolled_in_project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#report_manager.apps.dataUpload.get_subjects_enrolled_in_project" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extracts the number of subjects included in a given project.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>driver</strong> (<em>py2neo driver</em>) – py2neo driver, which provides the connection to the neo4j graph database.</p></li>
+<li><p><strong>projectId</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – external project identifier (from the graph database).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Number of subjects.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Numpy ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="report_manager.apps.dataUpload.check_samples_in_project">
+<code class="sig-prename descclassname">report_manager.apps.dataUpload.</code><code class="sig-name descname">check_samples_in_project</code><span class="sig-paren">(</span><em class="sig-param">driver</em>, <em class="sig-param">projectId</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/report_manager/apps/dataUpload.html#check_samples_in_project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#report_manager.apps.dataUpload.check_samples_in_project" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="report_manager.apps.dataUpload.check_external_ids_in_db">
+<code class="sig-prename descclassname">report_manager.apps.dataUpload.</code><code class="sig-name descname">check_external_ids_in_db</code><span class="sig-paren">(</span><em class="sig-param">driver</em>, <em class="sig-param">projectId</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/report_manager/apps/dataUpload.html#check_external_ids_in_db"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#report_manager.apps.dataUpload.check_external_ids_in_db" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="report_manager.apps.dataUpload.remove_samples_nodes_db">
+<code class="sig-prename descclassname">report_manager.apps.dataUpload.</code><code class="sig-name descname">remove_samples_nodes_db</code><span class="sig-paren">(</span><em class="sig-param">driver</em>, <em class="sig-param">projectId</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/report_manager/apps/dataUpload.html#remove_samples_nodes_db"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#report_manager.apps.dataUpload.remove_samples_nodes_db" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="report_manager.apps.dataUpload.create_new_subjects">
+<code class="sig-prename descclassname">report_manager.apps.dataUpload.</code><code class="sig-name descname">create_new_subjects</code><span class="sig-paren">(</span><em class="sig-param">driver</em>, <em class="sig-param">data</em>, <em class="sig-param">projectId</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/report_manager/apps/dataUpload.html#create_new_subjects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#report_manager.apps.dataUpload.create_new_subjects" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>driver</strong> – py2neo driver, which provides the connection to the neo4j graph database.</p></li>
+<li><p><strong>data</strong> – pandas Dataframe with clinical data as columns and samples as rows.</p></li>
+<li><p><strong>projectId</strong> (<em>string</em>) – project identifier.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Pandas DataFrame where new biological sample internal identifiers have been added.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="report_manager.apps.dataUpload.create_new_biosamples">
+<code class="sig-prename descclassname">report_manager.apps.dataUpload.</code><code class="sig-name descname">create_new_biosamples</code><span class="sig-paren">(</span><em class="sig-param">driver</em>, <em class="sig-param">data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/report_manager/apps/dataUpload.html#create_new_biosamples"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#report_manager.apps.dataUpload.create_new_biosamples" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>driver</strong> – py2neo driver, which provides the connection to the neo4j graph database.</p></li>
+<li><p><strong>data</strong> – pandas Dataframe with clinical data as columns and samples as rows.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Pandas DataFrame where new biological sample internal identifiers have been added.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="report_manager.apps.dataUpload.create_new_ansamples">
+<code class="sig-prename descclassname">report_manager.apps.dataUpload.</code><code class="sig-name descname">create_new_ansamples</code><span class="sig-paren">(</span><em class="sig-param">driver</em>, <em class="sig-param">data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/report_manager/apps/dataUpload.html#create_new_ansamples"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#report_manager.apps.dataUpload.create_new_ansamples" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>driver</strong> – py2neo driver, which provides the connection to the neo4j graph database.</p></li>
+<li><p><strong>data</strong> – pandas Dataframe with clinical data as columns and samples as rows.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Pandas DataFrame where new analytical sample internal identifiers have been added.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="report_manager.apps.dataUpload.create_experiment_internal_identifiers">
+<code class="sig-prename descclassname">report_manager.apps.dataUpload.</code><code class="sig-name descname">create_experiment_internal_identifiers</code><span class="sig-paren">(</span><em class="sig-param">driver</em>, <em class="sig-param">projectId</em>, <em class="sig-param">data</em>, <em class="sig-param">directory</em>, <em class="sig-param">filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/report_manager/apps/dataUpload.html#create_experiment_internal_identifiers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#report_manager.apps.dataUpload.create_experiment_internal_identifiers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="report_manager.apps.dataUpload.create_mapping_cols_clinical">
+<code class="sig-prename descclassname">report_manager.apps.dataUpload.</code><code class="sig-name descname">create_mapping_cols_clinical</code><span class="sig-paren">(</span><em class="sig-param">driver</em>, <em class="sig-param">data</em>, <em class="sig-param">directory</em>, <em class="sig-param">filename</em>, <em class="sig-param">separator='|'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/report_manager/apps/dataUpload.html#create_mapping_cols_clinical"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#report_manager.apps.dataUpload.create_mapping_cols_clinical" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>driver</strong> (<em>py2neo driver</em>) – py2neo driver, which provides the connection to the neo4j graph database.</p></li>
+<li><p><strong>data</strong> – pandas Dataframe with clinical data as columns and samples as rows.</p></li>
+<li><p><strong>separator</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – character used to separate multiple entries in an attribute.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Pandas Dataframe with all clinical data and graph database internal identifiers.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="homepage-stats-app">
 <h2>HomePage Stats App<a class="headerlink" href="#homepage-stats-app" title="Permalink to this headline">¶</a></h2>

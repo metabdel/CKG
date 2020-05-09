@@ -90,6 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../intro/getting-started-with-requirements.html">Getting Started with some Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../intro/getting-started-with-neo4j.html">Getting Started with Neo4j</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../intro/getting-started-with-build.html">Getting Started with the CKG Build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/getting-started-with-windows.html">Getting started with Windows</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Getting started</span></p>
 <ul>
@@ -123,14 +124,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../advanced_features/visualization-plots.html">Visualization plots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../advanced_features/R-interface.html">Python - R interface</a></li>
 </ul>
-<p class="caption"><span class="caption-text">System Requirements</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../system_require/mac-os.html">Mac OS X requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../system_require/linux.html">Linux requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../system_require/windows.html">Windows requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../system_requirements.html">System Requirements</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../src.html">Clinical Knowledge Graph package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../src.html">CKG package API Reference</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../MANIFEST.html">Credits</a></li>
@@ -204,7 +202,6 @@
 <span></span><span class="kn">import</span> <span class="nn">os.path</span>
 <span class="kn">import</span> <span class="nn">gzip</span>
 <span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">import</span> <span class="nn">ckg_utils</span>
 <span class="kn">from</span> <span class="nn">graphdb_builder</span> <span class="k">import</span> <span class="n">mapping</span> <span class="k">as</span> <span class="n">mp</span><span class="p">,</span> <span class="n">builder_utils</span>
 
 <span class="c1">#############################################</span>
@@ -217,11 +214,11 @@
 
     <span class="n">output_file</span> <span class="o">=</span> <span class="s1">&#39;sider_has_side_effect.tsv&#39;</span>
 
-    <span class="n">drugmapping</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">getSTRINGMapping</span><span class="p">(</span><span class="n">source</span> <span class="o">=</span> <span class="n">drug_source</span><span class="p">,</span> <span class="n">download</span> <span class="o">=</span> <span class="n">download</span><span class="p">,</span> <span class="n">db</span> <span class="o">=</span> <span class="s2">&quot;STITCH&quot;</span><span class="p">)</span>
-    <span class="n">phenotypemapping</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">getMappingFromOntology</span><span class="p">(</span><span class="n">ontology</span><span class="o">=</span><span class="s2">&quot;Phenotype&quot;</span><span class="p">,</span> <span class="n">source</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;SIDER_source&#39;</span><span class="p">])</span>
-    
+    <span class="n">drugmapping</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">getSTRINGMapping</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">drug_source</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="n">download</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="s2">&quot;STITCH&quot;</span><span class="p">)</span>
+    <span class="n">phenotypemapping</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">getMappingFromOntology</span><span class="p">(</span><span class="n">ontology</span><span class="o">=</span><span class="s2">&quot;Phenotype&quot;</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;SIDER_source&#39;</span><span class="p">])</span>
+
     <span class="n">relationships</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-    <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">databases_directory</span><span class="p">,</span><span class="s2">&quot;SIDER&quot;</span><span class="p">)</span>
+    <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">databases_directory</span><span class="p">,</span> <span class="s2">&quot;SIDER&quot;</span><span class="p">)</span>
     <span class="n">builder_utils</span><span class="o">.</span><span class="n">checkDirectory</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
     <span class="n">fileName</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
     <span class="k">if</span> <span class="n">download</span><span class="p">:</span>
@@ -241,6 +238,8 @@
                 <span class="n">relationships</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">d</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="s2">&quot;HAS_SIDE_EFFECT&quot;</span><span class="p">,</span> <span class="s2">&quot;SIDER&quot;</span><span class="p">,</span> <span class="n">se</span><span class="p">,</span> <span class="n">evidence_from</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">lower_bound</span><span class="p">,</span> <span class="n">upper_bound</span><span class="p">))</span>
     <span class="n">associations</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
+    <span class="n">builder_utils</span><span class="o">.</span><span class="n">remove_directory</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="p">(</span><span class="n">relationships</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">output_file</span><span class="p">,</span> <span class="n">drugmapping</span><span class="p">,</span> <span class="n">phenotypemapping</span><span class="p">)</span></div>
 
 
@@ -251,7 +250,7 @@
     <span class="n">output_file</span> <span class="o">=</span> <span class="s1">&#39;sider_is_indicated_for.tsv&#39;</span>
 
     <span class="n">relationships</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-    <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">databases_directory</span><span class="p">,</span><span class="s2">&quot;SIDER&quot;</span><span class="p">)</span>
+    <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">databases_directory</span><span class="p">,</span> <span class="s2">&quot;SIDER&quot;</span><span class="p">)</span>
     <span class="n">builder_utils</span><span class="o">.</span><span class="n">checkDirectory</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
     <span class="n">fileName</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
     <span class="k">if</span> <span class="n">download</span><span class="p">:</span>
@@ -266,9 +265,11 @@
             <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">drugMapping</span><span class="p">[</span><span class="n">drug</span><span class="p">]:</span>
                 <span class="n">p</span> <span class="o">=</span> <span class="n">phenotypeMapping</span><span class="p">[</span><span class="n">se</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
                 <span class="n">relationships</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">d</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="s2">&quot;IS_INDICATED_FOR&quot;</span><span class="p">,</span> <span class="n">evidence</span><span class="p">,</span> <span class="s2">&quot;SIDER&quot;</span><span class="p">,</span> <span class="n">se</span><span class="p">))</span>
-    
+
     <span class="n">associations</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-    
+
+    <span class="n">builder_utils</span><span class="o">.</span><span class="n">remove_directory</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="p">(</span><span class="n">relationships</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">output_file</span><span class="p">)</span></div>
 </pre></div>
 

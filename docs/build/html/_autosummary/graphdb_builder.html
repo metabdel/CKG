@@ -92,6 +92,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../intro/getting-started-with-requirements.html">Getting Started with some Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../intro/getting-started-with-neo4j.html">Getting Started with Neo4j</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../intro/getting-started-with-build.html">Getting Started with the CKG Build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/getting-started-with-windows.html">Getting started with Windows</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Getting started</span></p>
 <ul>
@@ -125,14 +126,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../advanced_features/visualization-plots.html">Visualization plots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../advanced_features/R-interface.html">Python - R interface</a></li>
 </ul>
-<p class="caption"><span class="caption-text">System Requirements</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../system_require/mac-os.html">Mac OS X requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../system_require/linux.html">Linux requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../system_require/windows.html">Windows requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../system_requirements.html">System Requirements</a></li>
 </ul>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../src.html">Clinical Knowledge Graph package</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../src.html">CKG package API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="graphdb_connector.html">Graph Database Connector</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Graph Database Builder</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="graphdb_builder.ontologies.html">Ontology Databases</a></li>
@@ -201,7 +199,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-          <li><a href="../src.html">Clinical Knowledge Graph package</a> &raquo;</li>
+          <li><a href="../src.html">CKG package API Reference</a> &raquo;</li>
         
       <li>Graph Database Builder</li>
     
@@ -392,6 +390,24 @@
 </dd></dl>
 
 <dl class="function">
+<dt id="graphdb_builder.builder_utils.expand_cols">
+<code class="sig-prename descclassname">graphdb_builder.builder_utils.</code><code class="sig-name descname">expand_cols</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">col</em>, <em class="sig-param">sep=';'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/builder_utils.html#expand_cols"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.builder_utils.expand_cols" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expands the rows of a dataframe by splitting the specified column</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – dataframe to be expanded</p></li>
+<li><p><strong>col</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – column that contains string to be expanded (i.e. ‘P02788;E7EQB2;E7ER44;P02788-2;C9JCF5’)</p></li>
+<li><p><strong>sep</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – separator (i.e. ‘;’)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>expanded pandas dataframe</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
 <dt id="graphdb_builder.builder_utils.setup_config">
 <code class="sig-prename descclassname">graphdb_builder.builder_utils.</code><code class="sig-name descname">setup_config</code><span class="sig-paren">(</span><em class="sig-param">data_type='databases'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/builder_utils.html#setup_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.builder_utils.setup_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads YAML configuration file and converts it into a Python dictionary.</p>
@@ -579,7 +595,7 @@
 <dd><p>Code from: <a class="reference external" href="https://gist.github.com/shaxbee/0ada767debf9eefbdb6e">https://gist.github.com/shaxbee/0ada767debf9eefbdb6e</a>
 Acknowledgements: Zbigniew Mandziejewicz (shaxbee)
 Generator flattening the structure</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">flatten</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="mi">4</span><span class="p">]],</span> <span class="mi">6</span><span class="p">)]]))</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">flatten</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="mi">4</span><span class="p">]],</span> <span class="mi">6</span><span class="p">)]]))</span>
 <span class="go">[2, 2, 4, 5, 7, 2, 6, 2, 6, 6, 4, 6]</span>
 </pre></div>
 </div>
@@ -784,6 +800,11 @@ to dictionary with aliases as keys and ontology identifiers as values.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="function">
+<dt id="graphdb_builder.mapping.getMappingFromDatabase">
+<code class="sig-prename descclassname">graphdb_builder.mapping.</code><code class="sig-name descname">getMappingFromDatabase</code><span class="sig-paren">(</span><em class="sig-param">id_list</em>, <em class="sig-param">node</em>, <em class="sig-param">attribute_from='id'</em>, <em class="sig-param">attribute_to='name'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/graphdb_builder/mapping.html#getMappingFromDatabase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#graphdb_builder.mapping.getMappingFromDatabase" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="function">
 <dt id="graphdb_builder.mapping.getMappingForEntity">

@@ -1,9 +1,11 @@
+.. _Getting Started with Neo4j:
+
 Getting Started with Neo4j
 ============================
 
 Getting started with Neo4j is easy.
 
-First download a copy of the Neo4j desktop version from the `Neo4j download page <https://neo4j.com/download/>`_.
+First download a copy of the Neo4j desktop version from the `Neo4j download page <https://neo4j.com/download/>`__.
 The Community Edition of the software is free but a sign up is required.
 Once the file has downloaded, you can install Neo4j by following the instructions automatically opened in the browser.
 
@@ -14,7 +16,7 @@ Once the file has downloaded, you can install Neo4j by following the instruction
 .. image:: ../_static/images/neo4j_app3.png
     :width: 32%
 
-Open the Neo4j Desktop App and create a database by clicking "Add graph", followed by "Create a Local Graph", using the password "bioinfo1112".
+Open the Neo4j Desktop App and create a database by clicking :guilabel:`Add graph`, followed by :guilabel:`Create a Local Graph`, using the password "bioinfo1112".
 Now that your database is created:
 
 .. image:: ../_static/images/neo4j_app4.png

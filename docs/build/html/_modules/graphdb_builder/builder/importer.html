@@ -90,6 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../intro/getting-started-with-requirements.html">Getting Started with some Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../intro/getting-started-with-neo4j.html">Getting Started with Neo4j</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../intro/getting-started-with-build.html">Getting Started with the CKG Build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro/getting-started-with-windows.html">Getting started with Windows</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Getting started</span></p>
 <ul>
@@ -123,14 +124,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../advanced_features/visualization-plots.html">Visualization plots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../advanced_features/R-interface.html">Python - R interface</a></li>
 </ul>
-<p class="caption"><span class="caption-text">System Requirements</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../system_require/mac-os.html">Mac OS X requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../system_require/linux.html">Linux requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../system_require/windows.html">Windows requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../system_requirements.html">System Requirements</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../src.html">Clinical Knowledge Graph package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../src.html">CKG package API Reference</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../MANIFEST.html">Credits</a></li>
@@ -246,7 +244,7 @@
 <span class="sd">    Generates all the entities and relationships from the provided ontologies. If the ontologies list is\</span>
 <span class="sd">    not provided, then all the ontologies listed in the configuration will be imported (full_import). \</span>
 <span class="sd">    This function also updates the stats object with numbers from the imported ontologies.</span>
-<span class="sd">    </span>
+
 <span class="sd">    :param str importDirectory: path of the import directory where files will be created.</span>
 <span class="sd">    :param list ontologies: a list of ontology names to be imported.</span>
 <span class="sd">    :param bool download: wether database is to be downloaded.</span>
@@ -258,6 +256,7 @@
     <span class="n">statsDf</span> <span class="o">=</span> <span class="n">generateStatsDataFrame</span><span class="p">(</span><span class="n">stats</span><span class="p">)</span>
     <span class="n">setupStats</span><span class="p">(</span><span class="n">import_type</span><span class="o">=</span><span class="n">import_type</span><span class="p">)</span>
     <span class="n">writeStats</span><span class="p">(</span><span class="n">statsDf</span><span class="p">,</span> <span class="n">import_type</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="databasesImport"><a class="viewcode-back" href="../../../_autosummary/graphdb_builder.builder.html#graphdb_builder.builder.importer.databasesImport">[docs]</a><span class="k">def</span> <span class="nf">databasesImport</span><span class="p">(</span><span class="n">importDirectory</span><span class="p">,</span> <span class="n">databases</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">import_type</span><span class="o">=</span><span class="s2">&quot;partial&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -277,12 +276,13 @@
     <span class="n">setupStats</span><span class="p">(</span><span class="n">import_type</span><span class="o">=</span><span class="n">import_type</span><span class="p">)</span>
     <span class="n">writeStats</span><span class="p">(</span><span class="n">statsDf</span><span class="p">,</span> <span class="n">import_type</span><span class="p">)</span></div>
 
+
 <div class="viewcode-block" id="experimentsImport"><a class="viewcode-back" href="../../../_autosummary/graphdb_builder.builder.html#graphdb_builder.builder.importer.experimentsImport">[docs]</a><span class="k">def</span> <span class="nf">experimentsImport</span><span class="p">(</span><span class="n">projects</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">import_type</span><span class="o">=</span><span class="s2">&quot;partial&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates all the entities and relationships from the specified Projects. If the projects list is\</span>
 <span class="sd">    not provided, then all the projects the experiments directory will be imported (full_import). \</span>
 <span class="sd">    Calls function experimentImport.</span>
-<span class="sd">    </span>
+
 <span class="sd">    :param list projects:  list of project identifiers to be imported.</span>
 <span class="sd">    :param int n_jobs: number of jobs to run in parallel. 1 by default when updating one project.</span>
 <span class="sd">    :param str import_type: type of import (´full´ or ´partial´).</span>
@@ -299,7 +299,7 @@
 <div class="viewcode-block" id="experimentImport"><a class="viewcode-back" href="../../../_autosummary/graphdb_builder.builder.html#graphdb_builder.builder.importer.experimentImport">[docs]</a><span class="k">def</span> <span class="nf">experimentImport</span><span class="p">(</span><span class="n">importDirectory</span><span class="p">,</span> <span class="n">experimentsDirectory</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates all the entities and relationships from the specified Project. Called from function experimentsImport.</span>
-<span class="sd">    </span>
+
 <span class="sd">    :param str importDirectory: path to the directory where all the import files are generated.</span>
 <span class="sd">    :param str experimentDirectory: path to the directory where all the experiments are located.</span>
 <span class="sd">    :param str project: identifier of the project to be imported.</span>
@@ -320,7 +320,7 @@
 <span class="sd">    Generates User entities from excel file and grants access of new users to the database.</span>
 <span class="sd">    This function also writes the relevant information to a tab-delimited file in the import \</span>
 <span class="sd">    directory.</span>
-<span class="sd">    </span>
+
 <span class="sd">    :param str importDirectory: path to the directory where all the import files are generated.</span>
 <span class="sd">    :param str import_type: type of import (´full´ or ´partial).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -404,7 +404,7 @@
 <div class="viewcode-block" id="createEmptyStats"><a class="viewcode-back" href="../../../_autosummary/graphdb_builder.builder.html#graphdb_builder.builder.importer.createEmptyStats">[docs]</a><span class="k">def</span> <span class="nf">createEmptyStats</span><span class="p">(</span><span class="n">statsCols</span><span class="p">,</span> <span class="n">statsFile</span><span class="p">,</span> <span class="n">statsName</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a HDFStore object with a empty dataframe with the collected stats columns.</span>
-<span class="sd">    </span>
+
 <span class="sd">    :param list statsCols: a list of columns with the fields collected from the import statistics.</span>
 <span class="sd">    :param str statsFile: path where the object should be stored.</span>
 <span class="sd">    :param str statsName: name if the file containing the stats object.</span>
@@ -412,7 +412,7 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">statsDf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">statsCols</span><span class="p">)</span>
         <span class="k">with</span> <span class="n">pd</span><span class="o">.</span><span class="n">HDFStore</span><span class="p">(</span><span class="n">statsFile</span><span class="p">)</span> <span class="k">as</span> <span class="n">hdf</span><span class="p">:</span>
-            <span class="n">hdf</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">statsName</span><span class="p">,</span> <span class="n">statsDf</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;table&#39;</span><span class="p">,</span> <span class="n">data_columns</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">min_itemsize</span><span class="o">=</span><span class="mi">2000</span><span class="p">)</span>
+            <span class="n">hdf</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">statsName</span><span class="p">,</span> <span class="n">statsDf</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;table&#39;</span><span class="p">,</span> <span class="n">data_columns</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="n">hdf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Creating empty Stats object </span><span class="si">{}</span><span class="s2"> in file:</span><span class="si">{}</span><span class="s2"> &gt; </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">statsName</span><span class="p">,</span> <span class="n">statsFile</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span></div>
@@ -447,7 +447,7 @@
         <span class="k">if</span> <span class="n">stats_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">stats_name</span> <span class="o">=</span> <span class="n">getStatsName</span><span class="p">(</span><span class="n">import_type</span><span class="p">)</span>
         <span class="k">with</span> <span class="n">pd</span><span class="o">.</span><span class="n">HDFStore</span><span class="p">(</span><span class="n">stats_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">hdf</span><span class="p">:</span>
-            <span class="n">hdf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stats_name</span><span class="p">,</span> <span class="n">statsDf</span><span class="p">,</span> <span class="n">data_columns</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">hdf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stats_name</span><span class="p">,</span> <span class="n">statsDf</span><span class="p">,</span> <span class="n">data_columns</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">min_itemsize</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">})</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Writing Stats object </span><span class="si">{}</span><span class="s2"> in file:</span><span class="si">{}</span><span class="s2"> &gt; </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">stats_name</span><span class="p">,</span> <span class="n">stats_file</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span></div>
 
@@ -456,7 +456,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates the stats object name where to store the importing statistics from the CKG version, \</span>
 <span class="sd">    which is defined in the configuration.</span>
-<span class="sd">    </span>
+
 <span class="sd">    :return: statsName: key used to store in the stats object.</span>
 <span class="sd">    :rtype: str</span>
 <span class="sd">    &quot;&quot;&quot;</span>

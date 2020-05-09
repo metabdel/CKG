@@ -4,7 +4,7 @@ Connecting to the Clinical Knowledge Graph database
 In order to make use of the CKG database you just built, we need to connect to it and be able to query for data.
 This connection is established via one of Neo4j's Python drivers ``Py2neo``, a library and comprehensive toolkit developed to enable working with Neo4j from within Python applications, and should already be installed in your virtual environment.
 
-Another essential tool when working with Neo4j databases, is the `Cypher query language <https://neo4j.com/developer/cypher-query-language/>`_. We recommend becoming familiar with it, to understand the queries used in the different analyses.
+Another essential tool when working with Neo4j databases, is the `Cypher query language <https://neo4j.com/developer/cypher-query-language/>`__. We recommend becoming familiar with it, to understand the queries used in the different analyses.
 
 
 Py2neo connector

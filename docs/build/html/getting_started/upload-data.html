@@ -92,6 +92,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../intro/getting-started-with-requirements.html">Getting Started with some Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../intro/getting-started-with-neo4j.html">Getting Started with Neo4j</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../intro/getting-started-with-build.html">Getting Started with the CKG Build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/getting-started-with-windows.html">Getting started with Windows</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Getting started</span></p>
 <ul class="current">
@@ -105,7 +106,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#proteomics-data">Proteomics data</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#upload">Upload data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#upload">Upload Data</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="data-analysis-config.html">Define data analysis parameters</a></li>
@@ -134,14 +135,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../advanced_features/visualization-plots.html">Visualization plots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../advanced_features/R-interface.html">Python - R interface</a></li>
 </ul>
-<p class="caption"><span class="caption-text">System Requirements</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../system_require/mac-os.html">Mac OS X requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../system_require/linux.html">Linux requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../system_require/windows.html">Windows requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../system_requirements.html">System Requirements</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../src.html">Clinical Knowledge Graph package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../src.html">CKG package API Reference</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../MANIFEST.html">Credits</a></li>
@@ -213,9 +211,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <p id="upload-data">NOT FINISHED!!!!f</p>
-<div class="section" id="upload-project-experimental-data">
-<h1>Upload project experimental data<a class="headerlink" href="#upload-project-experimental-data" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="upload-project-experimental-data">
+<span id="upload-data"></span><h1>Upload project experimental data<a class="headerlink" href="#upload-project-experimental-data" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="prepare-data-for-upload">
 <h2>Prepare data for upload<a class="headerlink" href="#prepare-data-for-upload" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="experimental-design">
@@ -333,11 +330,11 @@ sample id</p></th>
 </table>
 <p>As shown in the example table, if your experimental design is a timecourse experiment, you should add “_” followed by the timepoint, right after the analytical sample identifier. Otherwise, you can omit it.</p>
 <p>Do not perform any post-processing filtering, imputations or similar on your data before uploading it. This will be carried out by the CKG. In the case of Spectronaut outputs, the missing values are automatically replaced by the keyword “Filtered”.</p>
-<p>You can proceed to <a class="reference internal" href="#upload"><span class="std std-ref">Upload data</span></a> when you have prepared your experimental design file, clinical and proteomics data.</p>
+<p>You can proceed to <a class="reference internal" href="#upload"><span class="std std-ref">Upload Data</span></a> when you have prepared your experimental design file, clinical and proteomics data.</p>
 </div>
 </div>
 <div class="section" id="upload">
-<span id="id2"></span><h2>Upload data<a class="headerlink" href="#upload" title="Permalink to this headline">¶</a></h2>
+<span id="id2"></span><h2>Upload Data<a class="headerlink" href="#upload" title="Permalink to this headline">¶</a></h2>
 <div class="figure align-center" id="id5">
 <a class="reference internal image-reference" href="../_images/data_upload_app.png"><img alt="../_images/data_upload_app.png" src="../_images/data_upload_app.png" style="width: 70%;" /></a>
 <p class="caption"><span class="caption-text">Data Upload App</span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>

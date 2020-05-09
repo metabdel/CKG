@@ -1,4 +1,4 @@
-Clinical Knowledge Graph package
+CKG package API Reference
 ================================
 
 .. autosummary::

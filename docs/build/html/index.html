@@ -91,6 +91,7 @@
 <li class="toctree-l1"><a class="reference internal" href="intro/getting-started-with-requirements.html">Getting Started with some Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="intro/getting-started-with-neo4j.html">Getting Started with Neo4j</a></li>
 <li class="toctree-l1"><a class="reference internal" href="intro/getting-started-with-build.html">Getting Started with the CKG Build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro/getting-started-with-windows.html">Getting started with Windows</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Getting started</span></p>
 <ul>
@@ -124,14 +125,11 @@
 <li class="toctree-l1"><a class="reference internal" href="advanced_features/visualization-plots.html">Visualization plots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="advanced_features/R-interface.html">Python - R interface</a></li>
 </ul>
-<p class="caption"><span class="caption-text">System Requirements</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="system_require/mac-os.html">Mac OS X requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="system_require/linux.html">Linux requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="system_require/windows.html">Windows requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="system_requirements.html">System Requirements</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="src.html">Clinical Knowledge Graph package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src.html">CKG package API Reference</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="MANIFEST.html">Credits</a></li>
@@ -212,6 +210,7 @@
 <li class="toctree-l2"><a class="reference internal" href="INTRO.html#abstract">Abstract</a></li>
 <li class="toctree-l2"><a class="reference internal" href="INTRO.html#cloning-and-installing">Cloning and installing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="INTRO.html#features">Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="INTRO.html#disclaimer">Disclaimer</a></li>
 </ul>
 </li>
 </ul>
@@ -224,7 +223,8 @@ all the possibilities.</p>
 <li><p><strong>Getting started</strong>:
 <a class="reference internal" href="intro/getting-started-with-requirements.html"><span class="doc">With Requirements</span></a> |
 <a class="reference internal" href="intro/getting-started-with-neo4j.html"><span class="doc">With Neo4j</span></a> |
-<a class="reference internal" href="intro/getting-started-with-build.html"><span class="doc">With Clinical Knowledge Graph</span></a></p></li>
+<a class="reference internal" href="intro/getting-started-with-build.html"><span class="doc">With Clinical Knowledge Graph</span></a> |
+<a class="reference internal" href="intro/getting-started-with-windows.html"><span class="doc">With Windows</span></a></p></li>
 </ul>
 <div class="toctree-wrapper compound">
 </div>
@@ -297,23 +297,23 @@ all the possibilities.</p>
 </div>
 </div>
 <div class="section" id="system-requirements">
-<h2>System requirements<a class="headerlink" href="#system-requirements" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><p><strong>Mac OS X</strong>:
-<a class="reference internal" href="system_require/mac-os.html"><span class="doc">Requirements</span></a></p></li>
-<li><p><strong>Linux</strong>:
-<a class="reference internal" href="system_require/linux.html"><span class="doc">Requirements</span></a></p></li>
-<li><p><strong>Windows</strong>:
-<a class="reference internal" href="system_require/windows.html"><span class="doc">Requirements</span></a></p></li>
-</ul>
+<h2>System Requirements<a class="headerlink" href="#system-requirements" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="system_requirements.html">System Requirements</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="system_requirements.html#data">Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="system_requirements.html#software">Software</a></li>
+<li class="toctree-l2"><a class="reference internal" href="system_requirements.html#hardware">Hardware</a></li>
+</ul>
+</li>
+</ul>
 </div>
 </div>
 <div class="section" id="api-reference">
 <h2>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="src.html">Clinical Knowledge Graph package</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="src.html">CKG package API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="_autosummary/graphdb_connector.html">Graph Database Connector</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/graphdb_connector.html#module-graphdb_connector.connector">connector.py</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/graphdb_connector.html#module-graphdb_connector.query_utils">query_utils.py</a></li>
@@ -339,7 +339,7 @@ all the possibilities.</p>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/report_manager.html#module-report_manager.report">report.py</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/report_manager.html#module-report_manager.user">user.py</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/report_manager.html#module-report_manager.utils">utils.py</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/report_manager.html#worker-py">worker.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/report_manager.html#module-report_manager.worker">worker.py</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="_autosummary/analytics_core.html">Analytics Core</a><ul>

@@ -90,6 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../intro/getting-started-with-requirements.html">Getting Started with some Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../intro/getting-started-with-neo4j.html">Getting Started with Neo4j</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../intro/getting-started-with-build.html">Getting Started with the CKG Build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/getting-started-with-windows.html">Getting started with Windows</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Getting started</span></p>
 <ul>
@@ -123,14 +124,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../advanced_features/visualization-plots.html">Visualization plots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../advanced_features/R-interface.html">Python - R interface</a></li>
 </ul>
-<p class="caption"><span class="caption-text">System Requirements</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../system_require/mac-os.html">Mac OS X requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../system_require/linux.html">Linux requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../system_require/windows.html">Windows requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../system_requirements.html">System Requirements</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../src.html">Clinical Knowledge Graph package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../src.html">CKG package API Reference</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../MANIFEST.html">Credits</a></li>
@@ -201,7 +199,9 @@
            <div itemprop="articleBody">
             
   <h1>Source code for graphdb_builder.ontologies.parsers.icdParser</h1><div class="highlight"><pre>
-<span></span><span class="c1">#########################</span>
+<span></span><span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+
+<span class="c1">#########################</span>
 <span class="c1"># Diagnose entity - ICD # </span>
 <span class="c1">#########################</span>
 <div class="viewcode-block" id="parser"><a class="viewcode-back" href="../../../../_autosummary/graphdb_builder.ontologies.parsers.html#graphdb_builder.ontologies.parsers.icdParser.parser">[docs]</a><span class="k">def</span> <span class="nf">parser</span><span class="p">(</span><span class="n">ICDfile</span><span class="p">):</span>
@@ -241,17 +241,17 @@
             <span class="n">definitions</span><span class="p">[</span><span class="n">chapId</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;chapter&quot;</span>
             <span class="n">terms</span><span class="p">[</span><span class="n">blockId</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
             <span class="n">definitions</span><span class="p">[</span><span class="n">blockId</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;block&quot;</span>
-            
+
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">icdCode</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
                 <span class="n">order</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">icdCode</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
                 <span class="n">i</span> <span class="o">=</span> <span class="mi">3</span>
-                <span class="k">while</span> <span class="n">i</span><span class="o">&lt;=</span><span class="n">order</span><span class="p">:</span>
+                <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">order</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">icdCode</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
                         <span class="n">relationships</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">icdCode</span><span class="p">,</span> <span class="n">icdCode</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">i</span><span class="p">],</span> <span class="s2">&quot;HAS_PARENT&quot;</span><span class="p">))</span>
                         <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
-    
-            <span class="n">relationships</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">icdCode</span><span class="p">,</span><span class="n">chapId</span><span class="p">,</span> <span class="s2">&quot;HAS_PARENT&quot;</span><span class="p">))</span>
-            <span class="n">relationships</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">icdCode</span><span class="p">,</span><span class="n">blockId</span><span class="p">,</span> <span class="s2">&quot;HAS_PARENT&quot;</span><span class="p">))</span>
+
+            <span class="n">relationships</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">icdCode</span><span class="p">,</span> <span class="n">chapId</span><span class="p">,</span> <span class="s2">&quot;HAS_PARENT&quot;</span><span class="p">))</span>
+            <span class="n">relationships</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">icdCode</span><span class="p">,</span> <span class="n">blockId</span><span class="p">,</span> <span class="s2">&quot;HAS_PARENT&quot;</span><span class="p">))</span>
             <span class="n">relationships</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">blockId</span><span class="p">,</span> <span class="n">chapId</span><span class="p">,</span> <span class="s2">&quot;HAS_PARENT&quot;</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">terms</span><span class="p">,</span> <span class="n">relationships</span><span class="p">,</span> <span class="n">definitions</span></div>

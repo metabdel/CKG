@@ -23,7 +23,8 @@ all the possibilities.
 * **Getting started**:
   :doc:`With Requirements <intro/getting-started-with-requirements>` |
   :doc:`With Neo4j <intro/getting-started-with-neo4j>` |
-  :doc:`With Clinical Knowledge Graph <intro/getting-started-with-build>`
+  :doc:`With Clinical Knowledge Graph <intro/getting-started-with-build>` |
+  :doc:`With Windows <intro/getting-started-with-windows>`
 
 
 .. toctree::
@@ -34,6 +35,7 @@ all the possibilities.
    intro/getting-started-with-requirements
    intro/getting-started-with-neo4j
    intro/getting-started-with-build
+   intro/getting-started-with-windows
 
 
 Getting started 
@@ -158,27 +160,14 @@ Advanced featues
    advanced_features/R-interface
 
 
-System requirements
--------------------
-
-* **Mac OS X**:
-  :doc:`Requirements <system_require/mac-os>`
-
-* **Linux**:
-  :doc:`Requirements <system_require/linux>`
-
-* **Windows**:
-  :doc:`Requirements <system_require/windows>`
-
+System Requirements
+---------------------
 
 .. toctree::
    :maxdepth: 2
-   :hidden:
-   :caption: System Requirements
 
-   system_require/mac-os
-   system_require/linux
-   system_require/windows
+   system_requirements
+
 
 
 API Reference

@@ -92,6 +92,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../intro/getting-started-with-requirements.html">Getting Started with some Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../intro/getting-started-with-neo4j.html">Getting Started with Neo4j</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../intro/getting-started-with-build.html">Getting Started with the CKG Build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/getting-started-with-windows.html">Getting started with Windows</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Getting started</span></p>
 <ul>
@@ -125,14 +126,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../advanced_features/visualization-plots.html">Visualization plots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../advanced_features/R-interface.html">Python - R interface</a></li>
 </ul>
-<p class="caption"><span class="caption-text">System Requirements</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../system_require/mac-os.html">Mac OS X requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../system_require/linux.html">Linux requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../system_require/windows.html">Windows requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../system_requirements.html">System Requirements</a></li>
 </ul>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../src.html">Clinical Knowledge Graph package</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../src.html">CKG package API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="graphdb_connector.html">Graph Database Connector</a></li>
 <li class="toctree-l2"><a class="reference internal" href="graphdb_builder.html">Graph Database Builder</a></li>
 <li class="toctree-l2"><a class="reference internal" href="report_manager.html">Report Manager</a></li>
@@ -205,7 +203,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-          <li><a href="../src.html">Clinical Knowledge Graph package</a> &raquo;</li>
+          <li><a href="../src.html">CKG package API Reference</a> &raquo;</li>
         
           <li><a href="analytics_core.html">Analytics Core</a> &raquo;</li>
         
@@ -320,6 +318,39 @@ For more information visit <a class="reference external" href="https://dash.plot
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="analytics_core.viz.viz.get_boxplot_grid">
+<code class="sig-prename descclassname">analytics_core.viz.viz.</code><code class="sig-name descname">get_boxplot_grid</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">identifier</em>, <em class="sig-param">args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/viz/viz.html#get_boxplot_grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.viz.viz.get_boxplot_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function plots a boxplot in a grid based on column values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – pandas DataFrame with columns: ‘x’ values and ‘y’ values to plot, ‘color’ and ‘facet’ (color and facet can be the same).</p></li>
+<li><p><strong>identifier</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#str" title="(in Python v3.5)"><em>str</em></a>) – id used to identify the div where the figure will be generated.</p></li>
+<li><p><strong>args</strong> (<a class="reference external" href="https://docs.python.org/3.5/library/stdtypes.html#dict" title="(in Python v3.5)"><em>dict</em></a>) – see below.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Arguments</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>title</strong> (str) – plot title.</p></li>
+<li><p><strong>x</strong> (str) – name of column with x values.</p></li>
+<li><p><strong>y</strong> (str) – name of column with y values.</p></li>
+<li><p><strong>color</strong> (str) – name of column with colors</p></li>
+<li><p><strong>facet</strong> (str) – name of column specifying grouping</p></li>
+<li><p><strong>height</strong> (str) – plot height.</p></li>
+<li><p><strong>width</strong> (str) – plot width.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>boxplot figure within the &lt;div id=”_dash-app-content”&gt;.</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">get_boxplot_grid</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">identifier</span><span class="o">=</span><span class="s1">&#39;Boxplot&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">:{</span><span class="s2">&quot;Title&quot;</span><span class="p">:</span><span class="s2">&quot;Boxplot&quot;</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span><span class="s1">&#39;sample&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="s1">&#39;identifier&#39;</span><span class="p">,</span> <span class="s1">&#39;color&#39;</span><span class="p">:</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="s1">&#39;facet&#39;</span><span class="p">:</span><span class="s1">&#39;qc_class&#39;</span><span class="p">,</span> <span class="s1">&#39;axis&#39;</span><span class="p">:</span><span class="s1">&#39;cols&#39;</span><span class="p">})</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="function">
@@ -452,11 +483,6 @@ to form panels along the columns to segment the data even further, forming a bun
 </pre></div>
 </div>
 </dd></dl>
-
-<dl class="function">
-<dt id="analytics_core.viz.viz.get_scatterplot_matrix_old">
-<code class="sig-prename descclassname">analytics_core.viz.viz.</code><code class="sig-name descname">get_scatterplot_matrix_old</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">identifier</em>, <em class="sig-param">args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/viz/viz.html#get_scatterplot_matrix_old"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.viz.viz.get_scatterplot_matrix_old" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="function">
 <dt id="analytics_core.viz.viz.get_simple_scatterplot">
@@ -620,8 +646,8 @@ to form panels along the columns to segment the data even further, forming a bun
 </dd></dl>
 
 <dl class="function">
-<dt id="analytics_core.viz.viz.get_complex_heatmapplot_old">
-<code class="sig-prename descclassname">analytics_core.viz.viz.</code><code class="sig-name descname">get_complex_heatmapplot_old</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">identifier</em>, <em class="sig-param">args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/viz/viz.html#get_complex_heatmapplot_old"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.viz.viz.get_complex_heatmapplot_old" title="Permalink to this definition">¶</a></dt>
+<dt id="analytics_core.viz.viz.get_complex_heatmapplot">
+<code class="sig-prename descclassname">analytics_core.viz.viz.</code><code class="sig-name descname">get_complex_heatmapplot</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">identifier</em>, <em class="sig-param">args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/analytics_core/viz/viz.html#get_complex_heatmapplot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analytics_core.viz.viz.get_complex_heatmapplot" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">

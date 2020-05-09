@@ -92,6 +92,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../intro/getting-started-with-requirements.html">Getting Started with some Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../intro/getting-started-with-neo4j.html">Getting Started with Neo4j</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../intro/getting-started-with-build.html">Getting Started with the CKG Build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/getting-started-with-windows.html">Getting started with Windows</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Getting started</span></p>
 <ul class="current">
@@ -128,14 +129,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../advanced_features/visualization-plots.html">Visualization plots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../advanced_features/R-interface.html">Python - R interface</a></li>
 </ul>
-<p class="caption"><span class="caption-text">System Requirements</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../system_require/mac-os.html">Mac OS X requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../system_require/linux.html">Linux requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../system_require/windows.html">Windows requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../system_requirements.html">System Requirements</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../src.html">Clinical Knowledge Graph package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../src.html">CKG package API Reference</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../MANIFEST.html">Credits</a></li>
@@ -234,7 +232,15 @@ To create a project, please follow the steps below.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>If redis-server is not found, install with <code class="docutils literal notranslate"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">redis</span></code> (Mac) or <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt-get</span> <span class="pre">install</span> <span class="pre">redis-server</span></code> (Linux)</p>
+<p>If redis-server is not found, install with <code class="docutils literal notranslate"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">redis</span></code> (Mac) or <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt-get</span> <span class="pre">install</span> <span class="pre">redis-server</span></code> (Linux).</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>On Windows, redis-server should be installed by default (to check, go to start menu &gt; services.msc &gt; Redis). If that is not the case, go to <code class="docutils literal notranslate"><span class="pre">https://github.com/microsoftarchive/redis/releases</span></code>, download the latest release installer (.msi file), and follow the installation instructions. Let all options as default but remember to select <strong>Add the Redis installation folder to the PATH environment variable.</strong>. To start a redis-server, make sure it is <strong>not running in ``services.msc``</strong>, and run in the command prompt: C:”Program Files”Redisredis-server</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">C:\&quot;Program</span> <span class="pre">Files&quot;</span></code> can be replaced with the correct path where you installed Redis from the installer (.msi file).</p>
 </div>
 <ol class="arabic simple" start="2">
 <li><p>In two separate terminal windows:</p></li>
@@ -302,7 +308,7 @@ The page will refresh and once finished, the project identifier will be depicted
 <p class="caption"><span class="caption-text">Experimental Design file example</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
 </div>
 <p>Fill in the <code class="docutils literal notranslate"><span class="pre">ExperimentalDesign_Pxxxxxxx.xlsx</span></code> file with your subject, biological sample and analytical sample identifiers. Please double-check they are correct, this information is essential to map the results correctly in the database.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">ClinicalData_Pxxxxxxx.xlsx</span></code> file needs to be filled in with all the relevant clinical data and sample information. For more instructions on how to fill in the file, please see <span class="xref std std-ref">Upload Data</span>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">ClinicalData_Pxxxxxxx.xlsx</span></code> file needs to be filled in with all the relevant clinical data and sample information. For more instructions on how to fill in the file, please see <a class="reference internal" href="upload-data.html#upload-data"><span class="std std-ref">Upload project experimental data</span></a>.</p>
 <p>To check your project in the neo4j database interface:</p>
 <blockquote>
 <div><ul class="simple">

@@ -90,6 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../intro/getting-started-with-requirements.html">Getting Started with some Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../intro/getting-started-with-neo4j.html">Getting Started with Neo4j</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../intro/getting-started-with-build.html">Getting Started with the CKG Build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro/getting-started-with-windows.html">Getting started with Windows</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Getting started</span></p>
 <ul>
@@ -123,14 +124,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../advanced_features/visualization-plots.html">Visualization plots</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../advanced_features/R-interface.html">Python - R interface</a></li>
 </ul>
-<p class="caption"><span class="caption-text">System Requirements</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../system_require/mac-os.html">Mac OS X requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../system_require/linux.html">Linux requirements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../system_require/windows.html">Windows requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../system_requirements.html">System Requirements</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../src.html">Clinical Knowledge Graph package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../src.html">CKG package API Reference</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../MANIFEST.html">Credits</a></li>
@@ -218,7 +216,7 @@
     <span class="n">organisms</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;organisms&#39;</span><span class="p">])</span>
     <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">databases_directory</span><span class="p">,</span> <span class="s2">&quot;Jensenlab&quot;</span><span class="p">)</span>
     <span class="n">builder_utils</span><span class="o">.</span><span class="n">checkDirectory</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;textmining&quot;</span><span class="p">))</span>
-        
+
     <span class="k">if</span> <span class="n">download</span><span class="p">:</span>
         <span class="n">builder_utils</span><span class="o">.</span><span class="n">downloadDB</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;FILE&quot;</span><span class="p">,</span> <span class="n">ifile</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;textmining&quot;</span><span class="p">))</span>
 
@@ -229,9 +227,11 @@
     <span class="n">outputfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">importDirectory</span><span class="p">,</span> <span class="n">outputfileName</span><span class="p">)</span>
     <span class="n">builder_utils</span><span class="o">.</span><span class="n">write_entities</span><span class="p">(</span><span class="n">entities</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">outputfile</span><span class="p">)</span>
     <span class="n">entities</span> <span class="o">=</span> <span class="kc">None</span>
-    
+
     <span class="k">for</span> <span class="n">qtype</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;db_mentions_types&#39;</span><span class="p">]:</span>
         <span class="n">parse_mentions</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">qtype</span><span class="p">,</span> <span class="n">importDirectory</span><span class="p">,</span> <span class="n">download</span><span class="p">)</span>
+
+    <span class="n">builder_utils</span><span class="o">.</span><span class="n">remove_directory</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;textmining&quot;</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="n">num_entities</span><span class="p">,</span> <span class="n">outputfile</span><span class="p">)</span></div>
 
@@ -251,17 +251,17 @@
     <span class="n">plinkout</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;pubmed_linkout&#39;</span><span class="p">]</span>
     <span class="n">entities</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="n">fileName</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-    
+
     <span class="k">if</span> <span class="n">download</span><span class="p">:</span>
         <span class="n">builder_utils</span><span class="o">.</span><span class="n">downloadDB</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">directory</span><span class="p">)</span>
-        
+
     <span class="n">entities</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">,</span> <span class="n">low_memory</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">entities</span> <span class="o">=</span> <span class="n">entities</span><span class="p">[</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;PMC_fields&#39;</span><span class="p">]]</span>
     <span class="n">entities</span> <span class="o">=</span> <span class="n">entities</span><span class="p">[</span><span class="n">entities</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">notnull</span><span class="p">()]</span>
     <span class="n">entities</span> <span class="o">=</span> <span class="n">entities</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">entities</span><span class="o">.</span><span class="n">columns</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
     <span class="k">if</span> <span class="n">valid_pubs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">entities</span> <span class="o">=</span> <span class="n">entities</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">valid_pubs</span><span class="p">]</span>
-    
+
     <span class="n">entities</span><span class="p">[</span><span class="s1">&#39;linkout&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">plinkout</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;PUBMEDID&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">pubmedid</span><span class="p">)))</span> <span class="k">for</span> <span class="n">pubmedid</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">entities</span><span class="o">.</span><span class="n">index</span><span class="p">)]</span>
     <span class="n">entities</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ID&#39;</span><span class="p">]</span>
     <span class="n">entities</span><span class="p">[</span><span class="s1">&#39;TYPE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Publication&#39;</span>
@@ -269,7 +269,7 @@
     <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;ID&#39;</span><span class="p">,</span> <span class="s1">&#39;TYPE&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">entities</span><span class="o">.</span><span class="n">columns</span><span class="p">)]</span>
     <span class="n">entities</span> <span class="o">=</span> <span class="n">entities</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">entities</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">entities</span><span class="o">.</span><span class="n">itertuples</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
-    
+
     <span class="k">return</span> <span class="n">entities</span><span class="p">,</span> <span class="n">header</span></div>
 
 
@@ -280,13 +280,13 @@
         <span class="n">mapping</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">getSTRINGMapping</span><span class="p">(</span><span class="n">download</span><span class="o">=</span><span class="n">download</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">qtype</span> <span class="o">==</span> <span class="s2">&quot;-1&quot;</span><span class="p">:</span>
         <span class="n">mapping</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">getSTRINGMapping</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;db_sources&#39;</span><span class="p">][</span><span class="s2">&quot;Drug&quot;</span><span class="p">],</span> <span class="n">download</span><span class="o">=</span><span class="n">download</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="s2">&quot;STITCH&quot;</span><span class="p">)</span>
-    
+
     <span class="n">filters</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="n">qtype</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;db_mentions_filters&#39;</span><span class="p">]:</span>
         <span class="n">filters</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;db_mentions_filters&#39;</span><span class="p">][</span><span class="n">qtype</span><span class="p">]</span>
     <span class="n">entity1</span><span class="p">,</span> <span class="n">entity2</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;db_mentions_types&#39;</span><span class="p">][</span><span class="n">qtype</span><span class="p">]</span>
     <span class="n">outputfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">importDirectory</span><span class="p">,</span> <span class="n">entity1</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">entity2</span> <span class="o">+</span> <span class="s2">&quot;_mentioned_in_publication.tsv&quot;</span><span class="p">)</span>
-    
+
     <span class="k">if</span> <span class="n">download</span><span class="p">:</span>
         <span class="n">builder_utils</span><span class="o">.</span><span class="n">downloadDB</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;FILE&quot;</span><span class="p">,</span> <span class="n">ifile</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;textmining&quot;</span><span class="p">))</span>
     <span class="n">ifile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;textmining&quot;</span><span class="p">,</span> <span class="n">ifile</span><span class="p">))</span>
@@ -310,14 +310,14 @@
                         <span class="n">ident</span> <span class="o">=</span> <span class="p">[</span><span class="n">id1</span><span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">ident</span> <span class="o">=</span> <span class="p">[</span><span class="n">id1</span><span class="p">]</span>
-                
+
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ident</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">:</span>
                         <span class="n">aux</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Pubmedids&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">pubmedids</span><span class="p">)})</span>
                         <span class="n">aux</span><span class="p">[</span><span class="s2">&quot;START_ID&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
                         <span class="n">aux</span><span class="p">[</span><span class="s2">&quot;TYPE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;MENTIONED_IN_PUBLICATION&quot;</span>
                         <span class="n">aux</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path_or_buf</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">quotechar</span><span class="o">=</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="n">line_terminator</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">escapechar</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">)</span>
-                        <span class="n">aux</span> <span class="o">=</span> <span class="kc">None</span> </div>
+                        <span class="n">aux</span> <span class="o">=</span> <span class="kc">None</span></div>
 </pre></div>
 
            </div>

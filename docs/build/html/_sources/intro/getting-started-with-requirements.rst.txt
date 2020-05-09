@@ -2,13 +2,16 @@
 Getting Started with some Requirements
 ========================================
 
+The following instructions on installation of software requirements and setting up the Clinical Knowledge graph, are optimized for operating systems MacOS and Linux. For more detailed instructions on how to set up the CKG in Windows, pleaso go to :ref:`Windows installation`.
+
+
 Java
 -------
 
 Before starting setting up Neo4j and, later on, the Clinical Knowledge Graph, it is very important that you have *Java* installed in your machine.
 
 Different versions of a Neo4j database can have different requirements. For example, Neo4j 3.5 versions require Oracle Java 8, while Neo4j 4.0 versions already require Oracle Java 11.
-When using a new versionof Neo4j, always remember to read the respective Operations Manual, and check for the software requirements.
+When using a new version of Neo4j, always remember to read the respective Operations Manual, and check for the software requirements.
 
 To check if you already have **Java SE Development Kit** installed, run ``java -version`` in your terminal window. This should print out three lines similar to the following, with possible variation in the version:
 
@@ -54,7 +57,7 @@ To install the neccessary R packages, simply initiate R (terminal or shell) and 
 	install.packages(c('flashClust','WGCNA', 'samr'), dependencies=TRUE, repos='http://cran.rstudio.com/')
 
 
-.. note:: If you need to install R, follow `these <https://web.stanford.edu/~kjytay/courses/stats32-aut2018/Session%201/Installation%20for%20Mac.html>`_ tutorial.
+.. note:: If you need to install R, follow `these <https://web.stanford.edu/~kjytay/courses/stats32-aut2018/Session%201/Installation%20for%20Mac.html>`__ tutorial.
 
 .. warning:: In Mac OS, make sure you have **XQuartz** installed.
 
