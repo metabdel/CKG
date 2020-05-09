@@ -412,6 +412,7 @@ class ProteomicsDataset(Dataset):
                 extra_identifier = None
                 shift = 1.8
                 nstd = 0.3
+                knn_cutoff = 0.6
                 args = {}
                 if "args" in self.configuration:
                     args = self.configuration["args"]
@@ -435,11 +436,13 @@ class ProteomicsDataset(Dataset):
                         nstd = args["missing_nstd"]
                     if "missing_shift" in args:
                         shift = args["missing_shift"]
+                    if "knn_cutoff" in args:
+                        knn_cutoff = args["knn_cutoff"]
 
                 processed_data = analytics.get_proteomics_measurements_ready(data, index_cols=index, imputation=imputation,
                                                                              method=method, missing_method=missing_method, extra_identifier=extra_identifier,
                                                                              missing_per_group=missing_per_group, missing_max=missing_max,
-                                                                             min_valid=min_valid, shift=shift, nstd=nstd, value_col=value_col)
+                                                                             min_valid=min_valid, shift=shift, nstd=nstd, value_col=value_col, knn_cutoff=knn_cutoff)
         return processed_data
 
     def generate_knowledge(self):
@@ -543,6 +546,7 @@ class ClinicalDataset(Dataset):
         return kn
 
 
+#ToDO
 class DNAseqDataset(Dataset):
     def __init__(self, identifier, dataset_type, data={}, configuration=None, analyses={}, analysis_queries={}, report=None):
 
@@ -554,7 +558,7 @@ class DNAseqDataset(Dataset):
     def generate_dataset(self):
         self._data = self.query_data()
 
-
+#ToDO
 class RNAseqDataset(Dataset):
     def __init__(self, identifier, data={}, configuration=None, analyses={}, analysis_queries={}, report=None):
 
