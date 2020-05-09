@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Connecting to the Clinical Knowledge Graph database" href="../getting_started/connect-to-ckg.html" />
+    <link rel="next" title="Getting started with Windows" href="getting-started-with-windows.html" />
     <link rel="prev" title="Getting Started with Neo4j" href="getting-started-with-neo4j.html" /> 
 </head>
 
@@ -103,6 +103,7 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started-with-windows.html">Getting started with Windows</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Getting started</span></p>
 <ul>
@@ -284,7 +285,7 @@ Assuming you have <strong>Python 3.6</strong> already installed and added to <co
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ git clone https://github.com/MannLabs/CKG.git
 </pre></div>
 </div>
-<p>Once this is finished, you can find all the Python modules neccessary to run the Clinical Knowledge graph in <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code>.
+<p>Once this is finished, you can find all the Python modules necessary to run the Clinical Knowledge Graph in <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code>.
 To install all the packages required, simply run:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ <span class="nb">cd</span> CKG/
 $ pip install -r requirements.txt
@@ -299,8 +300,7 @@ $ pip install -r requirements.txt
 $ python setup_config_files.py
 </pre></div>
 </div>
-<p>This will automatically create the <code class="docutils literal notranslate"><span class="pre">data</span></code> folder and all subfolders, as well as setup the configuration for the log files where
-all errors and warnings related to the code will be written to.</p>
+<p>This will automatically create the <code class="docutils literal notranslate"><span class="pre">data</span></code> folder and all subfolders, as well as setup the configuration for the log files where all errors and warnings related to the code will be written to.</p>
 </div>
 <div class="section" id="add-ckg-to-bashrc">
 <h2>Add CKG to <em>.bashrc</em><a class="headerlink" href="#add-ckg-to-bashrc" title="Permalink to this headline">¶</a></h2>
@@ -322,25 +322,25 @@ $ <span class="nb">source</span> ~/.bashrc
 $ <span class="nb">source</span> path/to/env_name/bin/activate
 </pre></div>
 </div>
-<div class="figure align-right" id="id4">
+<div class="figure align-right" id="id2">
 <a class="reference internal image-reference" href="../_images/snomed_folder.png"><img alt="../_images/snomed_folder.png" src="../_images/snomed_folder.png" style="width: 240px;" /></a>
-<p class="caption"><span class="caption-text">SNOMED-CT ontology folder.</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+<p class="caption"><span class="caption-text">SNOMED-CT ontology folder.</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
 </div>
 </div>
 <div class="section" id="build-neo4j-graph-database">
 <span id="id1"></span><h2>Build Neo4j graph database<a class="headerlink" href="#build-neo4j-graph-database" title="Permalink to this headline">¶</a></h2>
 <p>The building of the CKG database is thoroughly automated. Most of the biomedical databases and ontology files will automatically be downloaded during building of the database. However, the following licensed databases have to be downloaded manually.</p>
-<div class="figure align-right" id="id5">
+<div class="figure align-right" id="id3">
 <a class="reference internal image-reference" href="../_images/drugbank_folder.png"><img alt="../_images/drugbank_folder.png" src="../_images/drugbank_folder.png" style="width: 240px;" /></a>
-<p class="caption"><span class="caption-text">DrugBank database folder.</span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
+<p class="caption"><span class="caption-text">DrugBank database folder.</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
 </div>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.phosphosite.org/staticDownloads">PhosphoSitePlus</a>: <em>Acetylation_site_dataset.gz</em>, <em>Disease-associated_sites.gz</em>, <em>Kinase_Substrate_Dataset.gz</em>, <em>Methylation_site_dataset.gz</em>, <em>O-GalNAc_site_dataset.gz</em>, <em>O-GlcNAc_site_dataset.gz</em>, <em>Phosphorylation_site_dataset.gz</em>, <em>Regulatory_sites.gz</em>, <em>Sumoylation_site_dataset.gz</em> and <em>Ubiquitination_site_dataset.gz</em>.</p></li>
 <li><p><a class="reference external" href="https://www.drugbank.ca/releases/latest">DrugBank</a>: <em>All drugs</em> (under <em>COMPLETE DATABASE</em>) and <em>DrugBank Vocabulary</em> (under <em>OPEN DATA</em>).</p></li>
 </ul>
-<div class="figure align-right" id="id6">
+<div class="figure align-right" id="id4">
 <a class="reference internal image-reference" href="../_images/psp_folder.png"><img alt="../_images/psp_folder.png" src="../_images/psp_folder.png" style="width: 240px;" /></a>
-<p class="caption"><span class="caption-text">PhosphoSitePlus database folder.</span><a class="headerlink" href="#id6" title="Permalink to this image">¶</a></p>
+<p class="caption"><span class="caption-text">PhosphoSitePlus database folder.</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
 </div>
 <ul class="simple">
 <li><p><a class="reference external" href="https://www.nlm.nih.gov/healthit/snomedct/international.html">SNOMED-CT</a>: <em>Download RF2 Files Now!</em>.</p></li>
@@ -397,7 +397,7 @@ $ sudo chown -R username data/databases/graph.db/
 </pre></div>
 </div>
 <p>Once you are done, start the database and you will have a functional graph database.</p>
-<p>However, be aware the database contained in the dump file <a href="#id2"><span class="problematic" id="id3">:underline:`does NOT`</span></a> include the licensed databases (<strong>PhosphoSitePlus</strong>, <strong>DrugBank</strong> and <strong>SNOMED-CT</strong>).</p>
+<p>However, be aware the database contained in the dump file <strong>does NOT</strong> include the licensed databases (<strong>PhosphoSitePlus</strong>, <strong>DrugBank</strong> and <strong>SNOMED-CT</strong>).</p>
 <p>To add the missing ontology and databases, as well as their dependencies (relationships to other nodes), please manually download the files as explained in <a class="reference internal" href="#build-neo4j-graph-database"><span class="std std-ref">Build Neo4j graph database</span></a>, and run the following commands:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ <span class="nb">cd</span> CKG/src/graphdb_builder/builder
 $ python builder.py -b import -i ontologies -d Clinical_variable -w False -u username
@@ -435,7 +435,7 @@ $ bin/neo4j-admin dump --database<span class="o">=</span>neo4j --to<span class="
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../getting_started/connect-to-ckg.html" class="btn btn-neutral float-right" title="Connecting to the Clinical Knowledge Graph database" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="getting-started-with-windows.html" class="btn btn-neutral float-right" title="Getting started with Windows" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="getting-started-with-neo4j.html" class="btn btn-neutral float-left" title="Getting Started with Neo4j" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

@@ -215,7 +215,7 @@ A dump file of the database is also made available in `add link to the dump file
 	$ mkdir backups
 	$ mkdir backups/graph.db
 	$ cp 2019-11-04.dump backups/graph.db/.
-	
+
 
 After copying the dump file to backups/graph.db/, make sure the graph database is shutdown and run:
 
@@ -235,7 +235,7 @@ In some systems you might have to run this as root:
 
 Once you are done, start the database and you will have a functional graph database.
 
-However, be aware the database contained in the dump file :underline:`does NOT` include the licensed databases (**PhosphoSitePlus**, **DrugBank** and **SNOMED-CT**).
+However, be aware the database contained in the dump file **does NOT** include the licensed databases (**PhosphoSitePlus**, **DrugBank** and **SNOMED-CT**).
 
 To add the missing ontology and databases, as well as their dependencies (relationships to other nodes), please manually download the files as explained in :ref:`Build Neo4j graph database`, and run the following commands:
 

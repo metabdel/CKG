@@ -1,4 +1,5 @@
 .. _Getting Started with Neo4j:
+
 Getting Started with Neo4j
 ============================
 

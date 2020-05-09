@@ -78,6 +78,7 @@ To check for errors, please go to tab :guilabel:`Logs`.
 
 
 .. _Add Neo4j graph database to environmental variables:
+
 Add Neo4j graph database to environmental variables
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -176,7 +177,7 @@ Unfortunately, due to incompatibilities of the current Anaconda version of the `
 To do so, open the mentioned file in your preferred text editor tool (e.g. Notepad) and remove the line ``rpy2==3.0.5``. Save and close the file, making sure it is saved as a plain text file.
 
 
-.. warning:: Part of the CKG functionality includes interfacing Python and R, and seemingly use R functions for data analysis. The python package ``rpy2``is used as this interface and unfortunately,  the current release of this package for Windows is not compatible with CKG. Installation of the CKG on Windows machines, will therefore **not** allow the usage of R packages (SAMR and WGCNA) within the CKG.
+.. warning:: Part of the CKG functionality includes interfacing Python and R, and seemingly use R functions for data analysis. The python package ``rpy2`` is used as this interface and unfortunately, the current release of this package for Windows is not compatible with CKG. Installation of the CKG on Windows machines, will therefore **not** allow the usage of R packages (SAMR and WGCNA) within the CKG.
 
 
 To install all the required packages, simply run:

@@ -11,7 +11,7 @@ Java
 Before starting setting up Neo4j and, later on, the Clinical Knowledge Graph, it is very important that you have *Java* installed in your machine.
 
 Different versions of a Neo4j database can have different requirements. For example, Neo4j 3.5 versions require Oracle Java 8, while Neo4j 4.0 versions already require Oracle Java 11.
-When using a new versionof Neo4j, always remember to read the respective Operations Manual, and check for the software requirements.
+When using a new version of Neo4j, always remember to read the respective Operations Manual, and check for the software requirements.
 
 To check if you already have **Java SE Development Kit** installed, run ``java -version`` in your terminal window. This should print out three lines similar to the following, with possible variation in the version:
 

@@ -1,7 +1,5 @@
 .. _Upload Data:
 
-NOT FINISHED!!!!f
-
 Upload project experimental data
 ==================================
 
@@ -121,7 +119,7 @@ You can proceed to :ref:`Upload` when you have prepared your experimental design
 
 .. _Upload:
 
-Upload data
+Upload Data
 -------------
 
 .. figure:: ../_static/images/data_upload_app.png
