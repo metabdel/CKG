@@ -70,7 +70,7 @@ graph:
     - drugs
     - food
     - known_variants
-    - clinical variants
+    - clinical_variants
     - pathology_expression
     - mentions
     - jensenlab

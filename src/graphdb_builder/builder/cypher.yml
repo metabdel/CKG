@@ -576,12 +576,12 @@ IMPORT_METABOLITE_DATA:
         MERGE (m)-[r:ASSOCIATED_WITH]->(t)
         RETURN COUNT(r) AS metabolite_associated_with_tissue;
         USING PERIODIC COMMIT 10000 
-        LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/RESOURCE_food_has_content.tsv" AS line
-        FIELDTERMINATOR '\t'
-        MATCH (m:Metabolite{id:line.START_ID})
-        MATCH (f:Food{id:line.END_ID}) 
-        MERGE (f)-[r:HAS_CONTENT]->(m)
-        RETURN COUNT(r) AS food_has_content;
+        #LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/RESOURCE_food_has_content.tsv" AS line
+        #FIELDTERMINATOR '\t'
+        #MATCH (m:Metabolite{id:line.START_ID})
+        #MATCH (f:Food{id:line.END_ID}) 
+        #MERGE (f)-[r:HAS_CONTENT]->(m)
+        #RETURN COUNT(r) AS food_has_content;
         
 IMPORT_FOOD_DATA:
     'name': 'import food data'
@@ -594,6 +594,13 @@ IMPORT_FOOD_DATA:
         MERGE (f:Food{id:line.ID})
         ON CREATE SET f.name=line.name,f.scientific_name=line.scientific_name,f.description=line.description,f.group=line.group,f.subgroup=line.subgroup,f.source=line.source
         RETURN COUNT(f) AS food;
+        USING PERIODIC COMMIT 10000
+        LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/RESOURCE_food_has_content.tsv" AS line
+        FIELDTERMINATOR '\t'
+        MATCH (f:Food{id:line.START_ID})
+        MATCH (m:Metabolite{id:line.END_ID}) 
+        MERGE (f)-[r:HAS_CONTENT{minimum:line.min,maximum:line.max,average:line.average,units:line.units,source:line.source}]->(m)
+        RETURN COUNT(r) AS food_has_content_metabolite;
 
 IMPORT_BIOMARKERS:
     'name': 'import protein biomarkers'
@@ -772,21 +779,21 @@ IMPORT_DATASETS:
             USING PERIODIC COMMIT 10000
             LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/PROJECTID_subject_had_intervention.tsv" AS line
             FIELDTERMINATOR '\t'
-            MATCH (:Project {id:'PROJECTID'})-[:HAS_ENROLLED]-(subject:Subject {external_id:line.START_ID})
+            MATCH (:Project {id:'PROJECTID'})-[:HAS_ENROLLED]->(subject:Subject {external_id:line.START_ID})
             MATCH (intervention:Clinical_variable {id:line.END_ID})
             MERGE (subject)-[r:HAD_INTERVENTION{type:line.type, in_combination:line.in_combination, response:line.response}]->(intervention)
             RETURN COUNT(r) AS interventions;
             USING PERIODIC COMMIT 10000 
             LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/PROJECTID_clinical_state.tsv" AS line 
             FIELDTERMINATOR '\t'
-            MATCH (:Project {id:'PROJECTID'})-[:HAS_ENROLLED]-(:Subject)-[:BELONGS_TO_SUBJECT]-(b:Biological_sample {external_id:line.START_ID})
+            MATCH (:Project {id:'PROJECTID'})-[:HAS_ENROLLED]->(:Subject)<-[:BELONGS_TO_SUBJECT]-(b:Biological_sample {external_id:line.START_ID})
             MATCH (c:Clinical_variable{id:line.END_ID}) 
             MERGE (b)-[r:HAS_CLINICAL_STATE{value:line.value}]->(c)
             RETURN COUNT(r) AS PROJECTID_biological_sample_has_clinical_state_clinical_variable;
             USING PERIODIC COMMIT 10000 
             LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/PROJECTID_clinical_quant.tsv" AS line 
             FIELDTERMINATOR '\t'
-            MATCH (:Project {id:'PROJECTID'})-[:HAS_ENROLLED]-(:Subject)-[:BELONGS_TO_SUBJECT]-(b:Biological_sample {external_id:line.START_ID})
+            MATCH (:Project {id:'PROJECTID'})-[:HAS_ENROLLED]->(:Subject)<-[:BELONGS_TO_SUBJECT]-(b:Biological_sample {external_id:line.START_ID})
             MATCH (c:Clinical_variable{id:line.END_ID}) 
             MERGE (b)-[r:HAS_QUANTIFIED_CLINICAL{value:toFloat(line.value)}]->(c)
             RETURN COUNT(r) AS PROJECTID_biological_sample_has_quantified_clinical_variable;
@@ -924,13 +931,13 @@ CREATE_SUBJECTS: &create_subject
         RETURN COUNT(r) AS PROJECTID_project_has_enrolled_subject;
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/PROJECTID_disease.tsv" AS line 
         FIELDTERMINATOR '\t'
-        MATCH (:Project {id:'PROJECTID'})-[:HAS_ENROLLED]-(s:Subject{external_id:line.START_ID})
+        MATCH (:Project {id:'PROJECTID'})-[:HAS_ENROLLED]->(s:Subject{external_id:line.START_ID})
         MATCH (d:Disease {id:line.END_ID}) 
         MERGE (s)-[r:HAS_DISEASE]->(d)
         RETURN COUNT(r) AS PROJECTID_subject_has_disease;
         LOAD CSV WITH HEADERS FROM "file:///IMPORTDIR/PROJECTID_experimental_factor.tsv" AS line 
         FIELDTERMINATOR '\t'
-        MATCH (:Project {id:'PROJECTID'})-[:HAS_ENROLLED]-(s:Subject{external_id:line.START_ID})
+        MATCH (:Project {id:'PROJECTID'})-[:HAS_ENROLLED]->(s:Subject{external_id:line.START_ID})
         MATCH (e:Experimental_factor {id:line.END_ID}) 
         MERGE (s)-[r:IS_A]->(e)
         RETURN COUNT(r) AS PROJECTID_subject_is_a_experimental_factor;

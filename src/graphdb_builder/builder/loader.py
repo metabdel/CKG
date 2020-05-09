@@ -210,7 +210,7 @@ def updateDB(driver, imports=None, specific=[]):
             elif i == "known_variants":
                 code = cypher_queries['IMPORT_KNOWN_VARIANT_DATA']['query']
                 queries = code.replace("IMPORTDIR", import_dir).split(';')[0:-1]
-            elif i == "clinical variants":
+            elif i == "clinical_variants":
                 code = cypher_queries['IMPORT_CLINICALLY_RELEVANT_VARIANT_DATA']['query']
                 for resource in config["clinical_variant_resources"]:
                     queries.extend(code.replace("IMPORTDIR", import_dir).replace("RESOURCE", resource.lower()).split(';')[0:-1])
