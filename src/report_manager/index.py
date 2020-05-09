@@ -624,7 +624,7 @@ def run_processing(n_clicks, project_id):
                         for col in intersections:
                             message += 'WARNING: Some {} identifiers were not matched:\n Matching: {}\n No information provided: {} \n Non-existing in the database: {}\n'.format(col, len(intersections[col]), ','.join(differences_in[col]), ','.join(differences_out[col]))
                 else:
-                    message = 'ERROR: Format of the Clinical Data file is not correct. Check template in the documentation.'
+                    message = 'ERROR: Format of the Clinical Data file is not correct. Check template in the documentation. Check columns: subject external_id, biological_sample external_id and analytical_sample external_id'
                     builder_utils.remove_directory(directory)
                     
                     return message, style, table
