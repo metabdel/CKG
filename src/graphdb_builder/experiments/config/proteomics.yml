@@ -42,6 +42,7 @@ ox : &var_ox
         - 'Amino acid'
     'sequenceCol': 'Sequence window'
     'geneCol': 'Gene names'
+    'combine': 'valueCol'
     'log': 'log2'
     'modId': 'MOD:00256'
     'mod_acronym': 'ox'
@@ -90,6 +91,7 @@ gly : &var_gly
     'sequenceCol': 'Sequence window'
     'geneCol': 'Gene names'
     'log': 'log2'
+    'combine': 'valueCol'
     'modId': 'MOD:00767'
     'mod_acronym': 'gly'
     'file': 'GlycationSites.txt'
@@ -136,6 +138,7 @@ p : &var_p
         - 'Amino acid'
     'sequenceCol': 'Sequence window'
     'geneCol': 'Gene names'
+    'combine': 'valueCol'
     'log': 'log2'
     'modId': 'MOD:00696'
     'mod_acronym': 'p'
@@ -147,6 +150,7 @@ maxquant :
             - 'Majority protein IDs'
             - 'Q-value'
             - 'Score'
+            - 'Razor + unique peptides'
             - 'id'
             - 'LFQ intensity \w+_AS\d+_?-?\d*'  #replicate_analytical_sample_timepoint
             - 'Intensity \w+_AS\d+_?-?\d*'
@@ -159,7 +163,7 @@ maxquant :
         'filters':
             - 'Reverse'
             - 'Only identified by site'
-            - Potential contaminant
+            - 'Potential contaminant'
         'proteinCol': 'Majority protein IDs'
         'contaminant_tag': 'CON__'
         'valueCol': 'LFQ intensity'
@@ -174,6 +178,7 @@ maxquant :
             'regex':
                 - 'Intensity'
         'log': 'log2'
+        'combine': 'regex'
         'file': 'proteinGroups.txt'
     'peptides':
         'columns':
@@ -209,6 +214,7 @@ maxquant :
             - 'End position'
         'type': 'tryptic peptide'
         'log': 'log2'
+        'combine': 'valueCol'
         'file': 'peptides.txt'
     'Oxydation(M)': *var_ox
     'Glycation': *var_gly
@@ -221,16 +227,16 @@ spectronaut :
             - 'PG.Qvalue'
             - 'is_razor'
             - 'id'
-            - '\w*_?AS\d+_?-?\d*\.PG\.Quantity'  #replicate_analytical_sample_timepoint
-            - '\w*_?AS\d+_?-?\d*\.PG\.NrOfStrippedSequencesMeasured'
-            - '\w*_?AS\d+_?-?\d*\.PG\.NrOfStrippedSequencesIdentified'
-            - '\w*_?AS\d+_?-?\d*\.PG\.NrOfPrecursorsIdentified'
-            - '\w*_?AS\d+_?-?\d*\.PG\.IsSingleHit'
-            - '\w*_?AS\d+_?-?\d*\.PG\.NrOfStrippedSequencesUsedForQuantification'
-            - '\w*_?AS\d+_?-?\d*\.PG\.NrOfModifiedSequencesUsedForQuantification'
-            - '\w*_?AS\d+_?-?\d*\.PG\.NrOfPrecursorsUsedForQuantification'
-            - '\w*_?AS\d+_?-?\d*\.PG\.MS1Quantity'
-            - '\w*_?AS\d+_?-?\d*\.PG\.MS2Quantity'
+            - '(.)+\.PG\.Quantity'  #replicate_analytical_sample_timepoint
+            - '(.)+\.PG\.NrOfStrippedSequencesMeasured'
+            - '(.)+\.PG\.NrOfStrippedSequencesIdentified'
+            - '(.)+\.PG\.NrOfPrecursorsIdentified'
+            - '(.)+\.PG\.IsSingleHit'
+            - '(.)+\.PG\.NrOfStrippedSequencesUsedForQuantification'
+            - '(.)+\.PG\.NrOfModifiedSequencesUsedForQuantification'
+            - '(.)+\.PG\.NrOfPrecursorsUsedForQuantification'
+            - '(.)+\.PG\.MS1Quantity'
+            - '(.)+\.PG\.MS2Quantity'
         'generated_columns':
             - 'is_razor'
             - 'id'
@@ -254,4 +260,5 @@ spectronaut :
                 - 'PG.MS1Quantity'
                 - 'PG.MS2Quantity'
         'log': 'log2'
+        'combine': 'valueCol'
         'file': '\w+\.xlsx'
