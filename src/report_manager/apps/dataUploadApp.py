@@ -57,7 +57,6 @@ class DataUploadApp(basicApp.BasicApp):
                                              n_clicks=0,
                                              className="button_link")],
                                       style={'width':'100%', 'padding-left': '87%', 'padding-right': '0%'})]),
-                                
                                 html.Div(children=html.A('Download Files(.zip)',
                                             id='data_download_link',
                                             href='',
@@ -66,6 +65,7 @@ class DataUploadApp(basicApp.BasicApp):
                                             className="button_link"),
                                          style={'width': '100%', 'padding-left': '87%', 'padding-right': '0%'}),
                                 html.Div(id='data-upload-result', children=[dcc.Markdown(id='upload-result')]),
-                                html.Hr()])]
+                                html.Hr()]),
+                  html.Div(id='project_table', children=[])]
 
         self.extend_layout(layout)

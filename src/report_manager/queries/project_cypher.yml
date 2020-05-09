@@ -88,6 +88,23 @@ overlap:
         RETURN algo.getNodeById(item1).name AS project1_name, algo.getNodeById(item2).name AS project2_name, 
         algo.getNodeById(item1).id AS from, algo.getNodeById(item2).id AS to, count1 AS project1_total, count2 AS project2_total, count1-intersection AS project1_unique, 
         count2-intersection AS project2_unique, intersection, similarity ORDER BY similarity DESC
+project_graph:
+    name: project graph
+    description: full graph for a project
+    involves_nodes:
+        - Project
+        - Biological_samples
+        - Anlytical_samples
+    involved_rels:
+        - HAS_ENROLLED
+        - BELONGS_TO_SUBJECT
+        - SPLITTED_INTO
+    query: >
+        MATCH (p:Project)-[:HAS_ENROLLED]->(s:Subject)<-[:BELONGS_TO_SUBJECT]-(b:Biological_sample)-[:SPLITTED_INTO]-(a:Analytical_sample)-[r:HAS_QUANTIFIED_PROTEIN]->(n:Protein)
+        WHERE p.id="PROJECTID"
+        WITH p.id AS project, COUNT(DISTINCT s.id) AS subjects, COUNT(DISTINCT b.id) AS biological_samples,
+        COUNT(DISTINCT a.id) AS analytical_samples, COUNT(DISTINCT r.proteinGroup) AS groups, COUNT(DISTINCT n.id) AS proteins
+        RETURN project, subjects, biological_samples, analytical_samples, groups, proteins;
 projects_subgraph:
     name: connected projects
     description: returns a subgraph for a list of projects

@@ -8,6 +8,7 @@ import ckg_utils
 from graphdb_connector import connector
 from graphdb_builder import builder_utils
 from graphdb_connector import query_utils
+from analytics_core.viz import viz
 
 log_config = ckg_config.graphdb_builder_log
 logger = builder_utils.setup_logging(log_config, key="data_upload")
@@ -168,6 +169,7 @@ def check_external_ids_in_db(driver, projectId):
 def remove_samples_nodes_db(driver, projectId):
     """
     """
+    result = None
     query_name = 'remove_project'
     query = ''
     try:
@@ -338,3 +340,24 @@ def create_mapping_cols_clinical(driver, data, directory, filename, separator='|
     data['disease id'] = data['disease'].map(disease_dict)
     data['tissue id'] = data['tissue'].map(tissue_dict)
     builder_utils.export_contents(data, directory, filename)
+    
+
+def get_project_information(driver, project_id):
+    query_name = 'project_graph'
+    res = pd.DataFrame()
+    try:
+        query = ''
+        parameters = {'project_id': project_id}
+        data_upload_cypher = get_data_upload_queries()
+        queries = data_upload_cypher[query_name]['query'].split(';')[:-1]
+        for query in queries:
+            res = connector.getCursorData(driver, query+';', parameters=parameters)
+    except Exception as err:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        logger.error("Error: {}. Creating analytical samples: Query name ({}) - Query ({}), error info: {}, file: {},line: {}".format(err, query_name, query, sys.exc_info(), fname, exc_tb.tb_lineno))
+
+    if not res.empty:
+        res = viz.get_table(res, identifier='new_project', title='Data Uploaded for Project {}'.format(project_id))
+
+    return res

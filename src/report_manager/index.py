@@ -103,7 +103,7 @@ def display_page(pathname):
                                       'right': '50px'}, {'display': 'none'})
         else:
             return ('404', {'display': 'block', 'position': 'absolute', 'right': '50px'}, {'display': 'none'})
-        
+
     return (None, None, {'display': 'none'})
 
 
@@ -389,7 +389,7 @@ def create_project(n_clicks, name, acronym, responsible, participant, datatype, 
         # Excel file is saved in folder with internal id name
         epoch = time.time()
         internal_id = "%s%d" % ("CP", epoch)
-        projectData.insert(loc=0, column='internal_id', value=internal_id)           
+        projectData.insert(loc=0, column='internal_id', value=internal_id)
         result = create_new_project.apply_async(args=[internal_id, projectData.to_json(), separator], task_id='project_creation_'+session_cookie+internal_id)
         result_output = result.get()
         if len(result_output) > 0:
@@ -527,13 +527,13 @@ def save_files_in_tmp(content, dataset, prot_tool, prot_file, projectid, uploade
             filename = config['file_design'].split('_')[0]+'_'+projectid+'.'+uploaded_file.split('.')[-1]
         elif dataset == 'clinical':
             filename = config['file_clinical'].split('_')[0]+'_'+projectid+'.'+uploaded_file.split('.')[-1]
-        
+
         if uploaded_file is None:
             content = None
         if content is not None:
             data = builder_utils.parse_contents(content, filename)
             builder_utils.export_contents(data, directory, filename)
-            
+
             uploaded = uploaded_file
             uploaded_file = None
             return uploaded, uploaded_file, '', ''
@@ -544,12 +544,14 @@ def save_files_in_tmp(content, dataset, prot_tool, prot_file, projectid, uploade
 
     
 @app.callback([Output('upload-result', 'children'),
-               Output('data_download_link', 'style')],
+               Output('data_download_link', 'style'),
+               Output('project_table', 'children')],
               [Input('submit_button', 'n_clicks'),
                Input('project_id', 'value')])
 def run_processing(n_clicks, project_id):
     message = None
     style = {'display':'none'}
+    table = None
     if n_clicks > 0:
         session_cookie = flask.request.cookies.get('custom-auth-session')
         destDir = os.path.join(experimentDir, project_id)
@@ -568,10 +570,16 @@ def run_processing(n_clicks, project_id):
                 if 'subject external_id' in designData.columns and 'biological_sample external_id' in designData.columns and 'analytical_sample external_id' in designData.columns:
                     if designData['analytical_sample external_id'].astype(str).str.contains('_', regex=False).any():
                         message = 'ERROR: The "analytical_sample external_id" provided are incorrect. Do not use special character "_"'
-                        return message, style
+                        return message, style, table
                     
                     if (res_n > 0).any().values.sum() > 0:
                         res = dataUpload.remove_samples_nodes_db(driver, project_id)
+                    
+                    if res is None:
+                        message = 'ERROR: There is already an experimental design loaded into the database and there was an error when trying to delete it. Contact your administrator.'.format(experimental_filename, ','.join(['subject external_id','biological_sample external_id','analytical_sample external_id']))
+                        
+                        return message, style, table
+                                            
                     res_n = None
                     result = create_new_identifiers.apply_async(args=[project_id, designData.to_json(), directory, experimental_filename], task_id='data_upload_'+session_cookie+datetime.now().strftime('%Y%m-%d%H-%M%S-'))
                     result_output = result.wait(timeout=None, propagate=True, interval=0.2)
@@ -580,7 +588,7 @@ def run_processing(n_clicks, project_id):
                     message = 'ERROR: The Experimental design file provided ({}) is missing some of the required fields: {}'.format(experimental_filename, ','.join(['subject external_id','biological_sample external_id','analytical_sample external_id']))
                     builder_utils.remove_directory(directory)
                     
-                    return message, style
+                    return message, style, table
 
         if 'clinical' in datasets:
             dataset = 'clinical'
@@ -600,7 +608,7 @@ def run_processing(n_clicks, project_id):
                         message = 'ERROR: No {} for project {} in the database. Please upload first the experimental design (ExperimentalDesign_{}.xlsx)'.format(samples, project_id, project_id)
                         builder_utils.remove_directory(directory)
 
-                        return message, style
+                        return message, style, table
                     else:
                         db_ids = dataUpload.check_external_ids_in_db(driver, project_id).to_dict()
                         message = ''
@@ -621,7 +629,7 @@ def run_processing(n_clicks, project_id):
                     message = 'ERROR: Format of the Clinical Data file is not correct. Check template in the documentation.'
                     builder_utils.remove_directory(directory)
                     
-                    return message, style
+                    return message, style, table
         try:
             for dataset in datasets:
                 source = os.path.join(temporaryDirectory, dataset)
@@ -636,11 +644,13 @@ def run_processing(n_clicks, project_id):
             utils.compress_directory(filename, temporaryDirectory, compression_format='zip')
             style = {'display':'block'}
             message = 'Files successfully uploaded.'
+            table = dataUpload.get_project_information(driver, project_id)
         except Exception as err:
             style = {'display':'block'}
             message = str(err)
-        
-    return message, style
+
+
+    return message, style, table
 
 @app.callback(Output('upload-result', 'style'),
               [Input('upload-result', 'children')])
@@ -667,7 +677,6 @@ def route_upload_url(value):
     page_id, project_id = value.split('_')
     directory = os.path.join(cwd,'../../data/tmp/')
     filename = os.path.join(directory, 'Uploaded_files_'+project_id)
-    #utils.compress_directory(filename, os.path.join(directory, page_id), compression_format='zip')
     url = filename+'.zip'
     
     return flask.send_file(url, attachment_filename = filename.split('/')[-1]+'.zip', as_attachment = True)
