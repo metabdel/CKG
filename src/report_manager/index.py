@@ -571,7 +571,7 @@ def run_processing(n_clicks, project_id):
                     if designData['analytical_sample external_id'].astype(str).str.contains('_', regex=False).any():
                         message = 'ERROR: The "analytical_sample external_id" provided are incorrect. Do not use special character "_"'
                         return message, style, table
-                    
+                    res = None
                     if (res_n > 0).any().values.sum() > 0:
                         res = dataUpload.remove_samples_nodes_db(driver, project_id)
                     
