@@ -446,12 +446,16 @@ def extract_subject_replicates_from_regex(data, regex):
     for r in regex:
         columns = data.filter(regex=r).columns
         for c in columns:
-            fields = c.split('_')
-            value = " ".join(fields[0].split(' ')[0:-1])
-            subject = fields[1]
+            value = ""
             timepoint = ""
-            if len(fields) > 2:
-                timepoint = " " + fields[2]
+            fields = c.split('_')
+            if len(fields) > 1:
+                value = " ".join(fields[0].split(' ')[0:-1])
+                subject = fields[1]
+                if len(fields) > 2:
+                    timepoint = " " + fields[2]
+            else:
+                subject = fields[0]
             ident = value + " " + subject + timepoint
             subjectDict[ident].append(c)
 
