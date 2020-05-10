@@ -567,13 +567,6 @@ def copytree(src, dst, symlinks=False, ignore=None):
         s = os.path.join(src, item)
         checkDirectory(dst)
         d = os.path.join(dst, item)
-        if os.path.exists(dst):
-            folders = listDirectoryFolders(dst)
-            files = listDirectoryFiles(dst)
-            for f in folders:
-                remove_directory(os.path.join(dst, f))
-            for f in files:
-                os.remove(os.path.join(dst, f))
         if os.path.isdir(s):    
             copytree(s, d, symlinks, ignore)
         else:
