@@ -1,5 +1,6 @@
-Clinical Knowledge Graph
+**Clinical Knowledge Graph**  
 ============================
+*version: 1.0b1* *BETA*
 
 A Python project that allows you to analyse proteomics and clinical data, and integrate and mine knowledge from multiple biomedical databases widely used nowadays.
 
