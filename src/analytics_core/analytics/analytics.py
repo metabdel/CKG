@@ -1568,8 +1568,6 @@ def correct_pairwise_ttest(df, alpha, correction='fdr_bh'):
                 posthoc_df = posthoc_df.append(pd.DataFrame({"index":index, "posthoc padj":posthoc_padj}))
         posthoc_df = posthoc_df.set_index("index")
         df = df.join(posthoc_df)
-    else:
-        print("No correction of posthoc pvalues")
     
     return df
 
