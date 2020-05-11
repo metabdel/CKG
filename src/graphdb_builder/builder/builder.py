@@ -51,7 +51,7 @@ if __name__ == '__main__':
     licensed_dbs = ['phosphositeplus', 'drugbank']
     licensed_ont = ['Clinical_variable']
     mapping_ont = ['Disease', 'Gene_ontology', 'Experimental_factor']
-    minimal_load = ['ontologies', 'modified_proteins', 'drugs', 'mentions', 'side effects', 'clinical_variants', 'pathway', 'project', 'experiment']
+    minimal_load = ['ontologies', 'modified_proteins', 'drugs', 'mentions', 'side effects', 'clinical_variants', 'project', 'experiment']
     if args.build_type == 'full':
         logger.info("The user {} chose to perform a full build".format(args.user))
         logger.info("Building database > step 1: Importing data from ontologies, databases and experiments")
