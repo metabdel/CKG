@@ -539,10 +539,10 @@ def save_files_in_tmp(content, dataset, prot_tool, prot_file, projectid, uploade
             return uploaded, uploaded_file, '', ''
         else:
             raise PreventUpdate
-    
+
     return '', None, '', ''
 
-    
+
 @app.callback([Output('upload-result', 'children'),
                Output('data_download_link', 'style'),
                Output('project_table', 'children')],
@@ -550,7 +550,7 @@ def save_files_in_tmp(content, dataset, prot_tool, prot_file, projectid, uploade
                Input('project_id', 'value')])
 def run_processing(n_clicks, project_id):
     message = None
-    style = {'display':'none'}
+    style = {'display': 'none'}
     table = None
     if n_clicks > 0:
         session_cookie = flask.request.cookies.get('custom-auth-session')
@@ -568,9 +568,6 @@ def run_processing(n_clicks, project_id):
                 designData = builder_utils.readDataset(os.path.join(directory, experimental_filename))
                 designData = designData.astype(str)
                 if 'subject external_id' in designData.columns and 'biological_sample external_id' in designData.columns and 'analytical_sample external_id' in designData.columns:
-                    if designData['analytical_sample external_id'].astype(str).str.contains('_', regex=False).any():
-                        message = 'ERROR: The "analytical_sample external_id" provided are incorrect. Do not use special character "_"'
-                        return message, style, table
                     if (res_n > 0).any().values.sum() > 0:
                         res = dataUpload.remove_samples_nodes_db(driver, project_id)
                         res_n = dataUpload.check_samples_in_project(driver, project_id)

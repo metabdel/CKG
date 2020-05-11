@@ -29,8 +29,8 @@ def generate_dataset_imports(projectId, dataType, dataset_import_dir):
     except Exception as err:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        logger.error("Experiment {}: {} file: {}, line: {}".format(projectId, sys.exc_info(), fname, exc_tb.tb_lineno))
-        raise Exception("Error when importing experiment {}.\n {}".format(projectId, err))
+        logger.error("Error: {}. Experiment {}: {} file: {}, line: {}".format(err, projectId, sys.exc_info(), fname, exc_tb.tb_lineno))
+        raise Exception("Error {}. Importing experiment {}. Data type {}.".format(err, projectId, dataType))
 
 
 def generate_graph_files(data, dataType, projectId, stats, ot='w', dataset_import_dir='experiments'):

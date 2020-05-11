@@ -255,18 +255,17 @@ def map_experiment_files(project_id, datasetPath, mapping):
 
 def map_experimental_data(data, mapping):
     mapping_cols = {}
-
+    regex = "({})".format("|".join(list(mapping.keys())))
     if not data.empty:
         for column in data.columns:
-            ids = re.search('_([a-zA-Z0-9|\-,<>\/?]*)', column)
+            ids = re.search(regex, column)
             if ids is not None:
-                ids = ids.group(0)
-                if ids.split('_', 1)[-1] in mapping:
-                    mapping_cols[column] = column.replace(ids, '_' + mapping[ids.split('_', 1)[-1]])
+                ids = ids.group(1)
+                mapping_cols[column] = column.replace(ids, mapping[ids])
             else:
                 continue
         data = data.rename(columns=mapping_cols)
-
+   
     return data
 
 

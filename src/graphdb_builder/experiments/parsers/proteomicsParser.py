@@ -57,7 +57,7 @@ def parser_from_file(file_path, configuration, data_type, is_standard=True):
     else:
         df = parse_dataset(file_path, configuration)
 
-    if df is not None:
+    if df is not None and not df.empty:
         if data_type == "proteins":
             data[(data_type, 'w')] = extract_protein_subject_rels(df, configuration)
         elif data_type == "peptides":
@@ -423,7 +423,6 @@ def extract_protein_subject_rels(data, configuration):
     if not cAttributes.empty:
         aux = merge_col_attributes(aux, cAttributes, "c0")
         columns.extend(cCols)
-    
     aux['TYPE'] = "HAS_QUANTIFIED_PROTEIN"
     columns.append("TYPE")
     aux.columns = columns

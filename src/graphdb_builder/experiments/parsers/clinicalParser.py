@@ -274,7 +274,7 @@ def extract_analytical_samples_info(clinical_data):
             cols = [i for i in clinical_data.columns if str(i).startswith('analytical_sample')]
             df = clinical_data[cols]
             df.columns = [col.replace('analytical_sample ', '') for col in cols]
-            df = df.rename(columns={'external_id':'ID'})
+            df = df.rename(columns={'external_id': 'ID'})
             df[['group', 'secondary_group']] = clinical_data[['grouping1', 'grouping2']]
 
     return df
